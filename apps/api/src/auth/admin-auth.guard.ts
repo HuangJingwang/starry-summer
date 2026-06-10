@@ -1,9 +1,10 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AuthService } from './auth.service.js';
 
 interface HttpRequest {
+  method?: string;
   headers: Record<string, string | string[] | undefined>;
   adminSession?: {
     email: string;
@@ -17,12 +18,18 @@ export class AdminAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<HttpRequest>();
-    const token = this.readBearerToken(request.headers.authorization) ?? this.readCookieToken(request.headers.cookie);
+    const bearerToken = this.readBearerToken(request.headers.authorization);
+    const cookieToken = this.readCookieToken(request.headers.cookie);
+    const token = bearerToken ?? cookieToken;
 
     const session = token ? this.authService.verifySession(token) : null;
 
     if (!session) {
       throw new UnauthorizedException('Admin session is required');
+    }
+
+    if (!bearerToken && cookieToken && this.isUnsafeMethod(request.method)) {
+      this.assertAllowedOrigin(request.headers.origin);
     }
 
     request.adminSession = session;
@@ -56,5 +63,20 @@ export class AdminAuthGuard implements CanActivate {
     }
 
     return null;
+  }
+
+  private isUnsafeMethod(method: string | undefined): boolean {
+    return !['GET', 'HEAD', 'OPTIONS'].includes((method ?? 'GET').toUpperCase());
+  }
+
+  private assertAllowedOrigin(value: string | string[] | undefined): void {
+    const origin = Array.isArray(value) ? value[0] : value;
+    const allowedOrigins = [process.env.WEB_ORIGIN ?? 'http://localhost:3000', process.env.PUBLIC_SITE_URL]
+      .map((item) => item?.trim().replace(/\/+$/, ''))
+      .filter(Boolean);
+
+    if (!origin || !allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
+      throw new ForbiddenException('Admin request origin is not allowed');
+    }
   }
 }
