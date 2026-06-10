@@ -378,6 +378,28 @@ textarea {
   gap: 8px;
 }
 
+.login-panel button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.form-message {
+  border-radius: 8px;
+  line-height: 1.6;
+  margin: 0;
+  padding: 12px;
+}
+
+.form-message--success {
+  background: #e4f4ed;
+  color: #1f6b4e;
+}
+
+.form-message--error {
+  background: #f8e7e2;
+  color: #943d2c;
+}
+
 .admin-layout {
   background: #eef2f0;
   display: grid;
