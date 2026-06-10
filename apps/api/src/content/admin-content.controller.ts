@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -10,8 +10,12 @@ export class AdminContentController {
   constructor(@Inject(ContentService) private readonly contentService: ContentService) {}
 
   @Get()
-  listAdmin(@Query('type') type?: ContentType, @Query('status') status?: ContentStatus, @Query('q') query?: string) {
-    return this.contentService.listAdmin({ type, status, query });
+  listAdmin(@Query('type') type?: string, @Query('status') status?: string, @Query('q') query?: string) {
+    return this.contentService.listAdmin({
+      type: parseOptionalContentType(type),
+      status: parseOptionalContentStatus(status),
+      query: normalizeOptionalQuery(query),
+    });
   }
 
   @Get('export/all')
@@ -77,4 +81,36 @@ export class AdminContentController {
   exportMarkdown(@Param('id') id: string) {
     return this.contentService.exportMarkdown(id);
   }
+}
+
+const contentTypes = new Set<ContentType>(['post', 'note', 'moment', 'page', 'project']);
+const contentStatuses = new Set<ContentStatus>(['draft', 'published', 'private', 'archived']);
+
+function parseOptionalContentType(value: string | undefined): ContentType | undefined {
+  if (value === undefined || value === '') {
+    return undefined;
+  }
+
+  if (!contentTypes.has(value as ContentType)) {
+    throw new BadRequestException(`Unsupported content type: ${value}`);
+  }
+
+  return value as ContentType;
+}
+
+function parseOptionalContentStatus(value: string | undefined): ContentStatus | undefined {
+  if (value === undefined || value === '') {
+    return undefined;
+  }
+
+  if (!contentStatuses.has(value as ContentStatus)) {
+    throw new BadRequestException(`Unsupported content status: ${value}`);
+  }
+
+  return value as ContentStatus;
+}
+
+function normalizeOptionalQuery(value: string | undefined): string | undefined {
+  const query = value?.trim();
+  return query === '' ? undefined : query;
 }
