@@ -117,13 +117,15 @@ describe('PostgresContentRepository mapping', () => {
     ]);
   });
 
-  test('builds content selects with persisted like counts', () => {
+  test('builds content selects with persisted like and view counts', () => {
     const select = buildContentSelect('where ci.status = $1', 'order by ci.published_at desc');
 
     expect(select).toContain('left join');
     expect(select).toContain('content_likes');
+    expect(select).toContain('view_events');
+    expect(select).toContain('ci.view_count + coalesce(view_counts.count, 0) as view_count');
     expect(select).toContain('ci.like_count + coalesce(like_counts.count, 0) as like_count');
-    expect(select).toContain('group by ci.id, like_counts.count');
+    expect(select).toContain('group by ci.id, like_counts.count, view_counts.count');
     expect(select).toContain('where ci.status = $1');
     expect(select).toContain('order by ci.published_at desc');
   });

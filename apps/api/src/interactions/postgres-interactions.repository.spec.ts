@@ -6,6 +6,8 @@ import {
   buildLikeCountSelect,
   buildLikeInsert,
   buildModerationUpdate,
+  buildViewCountSelect,
+  buildViewInsert,
   mapCommentRow,
   mapGuestbookRow,
   type CommentRow,
@@ -107,6 +109,26 @@ describe('PostgresInteractionsRepository mapping', () => {
       sql: `
       select count(*)::int as count
       from content_likes
+      where target_type = $1
+        and target_id = $2
+    `,
+      values: ['post', '11111111-1111-4111-8111-111111111111'],
+    });
+  });
+
+  test('builds view insert SQL with a generated actor hash', () => {
+    const insert = buildViewInsert('post', '11111111-1111-4111-8111-111111111111', () => 'viewer-1');
+
+    expect(insert.sql).toContain('insert into view_events');
+    expect(insert.sql).toContain('actor_hash');
+    expect(insert.values).toEqual(['post', '11111111-1111-4111-8111-111111111111', 'viewer-1']);
+  });
+
+  test('builds view count SQL and values', () => {
+    expect(buildViewCountSelect('post', '11111111-1111-4111-8111-111111111111')).toEqual({
+      sql: `
+      select count(*)::int as count
+      from view_events
       where target_type = $1
         and target_id = $2
     `,

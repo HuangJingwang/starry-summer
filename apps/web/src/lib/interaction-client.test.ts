@@ -6,6 +6,7 @@ import {
   buildGuestbookRequest,
   buildLikeRequest,
   buildModerationActionRequest,
+  buildViewRequest,
   loadAdminModerationCount,
   normalizeModerationRecord,
 } from './interaction-client';
@@ -14,6 +15,18 @@ describe('interaction client helpers', () => {
   test('builds like request', () => {
     expect(buildLikeRequest('post', 'post-1')).toEqual({
       url: '/api/likes/post/post-1',
+      init: {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+      },
+    });
+  });
+
+  test('builds view request', () => {
+    expect(buildViewRequest('post', 'post-1')).toEqual({
+      url: '/api/views/post/post-1',
       init: {
         method: 'POST',
         headers: {

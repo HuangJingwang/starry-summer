@@ -19,8 +19,9 @@ export class PublicInteractionRateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<HttpRequest>();
     const actor = this.actorKey(request);
     const route = request.route?.path ?? 'interaction';
+    const lightweightInteraction = route.includes('likes') || route.includes('views');
     const result = this.rateLimitService.consume(`${route}:${actor}`, {
-      limit: route.includes('likes') ? 30 : 8,
+      limit: lightweightInteraction ? 30 : 8,
       windowMs: 60_000,
     });
 

@@ -5,6 +5,7 @@ import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
 import { CommentForm } from './CommentForm';
 import { LikeButton } from './LikeButton';
+import { ViewTracker } from './ViewTracker';
 
 function isCommentTargetType(type: SiteContentItem['type']): type is CommentTargetType {
   return type === 'post' || type === 'note' || type === 'project';
@@ -37,6 +38,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
 
   return (
     <article className="detail">
+      <ViewTracker targetType={item.type} targetId={item.id} />
       <p className="eyebrow">{item.type}</p>
       <h1>{item.title}</h1>
       <p className="detail__summary">{item.summary}</p>

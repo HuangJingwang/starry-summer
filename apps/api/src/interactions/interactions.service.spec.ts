@@ -65,6 +65,13 @@ describe('InteractionsService', () => {
     expect(await service.getLikeCount('post', 'post-1')).toBe(2);
   });
 
+  test('views increment per content target', async () => {
+    await service.recordView('post', 'post-1');
+    await service.recordView('post', 'post-1');
+
+    expect(await service.getViewCount('post', 'post-1')).toBe(2);
+  });
+
   test('guestbook entries are pending by default', async () => {
     const entry = await service.createGuestbookEntry({
       authorName: 'Visitor',

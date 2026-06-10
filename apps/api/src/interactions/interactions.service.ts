@@ -77,6 +77,14 @@ export class InteractionsService {
     return this.repository.getLikeCount(targetType, targetId);
   }
 
+  async recordView(targetType: ContentType, targetId: string): Promise<number> {
+    return this.repository.recordView(targetType, targetId);
+  }
+
+  async getViewCount(targetType: ContentType, targetId: string): Promise<number> {
+    return this.repository.getViewCount(targetType, targetId);
+  }
+
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
     return this.repository.createGuestbookEntry(input);
   }

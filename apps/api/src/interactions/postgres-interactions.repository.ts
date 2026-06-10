@@ -37,7 +37,7 @@ export interface SqlStatement {
   values: unknown[];
 }
 
-interface LikeCountRow {
+interface CountRow {
   count: number;
 }
 
@@ -136,6 +136,36 @@ export function buildLikeCountSelect(targetType: ContentType, targetId: string):
   };
 }
 
+export function buildViewInsert(
+  targetType: ContentType,
+  targetId: string,
+  createActorHash: () => string = randomUUID,
+): SqlStatement {
+  return {
+    sql: `
+      insert into view_events (
+        target_type,
+        target_id,
+        actor_hash
+      )
+      values ($1, $2, $3)
+    `,
+    values: [targetType, targetId, createActorHash()],
+  };
+}
+
+export function buildViewCountSelect(targetType: ContentType, targetId: string): SqlStatement {
+  return {
+    sql: `
+      select count(*)::int as count
+      from view_events
+      where target_type = $1
+        and target_id = $2
+    `,
+    values: [targetType, targetId],
+  };
+}
+
 export class PostgresInteractionsRepository implements InteractionsRepository {
   private readonly pool: pg.Pool;
 
@@ -209,7 +239,22 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
 
   async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
     const statement = buildLikeCountSelect(targetType, targetId);
-    const result = await this.pool.query<LikeCountRow>(statement.sql, statement.values);
+    const result = await this.pool.query<CountRow>(statement.sql, statement.values);
+
+    return result.rows[0]?.count ?? 0;
+  }
+
+  async recordView(targetType: ContentType, targetId: string): Promise<number> {
+    const statement = buildViewInsert(targetType, targetId);
+
+    await this.pool.query(statement.sql, statement.values);
+
+    return this.getViewCount(targetType, targetId);
+  }
+
+  async getViewCount(targetType: ContentType, targetId: string): Promise<number> {
+    const statement = buildViewCountSelect(targetType, targetId);
+    const result = await this.pool.query<CountRow>(statement.sql, statement.values);
 
     return result.rows[0]?.count ?? 0;
   }

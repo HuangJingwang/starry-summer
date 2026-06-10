@@ -16,6 +16,8 @@ export interface InteractionsRepository {
   listApprovedComments(targetType: CommentRecord['targetType'], targetId: string): Promise<CommentRecord[]>;
   likeContent(targetType: ContentType, targetId: string): Promise<number>;
   getLikeCount(targetType: ContentType, targetId: string): Promise<number>;
+  recordView(targetType: ContentType, targetId: string): Promise<number>;
+  getViewCount(targetType: ContentType, targetId: string): Promise<number>;
   createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord>;
   moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord | null>;
   listAdminGuestbookEntries(filter?: ModerationListFilter): Promise<GuestbookEntryRecord[]>;
@@ -28,6 +30,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
   private readonly comments = new Map<string, CommentRecord>();
   private readonly guestbookEntries = new Map<string, GuestbookEntryRecord>();
   private readonly likes = new Map<string, number>();
+  private readonly views = new Map<string, number>();
   private nextCommentId = 1;
   private nextGuestbookId = 1;
 
@@ -77,7 +80,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
   }
 
   async likeContent(targetType: ContentType, targetId: string): Promise<number> {
-    const key = this.likeKey(targetType, targetId);
+    const key = this.targetKey(targetType, targetId);
     const count = (this.likes.get(key) ?? 0) + 1;
     this.likes.set(key, count);
 
@@ -85,7 +88,19 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
   }
 
   async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
-    return this.likes.get(this.likeKey(targetType, targetId)) ?? 0;
+    return this.likes.get(this.targetKey(targetType, targetId)) ?? 0;
+  }
+
+  async recordView(targetType: ContentType, targetId: string): Promise<number> {
+    const key = this.targetKey(targetType, targetId);
+    const count = (this.views.get(key) ?? 0) + 1;
+    this.views.set(key, count);
+
+    return count;
+  }
+
+  async getViewCount(targetType: ContentType, targetId: string): Promise<number> {
+    return this.views.get(this.targetKey(targetType, targetId)) ?? 0;
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
@@ -124,7 +139,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
     return [...this.guestbookEntries.values()].filter(isVisibleSubmission);
   }
 
-  private likeKey(targetType: ContentType, targetId: string): string {
+  private targetKey(targetType: ContentType, targetId: string): string {
     return `${targetType}:${targetId}`;
   }
 }

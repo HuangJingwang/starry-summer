@@ -42,6 +42,12 @@ export class InteractionsController {
     return this.interactionsService.likeContent(targetType, targetId);
   }
 
+  @Post('views/:targetType/:targetId')
+  @UseGuards(PublicInteractionRateLimitGuard)
+  recordView(@Param('targetType') targetType: ContentType, @Param('targetId') targetId: string) {
+    return this.interactionsService.recordView(targetType, targetId);
+  }
+
   @Post('guestbook')
   @UseGuards(PublicInteractionRateLimitGuard)
   createGuestbookEntry(@Body() input: CreateGuestbookEntryInput) {

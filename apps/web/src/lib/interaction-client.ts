@@ -54,6 +54,16 @@ export function buildLikeRequest(targetType: ContentType, targetId: string): Int
   };
 }
 
+export function buildViewRequest(targetType: ContentType, targetId: string): InteractionRequest {
+  return {
+    url: `/api/views/${targetType}/${targetId}`,
+    init: {
+      method: 'POST',
+      headers: jsonHeaders,
+    },
+  };
+}
+
 export function buildCommentRequest(input: CommentInput): InteractionRequest {
   return {
     url: '/api/comments',

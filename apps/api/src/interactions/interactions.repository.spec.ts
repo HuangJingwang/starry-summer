@@ -46,4 +46,13 @@ describe('InMemoryInteractionsRepository', () => {
     await expect(repository.getLikeCount('post', 'post-1')).resolves.toBe(2);
     await expect(repository.getLikeCount('note', 'note-1')).resolves.toBe(0);
   });
+
+  test('counts views per content target', async () => {
+    const repository = new InMemoryInteractionsRepository();
+
+    await expect(repository.recordView('post', 'post-1')).resolves.toBe(1);
+    await expect(repository.recordView('post', 'post-1')).resolves.toBe(2);
+    await expect(repository.getViewCount('post', 'post-1')).resolves.toBe(2);
+    await expect(repository.getViewCount('note', 'note-1')).resolves.toBe(0);
+  });
 });
