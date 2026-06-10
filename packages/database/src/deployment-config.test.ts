@@ -123,10 +123,12 @@ describe('deployment configuration', () => {
     const safeEnv = [
       'DOMAIN=blog.example.com',
       'PUBLIC_SITE_URL=https://blog.example.com',
+      'ACME_EMAIL=ops@example.com',
       'ADMIN_EMAIL=owner@example.com',
       'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
       'SESSION_SECRET=12345678901234567890123456789012',
       'POSTGRES_PASSWORD=replace-me-with-a-real-password',
+      'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
       'S3_ACCESS_KEY=starry-prod-access',
       'S3_SECRET_KEY=starry-prod-secret',
     ].join('\n');
@@ -135,7 +137,9 @@ describe('deployment configuration', () => {
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
+    expect(doctorScript).toContain('ACME_EMAIL must be a valid email for HTTPS certificates.');
     expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
+    expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(deployment).toContain('npm run ops:doctor');
 
     await expect(execFileAsync('bash', ['scripts/doctor.sh', '.env.example'], { cwd: repoRoot })).rejects.toMatchObject({

@@ -40,6 +40,10 @@ if [[ "${PUBLIC_SITE_URL:-}" != https://* ]]; then
   fail "PUBLIC_SITE_URL must start with https:// for production."
 fi
 
+if [[ "${ACME_EMAIL:-}" != *@* ]]; then
+  fail "ACME_EMAIL must be a valid email for HTTPS certificates."
+fi
+
 if [[ "${ADMIN_EMAIL:-}" != *@* ]]; then
   fail "ADMIN_EMAIL must be a valid owner login email."
 fi
@@ -59,6 +63,14 @@ case "${POSTGRES_PASSWORD:-}" in
     fail "POSTGRES_PASSWORD must not use a default or weak value."
     ;;
 esac
+
+if [[ -z "${DATABASE_URL:-}" ]]; then
+  fail "DATABASE_URL must be set for the API database connection."
+elif [[ "${DATABASE_URL}" == *":starry@"* ]]; then
+  fail "DATABASE_URL must not use the default starry database password."
+elif [[ "${DATABASE_URL}" == *":postgres@"* || "${DATABASE_URL}" == *":password@"* ]]; then
+  fail "DATABASE_URL must not use a default database password."
+fi
 
 case "${STORAGE_DRIVER:-local}" in
   local | s3)
