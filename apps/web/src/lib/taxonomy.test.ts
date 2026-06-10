@@ -6,6 +6,8 @@ import {
   buildListTaxonomyTermsRequest,
   buildTaxonomyPayloadFromFormData,
   buildUpdateTaxonomyTermRequest,
+  groupTaxonomyTermsByType,
+  normalizeTaxonomyTerm,
 } from './taxonomy';
 
 describe('taxonomy client helpers', () => {
@@ -68,6 +70,43 @@ describe('taxonomy client helpers', () => {
       slug: 'tech-notes',
       description: 'Notes about code',
       sortOrder: 7,
+    });
+  });
+
+  test('normalizes taxonomy terms from API data', () => {
+    expect(
+      normalizeTaxonomyTerm({
+        id: 'term-1',
+        type: 'tag',
+        name: 'Markdown',
+        slug: 'markdown',
+        description: null,
+        sortOrder: undefined,
+        createdAt: '2026-06-10T00:00:00.000Z',
+        updatedAt: '2026-06-10T00:00:00.000Z',
+      }),
+    ).toEqual({
+      id: 'term-1',
+      type: 'tag',
+      name: 'Markdown',
+      slug: 'markdown',
+      description: '',
+      sortOrder: 0,
+      createdAt: '2026-06-10T00:00:00.000Z',
+      updatedAt: '2026-06-10T00:00:00.000Z',
+    });
+  });
+
+  test('groups taxonomy terms by type', () => {
+    expect(
+      groupTaxonomyTermsByType([
+        { id: '1', type: 'tag', name: 'Markdown', slug: 'markdown', description: '', sortOrder: 0, createdAt: '', updatedAt: '' },
+        { id: '2', type: 'category', name: 'Writing', slug: 'writing', description: '', sortOrder: 0, createdAt: '', updatedAt: '' },
+      ]),
+    ).toEqual({
+      category: [expect.objectContaining({ id: '2' })],
+      tag: [expect.objectContaining({ id: '1' })],
+      series: [],
     });
   });
 });

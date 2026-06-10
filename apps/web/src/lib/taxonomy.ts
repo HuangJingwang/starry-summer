@@ -7,10 +7,32 @@ export interface TaxonomyPayload {
   sortOrder?: number;
 }
 
+export interface TaxonomyTerm {
+  id: string;
+  type: TaxonomyType;
+  name: string;
+  slug: string;
+  description: string;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TaxonomyTermGroups = Record<TaxonomyType, TaxonomyTerm[]>;
+
+export type RawTaxonomyTerm = Partial<Omit<TaxonomyTerm, 'description' | 'sortOrder'>> & {
+  id: string;
+  type: TaxonomyType;
+  description?: string | null;
+  sortOrder?: number | null;
+};
+
 export interface TaxonomyRequest {
   url: string;
   init: RequestInit;
 }
+
+const taxonomyTypes: TaxonomyType[] = ['category', 'tag', 'series'];
 
 function normalizeSlug(value: string): string {
   return value
@@ -56,6 +78,33 @@ export function buildTaxonomyPayloadFromFormData(formData: FormData): TaxonomyPa
     description: formText(formData, 'description'),
     sortOrder: sortOrderText ? Number(sortOrderText) : 0,
   });
+}
+
+export function normalizeTaxonomyTerm(input: RawTaxonomyTerm): TaxonomyTerm {
+  return {
+    id: input.id,
+    type: input.type,
+    name: input.name ?? '',
+    slug: input.slug ?? '',
+    description: input.description ?? '',
+    sortOrder: input.sortOrder ?? 0,
+    createdAt: input.createdAt ?? '',
+    updatedAt: input.updatedAt ?? '',
+  };
+}
+
+export function groupTaxonomyTermsByType(terms: TaxonomyTerm[]): TaxonomyTermGroups {
+  const groups: TaxonomyTermGroups = {
+    category: [],
+    tag: [],
+    series: [],
+  };
+
+  for (const term of terms) {
+    groups[term.type].push(term);
+  }
+
+  return groups;
 }
 
 export function buildListTaxonomyTermsRequest(type: TaxonomyType): TaxonomyRequest {
