@@ -17,6 +17,7 @@ export interface AdminContentSearchParams {
 export interface AdminContentRequestOptions {
   apiBaseUrl?: string;
   cookieHeader?: string;
+  filters?: AdminContentSearchParams;
 }
 
 export interface AdminContentStats {
@@ -229,6 +230,27 @@ function withAdminRequestOptions(path: string, options: AdminContentRequestOptio
   };
 }
 
+function appendAdminContentFilters(url: string, filters: AdminContentSearchParams | undefined): string {
+  const params = new URLSearchParams();
+  const query = filters?.q?.trim();
+
+  if (query) {
+    params.set('q', query);
+  }
+
+  if (filters?.status) {
+    params.set('status', filters.status);
+  }
+
+  if (filters?.type) {
+    params.set('type', filters.type);
+  }
+
+  const queryString = params.toString();
+
+  return queryString ? `${url}?${queryString}` : url;
+}
+
 function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentPayload): AdminContentRequest {
   return {
     url,
@@ -251,7 +273,7 @@ export function buildListAdminContentRequest(options: AdminContentRequestOptions
   const request = withAdminRequestOptions('/api/admin/content', options);
 
   return {
-    url: request.url,
+    url: appendAdminContentFilters(request.url, options.filters),
     init: {
       method: 'GET',
       credentials: 'include',

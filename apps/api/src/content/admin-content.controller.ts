@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import type { ContentVisibility } from '@starry-summer/shared';
+import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
 import { ContentService, type CreateDraftInput, type UpdateContentInput } from './content.service.js';
@@ -10,8 +10,8 @@ export class AdminContentController {
   constructor(@Inject(ContentService) private readonly contentService: ContentService) {}
 
   @Get()
-  listAdmin() {
-    return this.contentService.listAdmin();
+  listAdmin(@Query('type') type?: ContentType, @Query('status') status?: ContentStatus, @Query('q') query?: string) {
+    return this.contentService.listAdmin({ type, status, query });
   }
 
   @Get('export/all')

@@ -2,7 +2,7 @@ import pg from 'pg';
 
 import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 
-import type { ContentRecord, PublicContentFilter } from './content.service';
+import type { AdminContentFilter, ContentRecord, PublicContentFilter } from './content.service';
 import type { ContentRepository, CreateContentRecordInput } from './content.repository';
 
 const { Pool } = pg;
@@ -173,10 +173,9 @@ export class PostgresContentRepository implements ContentRepository {
     return result.rows[0] ? mapContentRow(result.rows[0]) : null;
   }
 
-  async listAdmin(): Promise<ContentRecord[]> {
-    const result = await this.pool.query<ContentItemRow>(
-      buildContentSelect('where true', 'order by ci.updated_at desc'),
-    );
+  async listAdmin(filter: AdminContentFilter = {}): Promise<ContentRecord[]> {
+    const statement = buildAdminContentSelect(filter);
+    const result = await this.pool.query<ContentItemRow>(statement.sql, statement.values);
 
     return result.rows.map(mapContentRow);
   }
@@ -295,6 +294,59 @@ export function buildContentSelect(whereClause: string, orderClause = ''): strin
     group by ci.id, like_counts.count, view_counts.count
     ${orderClause}
   `;
+}
+
+export function buildAdminContentSelect(filter: AdminContentFilter = {}): SqlStatement {
+  const clauses = ['where true'];
+  const values: unknown[] = [];
+
+  if (filter.type) {
+    values.push(filter.type);
+    clauses.push(`and ci.type = $${values.length}`);
+  }
+
+  if (filter.status) {
+    if (filter.status === 'private') {
+      clauses.push("and ci.visibility = 'private'");
+    } else {
+      values.push(filter.status);
+      clauses.push(`and ci.status = $${values.length}`);
+    }
+  }
+
+  const query = filter.query?.trim().toLowerCase();
+
+  if (query) {
+    values.push(`%${query}%`);
+    const placeholder = `$${values.length}`;
+    clauses.push(`
+      and (
+        lower(ci.title) like ${placeholder}
+        or lower(ci.slug) like ${placeholder}
+        or lower(ci.summary) like ${placeholder}
+        or lower(ci.body_markdown) like ${placeholder}
+        or exists (
+          select 1
+          from content_categories cc_filter
+          join categories c_filter on c_filter.id = cc_filter.category_id
+          where cc_filter.content_id = ci.id
+            and lower(c_filter.name) like ${placeholder}
+        )
+        or exists (
+          select 1
+          from content_tags ct_filter
+          join tags t_filter on t_filter.id = ct_filter.tag_id
+          where ct_filter.content_id = ci.id
+            and lower(t_filter.name) like ${placeholder}
+        )
+      )
+    `);
+  }
+
+  return {
+    sql: buildContentSelect(clauses.join('\n'), 'order by ci.updated_at desc'),
+    values,
+  };
 }
 
 export function buildPublicContentOrderClause(sort: PublicContentFilter['sort'] = 'latest'): string {

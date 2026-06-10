@@ -144,6 +144,56 @@ describe('InMemoryContentRepository', () => {
     expect((await repository.listAdmin())[0]?.id).toBe(newest.id);
   });
 
+  test('filters admin records by type status visibility and search text', async () => {
+    let now = '2026-06-10T00:00:00.000Z';
+    const repository = new InMemoryContentRepository(() => now);
+    const draft = await repository.create({
+      type: 'post',
+      title: 'Draft Post',
+      slug: 'draft-post',
+      summary: 'Draft summary',
+      bodyMarkdown: '# Draft',
+      sourceType: 'original',
+      sourceUrl: '',
+      status: 'draft',
+      visibility: 'public',
+      allowComments: true,
+      pinned: false,
+      featured: false,
+      categories: ['Drafts'],
+      tags: ['Writing'],
+      viewCount: 0,
+      likeCount: 0,
+      publishedAt: null,
+    });
+    now = '2026-06-11T00:00:00.000Z';
+    const privateProject = await repository.create({
+      type: 'project',
+      title: 'Private Project',
+      slug: 'private-project',
+      summary: 'Private work',
+      bodyMarkdown: '# Project',
+      sourceType: 'original',
+      sourceUrl: '',
+      status: 'published',
+      visibility: 'private',
+      allowComments: true,
+      pinned: false,
+      featured: false,
+      categories: ['Lab'],
+      tags: ['Roadmap'],
+      viewCount: 0,
+      likeCount: 0,
+      publishedAt: '2026-06-11T00:00:00.000Z',
+    });
+
+    expect((await repository.listAdmin({ type: 'project' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ status: 'draft' })).map((item) => item.id)).toEqual([draft.id]);
+    expect((await repository.listAdmin({ status: 'private' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ query: 'draft-post' })).map((item) => item.id)).toEqual([draft.id]);
+  });
+
   test('lists public records by popularity when requested', async () => {
     const repository = new InMemoryContentRepository(() => '2026-06-10T00:00:00.000Z');
     const recent = await repository.create({

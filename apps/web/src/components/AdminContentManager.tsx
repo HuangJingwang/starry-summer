@@ -26,7 +26,13 @@ export function AdminContentManager({ fallbackItems, query = '', status, type }:
 
     async function load() {
       setLoading(true);
-      const nextResult = await loadAdminContentItems(fallbackItems);
+      const nextResult = await loadAdminContentItems(fallbackItems, undefined, {
+        filters: {
+          q: query,
+          status,
+          type,
+        },
+      });
 
       if (active) {
         setResult(nextResult);
@@ -39,7 +45,7 @@ export function AdminContentManager({ fallbackItems, query = '', status, type }:
     return () => {
       active = false;
     };
-  }, [fallbackItems]);
+  }, [fallbackItems, query, status, type]);
 
   return (
     <div className="admin-content-manager">

@@ -1,4 +1,4 @@
-import type { ContentRecord, PublicContentFilter } from './content.service';
+import type { AdminContentFilter, ContentRecord, PublicContentFilter } from './content.service';
 
 export type CreateContentRecordInput = Omit<ContentRecord, 'createdAt' | 'id' | 'updatedAt'>;
 
@@ -6,7 +6,7 @@ export interface ContentRepository {
   create(input: CreateContentRecordInput): Promise<ContentRecord>;
   findById(id: string): Promise<ContentRecord | null>;
   findBySlug(slug: string): Promise<ContentRecord | null>;
-  listAdmin(): Promise<ContentRecord[]>;
+  listAdmin(filter?: AdminContentFilter): Promise<ContentRecord[]>;
   listPublic(filter?: PublicContentFilter): Promise<ContentRecord[]>;
   update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null>;
   delete(id: string): Promise<boolean>;
@@ -43,8 +43,10 @@ export class InMemoryContentRepository implements ContentRepository {
     return [...this.records.values()].find((record) => record.slug === slug) ?? null;
   }
 
-  async listAdmin(): Promise<ContentRecord[]> {
-    return [...this.records.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  async listAdmin(filter: AdminContentFilter = {}): Promise<ContentRecord[]> {
+    return [...this.records.values()]
+      .filter((record) => matchesAdminContentFilter(record, filter))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }
 
   async listPublic(filter: PublicContentFilter = {}): Promise<ContentRecord[]> {
@@ -77,6 +79,41 @@ export class InMemoryContentRepository implements ContentRepository {
   async delete(id: string): Promise<boolean> {
     return this.records.delete(id);
   }
+}
+
+function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFilter): boolean {
+  if (filter.type && record.type !== filter.type) {
+    return false;
+  }
+
+  if (filter.status) {
+    if (filter.status === 'private') {
+      if (record.visibility !== 'private') {
+        return false;
+      }
+    } else if (record.status !== filter.status) {
+      return false;
+    }
+  }
+
+  const query = filter.query?.trim().toLowerCase();
+
+  if (!query) {
+    return true;
+  }
+
+  const searchable = [
+    record.title,
+    record.slug,
+    record.summary,
+    record.bodyMarkdown,
+    ...record.categories,
+    ...record.tags,
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return searchable.includes(query);
 }
 
 function sortPublicContent(a: ContentRecord, b: ContentRecord, sort: NonNullable<PublicContentFilter['sort']>): number {

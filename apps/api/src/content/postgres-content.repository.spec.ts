@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  buildAdminContentSelect,
   buildContentDelete,
   buildContentInsert,
   buildPublicContentOrderClause,
@@ -153,6 +154,24 @@ describe('PostgresContentRepository mapping', () => {
     expect(select).toContain('group by ci.id, like_counts.count, view_counts.count');
     expect(select).toContain('where ci.status = $1');
     expect(select).toContain('order by ci.published_at desc');
+  });
+
+  test('builds filtered admin content selects', () => {
+    const statement = buildAdminContentSelect({
+      type: 'project',
+      status: 'private',
+      query: 'roadmap',
+    });
+
+    expect(statement.sql).toContain('where true');
+    expect(statement.sql).toContain('ci.type = $1');
+    expect(statement.sql).toContain("ci.visibility = 'private'");
+    expect(statement.sql).toContain('lower(ci.title) like $2');
+    expect(statement.sql).toContain('exists');
+    expect(statement.sql).toContain('categories');
+    expect(statement.sql).toContain('tags');
+    expect(statement.sql).toContain('order by ci.updated_at desc');
+    expect(statement.values).toEqual(['project', '%roadmap%']);
   });
 
   test('builds slug lookup selects', () => {

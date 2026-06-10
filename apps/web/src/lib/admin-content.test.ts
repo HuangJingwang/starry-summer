@@ -212,6 +212,9 @@ describe('admin content helpers', () => {
         credentials: 'include',
       },
     });
+    expect(buildListAdminContentRequest({ filters: { q: ' lab ', status: 'private', type: 'project' } }).url).toBe(
+      '/api/admin/content?q=lab&status=private&type=project',
+    );
   });
 
   test('builds server admin content list requests with forwarded cookies', () => {
@@ -219,9 +222,10 @@ describe('admin content helpers', () => {
       buildListAdminContentRequest({
         apiBaseUrl: 'https://api.example.com/',
         cookieHeader: 'ss_session=session-token',
+        filters: { q: 'draft', status: 'draft', type: 'post' },
       }),
     ).toEqual({
-      url: 'https://api.example.com/admin/content',
+      url: 'https://api.example.com/admin/content?q=draft&status=draft&type=post',
       init: {
         method: 'GET',
         credentials: 'include',
@@ -279,7 +283,9 @@ describe('admin content helpers', () => {
   });
 
   test('loads admin content records from the API', async () => {
-    const result = await loadAdminContentItems(items, async () => {
+    const seenUrls: string[] = [];
+    const result = await loadAdminContentItems(items, async (url) => {
+      seenUrls.push(url);
       return new Response(
         JSON.stringify([
           {
@@ -288,14 +294,16 @@ describe('admin content helpers', () => {
             title: 'API Note',
             slug: 'api-note',
             status: 'published',
-          visibility: 'public',
-          categories: ['Notes'],
-          tags: ['API'],
-          updatedAt: '2026-06-10T00:00:00.000Z',
+            visibility: 'public',
+            categories: ['Notes'],
+            tags: ['API'],
+            updatedAt: '2026-06-10T00:00:00.000Z',
           },
         ]),
       );
-    });
+    }, { filters: { status: 'private', type: 'project' } });
+
+    expect(seenUrls).toEqual(['/api/admin/content?status=private&type=project']);
 
     expect(result).toEqual({
       source: 'api',

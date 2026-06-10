@@ -55,6 +55,12 @@ export type UpdateContentInput = Partial<{
   tags: string[];
 }>;
 
+export interface AdminContentFilter {
+  type?: ContentType;
+  status?: ContentStatus;
+  query?: string;
+}
+
 export interface PublicContentFilter {
   type?: ContentType;
   sort?: PublicContentSort;
@@ -95,8 +101,8 @@ export class ContentService {
     });
   }
 
-  async listAdmin(): Promise<ContentRecord[]> {
-    return this.repository.listAdmin();
+  async listAdmin(filter: AdminContentFilter = {}): Promise<ContentRecord[]> {
+    return this.repository.listAdmin(filter);
   }
 
   async getAdminRecord(id: string): Promise<ContentRecord> {

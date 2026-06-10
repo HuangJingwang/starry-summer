@@ -90,6 +90,34 @@ describe('ContentService', () => {
     expect((await service.listPublic({ type: 'post', sort: 'popular' })).map((item) => item.id)).toEqual([older.id, newer.id]);
   });
 
+  test('lists admin content with server-side filters', async () => {
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Draft Post',
+      slug: 'draft-post',
+      summary: 'A draft',
+      bodyMarkdown: '# Draft',
+      categories: ['Drafts'],
+      tags: ['Writing'],
+    });
+    const privateProject = await service.createDraft({
+      type: 'project',
+      title: 'Private Project',
+      slug: 'private-project',
+      summary: 'Private work',
+      bodyMarkdown: '# Project',
+      categories: ['Lab'],
+      tags: ['Roadmap'],
+    });
+    await service.publish(privateProject.id);
+    await service.setVisibility(privateProject.id, 'private');
+
+    expect((await service.listAdmin({ type: 'project' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await service.listAdmin({ status: 'draft' })).map((item) => item.id)).toEqual([draft.id]);
+    expect((await service.listAdmin({ status: 'private' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await service.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+  });
+
   test('allows comments only on published public content with comments enabled', async () => {
     const published = await service.createDraft({
       type: 'post',
