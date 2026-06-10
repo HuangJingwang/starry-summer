@@ -269,6 +269,8 @@ describe('ContentService', () => {
         'status: published',
         'visibility: private',
         'allowComments: false',
+        'featured: true',
+        'pinned: true',
         '---',
         '# Imported Note',
       ].join('\n'),
@@ -283,6 +285,8 @@ describe('ContentService', () => {
     expect(imported.status).toBe('draft');
     expect(imported.visibility).toBe('private');
     expect(imported.allowComments).toBe(false);
+    expect(imported.featured).toBe(true);
+    expect(imported.pinned).toBe(true);
     expect(imported.bodyMarkdown).toBe('# Imported Note');
   });
 
@@ -294,7 +298,7 @@ describe('ContentService', () => {
       summary: 'Portable content',
       bodyMarkdown: '# Export Me',
     });
-    await service.updateContent(draft.id, { allowComments: false });
+    await service.updateContent(draft.id, { allowComments: false, featured: true, pinned: true });
 
     const exported = await service.exportMarkdown(draft.id);
 
@@ -304,6 +308,8 @@ describe('ContentService', () => {
     expect(exported).toContain('sourceType: original');
     expect(exported).toContain("sourceUrl: ''");
     expect(exported).toContain('allowComments: false');
+    expect(exported).toContain('featured: true');
+    expect(exported).toContain('pinned: true');
     expect(exported).toContain('categories: []');
     expect(exported).toContain('tags: []');
     expect(exported).toContain('# Export Me');

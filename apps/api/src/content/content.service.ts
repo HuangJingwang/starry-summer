@@ -214,6 +214,8 @@ export class ContentService {
     const categories = normalizeTaxonomyLabels(toStringArray(document.frontmatter.categories));
     const tags = normalizeTaxonomyLabels(toStringArray(document.frontmatter.tags));
     const allowComments = document.frontmatter.allowComments === false ? false : true;
+    const featured = document.frontmatter.featured === true;
+    const pinned = document.frontmatter.pinned === true;
 
     const record = await this.createDraft({
       type,
@@ -227,7 +229,7 @@ export class ContentService {
       tags,
     });
 
-    const updated = await this.updateContent(record.id, { allowComments });
+    const updated = await this.updateContent(record.id, { allowComments, featured, pinned });
 
     if (updated.visibility === visibility) {
       return updated;
@@ -275,6 +277,8 @@ export class ContentService {
         status: record.status,
         visibility: record.visibility,
         allowComments: record.allowComments,
+        featured: record.featured,
+        pinned: record.pinned,
         categories: record.categories,
         tags: record.tags,
         publishedAt: record.publishedAt,
