@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ContentSourceType, ContentStatus, ContentType, ProjectMetadata } from '@starry-summer/shared';
 
 import {
@@ -10,6 +10,7 @@ import {
   buildDeleteContentRequest,
   buildUpdateContentRequest,
   createMarkdownPreview,
+  getUnsavedContentWarning,
 } from '@/lib/admin-content';
 
 interface AdminContentFormInitialValue {
@@ -48,7 +49,27 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   const [message, setMessage] = useState('');
   const [markdown, setMarkdown] = useState(initialValue?.bodyMarkdown ?? fallbackMarkdown);
   const [contentType, setContentType] = useState<ContentType>(initialValue?.type ?? 'post');
+  const [isDirty, setIsDirty] = useState(false);
   const preview = useMemo(() => createMarkdownPreview(markdown), [markdown]);
+
+  useEffect(() => {
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      const warning = getUnsavedContentWarning(isDirty);
+
+      if (!warning) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = warning;
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty]);
 
   async function send(request: { url: string; init: RequestInit }) {
     const response = await fetch(request.url, request.init);
@@ -82,6 +103,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         await send(buildAdminContentActionRequest(contentId, lifecycle));
       }
 
+      setIsDirty(false);
       setState('success');
       setMessage(lifecycle === 'publish' ? '已保存并发布。' : lifecycle === 'archive' ? '已归档。' : lifecycle === 'restore-draft' ? '已恢复为草稿。' : '已保存草稿。');
     } catch {
@@ -109,7 +131,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   }
 
   return (
-    <form className="content-form" action={(formData) => runSave(formData)}>
+    <form className="content-form" action={(formData) => runSave(formData)} onInput={() => setIsDirty(true)}>
       <div className="form-grid">
         <label>
           标题
@@ -121,7 +143,14 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         </label>
         <label>
           类型
-          <select name="type" value={contentType} onChange={(event) => setContentType(event.target.value as ContentType)}>
+          <select
+            name="type"
+            value={contentType}
+            onChange={(event) => {
+              setContentType(event.target.value as ContentType);
+              setIsDirty(true);
+            }}
+          >
             <option value="post">Post</option>
             <option value="note">Note</option>
             <option value="moment">Moment</option>
@@ -246,7 +275,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
             id="markdown-body"
             name="bodyMarkdown"
             value={markdown}
-            onChange={(event) => setMarkdown(event.target.value)}
+            onChange={(event) => {
+              setMarkdown(event.target.value);
+              setIsDirty(true);
+            }}
             rows={18}
           />
         </section>

@@ -709,3 +709,7 @@ export function createMarkdownPreview(markdown: string): MarkdownPreviewModel {
     wordCount,
   };
 }
+
+export function getUnsavedContentWarning(isDirty: boolean): string | null {
+  return isDirty ? 'You have unsaved content changes.' : null;
+}

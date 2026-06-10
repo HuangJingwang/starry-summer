@@ -16,6 +16,7 @@ import {
   createMarkdownPreview,
   filterAdminContent,
   getAdminContentStats,
+  getUnsavedContentWarning,
   loadAdminContentItems,
   loadAdminContentItem,
   normalizeAdminContentItem,
@@ -154,6 +155,11 @@ describe('admin content helpers', () => {
     expect(preview.title).toBe('Hello');
     expect(preview.excerpt).toBe('This is a first paragraph with useful context.');
     expect(preview.wordCount).toBe(9);
+  });
+
+  test('warns before leaving a dirty content form', () => {
+    expect(getUnsavedContentWarning(true)).toBe('You have unsaved content changes.');
+    expect(getUnsavedContentWarning(false)).toBeNull();
   });
 
   test('builds a normalized create draft request', () => {
