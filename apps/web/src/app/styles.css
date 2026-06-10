@@ -714,6 +714,7 @@ textarea {
 .content-form textarea,
 .editor-pane textarea,
 .split-panels input,
+.split-panels select,
 .split-panels textarea {
   background: #fff;
   border: 1px solid var(--line);
@@ -862,6 +863,7 @@ textarea {
 }
 
 .preview-pane,
+.split-panels form,
 .split-panels section,
 .moderation-list article,
 .asset-dropzone {
@@ -887,7 +889,8 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.split-panels:has(section:nth-child(3)) {
+.split-panels:has(section:nth-child(3)),
+.split-panels:has(form:nth-child(3)) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 

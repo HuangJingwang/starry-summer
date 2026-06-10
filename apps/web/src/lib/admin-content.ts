@@ -67,6 +67,11 @@ export interface AdminContentPayload {
   tags?: string[];
 }
 
+export interface AdminMarkdownImportPayload {
+  type: ContentType;
+  markdown: string;
+}
+
 export interface AdminContentRequest {
   url: string;
   init: RequestInit;
@@ -324,6 +329,33 @@ export function buildAdminContentActionRequest(id: string, action: AdminContentA
     init: {
       method: 'PATCH',
       credentials: 'include',
+    },
+  };
+}
+
+export function buildExportMarkdownRequest(id: string): AdminContentRequest {
+  return {
+    url: `/api/admin/content/${id}/export`,
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
+export function buildImportMarkdownRequest(input: AdminMarkdownImportPayload): AdminContentRequest {
+  return {
+    url: '/api/admin/content/import',
+    init: {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: input.type,
+        markdown: input.markdown,
+      }),
     },
   };
 }

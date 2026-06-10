@@ -4,6 +4,8 @@ import {
   buildAdminContentActionRequest,
   buildCreateDraftRequest,
   buildGetAdminContentRequest,
+  buildExportMarkdownRequest,
+  buildImportMarkdownRequest,
   buildContentPayloadFromFormData,
   buildListAdminContentRequest,
   buildUpdateContentRequest,
@@ -141,6 +143,30 @@ describe('admin content helpers', () => {
       init: {
         method: 'PATCH',
         credentials: 'include',
+      },
+    });
+  });
+
+  test('builds markdown import and export requests', () => {
+    expect(buildExportMarkdownRequest('content-1')).toEqual({
+      url: '/api/admin/content/content-1/export',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+      },
+    });
+    expect(buildImportMarkdownRequest({ type: 'post', markdown: '# Imported' })).toEqual({
+      url: '/api/admin/content/import',
+      init: {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'post',
+          markdown: '# Imported',
+        }),
       },
     });
   });
