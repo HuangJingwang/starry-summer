@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
 import { loadRandomAsset } from '@/lib/assets';
-import { getFeaturedContent, getPopularContent, getSiteStats } from '@/lib/content';
+import { getContentHref, getFeaturedContent, getPopularContent } from '@/lib/content';
+import { buildHomeProfileModel } from '@/lib/home-profile';
 import { loadSiteContent } from '@/lib/public-content';
 import { loadPublicSettings } from '@/lib/settings';
 
@@ -19,7 +20,8 @@ export default async function HomePage() {
     excludeIds: featured.map((item) => item.id),
     limit: 3,
   });
-  const stats = getSiteStats(content);
+  const profile = buildHomeProfileModel(settings, content);
+  const stats = profile.stats;
   const heroBackground = backgroundAsset?.publicUrl || settings.hero.backgroundImageUrl;
 
   return (
@@ -60,6 +62,40 @@ export default async function HomePage() {
           <div>
             <strong>{stats.lastPublishedAt || 'Soon'}</strong>
             <span>Updated</span>
+          </div>
+        </section>
+
+        <section className="home-dashboard" aria-label="Personal overview">
+          <div className="home-profile">
+            <p className="eyebrow">Profile</p>
+            <h2>{profile.ownerName}</h2>
+            <p>{profile.description}</p>
+            <dl>
+              <div>
+                <dt>Site</dt>
+                <dd>{profile.title}</dd>
+              </div>
+              <div>
+                <dt>Latest</dt>
+                <dd>{profile.stats.lastPublishedAt || 'Soon'}</dd>
+              </div>
+            </dl>
+          </div>
+          <div className="home-focus">
+            {profile.latestProject ? (
+              <Link href={getContentHref(profile.latestProject)}>
+                <span>最近项目</span>
+                <strong>{profile.latestProject.title}</strong>
+                <small>{profile.latestProject.summary}</small>
+              </Link>
+            ) : null}
+            {profile.latestMoment ? (
+              <Link href={getContentHref(profile.latestMoment)}>
+                <span>最近日常</span>
+                <strong>{profile.latestMoment.title}</strong>
+                <small>{profile.latestMoment.summary}</small>
+              </Link>
+            ) : null}
           </div>
         </section>
 

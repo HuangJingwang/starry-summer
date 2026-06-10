@@ -187,6 +187,95 @@ textarea {
   color: #b9c4c2;
 }
 
+.home-dashboard {
+  background: color-mix(in srgb, var(--panel) 76%, white);
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  padding: clamp(28px, 5vw, 56px) clamp(16px, 5vw, 72px);
+}
+
+.home-profile {
+  display: grid;
+  gap: 12px;
+}
+
+.home-profile h2 {
+  font-size: clamp(2rem, 4vw, 3.8rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.home-profile p:not(.eyebrow) {
+  color: var(--muted);
+  line-height: 1.75;
+  margin: 0;
+  max-width: 560px;
+}
+
+.home-profile dl {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 8px 0 0;
+}
+
+.home-profile dl div {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.home-profile dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-profile dd {
+  color: var(--ink);
+  font-weight: 800;
+  margin: 4px 0 0;
+}
+
+.home-focus {
+  display: grid;
+  gap: 12px;
+}
+
+.home-focus a {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 8px;
+  min-height: 132px;
+  padding: 18px;
+  text-decoration: none;
+}
+
+.home-focus a:hover {
+  border-color: var(--accent);
+}
+
+.home-focus span {
+  color: var(--accent-2);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-focus strong {
+  font-size: 1.35rem;
+}
+
+.home-focus small {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
 .content-section,
 .page-main {
   padding: clamp(42px, 8vw, 96px) clamp(16px, 5vw, 72px);
@@ -1208,6 +1297,8 @@ textarea {
   }
 
   .stats-band,
+  .home-dashboard,
+  .home-profile dl,
   .content-grid,
   .admin-grid,
   .search-form,
