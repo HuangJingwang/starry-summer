@@ -16,11 +16,14 @@ import {
   createMarkdownPreview,
   filterAdminContent,
   getAdminContentStats,
+  getContentDraftStorageKey,
   getUnsavedContentWarning,
   loadAdminContentItems,
   loadAdminContentItem,
   normalizeAdminContentItem,
   normalizeAdminContentSearchParams,
+  parseContentDraftSnapshot,
+  serializeContentDraftSnapshot,
 } from './admin-content';
 import type { SiteContentItem } from './content';
 
@@ -160,6 +163,29 @@ describe('admin content helpers', () => {
   test('warns before leaving a dirty content form', () => {
     expect(getUnsavedContentWarning(true)).toBe('You have unsaved content changes.');
     expect(getUnsavedContentWarning(false)).toBeNull();
+  });
+
+  test('serializes local content draft snapshots safely', () => {
+    expect(getContentDraftStorageKey()).toBe('starry-summer:content-draft:new');
+    expect(getContentDraftStorageKey('content-1')).toBe('starry-summer:content-draft:content-1');
+
+    const serialized = serializeContentDraftSnapshot({
+      title: 'Draft title',
+      slug: 'draft-title',
+      summary: 'Draft summary',
+      bodyMarkdown: '# Draft',
+      savedAt: '2026-06-11T00:00:00.000Z',
+    });
+
+    expect(parseContentDraftSnapshot(serialized)).toEqual({
+      title: 'Draft title',
+      slug: 'draft-title',
+      summary: 'Draft summary',
+      bodyMarkdown: '# Draft',
+      savedAt: '2026-06-11T00:00:00.000Z',
+    });
+    expect(parseContentDraftSnapshot('not-json')).toBeNull();
+    expect(parseContentDraftSnapshot(JSON.stringify({ title: 'Missing body' }))).toBeNull();
   });
 
   test('builds a normalized create draft request', () => {

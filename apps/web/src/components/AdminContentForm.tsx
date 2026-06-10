@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentSourceType, ContentStatus, ContentType, ProjectMetadata } from '@starry-summer/shared';
 
 import {
@@ -10,7 +10,11 @@ import {
   buildDeleteContentRequest,
   buildUpdateContentRequest,
   createMarkdownPreview,
+  getContentDraftStorageKey,
   getUnsavedContentWarning,
+  parseContentDraftSnapshot,
+  serializeContentDraftSnapshot,
+  type ContentDraftSnapshot,
 } from '@/lib/admin-content';
 
 interface AdminContentFormInitialValue {
@@ -45,12 +49,16 @@ type SaveState = 'idle' | 'submitting' | 'success' | 'error';
 const fallbackMarkdown = '# 新内容标题\n\n这里写正文。';
 
 export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, setState] = useState<SaveState>('idle');
   const [message, setMessage] = useState('');
   const [markdown, setMarkdown] = useState(initialValue?.bodyMarkdown ?? fallbackMarkdown);
   const [contentType, setContentType] = useState<ContentType>(initialValue?.type ?? 'post');
   const [isDirty, setIsDirty] = useState(false);
+  const [localDraft, setLocalDraft] = useState<ContentDraftSnapshot | null>(null);
+  const [localDraftMessage, setLocalDraftMessage] = useState('');
   const preview = useMemo(() => createMarkdownPreview(markdown), [markdown]);
+  const draftStorageKey = useMemo(() => getContentDraftStorageKey(initialValue?.id), [initialValue?.id]);
 
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -70,6 +78,90 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [isDirty]);
+
+  useEffect(() => {
+    try {
+      setLocalDraft(parseContentDraftSnapshot(window.localStorage.getItem(draftStorageKey)));
+    } catch {
+      setLocalDraft(null);
+    }
+  }, [draftStorageKey]);
+
+  function readDraftSnapshot(): ContentDraftSnapshot | null {
+    if (!formRef.current) {
+      return null;
+    }
+
+    const formData = new FormData(formRef.current);
+
+    return {
+      title: String(formData.get('title') ?? ''),
+      slug: String(formData.get('slug') ?? ''),
+      summary: String(formData.get('summary') ?? ''),
+      bodyMarkdown: String(formData.get('bodyMarkdown') ?? markdown),
+      savedAt: new Date().toISOString(),
+    };
+  }
+
+  function saveLocalDraft() {
+    const snapshot = readDraftSnapshot();
+
+    if (!snapshot) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(draftStorageKey, serializeContentDraftSnapshot(snapshot));
+      setLocalDraft(snapshot);
+      setLocalDraftMessage(`本地草稿已保存 ${snapshot.savedAt.slice(11, 16)}`);
+    } catch {
+      setLocalDraftMessage('本地草稿保存失败。');
+    }
+  }
+
+  function markDirtyAndSaveLocalDraft() {
+    setIsDirty(true);
+    saveLocalDraft();
+  }
+
+  function recoverLocalDraft() {
+    if (!localDraft || !formRef.current) {
+      return;
+    }
+
+    const controls = formRef.current.elements as HTMLFormControlsCollection & {
+      title?: HTMLInputElement;
+      slug?: HTMLInputElement;
+      summary?: HTMLTextAreaElement;
+    };
+
+    if (controls.title) {
+      controls.title.value = localDraft.title;
+    }
+
+    if (controls.slug) {
+      controls.slug.value = localDraft.slug;
+    }
+
+    if (controls.summary) {
+      controls.summary.value = localDraft.summary;
+    }
+
+    setMarkdown(localDraft.bodyMarkdown);
+    setIsDirty(true);
+    setLocalDraftMessage('已恢复本地草稿，保存后会清除本地副本。');
+  }
+
+  function discardLocalDraft() {
+    try {
+      window.localStorage.removeItem(draftStorageKey);
+    } catch {
+      // Ignore localStorage cleanup errors.
+    }
+
+    setLocalDraft(null);
+    setLocalDraftMessage('');
+  }
 
   async function send(request: { url: string; init: RequestInit }) {
     const response = await fetch(request.url, request.init);
@@ -103,6 +195,14 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         await send(buildAdminContentActionRequest(contentId, lifecycle));
       }
 
+      try {
+        window.localStorage.removeItem(draftStorageKey);
+      } catch {
+        // Ignore localStorage cleanup errors after a successful remote save.
+      }
+
+      setLocalDraft(null);
+      setLocalDraftMessage('');
       setIsDirty(false);
       setState('success');
       setMessage(lifecycle === 'publish' ? '已保存并发布。' : lifecycle === 'archive' ? '已归档。' : lifecycle === 'restore-draft' ? '已恢复为草稿。' : '已保存草稿。');
@@ -131,7 +231,22 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   }
 
   return (
-    <form className="content-form" action={(formData) => runSave(formData)} onInput={() => setIsDirty(true)}>
+    <form ref={formRef} className="content-form" action={(formData) => runSave(formData)} onInput={markDirtyAndSaveLocalDraft}>
+      {localDraft ? (
+        <div className="local-draft-banner">
+          <div>
+            <strong>{isDirty ? '本地自动保存' : '发现本地草稿'}</strong>
+            <span>保存于 {localDraft.savedAt.replace('T', ' ').slice(0, 16)}</span>
+          </div>
+          {!isDirty ? (
+            <>
+              <button type="button" onClick={recoverLocalDraft}>恢复</button>
+              <button type="button" onClick={discardLocalDraft}>丢弃</button>
+            </>
+          ) : null}
+        </div>
+      ) : null}
+      {localDraftMessage ? <p className="local-draft-note">{localDraftMessage}</p> : null}
       <div className="form-grid">
         <label>
           标题
@@ -148,7 +263,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
             value={contentType}
             onChange={(event) => {
               setContentType(event.target.value as ContentType);
-              setIsDirty(true);
+              markDirtyAndSaveLocalDraft();
             }}
           >
             <option value="post">Post</option>
@@ -277,7 +392,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
             value={markdown}
             onChange={(event) => {
               setMarkdown(event.target.value);
-              setIsDirty(true);
+              markDirtyAndSaveLocalDraft();
             }}
             rows={18}
           />

@@ -1275,6 +1275,43 @@ textarea {
   padding: 18px;
 }
 
+.local-draft-banner {
+  align-items: center;
+  background: #fff7df;
+  border: 1px solid #e2c879;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.local-draft-banner div {
+  display: grid;
+  gap: 3px;
+}
+
+.local-draft-banner span,
+.local-draft-note {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.local-draft-banner button {
+  background: #38413f;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  min-height: 34px;
+  padding: 7px 10px;
+}
+
+.local-draft-note {
+  margin: -2px 0 12px;
+}
+
 .content-form label,
 .editor-pane label,
 .taxonomy-form label {
@@ -1563,6 +1600,7 @@ textarea {
   .admin-content-summary li,
   .admin-table__row,
   .form-grid,
+  .local-draft-banner,
   .project-meta,
   .moderation-toolbar,
   .editor-grid,

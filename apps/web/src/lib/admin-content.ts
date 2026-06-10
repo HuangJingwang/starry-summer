@@ -62,6 +62,14 @@ export interface MarkdownPreviewModel {
   wordCount: number;
 }
 
+export interface ContentDraftSnapshot {
+  title: string;
+  slug: string;
+  summary: string;
+  bodyMarkdown: string;
+  savedAt: string;
+}
+
 export interface AdminContentApiRecord {
   id: string;
   type: ContentType;
@@ -712,4 +720,42 @@ export function createMarkdownPreview(markdown: string): MarkdownPreviewModel {
 
 export function getUnsavedContentWarning(isDirty: boolean): string | null {
   return isDirty ? 'You have unsaved content changes.' : null;
+}
+
+export function getContentDraftStorageKey(contentId?: string): string {
+  return `starry-summer:content-draft:${contentId || 'new'}`;
+}
+
+export function serializeContentDraftSnapshot(snapshot: ContentDraftSnapshot): string {
+  return JSON.stringify(snapshot);
+}
+
+export function parseContentDraftSnapshot(value: string | null): ContentDraftSnapshot | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<ContentDraftSnapshot>;
+
+    if (
+      typeof parsed.title !== 'string' ||
+      typeof parsed.slug !== 'string' ||
+      typeof parsed.summary !== 'string' ||
+      typeof parsed.bodyMarkdown !== 'string' ||
+      typeof parsed.savedAt !== 'string'
+    ) {
+      return null;
+    }
+
+    return {
+      title: parsed.title,
+      slug: parsed.slug,
+      summary: parsed.summary,
+      bodyMarkdown: parsed.bodyMarkdown,
+      savedAt: parsed.savedAt,
+    };
+  } catch {
+    return null;
+  }
 }
