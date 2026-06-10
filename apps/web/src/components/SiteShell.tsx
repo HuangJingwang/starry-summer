@@ -7,6 +7,8 @@ const navItems = [
   { href: '/notes', label: 'Notes' },
   { href: '/moments', label: 'Moments' },
   { href: '/projects', label: 'Projects' },
+  { href: '/search', label: 'Search' },
+  { href: '/about', label: 'About' },
   { href: '/guestbook', label: 'Guestbook' },
 ];
 

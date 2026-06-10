@@ -1,6 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { getFeaturedContent, getPublicContent, groupContentCounts } from './content';
+import {
+  getContentBySlug,
+  getContentHref,
+  getFeaturedContent,
+  getPublicContent,
+  groupContentCounts,
+  searchContent,
+} from './content';
 
 describe('web content helpers', () => {
   test('filters public content and sorts newest first', () => {
@@ -31,5 +38,81 @@ describe('web content helpers', () => {
         { id: '3', title: 'C', type: 'moment', status: 'published', visibility: 'public', publishedAt: '2026-01-03' },
       ]),
     ).toEqual({ moment: 1, note: 0, page: 0, post: 2, project: 0 });
+  });
+
+  test('searches public title summary and tags only', () => {
+    const results = searchContent(
+      [
+        {
+          id: '1',
+          title: 'Public Markdown Note',
+          type: 'note',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-01-01',
+          tags: ['Archive'],
+        },
+        {
+          id: '2',
+          title: 'Private Markdown Draft',
+          type: 'post',
+          status: 'draft',
+          visibility: 'public',
+          publishedAt: '2026-01-02',
+          tags: ['Archive'],
+        },
+        {
+          id: '3',
+          title: 'Project',
+          type: 'project',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-01-03',
+          summary: 'Built with Next.js',
+        },
+      ],
+      'archive',
+    );
+
+    expect(results.map((item) => item.id)).toEqual(['1']);
+  });
+
+  test('builds public content hrefs', () => {
+    expect(
+      getContentHref({
+        id: '1',
+        title: 'A',
+        type: 'post',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-01-01',
+        slug: 'a',
+      }),
+    ).toBe('/posts/a');
+    expect(
+      getContentHref({
+        id: '2',
+        title: 'About',
+        type: 'page',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-01-01',
+        slug: 'about',
+      }),
+    ).toBe('/about');
+  });
+
+  test('finds public content by type and slug', () => {
+    const item = getContentBySlug(
+      [
+        { id: '1', title: 'A', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01', slug: 'a' },
+        { id: '2', title: 'B', type: 'post', status: 'draft', visibility: 'public', publishedAt: '2026-01-02', slug: 'b' },
+      ],
+      'post',
+      'a',
+    );
+
+    expect(item?.id).toBe('1');
+    expect(getContentBySlug([], 'post', 'missing')).toBeNull();
   });
 });

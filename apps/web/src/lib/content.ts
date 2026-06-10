@@ -44,6 +44,46 @@ export function groupContentCounts(items: SiteContentItem[]): Record<ContentType
   return counts;
 }
 
+export function searchContent(items: SiteContentItem[], query: string): SiteContentItem[] {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (normalizedQuery.length === 0) {
+    return [];
+  }
+
+  return getPublicContent(items).filter((item) => {
+    const searchable = [item.title, item.summary ?? '', ...(item.tags ?? [])].join(' ').toLowerCase();
+
+    return searchable.includes(normalizedQuery);
+  });
+}
+
+export function getContentHref(item: SiteContentItem): string {
+  const slug = item.slug ?? item.id;
+
+  if (item.type === 'page' && slug === 'about') {
+    return '/about';
+  }
+
+  const segmentByType: Record<ContentType, string> = {
+    moment: 'moments',
+    note: 'notes',
+    page: 'pages',
+    post: 'posts',
+    project: 'projects',
+  };
+
+  return `/${segmentByType[item.type]}/${slug}`;
+}
+
+export function getContentBySlug(
+  items: SiteContentItem[],
+  type: ContentType,
+  slug: string,
+): SiteContentItem | null {
+  return getPublicContent(items, type).find((item) => (item.slug ?? item.id) === slug) ?? null;
+}
+
 export const seedContent: SiteContentItem[] = [
   {
     id: 'intro-post',
@@ -98,5 +138,18 @@ export const seedContent: SiteContentItem[] = [
     tags: ['Daily'],
     viewCount: 44,
     likeCount: 6,
+  },
+  {
+    id: 'about-page',
+    title: 'About Starry Summer',
+    type: 'page',
+    status: 'published',
+    visibility: 'public',
+    publishedAt: '2026-06-06',
+    summary: '一个用于沉淀写作、项目和日常记录的个人内容平台。',
+    slug: 'about',
+    tags: ['About'],
+    viewCount: 31,
+    likeCount: 2,
   },
 ];

@@ -236,6 +236,10 @@ textarea {
   margin: 0;
 }
 
+.content-card h3 a:hover {
+  color: var(--accent);
+}
+
 .content-card p {
   color: var(--muted);
   line-height: 1.7;
@@ -247,7 +251,8 @@ textarea {
 }
 
 .guestbook-form,
-.login-panel {
+.login-panel,
+.search-form {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -258,11 +263,81 @@ textarea {
 
 .guestbook-form input,
 .guestbook-form textarea,
-.login-panel input {
+.login-panel input,
+.search-form input {
   border: 1px solid var(--line);
   border-radius: 8px;
   min-height: 44px;
   padding: 12px;
+}
+
+.search-form {
+  align-items: center;
+  grid-template-columns: 1fr auto;
+  margin-bottom: 24px;
+}
+
+.search-form button {
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 12px 18px;
+}
+
+.about-list {
+  display: grid;
+  gap: 16px;
+}
+
+.about-list div {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.about-list h2 {
+  margin: 0 0 8px;
+}
+
+.about-list p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.detail h1 {
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.detail__summary {
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1.8;
+}
+
+.detail__meta {
+  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 26px 0;
+  padding: 14px 0;
+}
+
+.detail__body {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  line-height: 1.8;
+  padding: 22px;
 }
 
 .admin-main {
@@ -319,7 +394,8 @@ textarea {
 
   .stats-band,
   .content-grid,
-  .admin-grid {
+  .admin-grid,
+  .search-form {
     grid-template-columns: 1fr;
   }
 

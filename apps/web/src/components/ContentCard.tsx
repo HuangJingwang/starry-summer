@@ -1,4 +1,7 @@
+import Link from 'next/link';
+
 import type { SiteContentItem } from '@/lib/content';
+import { getContentHref } from '@/lib/content';
 
 export function ContentCard({ item }: { item: SiteContentItem }) {
   return (
@@ -7,7 +10,9 @@ export function ContentCard({ item }: { item: SiteContentItem }) {
         <span>{item.type}</span>
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
       </div>
-      <h3>{item.title}</h3>
+      <h3>
+        <Link href={getContentHref(item)}>{item.title}</Link>
+      </h3>
       <p>{item.summary}</p>
       <div className="content-card__footer">
         <span>{item.viewCount ?? 0} views</span>
