@@ -143,6 +143,7 @@ describe('deployment configuration', () => {
     ].join('\n');
     const tempDirectory = await mkdtemp(join(tmpdir(), 'starry-summer-env-'));
     const safeEnvPath = join(tempDirectory, '.env');
+    const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
@@ -150,6 +151,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
+    expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
     expect(deployment).toContain('npm run ops:doctor');
 
     await expect(execFileAsync('bash', ['scripts/doctor.sh', '.env.example'], { cwd: repoRoot })).rejects.toMatchObject({
@@ -158,6 +160,11 @@ describe('deployment configuration', () => {
     await writeFile(safeEnvPath, safeEnv);
     await expect(execFileAsync('bash', ['scripts/doctor.sh', safeEnvPath], { cwd: repoRoot })).resolves.toMatchObject({
       stdout: expect.stringContaining('Deployment environment looks ready.'),
+    });
+    await writeFile(mismatchedSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://wrong.example.com'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('PUBLIC_SITE_URL host must match DOMAIN.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
   });

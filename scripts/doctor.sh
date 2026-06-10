@@ -40,6 +40,14 @@ if [[ "${PUBLIC_SITE_URL:-}" != https://* ]]; then
   fail "PUBLIC_SITE_URL must start with https:// for production."
 fi
 
+public_site_host="$(
+  node -e "try { process.stdout.write(new URL(process.argv[1]).hostname) } catch { process.exit(1) }" "${PUBLIC_SITE_URL:-}" 2>/dev/null || true
+)"
+
+if [[ -n "${DOMAIN:-}" && -n "$public_site_host" && "$public_site_host" != "$DOMAIN" ]]; then
+  fail "PUBLIC_SITE_URL host must match DOMAIN."
+fi
+
 if [[ "${ACME_EMAIL:-}" != *@* ]]; then
   fail "ACME_EMAIL must be a valid email for HTTPS certificates."
 fi
