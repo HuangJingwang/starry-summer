@@ -63,6 +63,26 @@ check_api_health() {
   fi
 }
 
+check_rss() {
+  check_path "/rss.xml" "RSS feed"
+
+  if ! grep -q '<rss' "$response_file" || ! grep -q '<channel>' "$response_file"; then
+    echo "RSS endpoint did not return an RSS channel."
+    cat "$response_file"
+    exit 1
+  fi
+}
+
+check_sitemap() {
+  check_path "/sitemap.xml" "sitemap"
+
+  if ! grep -q '<urlset' "$response_file" || ! grep -q '<loc>' "$response_file"; then
+    echo "Sitemap endpoint did not return URL entries."
+    cat "$response_file"
+    exit 1
+  fi
+}
+
 check_health
 if [[ "${CHECK_API_HEALTH:-true}" == "true" ]]; then
   check_api_health
@@ -70,7 +90,7 @@ fi
 check_path "/" "home page"
 check_path "/admin/login" "admin login"
 check_admin_protected_redirect
-check_path "/rss.xml" "RSS feed"
-check_path "/sitemap.xml" "sitemap"
+check_rss
+check_sitemap
 
 echo "Smoke checks passed for $SITE_URL"

@@ -59,10 +59,10 @@ case "$url" in
     printf '<html>login</html>'
     ;;
   */rss.xml)
-    printf '<rss></rss>'
+    printf '%s' "${FAKE_RSS_BODY:-<rss version=\"2.0\"><channel><title>Starry Summer</title></channel></rss>}"
     ;;
   */sitemap.xml)
-    printf '<urlset></urlset>'
+    printf '%s' "${FAKE_SITEMAP_BODY:-<urlset><url><loc>https://example.com</loc></url></urlset>}"
     ;;
   *)
     printf 'unexpected URL: %s\n' "$url" >&2
@@ -88,6 +88,18 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"degraded","service":"starry-summer-api"}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/degraded-api-health.log" 2>&1; then
   echo "Smoke script accepted a degraded API health response."
   cat "$tmp_dir/degraded-api-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_RSS_BODY='<html>not rss</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unexpected-rss.log" 2>&1; then
+  echo "Smoke script accepted a non-RSS response."
+  cat "$tmp_dir/unexpected-rss.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_SITEMAP_BODY='<html>not sitemap</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unexpected-sitemap.log" 2>&1; then
+  echo "Smoke script accepted a non-sitemap response."
+  cat "$tmp_dir/unexpected-sitemap.log"
   exit 1
 fi
 

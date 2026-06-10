@@ -221,6 +221,8 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('Location header did not point to /admin/login.');
     expect(smokeScript).toContain('/rss.xml');
     expect(smokeScript).toContain('/sitemap.xml');
+    expect(smokeScript).toContain('RSS endpoint did not return an RSS channel.');
+    expect(smokeScript).toContain('Sitemap endpoint did not return URL entries.');
     expect(deployment).toContain('npm run ops:smoke -- https://example.com');
   });
 
