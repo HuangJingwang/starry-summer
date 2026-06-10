@@ -1,5 +1,6 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join, resolve, sep } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 export interface UploadValidationInput {
@@ -34,6 +35,7 @@ export interface S3AssetStorageOptions {
   secretAccessKey?: string;
   forcePathStyle?: boolean;
   now?: () => Date;
+  randomId?: () => string;
   send?: (command: DeleteObjectCommand | PutObjectCommand) => Promise<unknown>;
 }
 
@@ -64,6 +66,7 @@ export class LocalAssetStorage implements AssetStorage {
       uploadDir: string;
       publicBaseUrl: string;
       now?: () => Date;
+      randomId?: () => string;
     },
   ) {}
 
@@ -99,7 +102,7 @@ export class LocalAssetStorage implements AssetStorage {
   }
 
   private createStorageKey(filename: string): string {
-    return createStorageKey(filename, this.options.now?.() ?? new Date());
+    return createStorageKey(filename, this.options.now?.() ?? new Date(), this.options.randomId);
   }
 }
 
@@ -134,7 +137,7 @@ export class S3AssetStorage implements AssetStorage {
       byteSize: input.bytes.byteLength,
     });
 
-    const storageKey = createStorageKey(input.filename, this.options.now?.() ?? new Date());
+    const storageKey = createStorageKey(input.filename, this.options.now?.() ?? new Date(), this.options.randomId);
 
     await this.sendCommand(
       new PutObjectCommand({
@@ -163,7 +166,7 @@ export class S3AssetStorage implements AssetStorage {
   }
 }
 
-function createStorageKey(filename: string, now: Date): string {
+function createStorageKey(filename: string, now: Date, randomId: (() => string) | undefined): string {
   const originalExt = extname(filename);
   const ext = originalExt.toLowerCase();
   const name = basename(filename, originalExt)
@@ -175,6 +178,14 @@ function createStorageKey(filename: string, now: Date): string {
   const year = String(now.getUTCFullYear());
   const month = String(now.getUTCMonth() + 1).padStart(2, '0');
   const day = String(now.getUTCDate()).padStart(2, '0');
+  const suffix = normalizeStorageKeySuffix(randomId?.() ?? randomUUID().slice(0, 8));
 
-  return `${year}/${month}/${day}/${safeName}${ext}`;
+  return `${year}/${month}/${day}/${safeName}-${suffix}${ext}`;
+}
+
+function normalizeStorageKeySuffix(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .slice(0, 16) || randomUUID().replace(/-/g, '').slice(0, 8);
 }

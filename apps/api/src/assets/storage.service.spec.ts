@@ -34,6 +34,7 @@ describe('asset storage', () => {
       uploadDir: dir,
       publicBaseUrl: '/uploads',
       now: () => new Date('2026-06-10T00:00:00.000Z'),
+      randomId: () => 'fixed',
     });
 
     const result = await storage.save({
@@ -42,9 +43,35 @@ describe('asset storage', () => {
       bytes: Buffer.from('png-bytes'),
     });
 
-    expect(result.storageKey).toBe('2026/06/10/hero-image.png');
-    expect(result.publicUrl).toBe('/uploads/2026/06/10/hero-image.png');
+    expect(result.storageKey).toBe('2026/06/10/hero-image-fixed.png');
+    expect(result.publicUrl).toBe('/uploads/2026/06/10/hero-image-fixed.png');
     await expect(readFile(join(dir, result.storageKey), 'utf8')).resolves.toBe('png-bytes');
+  });
+
+  test('stores repeated filenames under distinct keys', async () => {
+    const suffixes = ['first', 'second'];
+    const storage = new LocalAssetStorage({
+      uploadDir: dir,
+      publicBaseUrl: '/uploads',
+      now: () => new Date('2026-06-10T00:00:00.000Z'),
+      randomId: () => suffixes.shift() ?? 'fallback',
+    });
+
+    const first = await storage.save({
+      filename: 'Hero Image.PNG',
+      mimeType: 'image/png',
+      bytes: Buffer.from('first'),
+    });
+    const second = await storage.save({
+      filename: 'Hero Image.PNG',
+      mimeType: 'image/png',
+      bytes: Buffer.from('second'),
+    });
+
+    expect(first.storageKey).toBe('2026/06/10/hero-image-first.png');
+    expect(second.storageKey).toBe('2026/06/10/hero-image-second.png');
+    await expect(readFile(join(dir, first.storageKey), 'utf8')).resolves.toBe('first');
+    await expect(readFile(join(dir, second.storageKey), 'utf8')).resolves.toBe('second');
   });
 
   test('deletes stored local files by storage key', async () => {
@@ -52,6 +79,7 @@ describe('asset storage', () => {
       uploadDir: dir,
       publicBaseUrl: '/uploads',
       now: () => new Date('2026-06-10T00:00:00.000Z'),
+      randomId: () => 'fixed',
     });
 
     const result = await storage.save({
@@ -80,6 +108,7 @@ describe('asset storage', () => {
       bucket: 'starry-summer',
       publicBaseUrl: 'https://assets.example.com',
       now: () => new Date('2026-06-10T00:00:00.000Z'),
+      randomId: () => 'fixed',
       send: async (command) => {
         sent.push(command);
       },
@@ -92,8 +121,8 @@ describe('asset storage', () => {
     });
 
     expect(result).toEqual({
-      storageKey: '2026/06/10/hero-image.png',
-      publicUrl: 'https://assets.example.com/2026/06/10/hero-image.png',
+      storageKey: '2026/06/10/hero-image-fixed.png',
+      publicUrl: 'https://assets.example.com/2026/06/10/hero-image-fixed.png',
       mimeType: 'image/png',
       byteSize: 9,
     });
@@ -101,7 +130,7 @@ describe('asset storage', () => {
     expect(sent[0]).toMatchObject({
       input: {
         Bucket: 'starry-summer',
-        Key: '2026/06/10/hero-image.png',
+        Key: '2026/06/10/hero-image-fixed.png',
         Body: Buffer.from('png-bytes'),
         ContentType: 'image/png',
       },
