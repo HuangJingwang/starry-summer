@@ -10,6 +10,7 @@ export function proxy(request: NextRequest) {
     search: request.nextUrl.search,
     sessionToken: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
     sessionSecret: process.env.SESSION_SECRET ?? defaultSessionSecret,
+    adminEmail: process.env.ADMIN_EMAIL,
   });
 
   if (decision.action === 'allow') {

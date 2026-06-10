@@ -82,7 +82,12 @@ export class AuthService {
       return null;
     }
 
-    if (!payload.email || !payload.expiresAt || Date.parse(payload.expiresAt) <= Date.now()) {
+    if (
+      !payload.email ||
+      payload.email.trim().toLowerCase() !== this.config.adminEmail.trim().toLowerCase() ||
+      !payload.expiresAt ||
+      Date.parse(payload.expiresAt) <= Date.now()
+    ) {
       return null;
     }
 

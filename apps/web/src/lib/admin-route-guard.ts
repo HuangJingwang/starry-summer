@@ -19,12 +19,18 @@ export interface AdminRouteAccessInput {
   search: string;
   sessionToken?: string;
   sessionSecret: string;
+  adminEmail?: string;
   now?: number;
 }
 
 export const ADMIN_SESSION_COOKIE = 'ss_session';
 
-export function verifyAdminSessionToken(token: string | undefined, sessionSecret: string, now = Date.now()): AdminSessionPayload | null {
+export function verifyAdminSessionToken(
+  token: string | undefined,
+  sessionSecret: string,
+  now = Date.now(),
+  adminEmail?: string,
+): AdminSessionPayload | null {
   if (!token || !sessionSecret) {
     return null;
   }
@@ -46,7 +52,12 @@ export function verifyAdminSessionToken(token: string | undefined, sessionSecret
   try {
     const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8')) as Partial<AdminSessionPayload>;
 
-    if (!payload.email || !payload.expiresAt || Date.parse(payload.expiresAt) <= now) {
+    if (
+      !payload.email ||
+      (adminEmail && payload.email.trim().toLowerCase() !== adminEmail.trim().toLowerCase()) ||
+      !payload.expiresAt ||
+      Date.parse(payload.expiresAt) <= now
+    ) {
       return null;
     }
 
@@ -60,7 +71,7 @@ export function verifyAdminSessionToken(token: string | undefined, sessionSecret
 }
 
 export function getAdminRouteAccessDecision(input: AdminRouteAccessInput): AdminRouteAccessDecision {
-  const session = verifyAdminSessionToken(input.sessionToken, input.sessionSecret, input.now);
+  const session = verifyAdminSessionToken(input.sessionToken, input.sessionSecret, input.now, input.adminEmail);
 
   if (isAdminLoginPath(input.pathname)) {
     return session ? { action: 'redirect', destination: '/admin' } : { action: 'allow' };

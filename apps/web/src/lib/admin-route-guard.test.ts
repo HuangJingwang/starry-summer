@@ -58,6 +58,7 @@ describe('admin route guard helpers', () => {
         search: '',
         sessionToken: token,
         sessionSecret,
+        adminEmail: 'owner@example.com',
         now,
       }),
     ).toEqual({ action: 'allow' });
@@ -75,6 +76,7 @@ describe('admin route guard helpers', () => {
         search: '',
         sessionToken: token,
         sessionSecret,
+        adminEmail: 'owner@example.com',
         now,
       }),
     ).toEqual({
@@ -95,5 +97,27 @@ describe('admin route guard helpers', () => {
 
     expect(verifyAdminSessionToken(expired, sessionSecret, now)).toBeNull();
     expect(verifyAdminSessionToken(`${valid.slice(0, -1)}x`, sessionSecret, now)).toBeNull();
+  });
+
+  test('rejects signed session tokens for a different admin email', () => {
+    const token = createSessionToken({
+      email: 'other@example.com',
+      expiresAt: '2026-06-11T08:00:00.000Z',
+    });
+
+    expect(verifyAdminSessionToken(token, sessionSecret, now, 'owner@example.com')).toBeNull();
+    expect(
+      getAdminRouteAccessDecision({
+        pathname: '/admin/content',
+        search: '',
+        sessionToken: token,
+        sessionSecret,
+        adminEmail: 'owner@example.com',
+        now,
+      }),
+    ).toEqual({
+      action: 'redirect',
+      destination: '/admin/login?next=%2Fadmin%2Fcontent',
+    });
   });
 });

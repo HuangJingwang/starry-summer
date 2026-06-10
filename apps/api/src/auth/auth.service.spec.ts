@@ -63,4 +63,23 @@ describe('AuthService', () => {
 
     expect(service.verifySession(`${encodedPayload}.${signature}`)).toBeNull();
   });
+
+  test('rejects signed sessions for a different admin email', () => {
+    const sessionSecret = 'test-session-secret';
+    const service = new AuthService({
+      adminEmail: 'owner@example.com',
+      adminPasswordHash: createPasswordHash('secret-password', 'auth-service-salt'),
+      sessionSecret,
+    });
+    const encodedPayload = Buffer.from(
+      JSON.stringify({
+        email: 'other@example.com',
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      }),
+      'utf8',
+    ).toString('base64url');
+    const signature = createHmac('sha256', sessionSecret).update(encodedPayload).digest('base64url');
+
+    expect(service.verifySession(`${encodedPayload}.${signature}`)).toBeNull();
+  });
 });
