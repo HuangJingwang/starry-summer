@@ -11,6 +11,7 @@ export interface PublicContentApiRecord {
   status: ContentStatus;
   visibility?: SiteContentItem['visibility'];
   featured?: boolean;
+  pinned?: boolean;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
   categories?: string[];
@@ -88,6 +89,7 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     summary: record.summary ?? '',
     slug: record.slug,
     featured: record.featured ?? false,
+    pinned: record.pinned ?? false,
     sourceType: record.sourceType ?? 'original',
     sourceUrl: record.sourceUrl ?? '',
     categories: record.categories ?? [],

@@ -70,6 +70,10 @@ export function canShowComments(item: SiteContentItem): boolean {
 }
 
 function sortPublicContent(a: SiteContentItem, b: SiteContentItem, sort: ContentSort): number {
+  if (Boolean(a.pinned) !== Boolean(b.pinned)) {
+    return a.pinned ? -1 : 1;
+  }
+
   if (sort === 'popular') {
     const viewOrder = (b.viewCount ?? 0) - (a.viewCount ?? 0);
 

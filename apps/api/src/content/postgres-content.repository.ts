@@ -301,13 +301,14 @@ export function buildPublicContentOrderClause(sort: PublicContentFilter['sort'] 
   if (sort === 'popular') {
     return `
       order by
+        ci.pinned desc,
         (ci.view_count + coalesce(view_counts.count, 0)) desc,
         (ci.like_count + coalesce(like_counts.count, 0)) desc,
         ci.published_at desc
     `;
   }
 
-  return 'order by ci.published_at desc';
+  return 'order by ci.pinned desc, ci.published_at desc';
 }
 
 async function syncTaxonomyLabels(client: Queryable, contentId: string, kind: TaxonomyKind, labels: string[]): Promise<void> {

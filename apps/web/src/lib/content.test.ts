@@ -23,9 +23,10 @@ describe('web content helpers', () => {
       { id: '2', title: 'Draft', type: 'post', status: 'draft', visibility: 'public', publishedAt: '2026-06-01' },
       { id: '3', title: 'New', type: 'note', status: 'published', visibility: 'public', publishedAt: '2026-05-01' },
       { id: '4', title: 'Private', type: 'post', status: 'published', visibility: 'private', publishedAt: '2026-04-01' },
+      { id: '5', title: 'Pinned', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-02-01', pinned: true },
     ]);
 
-    expect(visible.map((item) => item.id)).toEqual(['3', '1']);
+    expect(visible.map((item) => item.id)).toEqual(['5', '3', '1']);
   });
 
   test('filters public content and sorts popular first', () => {
@@ -33,13 +34,14 @@ describe('web content helpers', () => {
       [
         { id: 'newer', title: 'Newer', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-10', viewCount: 5, likeCount: 1 },
         { id: 'popular', title: 'Popular', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-09', viewCount: 200, likeCount: 10 },
+        { id: 'pinned', title: 'Pinned', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-08', viewCount: 1, likeCount: 0, pinned: true },
         { id: 'draft', title: 'Draft', type: 'post', status: 'draft', visibility: 'public', publishedAt: '2026-06-11', viewCount: 999, likeCount: 999 },
       ],
       'post',
       'popular',
     );
 
-    expect(visible.map((item) => item.id)).toEqual(['popular', 'newer']);
+    expect(visible.map((item) => item.id)).toEqual(['pinned', 'popular', 'newer']);
   });
 
   test('normalizes content sort values for public pages', () => {

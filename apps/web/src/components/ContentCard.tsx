@@ -7,7 +7,10 @@ export function ContentCard({ item }: { item: SiteContentItem }) {
   return (
     <article className="content-card">
       <div className="content-card__meta">
-        <span>{item.type}</span>
+        <span>
+          {item.pinned ? <span className="content-card__pin">置顶</span> : null}
+          {item.type}
+        </span>
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
       </div>
       <h3>

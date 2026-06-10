@@ -184,9 +184,29 @@ describe('InMemoryContentRepository', () => {
       likeCount: 5,
       publishedAt: '2026-06-11T00:00:00.000Z',
     });
+    const pinned = await repository.create({
+      type: 'post',
+      title: 'Pinned',
+      slug: 'pinned',
+      summary: 'Pinned',
+      bodyMarkdown: '# Pinned',
+      sourceType: 'original',
+      sourceUrl: '',
+      status: 'published',
+      visibility: 'public',
+      allowComments: true,
+      pinned: true,
+      featured: false,
+      categories: [],
+      tags: [],
+      viewCount: 1,
+      likeCount: 0,
+      publishedAt: '2026-06-10T00:00:00.000Z',
+    });
 
-    expect((await repository.listPublic({ type: 'post' })).map((item) => item.id)).toEqual([recent.id, popular.id]);
+    expect((await repository.listPublic({ type: 'post' })).map((item) => item.id)).toEqual([pinned.id, recent.id, popular.id]);
     expect((await repository.listPublic({ type: 'post', sort: 'popular' })).map((item) => item.id)).toEqual([
+      pinned.id,
       popular.id,
       recent.id,
     ]);

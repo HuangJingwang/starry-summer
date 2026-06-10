@@ -80,6 +80,10 @@ export class InMemoryContentRepository implements ContentRepository {
 }
 
 function sortPublicContent(a: ContentRecord, b: ContentRecord, sort: NonNullable<PublicContentFilter['sort']>): number {
+  if (a.pinned !== b.pinned) {
+    return a.pinned ? -1 : 1;
+  }
+
   if (sort === 'popular') {
     const viewOrder = b.viewCount - a.viewCount;
 

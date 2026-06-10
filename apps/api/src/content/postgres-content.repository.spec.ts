@@ -162,8 +162,13 @@ describe('PostgresContentRepository mapping', () => {
   test('builds popular order clauses from persisted interaction counts', () => {
     const select = buildContentSelect('where ci.status = $1', buildPublicContentOrderClause('popular'));
 
+    expect(select).toContain('ci.pinned desc');
     expect(select).toContain('(ci.view_count + coalesce(view_counts.count, 0)) desc');
     expect(select).toContain('(ci.like_count + coalesce(like_counts.count, 0)) desc');
     expect(select).toContain('ci.published_at desc');
+  });
+
+  test('builds latest order clauses with pinned content first', () => {
+    expect(buildPublicContentOrderClause('latest')).toContain('order by ci.pinned desc, ci.published_at desc');
   });
 });

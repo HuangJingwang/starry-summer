@@ -292,6 +292,12 @@ textarea {
   text-transform: capitalize;
 }
 
+.content-card__pin {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 8px;
+}
+
 .content-card h3 {
   font-size: 1.4rem;
   line-height: 1.25;
