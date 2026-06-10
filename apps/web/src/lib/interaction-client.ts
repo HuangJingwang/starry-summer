@@ -19,6 +19,15 @@ export interface InteractionRequest {
   init: RequestInit;
 }
 
+export interface AdminInteractionRequestOptions {
+  apiBaseUrl?: string;
+  cookieHeader?: string;
+}
+
+export interface AdminModerationCountOptions extends AdminInteractionRequestOptions {
+  fetcher?: (url: string, init: RequestInit) => Promise<Response>;
+}
+
 export type ModerationResource = 'comments' | 'guestbook';
 
 export interface ModerationRecord {
@@ -78,16 +87,46 @@ export function buildGuestbookRequest(input: GuestbookInput): InteractionRequest
 export function buildAdminModerationListRequest(
   resource: ModerationResource,
   status?: ModerationStatus,
+  options: AdminInteractionRequestOptions = {},
 ): InteractionRequest {
   const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  const path = `/api/admin/${resource}${query}`;
+  const url = options.apiBaseUrl
+    ? `${options.apiBaseUrl.replace(/\/$/, '')}${path.replace(/^\/api/, '')}`
+    : path;
+  const headers = options.cookieHeader ? { cookie: options.cookieHeader } : undefined;
 
   return {
-    url: `/api/admin/${resource}${query}`,
+    url,
     init: {
       method: 'GET',
       credentials: 'include',
+      ...(headers ? { headers } : {}),
     },
   };
+}
+
+export async function loadAdminModerationCount(
+  resource: ModerationResource,
+  status: ModerationStatus,
+  options: AdminModerationCountOptions = {},
+): Promise<number> {
+  const request = buildAdminModerationListRequest(resource, status, options);
+  const fetcher = options.fetcher ?? fetch;
+
+  try {
+    const response = await fetcher(request.url, request.init);
+
+    if (!response.ok) {
+      return 0;
+    }
+
+    const data: unknown = await response.json();
+
+    return Array.isArray(data) ? data.length : 0;
+  } catch {
+    return 0;
+  }
 }
 
 export function buildModerationActionRequest(

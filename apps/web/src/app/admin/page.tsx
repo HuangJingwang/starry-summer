@@ -4,13 +4,21 @@ import { cookies } from 'next/headers';
 import { AdminShell } from '@/components/AdminShell';
 import { getAdminContentStats, loadAdminContentItems } from '@/lib/admin-content';
 import { seedContent } from '@/lib/content';
+import { loadAdminModerationCount } from '@/lib/interaction-client';
 
 export default async function AdminPage() {
   const cookieHeader = (await cookies()).toString();
-  const { items } = await loadAdminContentItems(seedContent, undefined, {
+  const adminRequestOptions = {
     apiBaseUrl: process.env.API_BASE_URL,
     cookieHeader,
+  };
+  const { items } = await loadAdminContentItems(seedContent, undefined, {
+    ...adminRequestOptions,
   });
+  const [pendingComments, pendingGuestbook] = await Promise.all([
+    loadAdminModerationCount('comments', 'pending', adminRequestOptions),
+    loadAdminModerationCount('guestbook', 'pending', adminRequestOptions),
+  ]);
   const stats = getAdminContentStats(items);
 
   return (
@@ -26,8 +34,8 @@ export default async function AdminPage() {
           <span>Published {stats.published}</span>
           <span>Private {stats.private}</span>
           <span>Archived {stats.archived}</span>
-          <span>Pending comments 0</span>
-          <span>Guestbook review 0</span>
+          <span>Pending comments {pendingComments}</span>
+          <span>Guestbook review {pendingGuestbook}</span>
         </div>
         <div className="admin-actions">
           <Link href="/admin/content/new">新建内容</Link>
