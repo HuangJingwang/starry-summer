@@ -34,7 +34,13 @@ textarea {
 }
 
 .site-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+
+.site-shell > main {
+  flex: 1;
 }
 
 .site-header {
@@ -85,6 +91,46 @@ textarea {
   border-radius: 999px;
   min-height: 36px;
   padding: 0 14px;
+}
+
+.site-footer {
+  align-items: end;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(200px, 0.8fr) minmax(240px, 1fr) auto;
+  padding: 28px clamp(16px, 4vw, 56px);
+}
+
+.site-footer strong,
+.site-footer span {
+  display: block;
+}
+
+.site-footer strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.site-footer p {
+  margin: 0;
+  max-width: 620px;
+}
+
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: end;
+}
+
+.site-footer a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  min-height: 34px;
+  padding: 8px 12px;
 }
 
 .hero {
@@ -1600,6 +1646,15 @@ textarea {
   .site-nav {
     justify-content: flex-start;
     overflow-x: auto;
+  }
+
+  .site-footer {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer nav {
+    justify-content: start;
   }
 
   .admin-link {

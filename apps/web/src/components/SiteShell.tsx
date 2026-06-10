@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { buildPublicNavigation } from '@/lib/navigation';
+import { buildSiteFooterModel } from '@/lib/site-shell';
+import type { SiteSettings } from '@/lib/settings';
 import { loadPublicSettings } from '@/lib/settings';
 
 export async function SiteShell({ children }: { children: ReactNode }) {
@@ -29,6 +31,33 @@ export async function SiteShell({ children }: { children: ReactNode }) {
         </Link>
       </header>
       {children}
+      <SiteFooter settings={settings} />
     </div>
+  );
+}
+
+export function SiteFooter({ settings }: { settings: SiteSettings }) {
+  const footer = buildSiteFooterModel(settings);
+
+  return (
+    <footer className="site-footer">
+      <div>
+        <strong>{footer.title}</strong>
+        <span>{footer.ownerName}</span>
+      </div>
+      <p>{footer.description}</p>
+      <nav aria-label="Footer links">
+        {footer.links.map((link) => (
+          <a
+            key={`${link.label}-${link.href}`}
+            href={link.href}
+            target={link.external ? '_blank' : undefined}
+            rel={link.external ? 'noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </footer>
   );
 }
