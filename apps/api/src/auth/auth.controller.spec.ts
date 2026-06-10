@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { SELF_DECLARED_DEPS_METADATA } from '@nestjs/common/constants';
 
 import { AuthController, type AuthenticatedRequest } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -15,6 +16,12 @@ function createController() {
 }
 
 describe('AuthController', () => {
+  test('declares auth service injection explicitly for runtime bootstrap', () => {
+    expect(Reflect.getMetadata(SELF_DECLARED_DEPS_METADATA, AuthController)).toEqual([
+      { index: 0, param: AuthService },
+    ]);
+  });
+
   test('returns the current admin session', () => {
     const controller = createController();
 

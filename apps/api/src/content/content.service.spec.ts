@@ -226,4 +226,35 @@ describe('ContentService', () => {
     expect(exported).toContain('tags: []');
     expect(exported).toContain('# Export Me');
   });
+
+  test('exports every admin content record as one Markdown archive', async () => {
+    const first = await service.createDraft({
+      type: 'post',
+      title: 'First Export',
+      slug: 'first-export',
+      summary: 'First portable content',
+      bodyMarkdown: '# First Export',
+    });
+    const second = await service.createDraft({
+      type: 'note',
+      title: 'Second Export',
+      slug: 'second-export',
+      summary: 'Second portable content',
+      bodyMarkdown: '# Second Export',
+    });
+
+    await service.publish(first.id);
+    await service.setVisibility(second.id, 'private');
+
+    const archive = await service.exportMarkdownArchive();
+
+    expect(archive).toContain('# Starry Summer Markdown Export');
+    expect(archive).toContain(`<!-- starry-summer:content post/first-export id=${first.id} -->`);
+    expect(archive).toContain(`<!-- starry-summer:content note/second-export id=${second.id} -->`);
+    expect(archive).toContain('title: First Export');
+    expect(archive).toContain('title: Second Export');
+    expect(archive).toContain('visibility: private');
+    expect(archive).toContain('# First Export');
+    expect(archive).toContain('# Second Export');
+  });
 });

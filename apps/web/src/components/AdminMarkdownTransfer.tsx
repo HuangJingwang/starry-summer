@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { ContentType } from '@starry-summer/shared';
 
-import { buildExportMarkdownRequest, buildImportMarkdownRequest } from '@/lib/admin-content';
+import { buildExportAllMarkdownRequest, buildExportMarkdownRequest, buildImportMarkdownRequest } from '@/lib/admin-content';
 
 type TransferState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -11,6 +11,7 @@ const exampleMarkdown = ['---', 'title: Imported Post', 'slug: imported-post', '
 
 export function AdminMarkdownTransfer() {
   const [exportedMarkdown, setExportedMarkdown] = useState('');
+  const [exportFilename, setExportFilename] = useState('starry-summer-export.md');
   const [state, setState] = useState<TransferState>('idle');
   const [message, setMessage] = useState('');
 
@@ -29,11 +30,35 @@ export function AdminMarkdownTransfer() {
 
       const markdown = await response.text();
       setExportedMarkdown(markdown);
+      setExportFilename(`starry-summer-${id || 'export'}.md`);
       setState('success');
       setMessage('Markdown 已导出，可以下载或复制保存。');
     } catch {
       setState('error');
       setMessage('导出失败，请确认内容 ID 正确且已登录。');
+    }
+  }
+
+  async function exportAllMarkdown() {
+    setState('submitting');
+    setMessage('');
+
+    try {
+      const request = buildExportAllMarkdownRequest();
+      const response = await fetch(request.url, request.init);
+
+      if (!response.ok) {
+        throw new Error(`Export failed with ${response.status}`);
+      }
+
+      const markdown = await response.text();
+      setExportedMarkdown(markdown);
+      setExportFilename('starry-summer-export-all.md');
+      setState('success');
+      setMessage('全部 Markdown 已导出，可以下载或复制保存。');
+    } catch {
+      setState('error');
+      setMessage('全量导出失败，请确认已登录且 API 服务可用。');
     }
   }
 
@@ -66,7 +91,7 @@ export function AdminMarkdownTransfer() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'starry-summer-export.md';
+    link.download = exportFilename;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -79,6 +104,9 @@ export function AdminMarkdownTransfer() {
         <input name="contentId" placeholder="content id" required />
         <button type="submit" disabled={state === 'submitting'}>
           Export Markdown
+        </button>
+        <button type="button" onClick={exportAllMarkdown} disabled={state === 'submitting'}>
+          Export all
         </button>
         {exportedMarkdown ? (
           <>

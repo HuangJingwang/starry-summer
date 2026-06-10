@@ -353,6 +353,16 @@ export function buildExportMarkdownRequest(id: string): AdminContentRequest {
   };
 }
 
+export function buildExportAllMarkdownRequest(): AdminContentRequest {
+  return {
+    url: '/api/admin/content/export/all',
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
 export function buildImportMarkdownRequest(input: AdminMarkdownImportPayload): AdminContentRequest {
   return {
     url: '/api/admin/content/import',

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 
 import { AdminAuthGuard } from './admin-auth.guard.js';
 import { AuthService, type LoginInput } from './auth.service.js';
@@ -16,7 +16,7 @@ export interface AuthenticatedRequest {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   @Post('login')
   async login(@Body() input: LoginInput, @Res({ passthrough: true }) response: CookieResponse) {

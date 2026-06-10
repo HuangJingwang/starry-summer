@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -11,7 +11,7 @@ import {
 
 @Controller()
 export class InteractionsController {
-  constructor(private readonly interactionsService: InteractionsService) {}
+  constructor(@Inject(InteractionsService) private readonly interactionsService: InteractionsService) {}
 
   @Post('comments')
   @UseGuards(PublicInteractionRateLimitGuard)

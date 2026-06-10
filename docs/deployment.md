@@ -90,7 +90,7 @@ MinIO data:
 
 Markdown export:
 
-- Use the admin export workflow once implemented.
+- Use `/admin/export` to export all content as a portable Markdown archive.
 - Keep exports outside the server as a portable content archive.
 
 ## 5. Restore

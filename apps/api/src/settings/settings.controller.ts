@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
 import { SettingsService } from './settings.service.js';
@@ -6,7 +6,7 @@ import type { UpdateSiteSettingsInput } from './settings.repository.js';
 
 @Controller()
 export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) {}
+  constructor(@Inject(SettingsService) private readonly settingsService: SettingsService) {}
 
   @Get('settings')
   getPublicSettings() {

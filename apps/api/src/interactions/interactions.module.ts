@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthModule } from '../auth/auth.module.js';
 import { SecurityModule } from '../security/security.module.js';
 import { InteractionsController } from './interactions.controller.js';
 import {
@@ -25,7 +26,7 @@ function createInteractionsRepository(): InteractionsRepository {
 }
 
 @Module({
-  imports: [SecurityModule],
+  imports: [AuthModule, SecurityModule],
   controllers: [InteractionsController],
   providers: [
     InteractionsService,

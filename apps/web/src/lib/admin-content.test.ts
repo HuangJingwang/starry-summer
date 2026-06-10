@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 import {
   buildAdminContentActionRequest,
   buildCreateDraftRequest,
+  buildExportAllMarkdownRequest,
   buildGetAdminContentRequest,
   buildExportMarkdownRequest,
   buildImportMarkdownRequest,
@@ -152,6 +153,13 @@ describe('admin content helpers', () => {
   test('builds markdown import and export requests', () => {
     expect(buildExportMarkdownRequest('content-1')).toEqual({
       url: '/api/admin/content/content-1/export',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+      },
+    });
+    expect(buildExportAllMarkdownRequest()).toEqual({
+      url: '/api/admin/content/export/all',
       init: {
         method: 'GET',
         credentials: 'include',

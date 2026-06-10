@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthModule } from '../auth/auth.module.js';
 import { AdminContentController } from './admin-content.controller.js';
 import { ContentController } from './content.controller.js';
 import { CONTENT_REPOSITORY, InMemoryContentRepository, type ContentRepository } from './content.repository.js';
@@ -21,6 +22,7 @@ function createContentRepository(): ContentRepository {
 }
 
 @Module({
+  imports: [AuthModule],
   controllers: [AdminContentController, ContentController],
   providers: [
     ContentService,

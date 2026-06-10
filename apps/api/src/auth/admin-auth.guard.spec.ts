@@ -1,4 +1,5 @@
 import type { ExecutionContext } from '@nestjs/common';
+import { SELF_DECLARED_DEPS_METADATA } from '@nestjs/common/constants';
 import { describe, expect, test } from 'vitest';
 
 import { AdminAuthGuard } from './admin-auth.guard';
@@ -20,6 +21,12 @@ describe('AdminAuthGuard', () => {
     adminEmail: 'owner@example.com',
     adminPasswordHash: createPasswordHash('secret-password', 'guard-test-salt'),
     sessionSecret: 'guard-secret',
+  });
+
+  test('declares auth service injection explicitly for runtime bootstrap', () => {
+    expect(Reflect.getMetadata(SELF_DECLARED_DEPS_METADATA, AdminAuthGuard)).toEqual([
+      { index: 0, param: AuthService },
+    ]);
   });
 
   test('allows bearer session tokens', async () => {

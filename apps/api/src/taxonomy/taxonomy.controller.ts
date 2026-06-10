@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
 import { TaxonomyService, type CreateTaxonomyInput, type UpdateTaxonomyInput } from './taxonomy.service.js';
@@ -7,7 +7,7 @@ import type { TaxonomyType } from './taxonomy.repository.js';
 @Controller('admin/taxonomy/:type')
 @UseGuards(AdminAuthGuard)
 export class TaxonomyController {
-  constructor(private readonly taxonomyService: TaxonomyService) {}
+  constructor(@Inject(TaxonomyService) private readonly taxonomyService: TaxonomyService) {}
 
   @Get()
   list(@Param('type') type: TaxonomyType) {

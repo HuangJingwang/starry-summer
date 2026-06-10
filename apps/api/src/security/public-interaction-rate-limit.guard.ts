@@ -1,5 +1,5 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 
 import { RateLimitService } from './rate-limit.service.js';
 
@@ -13,7 +13,7 @@ interface HttpRequest {
 
 @Injectable()
 export class PublicInteractionRateLimitGuard implements CanActivate {
-  constructor(private readonly rateLimitService: RateLimitService) {}
+  constructor(@Inject(RateLimitService) private readonly rateLimitService: RateLimitService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<HttpRequest>();

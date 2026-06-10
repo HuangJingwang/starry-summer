@@ -192,6 +192,20 @@ export class ContentService {
   async exportMarkdown(id: string): Promise<string> {
     const record = await this.getRecord(id);
 
+    return this.serializeRecordAsMarkdown(record);
+  }
+
+  async exportMarkdownArchive(): Promise<string> {
+    const records = await this.repository.listAdmin();
+    const sections = records.flatMap((record) => [
+      `<!-- starry-summer:content ${record.type}/${record.slug} id=${record.id} -->`,
+      this.serializeRecordAsMarkdown(record),
+    ]);
+
+    return ['# Starry Summer Markdown Export', '', ...sections].join('\n\n');
+  }
+
+  private serializeRecordAsMarkdown(record: ContentRecord): string {
     return serializeMarkdownDocument({
       frontmatter: {
         title: record.title,
