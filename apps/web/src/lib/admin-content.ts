@@ -680,11 +680,11 @@ export function buildAdminContentDashboard(
     filteredTotal: filteredItems.length,
     activeFilters: getActiveAdminFilterLabels(filters),
     statusCards: [
-      { label: 'All', value: statusStats.total, href: basePath, active: !filters.status },
-      { label: 'Drafts', value: statusStats.draft, href: `${basePath}?status=draft`, active: filters.status === 'draft' },
-      { label: 'Published', value: statusStats.published, href: `${basePath}?status=published`, active: filters.status === 'published' },
-      { label: 'Private', value: statusStats.private, href: `${basePath}?status=private`, active: filters.status === 'private' },
-      { label: 'Archived', value: statusStats.archived, href: `${basePath}?status=archived`, active: filters.status === 'archived' },
+      { label: 'All', value: statusStats.total, href: buildAdminStatusHref(basePath, filters), active: !filters.status },
+      { label: 'Drafts', value: statusStats.draft, href: buildAdminStatusHref(basePath, filters, 'draft'), active: filters.status === 'draft' },
+      { label: 'Published', value: statusStats.published, href: buildAdminStatusHref(basePath, filters, 'published'), active: filters.status === 'published' },
+      { label: 'Private', value: statusStats.private, href: buildAdminStatusHref(basePath, filters, 'private'), active: filters.status === 'private' },
+      { label: 'Archived', value: statusStats.archived, href: buildAdminStatusHref(basePath, filters, 'archived'), active: filters.status === 'archived' },
     ],
     recentItems: filteredItems.slice(0, 5).map((item) => ({
       id: item.id,
@@ -693,6 +693,42 @@ export function buildAdminContentDashboard(
       meta: `${item.type} / ${item.visibility === 'private' ? 'private' : item.status} / ${item.publishedAt}`,
     })),
   };
+}
+
+function buildAdminStatusHref(basePath: string, filters: AdminContentFilters, status?: ContentStatus): string {
+  const params = new URLSearchParams();
+  const query = filters.query?.trim();
+  const category = filters.category?.trim();
+  const tag = filters.tag?.trim();
+  const series = filters.series?.trim();
+
+  if (query) {
+    params.set('q', query);
+  }
+
+  if (filters.type && basePath === '/admin/content') {
+    params.set('type', filters.type);
+  }
+
+  if (category) {
+    params.set('category', category);
+  }
+
+  if (tag) {
+    params.set('tag', tag);
+  }
+
+  if (series) {
+    params.set('series', series);
+  }
+
+  if (status) {
+    params.set('status', status);
+  }
+
+  const queryString = params.toString();
+
+  return queryString ? `${basePath}?${queryString}` : basePath;
 }
 
 export function filterAdminContent(items: SiteContentItem[], filters: AdminContentFilters): SiteContentItem[] {

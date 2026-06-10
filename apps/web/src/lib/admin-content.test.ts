@@ -108,7 +108,7 @@ describe('admin content helpers', () => {
     expect(dashboard.statusCards).toContainEqual({
       label: 'Private',
       value: 1,
-      href: '/admin/content?status=private',
+      href: '/admin/content?q=lab&type=project&status=private',
       active: true,
     });
     expect(dashboard.recentItems).toEqual([
@@ -134,6 +134,36 @@ describe('admin content helpers', () => {
       label: 'Published',
       value: 1,
       href: '/admin/projects?status=published',
+      active: true,
+    });
+  });
+
+  test('preserves active non-status filters when building dashboard status links', () => {
+    const dashboard = buildAdminContentDashboard(items, {
+      query: 'lab',
+      type: 'project',
+      status: 'private',
+      category: 'Lab',
+      tag: 'Lab',
+      series: 'Platform Journal',
+    });
+
+    expect(dashboard.statusCards).toContainEqual({
+      label: 'All',
+      value: 1,
+      href: '/admin/content?q=lab&type=project&category=Lab&tag=Lab&series=Platform+Journal',
+      active: false,
+    });
+    expect(dashboard.statusCards).toContainEqual({
+      label: 'Drafts',
+      value: 0,
+      href: '/admin/content?q=lab&type=project&category=Lab&tag=Lab&series=Platform+Journal&status=draft',
+      active: false,
+    });
+    expect(dashboard.statusCards).toContainEqual({
+      label: 'Private',
+      value: 1,
+      href: '/admin/content?q=lab&type=project&category=Lab&tag=Lab&series=Platform+Journal&status=private',
       active: true,
     });
   });
