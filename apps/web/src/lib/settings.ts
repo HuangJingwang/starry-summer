@@ -93,6 +93,15 @@ export function formatSocialLinksText(links: SiteSocialLink[]): string {
   return links.map((link) => `${link.label} | ${link.href}`).join('\n');
 }
 
+export function buildSettingsFormKey(settings: SiteSettings): string {
+  return JSON.stringify({
+    profile: settings.profile,
+    hero: settings.hero,
+    navigation: settings.navigation,
+    updatedAt: settings.updatedAt,
+  });
+}
+
 function normalizeSocialLinks(links: SiteSocialLink[] | undefined): SiteSocialLink[] {
   return (Array.isArray(links) ? links : [])
     .map((link) => ({

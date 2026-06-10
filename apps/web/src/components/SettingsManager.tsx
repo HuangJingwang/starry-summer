@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import {
   buildGetAdminSettingsRequest,
+  buildSettingsFormKey,
   buildUpdateSettingsRequest,
   formatSocialLinksText,
   normalizeSiteSettings,
@@ -86,7 +87,7 @@ export function SettingsManager() {
   }
 
   return (
-    <form className="content-form" action={save}>
+    <form className="content-form" action={save} key={buildSettingsFormKey(settings)}>
       <div className="form-grid">
         <label>
           Site title

@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 import {
   buildGetAdminSettingsRequest,
   buildGetPublicSettingsRequest,
+  buildSettingsFormKey,
   buildUpdateSettingsRequest,
   loadPublicSettings,
   normalizeSiteSettings,
@@ -120,6 +121,27 @@ describe('settings client helpers', () => {
         }),
       },
     });
+  });
+
+  test('builds a form key that changes when loaded settings change', () => {
+    const fallback = normalizeSiteSettings({});
+    const loaded = normalizeSiteSettings({
+      profile: {
+        title: 'Loaded Blog',
+        ownerName: 'Loaded Owner',
+        description: 'Loaded description',
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/loaded' }],
+      },
+      hero: {
+        tagline: 'Loaded tagline',
+        backgroundImageUrl: '/loaded-cover.jpg',
+        motto: 'Loaded motto',
+      },
+      navigation: ['posts', 'about'],
+      updatedAt: '2026-06-11T00:00:00.000Z',
+    });
+
+    expect(buildSettingsFormKey(loaded)).not.toBe(buildSettingsFormKey(fallback));
   });
 
   test('loads public settings from the API with defaults on failure', async () => {
