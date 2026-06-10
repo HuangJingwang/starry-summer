@@ -314,6 +314,36 @@ export function buildAdminContentSelect(filter: AdminContentFilter = {}): SqlSta
     }
   }
 
+  const category = filter.category?.trim().toLowerCase();
+
+  if (category) {
+    values.push(category);
+    clauses.push(`
+      and exists (
+        select 1
+        from content_categories cc_exact
+        join categories c_exact on c_exact.id = cc_exact.category_id
+        where cc_exact.content_id = ci.id
+          and lower(c_exact.name) = $${values.length}
+      )
+    `);
+  }
+
+  const tag = filter.tag?.trim().toLowerCase();
+
+  if (tag) {
+    values.push(tag);
+    clauses.push(`
+      and exists (
+        select 1
+        from content_tags ct_exact
+        join tags t_exact on t_exact.id = ct_exact.tag_id
+        where ct_exact.content_id = ci.id
+          and lower(t_exact.name) = $${values.length}
+      )
+    `);
+  }
+
   const query = filter.query?.trim().toLowerCase();
 
   if (query) {

@@ -12,9 +12,18 @@ interface AdminContentManagerProps {
   query?: string;
   status?: SiteContentItem['status'];
   type?: SiteContentItem['type'];
+  category?: string;
+  tag?: string;
 }
 
-export function AdminContentManager({ fallbackItems, query = '', status, type }: AdminContentManagerProps) {
+export function AdminContentManager({
+  fallbackItems,
+  query = '',
+  status,
+  type,
+  category,
+  tag,
+}: AdminContentManagerProps) {
   const [result, setResult] = useState<AdminContentLoadResult>({
     source: 'fallback',
     items: fallbackItems,
@@ -31,6 +40,8 @@ export function AdminContentManager({ fallbackItems, query = '', status, type }:
           q: query,
           status,
           type,
+          category,
+          tag,
         },
       });
 
@@ -45,7 +56,7 @@ export function AdminContentManager({ fallbackItems, query = '', status, type }:
     return () => {
       active = false;
     };
-  }, [fallbackItems, query, status, type]);
+  }, [fallbackItems, query, status, type, category, tag]);
 
   return (
     <div className="admin-content-manager">
@@ -56,7 +67,7 @@ export function AdminContentManager({ fallbackItems, query = '', status, type }:
             ? `已加载 ${result.items.length} 条后台内容。`
             : '当前显示本地样例内容。'}
       </p>
-      <AdminContentTable items={result.items} query={query} status={status} type={type} />
+      <AdminContentTable items={result.items} query={query} status={status} type={type} category={category} tag={tag} />
     </div>
   );
 }

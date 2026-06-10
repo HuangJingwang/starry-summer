@@ -96,6 +96,14 @@ function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFi
     }
   }
 
+  if (filter.category && !includesTaxonomyLabel(record.categories, filter.category)) {
+    return false;
+  }
+
+  if (filter.tag && !includesTaxonomyLabel(record.tags, filter.tag)) {
+    return false;
+  }
+
   const query = filter.query?.trim().toLowerCase();
 
   if (!query) {
@@ -114,6 +122,11 @@ function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFi
     .toLowerCase();
 
   return searchable.includes(query);
+}
+
+function includesTaxonomyLabel(labels: string[], filter: string): boolean {
+  const normalized = filter.trim().toLowerCase();
+  return normalized ? labels.some((label) => label.trim().toLowerCase() === normalized) : true;
 }
 
 function sortPublicContent(a: ContentRecord, b: ContentRecord, sort: NonNullable<PublicContentFilter['sort']>): number {

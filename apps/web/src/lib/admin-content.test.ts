@@ -73,15 +73,25 @@ describe('admin content helpers', () => {
     expect(filterAdminContent(items, { type: 'note' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { status: 'draft' }).map((item) => item.id)).toEqual(['draft-post']);
     expect(filterAdminContent(items, { status: 'private' }).map((item) => item.id)).toEqual(['private-project']);
+    expect(filterAdminContent(items, { category: 'knowledge base' }).map((item) => item.id)).toEqual(['published-note']);
+    expect(filterAdminContent(items, { tag: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'knowledge' }).map((item) => item.id)).toEqual(['published-note']);
   });
 
   test('normalizes URL search params into valid admin content filters', () => {
-    expect(normalizeAdminContentSearchParams({ q: ' api ', status: 'draft', type: 'post' })).toEqual({
+    expect(normalizeAdminContentSearchParams({
+      q: ' api ',
+      status: 'draft',
+      type: 'post',
+      category: ' Lab ',
+      tag: ' Roadmap ',
+    })).toEqual({
       query: 'api',
       status: 'draft',
       type: 'post',
+      category: 'Lab',
+      tag: 'Roadmap',
     });
     expect(normalizeAdminContentSearchParams({ q: 'x', status: 'deleted', type: 'article' })).toEqual({
       query: 'x',
@@ -212,8 +222,10 @@ describe('admin content helpers', () => {
         credentials: 'include',
       },
     });
-    expect(buildListAdminContentRequest({ filters: { q: ' lab ', status: 'private', type: 'project' } }).url).toBe(
-      '/api/admin/content?q=lab&status=private&type=project',
+    expect(buildListAdminContentRequest({
+      filters: { q: ' lab ', status: 'private', type: 'project', category: 'Lab', tag: 'Roadmap' },
+    }).url).toBe(
+      '/api/admin/content?q=lab&status=private&type=project&category=Lab&tag=Roadmap',
     );
   });
 
@@ -222,10 +234,10 @@ describe('admin content helpers', () => {
       buildListAdminContentRequest({
         apiBaseUrl: 'https://api.example.com/',
         cookieHeader: 'ss_session=session-token',
-        filters: { q: 'draft', status: 'draft', type: 'post' },
+        filters: { q: 'draft', status: 'draft', type: 'post', category: 'Drafts', tag: 'Writing' },
       }),
     ).toEqual({
-      url: 'https://api.example.com/admin/content?q=draft&status=draft&type=post',
+      url: 'https://api.example.com/admin/content?q=draft&status=draft&type=post&category=Drafts&tag=Writing',
       init: {
         method: 'GET',
         credentials: 'include',
@@ -301,9 +313,9 @@ describe('admin content helpers', () => {
           },
         ]),
       );
-    }, { filters: { status: 'private', type: 'project' } });
+    }, { filters: { status: 'private', type: 'project', category: 'Lab', tag: 'API' } });
 
-    expect(seenUrls).toEqual(['/api/admin/content?status=private&type=project']);
+    expect(seenUrls).toEqual(['/api/admin/content?status=private&type=project&category=Lab&tag=API']);
 
     expect(result).toEqual({
       source: 'api',

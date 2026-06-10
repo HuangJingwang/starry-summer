@@ -190,6 +190,9 @@ describe('InMemoryContentRepository', () => {
     expect((await repository.listAdmin({ type: 'project' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ status: 'draft' })).map((item) => item.id)).toEqual([draft.id]);
     expect((await repository.listAdmin({ status: 'private' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ category: 'lab' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ tag: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ tag: 'writing' })).map((item) => item.id)).toEqual([draft.id]);
     expect((await repository.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ query: 'draft-post' })).map((item) => item.id)).toEqual([draft.id]);
   });

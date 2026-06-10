@@ -59,6 +59,8 @@ export interface AdminContentFilter {
   type?: ContentType;
   status?: ContentStatus;
   query?: string;
+  category?: string;
+  tag?: string;
 }
 
 export interface PublicContentFilter {

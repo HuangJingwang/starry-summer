@@ -6,12 +6,16 @@ export interface AdminContentFilters {
   type?: ContentType;
   status?: ContentStatus;
   query?: string;
+  category?: string;
+  tag?: string;
 }
 
 export interface AdminContentSearchParams {
   q?: string;
   status?: string;
   type?: string;
+  category?: string;
+  tag?: string;
 }
 
 export interface AdminContentRequestOptions {
@@ -209,6 +213,17 @@ export function normalizeAdminContentSearchParams(params: AdminContentSearchPara
     filters.type = params.type as ContentType;
   }
 
+  const category = params.category?.trim();
+  const tag = params.tag?.trim();
+
+  if (category) {
+    filters.category = category;
+  }
+
+  if (tag) {
+    filters.tag = tag;
+  }
+
   return filters;
 }
 
@@ -244,6 +259,17 @@ function appendAdminContentFilters(url: string, filters: AdminContentSearchParam
 
   if (filters?.type) {
     params.set('type', filters.type);
+  }
+
+  const category = filters?.category?.trim();
+  const tag = filters?.tag?.trim();
+
+  if (category) {
+    params.set('category', category);
+  }
+
+  if (tag) {
+    params.set('tag', tag);
   }
 
   const queryString = params.toString();
@@ -444,6 +470,8 @@ export function getAdminContentStats(items: SiteContentItem[]): AdminContentStat
 
 export function filterAdminContent(items: SiteContentItem[], filters: AdminContentFilters): SiteContentItem[] {
   const normalizedQuery = filters.query?.trim().toLowerCase() ?? '';
+  const normalizedCategory = filters.category?.trim().toLowerCase() ?? '';
+  const normalizedTag = filters.tag?.trim().toLowerCase() ?? '';
 
   return items
     .filter((item) => (filters.type ? item.type === filters.type : true))
@@ -454,6 +482,8 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
 
       return filters.status === 'private' ? item.visibility === 'private' : item.status === filters.status;
     })
+    .filter((item) => (normalizedCategory ? includesTaxonomyLabel(item.categories, normalizedCategory) : true))
+    .filter((item) => (normalizedTag ? includesTaxonomyLabel(item.tags, normalizedTag) : true))
     .filter((item) => {
       if (!normalizedQuery) {
         return true;
@@ -466,6 +496,10 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
       return searchable.includes(normalizedQuery);
     })
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+function includesTaxonomyLabel(labels: string[] | undefined, normalizedFilter: string): boolean {
+  return labels?.some((label) => label.trim().toLowerCase() === normalizedFilter) ?? false;
 }
 
 export function createMarkdownPreview(markdown: string): MarkdownPreviewModel {

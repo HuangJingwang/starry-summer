@@ -10,11 +10,19 @@ export class AdminContentController {
   constructor(@Inject(ContentService) private readonly contentService: ContentService) {}
 
   @Get()
-  listAdmin(@Query('type') type?: string, @Query('status') status?: string, @Query('q') query?: string) {
+  listAdmin(
+    @Query('type') type?: string,
+    @Query('status') status?: string,
+    @Query('q') query?: string,
+    @Query('category') category?: string,
+    @Query('tag') tag?: string,
+  ) {
     return this.contentService.listAdmin({
       type: parseOptionalContentType(type),
       status: parseOptionalContentStatus(status),
       query: normalizeOptionalQuery(query),
+      category: normalizeOptionalQuery(category),
+      tag: normalizeOptionalQuery(tag),
     });
   }
 

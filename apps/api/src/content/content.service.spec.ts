@@ -115,6 +115,8 @@ describe('ContentService', () => {
     expect((await service.listAdmin({ type: 'project' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await service.listAdmin({ status: 'draft' })).map((item) => item.id)).toEqual([draft.id]);
     expect((await service.listAdmin({ status: 'private' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await service.listAdmin({ category: 'lab' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await service.listAdmin({ tag: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await service.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
   });
 

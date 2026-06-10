@@ -161,17 +161,21 @@ describe('PostgresContentRepository mapping', () => {
       type: 'project',
       status: 'private',
       query: 'roadmap',
+      category: 'Lab',
+      tag: 'Roadmap',
     });
 
     expect(statement.sql).toContain('where true');
     expect(statement.sql).toContain('ci.type = $1');
     expect(statement.sql).toContain("ci.visibility = 'private'");
-    expect(statement.sql).toContain('lower(ci.title) like $2');
+    expect(statement.sql).toContain('lower(c_exact.name) = $2');
+    expect(statement.sql).toContain('lower(t_exact.name) = $3');
+    expect(statement.sql).toContain('lower(ci.title) like $4');
     expect(statement.sql).toContain('exists');
     expect(statement.sql).toContain('categories');
     expect(statement.sql).toContain('tags');
     expect(statement.sql).toContain('order by ci.updated_at desc');
-    expect(statement.values).toEqual(['project', '%roadmap%']);
+    expect(statement.values).toEqual(['project', 'lab', 'roadmap', '%roadmap%']);
   });
 
   test('builds slug lookup selects', () => {
