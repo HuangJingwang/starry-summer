@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Header, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { ContentVisibility } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -15,6 +15,8 @@ export class AdminContentController {
   }
 
   @Get('export/all')
+  @Header('Content-Type', 'text/markdown; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="starry-summer-export-all.md"')
   exportMarkdownArchive() {
     return this.contentService.exportMarkdownArchive();
   }
@@ -60,6 +62,8 @@ export class AdminContentController {
   }
 
   @Get(':id/export')
+  @Header('Content-Type', 'text/markdown; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="starry-summer-export.md"')
   exportMarkdown(@Param('id') id: string) {
     return this.contentService.exportMarkdown(id);
   }
