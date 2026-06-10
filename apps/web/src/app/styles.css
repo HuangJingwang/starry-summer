@@ -604,6 +604,8 @@ textarea {
 .content-form,
 .form-grid,
 .split-panels,
+.moderation-manager,
+.moderation-toolbar,
 .moderation-list {
   display: grid;
   gap: 14px;
@@ -809,6 +811,43 @@ textarea {
   text-transform: uppercase;
 }
 
+.moderation-manager {
+  margin-top: 22px;
+}
+
+.moderation-toolbar {
+  grid-template-columns: repeat(5, max-content);
+}
+
+.moderation-toolbar button {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  min-height: 38px;
+  padding: 8px 14px;
+}
+
+.moderation-toolbar button.active {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: #fff;
+}
+
+.moderation-list article {
+  display: grid;
+  gap: 8px;
+}
+
+.moderation-list strong {
+  font-size: 1rem;
+}
+
+.moderation-list small {
+  color: var(--muted);
+}
+
 .asset-dropzone {
   align-items: center;
   border-style: dashed;
@@ -892,6 +931,7 @@ textarea {
   .admin-filter,
   .admin-table__row,
   .form-grid,
+  .moderation-toolbar,
   .editor-grid,
   .adjacent-content,
   .archive-item,

@@ -1,4 +1,5 @@
 import { AdminShell } from '@/components/AdminShell';
+import { ModerationManager } from '@/components/ModerationManager';
 
 export default function AdminGuestbookPage() {
   return (
@@ -6,16 +7,7 @@ export default function AdminGuestbookPage() {
       <section className="admin-panel wide">
         <p className="eyebrow">Guestbook</p>
         <h1>留言审核</h1>
-        <div className="moderation-list">
-          <article>
-            <span>Pending</span>
-            <p>留言板内容默认待审核，避免公网垃圾内容直接展示。</p>
-            <div className="admin-actions">
-              <button type="button">Approve</button>
-              <button type="button">Reject</button>
-            </div>
-          </article>
-        </div>
+        <ModerationManager resource="guestbook" emptyText="暂无留言需要处理。" />
       </section>
     </AdminShell>
   );

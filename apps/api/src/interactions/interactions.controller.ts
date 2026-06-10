@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -30,6 +30,12 @@ export class InteractionsController {
     return this.interactionsService.moderateComment(id, status);
   }
 
+  @Get('admin/comments')
+  @UseGuards(AdminAuthGuard)
+  listAdminComments(@Query('status') status?: ModerationStatus) {
+    return this.interactionsService.listAdminComments({ status });
+  }
+
   @Post('likes/:targetType/:targetId')
   @UseGuards(PublicInteractionRateLimitGuard)
   likeContent(@Param('targetType') targetType: ContentType, @Param('targetId') targetId: string) {
@@ -45,5 +51,17 @@ export class InteractionsController {
   @Get('guestbook')
   listApprovedGuestbookEntries() {
     return this.interactionsService.listApprovedGuestbookEntries();
+  }
+
+  @Get('admin/guestbook')
+  @UseGuards(AdminAuthGuard)
+  listAdminGuestbookEntries(@Query('status') status?: ModerationStatus) {
+    return this.interactionsService.listAdminGuestbookEntries({ status });
+  }
+
+  @Patch('admin/guestbook/:id/moderate')
+  @UseGuards(AdminAuthGuard)
+  moderateGuestbookEntry(@Param('id') id: string, @Body('status') status: ModerationStatus) {
+    return this.interactionsService.moderateGuestbookEntry(id, status);
   }
 }

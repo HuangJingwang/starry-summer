@@ -32,6 +32,10 @@ export interface CreateGuestbookEntryInput {
   body: string;
 }
 
+export interface ModerationListFilter {
+  status?: ModerationStatus;
+}
+
 @Injectable()
 export class InteractionsService {
   private readonly comments = new Map<string, CommentRecord>();
@@ -66,6 +70,12 @@ export class InteractionsService {
     this.comments.set(id, updated);
 
     return updated;
+  }
+
+  async listAdminComments(filter: ModerationListFilter = {}): Promise<CommentRecord[]> {
+    return [...this.comments.values()]
+      .filter((comment) => (filter.status ? comment.status === filter.status : true))
+      .sort(sortNewestModerationFirst);
   }
 
   async listApprovedComments(
@@ -105,6 +115,25 @@ export class InteractionsService {
     return entry;
   }
 
+  async moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord> {
+    const entry = this.guestbookEntries.get(id);
+
+    if (!entry) {
+      throw new NotFoundException(`Guestbook entry ${id} was not found`);
+    }
+
+    const updated = { ...entry, status };
+    this.guestbookEntries.set(id, updated);
+
+    return updated;
+  }
+
+  async listAdminGuestbookEntries(filter: ModerationListFilter = {}): Promise<GuestbookEntryRecord[]> {
+    return [...this.guestbookEntries.values()]
+      .filter((entry) => (filter.status ? entry.status === filter.status : true))
+      .sort(sortNewestModerationFirst);
+  }
+
   async listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]> {
     return [...this.guestbookEntries.values()].filter(isVisibleSubmission);
   }
@@ -112,4 +141,17 @@ export class InteractionsService {
   private likeKey(targetType: ContentType, targetId: string): string {
     return `${targetType}:${targetId}`;
   }
+}
+
+function sortNewestModerationFirst(
+  a: Pick<CommentRecord, 'id' | 'createdAt'>,
+  b: Pick<CommentRecord, 'id' | 'createdAt'>,
+): number {
+  const dateOrder = b.createdAt.localeCompare(a.createdAt);
+
+  if (dateOrder !== 0) {
+    return dateOrder;
+  }
+
+  return Number(b.id) - Number(a.id);
 }

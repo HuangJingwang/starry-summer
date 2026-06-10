@@ -1,4 +1,4 @@
-import type { ContentType } from '@starry-summer/shared';
+import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 export type CommentTargetType = Extract<ContentType, 'post' | 'note' | 'project'>;
 
@@ -17,6 +17,18 @@ export interface GuestbookInput {
 export interface InteractionRequest {
   url: string;
   init: RequestInit;
+}
+
+export type ModerationResource = 'comments' | 'guestbook';
+
+export interface ModerationRecord {
+  id: string;
+  authorName: string;
+  body: string;
+  status: ModerationStatus;
+  createdAt: string;
+  targetType?: CommentTargetType;
+  targetId?: string;
 }
 
 const jsonHeaders = {
@@ -60,5 +72,48 @@ export function buildGuestbookRequest(input: GuestbookInput): InteractionRequest
         body: input.body.trim(),
       }),
     },
+  };
+}
+
+export function buildAdminModerationListRequest(
+  resource: ModerationResource,
+  status?: ModerationStatus,
+): InteractionRequest {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+
+  return {
+    url: `/api/admin/${resource}${query}`,
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
+export function buildModerationActionRequest(
+  resource: ModerationResource,
+  id: string,
+  status: ModerationStatus,
+): InteractionRequest {
+  return {
+    url: `/api/admin/${resource}/${id}/moderate`,
+    init: {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: jsonHeaders,
+      body: JSON.stringify({ status }),
+    },
+  };
+}
+
+export function normalizeModerationRecord(input: Partial<ModerationRecord> & { id: string }): ModerationRecord {
+  return {
+    id: input.id,
+    targetType: input.targetType,
+    targetId: input.targetId,
+    authorName: input.authorName ?? '',
+    body: input.body ?? '',
+    status: input.status ?? 'pending',
+    createdAt: input.createdAt ?? '',
   };
 }
