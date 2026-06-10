@@ -125,7 +125,8 @@ export function buildRssXml(settings: SiteSettings, siteUrl: string, content: Si
 export function buildSitemapXml(siteUrl: string, content: SiteContentItem[]): string {
   const url = normalizePublicSiteUrl(siteUrl);
   const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'series', 'categories', 'tags', 'archives', 'guestbook', 'about', 'search'];
-  const contentRoutes = content.map((item) => getContentHref(item).slice(1));
+  const contentRouteMetadata = new Map(content.map((item) => [getContentHref(item).slice(1), item.updatedAt || item.publishedAt]));
+  const contentRoutes = [...contentRouteMetadata.keys()];
   const categoryRoutes = groupContentByCategory(content).map((group) => `categories/${group.key}`);
   const seriesRoutes = groupContentBySeries(content).map((group) => `series/${group.key}`);
   const tagRoutes = groupContentByTag(content).map((group) => `tags/${group.key}`);
@@ -133,8 +134,9 @@ export function buildSitemapXml(siteUrl: string, content: SiteContentItem[]): st
   const urls = routes
     .map((route) => {
       const loc = route ? `${url}/${route}` : url;
+      const lastmod = contentRouteMetadata.get(route);
 
-      return `<url><loc>${escapeXml(loc)}</loc></url>`;
+      return `<url><loc>${escapeXml(loc)}</loc>${lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : ''}</url>`;
     })
     .join('');
 

@@ -146,6 +146,7 @@ describe('SEO helpers', () => {
     const xml = buildSitemapXml('https://example.com', [
       {
         ...content,
+        updatedAt: '2026-06-11',
         categories: ['Writing Notes'],
         series: ['Platform Journal'],
         tags: ['Next.js'],
@@ -157,6 +158,7 @@ describe('SEO helpers', () => {
     expect(xml).toContain('<loc>https://example.com/categories/writing-notes</loc>');
     expect(xml).toContain('<loc>https://example.com/tags</loc>');
     expect(xml).toContain('<loc>https://example.com/posts/public-post</loc>');
+    expect(xml).toContain('<lastmod>2026-06-11</lastmod>');
     expect(xml).toContain('<loc>https://example.com/series/platform-journal</loc>');
     expect(xml).toContain('<loc>https://example.com/tags/next-js</loc>');
   });
