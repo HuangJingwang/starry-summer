@@ -15,6 +15,28 @@ check_path() {
   curl --fail --silent --show-error --location --max-time 10 "$SITE_URL$path" >"$response_file"
 }
 
+check_admin_protected_redirect() {
+  local header_file="/tmp/starry-summer-smoke-headers"
+  local status_code
+  local location
+
+  echo "Checking admin protected redirect: $SITE_URL/admin/content"
+  status_code=$(curl --silent --show-error --output /dev/null --dump-header "$header_file" --write-out "%{http_code}" --max-time 10 "$SITE_URL/admin/content")
+  location=$(awk 'BEGIN { IGNORECASE = 1 } /^location:/ { sub(/\r$/, "", $2); print $2; exit }' "$header_file")
+  rm -f "$header_file"
+
+  if [[ "$status_code" != "307" && "$status_code" != "308" && "$status_code" != "302" && "$status_code" != "301" ]]; then
+    echo "Admin protected route did not redirect. Status: $status_code"
+    exit 1
+  fi
+
+  if [[ "$location" != /admin/login* ]]; then
+    echo "Location header did not point to /admin/login."
+    echo "Location: ${location:-<missing>}"
+    exit 1
+  fi
+}
+
 check_health() {
   check_path "/health" "web health"
 
@@ -31,6 +53,7 @@ if [[ "${CHECK_API_HEALTH:-true}" == "true" ]]; then
 fi
 check_path "/" "home page"
 check_path "/admin/login" "admin login"
+check_admin_protected_redirect
 check_path "/rss.xml" "RSS feed"
 check_path "/sitemap.xml" "sitemap"
 

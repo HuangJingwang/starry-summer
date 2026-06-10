@@ -161,6 +161,9 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('/health');
     expect(smokeScript).toContain('/api/health');
     expect(smokeScript).toContain('/admin/login');
+    expect(smokeScript).toContain('/admin/content');
+    expect(smokeScript).toContain('admin protected redirect');
+    expect(smokeScript).toContain('Location header did not point to /admin/login.');
     expect(smokeScript).toContain('/rss.xml');
     expect(smokeScript).toContain('/sitemap.xml');
     expect(deployment).toContain('npm run ops:smoke -- https://example.com');
