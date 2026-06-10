@@ -148,6 +148,24 @@ describe('deployment configuration', () => {
     await rm(tempDirectory, { recursive: true, force: true });
   });
 
+  test('provides a deployment smoke test for public endpoints', async () => {
+    const smokeScript = await readFile(join(repoRoot, 'scripts/smoke.sh'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(packageJson.scripts?.['ops:smoke']).toBe('bash scripts/smoke.sh');
+    expect(smokeScript).toContain('SITE_URL');
+    expect(smokeScript).toContain('curl --fail');
+    expect(smokeScript).toContain('/health');
+    expect(smokeScript).toContain('/api/health');
+    expect(smokeScript).toContain('/admin/login');
+    expect(smokeScript).toContain('/rss.xml');
+    expect(smokeScript).toContain('/sitemap.xml');
+    expect(deployment).toContain('npm run ops:smoke -- https://example.com');
+  });
+
   test('sets baseline security headers at the reverse proxy', async () => {
     const caddy = await readFile(join(repoRoot, 'infra/caddy/Caddyfile'), 'utf8');
 

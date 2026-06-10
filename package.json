@@ -20,7 +20,8 @@
     "db:migrate": "npm run migrate --workspace @starry-summer/database",
     "ops:backup": "bash scripts/backup.sh",
     "ops:restore": "bash scripts/restore.sh",
-    "ops:doctor": "bash scripts/doctor.sh"
+    "ops:doctor": "bash scripts/doctor.sh",
+    "ops:smoke": "bash scripts/smoke.sh"
   },
   "engines": {
     "node": ">=22.0.0",

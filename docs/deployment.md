@@ -73,6 +73,12 @@ Verify:
 - `https://$DOMAIN/admin/login` opens the admin login screen.
 - `https://$DOMAIN/api/health` returns API health through Caddy.
 
+Run the public smoke check after DNS and HTTPS are ready:
+
+```bash
+npm run ops:smoke -- https://example.com
+```
+
 For later schema changes, rerun migrations before restarting the API:
 
 ```bash
