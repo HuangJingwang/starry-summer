@@ -5,6 +5,10 @@ import { AuthService } from './auth.service.js';
 
 interface HttpRequest {
   headers: Record<string, string | string[] | undefined>;
+  adminSession?: {
+    email: string;
+    expiresAt: string;
+  };
 }
 
 @Injectable()
@@ -15,9 +19,13 @@ export class AdminAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<HttpRequest>();
     const token = this.readBearerToken(request.headers.authorization) ?? this.readCookieToken(request.headers.cookie);
 
-    if (!token || !this.authService.verifySession(token)) {
+    const session = token ? this.authService.verifySession(token) : null;
+
+    if (!session) {
       throw new UnauthorizedException('Admin session is required');
     }
+
+    request.adminSession = session;
 
     return true;
   }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { buildLoginRequest, normalizeLoginInput } from './auth-client';
+import { buildLoginRequest, buildLogoutRequest, buildSessionRequest, normalizeLoginInput } from './auth-client';
 
 describe('auth client helpers', () => {
   test('normalizes owner login input', () => {
@@ -20,6 +20,26 @@ describe('auth client helpers', () => {
           'content-type': 'application/json',
         },
         body: JSON.stringify({ email: 'owner@example.com', password: 'secret' }),
+      },
+    });
+  });
+
+  test('builds a credentialed session request', () => {
+    expect(buildSessionRequest()).toEqual({
+      url: '/api/auth/me',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+      },
+    });
+  });
+
+  test('builds a credentialed logout request', () => {
+    expect(buildLogoutRequest()).toEqual({
+      url: '/api/auth/logout',
+      init: {
+        method: 'POST',
+        credentials: 'include',
       },
     });
   });

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { AdminSessionStatus } from './AdminSessionStatus';
+
 const adminNav = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/content', label: 'Content' },
@@ -31,6 +33,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <Link className="admin-home-link" href="/">
           View site
         </Link>
+        <AdminSessionStatus />
       </aside>
       <main className="admin-content">{children}</main>
     </div>

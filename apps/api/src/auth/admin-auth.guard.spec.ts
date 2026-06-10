@@ -5,10 +5,12 @@ import { AdminAuthGuard } from './admin-auth.guard';
 import { AuthService } from './auth.service';
 import { createPasswordHash } from './password';
 
-function createContext(headers: Record<string, string | undefined>): ExecutionContext {
+function createContext(headers: Record<string, string | undefined>, request: Record<string, unknown> = {}): ExecutionContext {
+  request.headers = headers;
+
   return {
     switchToHttp: () => ({
-      getRequest: () => ({ headers }),
+      getRequest: () => request,
     }),
   } as ExecutionContext;
 }
@@ -32,6 +34,18 @@ describe('AdminAuthGuard', () => {
     const guard = new AdminAuthGuard(authService);
 
     expect(guard.canActivate(createContext({ cookie: `other=value; ss_session=${session.token}` }))).toBe(true);
+  });
+
+  test('attaches the verified admin session to the request', async () => {
+    const session = await authService.login({ email: 'owner@example.com', password: 'secret-password' });
+    const guard = new AdminAuthGuard(authService);
+    const request: Record<string, unknown> = {};
+
+    expect(guard.canActivate(createContext({ authorization: `Bearer ${session.token}` }, request))).toBe(true);
+    expect(request.adminSession).toEqual({
+      email: 'owner@example.com',
+      expiresAt: session.expiresAt,
+    });
   });
 
   test('rejects missing or invalid tokens', () => {

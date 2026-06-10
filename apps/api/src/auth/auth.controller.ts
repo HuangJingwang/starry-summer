@@ -1,9 +1,17 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 
+import { AdminAuthGuard } from './admin-auth.guard.js';
 import { AuthService, type LoginInput } from './auth.service.js';
 
 interface CookieResponse {
   cookie(name: string, value: string, options: Record<string, unknown>): void;
+}
+
+export interface AuthenticatedRequest {
+  adminSession: {
+    email: string;
+    expiresAt: string;
+  };
 }
 
 @Controller('auth')
@@ -26,5 +34,25 @@ export class AuthController {
       email: session.email,
       expiresAt: session.expiresAt,
     };
+  }
+
+  @Get('me')
+  @UseGuards(AdminAuthGuard)
+  me(@Req() request: AuthenticatedRequest) {
+    return request.adminSession;
+  }
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) response: CookieResponse) {
+    response.cookie('ss_session', '', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      expires: new Date(0),
+      maxAge: 0,
+      path: '/',
+    });
+
+    return { ok: true };
   }
 }

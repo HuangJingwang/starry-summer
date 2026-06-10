@@ -30,3 +30,23 @@ export function buildLoginRequest(input: LoginInput): LoginRequest {
     },
   };
 }
+
+export function buildSessionRequest(): LoginRequest {
+  return {
+    url: '/api/auth/me',
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
+export function buildLogoutRequest(): LoginRequest {
+  return {
+    url: '/api/auth/logout',
+    init: {
+      method: 'POST',
+      credentials: 'include',
+    },
+  };
+}
