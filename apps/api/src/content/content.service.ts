@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { parseMarkdownDocument, serializeMarkdownDocument } from '@starry-summer/markdown';
 import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 import { canPublishContent } from '@starry-summer/shared';
@@ -105,6 +105,23 @@ export class ContentService {
 
   async listPublic(filter: PublicContentFilter = {}): Promise<ContentRecord[]> {
     return this.repository.listPublic(filter);
+  }
+
+  async ensureCanComment(targetType: Extract<ContentType, 'post' | 'note' | 'project'>, targetId: string): Promise<void> {
+    const record = await this.repository.findById(targetId);
+
+    if (
+      !record ||
+      record.type !== targetType ||
+      record.status !== 'published' ||
+      record.visibility !== 'public'
+    ) {
+      throw new NotFoundException(`Content ${targetId} was not found`);
+    }
+
+    if (!record.allowComments) {
+      throw new ForbiddenException('Comments are disabled for this content');
+    }
   }
 
   async updateContent(id: string, input: UpdateContentInput): Promise<ContentRecord> {

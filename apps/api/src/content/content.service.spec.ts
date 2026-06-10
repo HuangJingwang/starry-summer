@@ -90,6 +90,35 @@ describe('ContentService', () => {
     expect((await service.listPublic({ type: 'post', sort: 'popular' })).map((item) => item.id)).toEqual([older.id, newer.id]);
   });
 
+  test('allows comments only on published public content with comments enabled', async () => {
+    const published = await service.createDraft({
+      type: 'post',
+      title: 'Published',
+      slug: 'commentable',
+      summary: 'Visible post',
+      bodyMarkdown: '# Published',
+    });
+    await service.publish(published.id);
+
+    await expect(service.ensureCanComment('post', published.id)).resolves.toBeUndefined();
+
+    const disabled = await service.updateContent(published.id, { allowComments: false });
+    await expect(service.ensureCanComment('post', disabled.id)).rejects.toThrow('Comments are disabled for this content');
+
+    const privatePost = await service.createDraft({
+      type: 'post',
+      title: 'Private',
+      slug: 'private-comment-target',
+      summary: 'Hidden',
+      bodyMarkdown: '# Private',
+    });
+    await service.publish(privatePost.id);
+    await service.setVisibility(privatePost.id, 'private');
+
+    await expect(service.ensureCanComment('post', privatePost.id)).rejects.toThrow(`Content ${privatePost.id} was not found`);
+    await expect(service.ensureCanComment('note', disabled.id)).rejects.toThrow(`Content ${disabled.id} was not found`);
+  });
+
   test('publishing rejects invalid slugs', async () => {
     const draft = await service.createDraft({
       type: 'post',

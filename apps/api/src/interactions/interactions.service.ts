@@ -1,6 +1,7 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
+import { ContentService } from '../content/content.service.js';
 import { INTERACTIONS_REPOSITORY, type InteractionsRepository } from './interactions.repository.js';
 
 export interface CommentRecord {
@@ -37,6 +38,10 @@ export interface ModerationListFilter {
   status?: ModerationStatus;
 }
 
+export interface CommentTargetPolicy {
+  ensureCanComment(targetType: CommentRecord['targetType'], targetId: string): Promise<void>;
+}
+
 const MAX_AUTHOR_NAME_LENGTH = 80;
 const MAX_SUBMISSION_BODY_LENGTH = 2000;
 
@@ -45,12 +50,19 @@ export class InteractionsService {
   constructor(
     @Inject(INTERACTIONS_REPOSITORY)
     private readonly repository: InteractionsRepository,
+    @Optional()
+    @Inject(ContentService)
+    private readonly commentTargetPolicy?: CommentTargetPolicy,
   ) {}
 
   async createComment(input: CreateCommentInput): Promise<CommentRecord> {
+    const submission = normalizePublicSubmission(input);
+
+    await this.commentTargetPolicy?.ensureCanComment(input.targetType, input.targetId);
+
     return this.repository.createComment({
       ...input,
-      ...normalizePublicSubmission(input),
+      ...submission,
     });
   }
 

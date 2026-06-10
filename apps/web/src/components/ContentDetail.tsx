@@ -1,6 +1,6 @@
 import { renderMarkdown } from '@starry-summer/markdown';
 
-import { getContentHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { canShowComments, getContentHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
@@ -16,25 +16,10 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const markdown = item.bodyMarkdown || item.summary || '';
   const bodyHtml = await renderMarkdown(markdown);
   const tableOfContents = buildContentTableOfContents(markdown);
-  const comments = isCommentTargetType(item.type) ? await loadApprovedComments(item.type, item.id) : [];
-  const commentSection = isCommentTargetType(item.type) ? (
+  const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="Comments">
       <h2>评论</h2>
-      {comments.length > 0 ? (
-        <ol className="detail-comments__list">
-          {comments.map((comment) => (
-            <li key={comment.id}>
-              <div>
-                <strong>{comment.authorName || '匿名读者'}</strong>
-                {comment.createdAt ? <time dateTime={comment.createdAt}>{comment.createdAt.slice(0, 10)}</time> : null}
-              </div>
-              <p>{comment.body}</p>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p className="detail-comments__empty">暂无公开评论。</p>
-      )}
+      <CommentList targetType={item.type} targetId={item.id} />
       <CommentForm targetType={item.type} targetId={item.id} />
     </section>
   ) : null;
@@ -91,5 +76,25 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       ) : null}
       {commentSection}
     </article>
+  );
+}
+
+async function CommentList({ targetType, targetId }: { targetType: CommentTargetType; targetId: string }) {
+  const comments = await loadApprovedComments(targetType, targetId);
+
+  return comments.length > 0 ? (
+    <ol className="detail-comments__list">
+      {comments.map((comment) => (
+        <li key={comment.id}>
+          <div>
+            <strong>{comment.authorName || '匿名读者'}</strong>
+            {comment.createdAt ? <time dateTime={comment.createdAt}>{comment.createdAt.slice(0, 10)}</time> : null}
+          </div>
+          <p>{comment.body}</p>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <p className="detail-comments__empty">暂无公开评论。</p>
   );
 }

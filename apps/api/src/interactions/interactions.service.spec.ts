@@ -5,10 +5,17 @@ import { InteractionsService } from './interactions.service';
 
 describe('InteractionsService', () => {
   let service: InteractionsService;
+  let allowedCommentTargets: Array<{ targetType: string; targetId: string }>;
 
   beforeEach(() => {
+    allowedCommentTargets = [];
     service = new InteractionsService(
       new InMemoryInteractionsRepository(() => '2026-06-10T00:00:00.000Z'),
+      {
+        ensureCanComment: async (targetType, targetId) => {
+          allowedCommentTargets.push({ targetType, targetId });
+        },
+      },
     );
   });
 
@@ -23,7 +30,30 @@ describe('InteractionsService', () => {
     expect(comment.status).toBe('pending');
     expect(comment.authorName).toBe('Reader');
     expect(comment.body).toBe('Nice writing.');
+    expect(allowedCommentTargets).toEqual([{ targetType: 'post', targetId: 'post-1' }]);
     expect(await service.listApprovedComments('post', 'post-1')).toEqual([]);
+  });
+
+  test('rejects comments when the content policy rejects the target', async () => {
+    service = new InteractionsService(
+      new InMemoryInteractionsRepository(() => '2026-06-10T00:00:00.000Z'),
+      {
+        ensureCanComment: async () => {
+          throw new Error('Comments are disabled for this content');
+        },
+      },
+    );
+
+    await expect(
+      service.createComment({
+        targetType: 'post',
+        targetId: 'post-1',
+        authorName: 'Reader',
+        body: 'Nice writing.',
+      }),
+    ).rejects.toThrow('Comments are disabled for this content');
+
+    expect(await service.listAdminComments()).toEqual([]);
   });
 
   test('rejects empty comments before moderation', async () => {

@@ -65,6 +65,10 @@ export function normalizeContentSort(value: unknown): ContentSort {
   return value === 'popular' ? 'popular' : 'latest';
 }
 
+export function canShowComments(item: SiteContentItem): boolean {
+  return ['post', 'note', 'project'].includes(item.type) && item.allowComments !== false;
+}
+
 function sortPublicContent(a: SiteContentItem, b: SiteContentItem, sort: ContentSort): number {
   if (sort === 'popular') {
     const viewOrder = (b.viewCount ?? 0) - (a.viewCount ?? 0);

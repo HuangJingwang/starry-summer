@@ -4,6 +4,7 @@ import {
   getContentBySlug,
   getContentHref,
   getAdjacentContent,
+  canShowComments,
   groupContentByMonth,
   getFeaturedContent,
   getPopularContent,
@@ -45,6 +46,23 @@ describe('web content helpers', () => {
     expect(normalizeContentSort('popular')).toBe('popular');
     expect(normalizeContentSort('latest')).toBe('latest');
     expect(normalizeContentSort('unknown')).toBe('latest');
+  });
+
+  test('shows comment forms only for commentable content with comments enabled', () => {
+    const base = {
+      id: '1',
+      title: 'A',
+      status: 'published' as const,
+      visibility: 'public' as const,
+      publishedAt: '2026-01-01',
+    };
+
+    expect(canShowComments({ ...base, type: 'post' })).toBe(true);
+    expect(canShowComments({ ...base, type: 'note' })).toBe(true);
+    expect(canShowComments({ ...base, type: 'project' })).toBe(true);
+    expect(canShowComments({ ...base, type: 'post', allowComments: false })).toBe(false);
+    expect(canShowComments({ ...base, type: 'moment' })).toBe(false);
+    expect(canShowComments({ ...base, type: 'page' })).toBe(false);
   });
 
   test('returns featured content before regular content', () => {
