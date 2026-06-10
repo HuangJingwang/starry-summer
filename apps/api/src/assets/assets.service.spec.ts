@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { LocalAssetStorage } from './storage.service.js';
+import { LocalAssetStorage, S3AssetStorage } from './storage.service.js';
 import { InMemoryAssetRepository } from './assets.repository.js';
 import { AssetsService, createAssetStorage } from './assets.service.js';
 
@@ -15,10 +15,19 @@ describe('createAssetStorage', () => {
     expect(createAssetStorage()).toBeInstanceOf(LocalAssetStorage);
   });
 
-  test('rejects unsupported storage drivers', () => {
+  test('creates S3-compatible storage when configured for object storage', () => {
     vi.stubEnv('STORAGE_DRIVER', 's3');
+    vi.stubEnv('S3_BUCKET', 'starry-summer');
+    vi.stubEnv('S3_ACCESS_KEY', 'access-key');
+    vi.stubEnv('S3_SECRET_KEY', 'secret-key');
 
-    expect(() => createAssetStorage()).toThrow('Unsupported STORAGE_DRIVER "s3"');
+    expect(createAssetStorage()).toBeInstanceOf(S3AssetStorage);
+  });
+
+  test('rejects unsupported storage drivers', () => {
+    vi.stubEnv('STORAGE_DRIVER', 'ftp');
+
+    expect(() => createAssetStorage()).toThrow('Unsupported STORAGE_DRIVER "ftp"');
   });
 });
 

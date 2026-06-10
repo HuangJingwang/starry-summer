@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { AssetStorage, StoredAsset } from './storage.service.js';
-import { LocalAssetStorage } from './storage.service.js';
+import { LocalAssetStorage, S3AssetStorage } from './storage.service.js';
 import {
   ASSET_REPOSITORY,
   InMemoryAssetRepository,
@@ -71,14 +71,43 @@ export class AssetsService {
 export function createAssetStorage(): AssetStorage {
   const driver = process.env.STORAGE_DRIVER ?? 'local';
 
+  if (driver === 's3') {
+    const bucket = process.env.S3_BUCKET;
+
+    if (!bucket) {
+      throw new Error('S3_BUCKET is required when STORAGE_DRIVER=s3');
+    }
+
+    const endpoint = process.env.S3_ENDPOINT;
+    const publicBaseUrl = process.env.S3_PUBLIC_BASE_URL ?? buildS3PublicBaseUrl(endpoint, bucket);
+
+    return new S3AssetStorage({
+      bucket,
+      endpoint,
+      publicBaseUrl,
+      region: process.env.S3_REGION ?? 'us-east-1',
+      accessKeyId: process.env.S3_ACCESS_KEY,
+      secretAccessKey: process.env.S3_SECRET_KEY,
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE !== 'false',
+    });
+  }
+
   if (driver !== 'local') {
-    throw new Error(`Unsupported STORAGE_DRIVER "${driver}". Use "local" until S3 storage is implemented.`);
+    throw new Error(`Unsupported STORAGE_DRIVER "${driver}"`);
   }
 
   return new LocalAssetStorage({
     uploadDir: process.env.LOCAL_UPLOAD_DIR ?? './uploads',
     publicBaseUrl: process.env.LOCAL_UPLOAD_PUBLIC_URL ?? '/uploads',
   });
+}
+
+function buildS3PublicBaseUrl(endpoint: string | undefined, bucket: string): string {
+  if (!endpoint) {
+    return `https://${bucket}.s3.amazonaws.com`;
+  }
+
+  return `${endpoint.replace(/\/$/, '')}/${bucket}`;
 }
 
 export function createAssetRepository(): AssetRepository {
