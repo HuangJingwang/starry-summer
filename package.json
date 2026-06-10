@@ -19,7 +19,8 @@
     "auth:secret": "npm run session-secret --workspace @starry-summer/api",
     "db:migrate": "npm run migrate --workspace @starry-summer/database",
     "ops:backup": "bash scripts/backup.sh",
-    "ops:restore": "bash scripts/restore.sh"
+    "ops:restore": "bash scripts/restore.sh",
+    "ops:doctor": "bash scripts/doctor.sh"
   },
   "engines": {
     "node": ">=22.0.0",

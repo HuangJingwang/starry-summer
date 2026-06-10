@@ -1,10 +1,14 @@
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 import { describe, expect, test } from 'vitest';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+const execFileAsync = promisify(execFile);
 
 describe('deployment configuration', () => {
   test('documents every Docker Compose environment variable in the env example', async () => {
@@ -108,6 +112,40 @@ describe('deployment configuration', () => {
     expect(restoreScript).toContain('docker run --rm');
     expect(deployment).toContain('npm run ops:backup');
     expect(deployment).toContain('npm run ops:restore -- backups/starry-summer-YYYY-MM-DD');
+  });
+
+  test('provides a production environment doctor before first boot', async () => {
+    const doctorScript = await readFile(join(repoRoot, 'scripts/doctor.sh'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+    const safeEnv = [
+      'DOMAIN=blog.example.com',
+      'PUBLIC_SITE_URL=https://blog.example.com',
+      'ADMIN_EMAIL=owner@example.com',
+      'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
+      'SESSION_SECRET=12345678901234567890123456789012',
+      'POSTGRES_PASSWORD=replace-me-with-a-real-password',
+      'S3_ACCESS_KEY=starry-prod-access',
+      'S3_SECRET_KEY=starry-prod-secret',
+    ].join('\n');
+    const tempDirectory = await mkdtemp(join(tmpdir(), 'starry-summer-env-'));
+    const safeEnvPath = join(tempDirectory, '.env');
+
+    expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
+    expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
+    expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
+    expect(deployment).toContain('npm run ops:doctor');
+
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', '.env.example'], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+    });
+    await writeFile(safeEnvPath, safeEnv);
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', safeEnvPath], { cwd: repoRoot })).resolves.toMatchObject({
+      stdout: expect.stringContaining('Deployment environment looks ready.'),
+    });
+    await rm(tempDirectory, { recursive: true, force: true });
   });
 
   test('sets baseline security headers at the reverse proxy', async () => {

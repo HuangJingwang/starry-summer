@@ -31,6 +31,12 @@ Required production changes:
 - `S3_PUBLIC_BASE_URL`: public asset base URL when `STORAGE_DRIVER=s3`, for example `https://assets.example.com/starry-summer` or a CDN URL.
 - `S3_FORCE_PATH_STYLE`: keep `true` for self-hosted MinIO and most S3-compatible services; set `false` only for providers that require virtual-hosted bucket URLs.
 
+Check the production environment before first boot:
+
+```bash
+npm run ops:doctor
+```
+
 Generate the admin password hash locally, then paste the printed value into `.env`:
 
 ```bash
