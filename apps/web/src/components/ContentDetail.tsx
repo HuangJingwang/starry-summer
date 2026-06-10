@@ -1,6 +1,7 @@
 import { renderMarkdown } from '@starry-summer/markdown';
+import Link from 'next/link';
 
-import { canShowComments, getContentHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { canShowComments, getContentHref, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
@@ -50,7 +51,9 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         <div className="detail-taxonomy" aria-label="Series">
           <span>系列</span>
           {item.series.map((series) => (
-            <strong key={series}>{series}</strong>
+            <Link key={series} href={getSeriesHref(series)}>
+              {series}
+            </Link>
           ))}
         </div>
       ) : null}

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import type { SiteContentItem } from '@/lib/content';
-import { getContentHref } from '@/lib/content';
+import { getContentHref, getSeriesHref } from '@/lib/content';
 
 export function ContentCard({ item }: { item: SiteContentItem }) {
   return (
@@ -25,7 +25,9 @@ export function ContentCard({ item }: { item: SiteContentItem }) {
       {item.series && item.series.length > 0 ? (
         <div className="content-card__series" aria-label="Series">
           {item.series.slice(0, 2).map((series) => (
-            <span key={series}>{series}</span>
+            <Link key={series} href={getSeriesHref(series)}>
+              {series}
+            </Link>
           ))}
         </div>
       ) : null}

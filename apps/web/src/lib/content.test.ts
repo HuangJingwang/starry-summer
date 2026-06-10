@@ -7,11 +7,14 @@ import {
   canShowComments,
   groupContentByMonth,
   getFeaturedContent,
+  getContentBySeriesSlug,
   getPopularContent,
   getPublicContent,
+  getSeriesHref,
   getSiteStats,
   groupContentByCategory,
   groupContentCounts,
+  groupContentBySeries,
   normalizeContentSort,
   searchContent,
 } from './content';
@@ -379,6 +382,78 @@ describe('web content helpers', () => {
         items: [expect.objectContaining({ id: 'old' })],
       },
     ]);
+  });
+
+  test('groups public content by series newest first', () => {
+    const groups = groupContentBySeries([
+      {
+        id: 'old',
+        title: 'Old',
+        type: 'post',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-01-01',
+        series: ['Platform Journal', 'Build Log'],
+      },
+      {
+        id: 'new',
+        title: 'New',
+        type: 'note',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-02-01',
+        series: ['Platform Journal'],
+      },
+      {
+        id: 'draft',
+        title: 'Draft',
+        type: 'post',
+        status: 'draft',
+        visibility: 'public',
+        publishedAt: '2026-03-01',
+        series: ['Platform Journal'],
+      },
+    ]);
+
+    expect(groups).toEqual([
+      {
+        key: 'platform-journal',
+        label: 'Platform Journal',
+        items: [expect.objectContaining({ id: 'new' }), expect.objectContaining({ id: 'old' })],
+      },
+      {
+        key: 'build-log',
+        label: 'Build Log',
+        items: [expect.objectContaining({ id: 'old' })],
+      },
+    ]);
+  });
+
+  test('finds public content by series slug', () => {
+    const items = [
+      {
+        id: 'one',
+        title: 'One',
+        type: 'post' as const,
+        status: 'published' as const,
+        visibility: 'public' as const,
+        publishedAt: '2026-01-01',
+        series: ['Platform Journal'],
+      },
+      {
+        id: 'two',
+        title: 'Two',
+        type: 'note' as const,
+        status: 'published' as const,
+        visibility: 'public' as const,
+        publishedAt: '2026-02-01',
+        series: ['Other'],
+      },
+    ];
+
+    expect(getContentBySeriesSlug(items, 'platform-journal')?.items.map((item) => item.id)).toEqual(['one']);
+    expect(getContentBySeriesSlug(items, 'missing')).toBeNull();
+    expect(getSeriesHref('Platform Journal')).toBe('/series/platform-journal');
   });
 
   test('finds adjacent public content in timeline order', () => {

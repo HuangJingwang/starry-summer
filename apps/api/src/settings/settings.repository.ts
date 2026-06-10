@@ -39,7 +39,7 @@ export const defaultSiteSettings: SiteSettings = {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
     backgroundImageUrl: '/hero-workspace.png',
   },
-  navigation: ['posts', 'notes', 'moments', 'projects', 'guestbook', 'about'],
+  navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
   updatedAt: '2026-06-10T00:00:00.000Z',
 };
 

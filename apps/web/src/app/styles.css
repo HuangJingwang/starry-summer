@@ -427,14 +427,21 @@ textarea {
   gap: 8px;
 }
 
-.content-card__series span,
-.detail-taxonomy strong {
+.content-card__series a,
+.detail-taxonomy a {
   background: color-mix(in srgb, var(--accent) 8%, var(--panel));
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--ink);
   font-size: 0.82rem;
   padding: 6px 10px;
+  text-decoration: none;
+}
+
+.content-card__series a:hover,
+.detail-taxonomy a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .narrow {

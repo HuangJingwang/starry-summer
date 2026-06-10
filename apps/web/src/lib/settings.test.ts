@@ -42,6 +42,7 @@ describe('settings client helpers', () => {
       tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
       backgroundImageUrl: '/hero-workspace.png',
     });
+    expect(normalizeSiteSettings({}).navigation).toContain('series');
   });
 
   test('builds public and admin settings requests', () => {
