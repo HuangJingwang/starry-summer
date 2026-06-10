@@ -22,7 +22,7 @@ absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
 echo "Writing backup to $backup_dir"
 
-docker compose exec -T postgres pg_dump -U "$postgres_user" "$postgres_db" > "$backup_dir/postgres.sql"
+docker compose exec -T postgres pg_dump --clean --if-exists -U "$postgres_user" "$postgres_db" > "$backup_dir/postgres.sql"
 
 backup_volume() {
   local volume_name="$1"
