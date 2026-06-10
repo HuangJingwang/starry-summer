@@ -36,6 +36,13 @@ export interface AdjacentContent {
   next: SiteContentItem | null;
 }
 
+export interface SiteStats {
+  publicCount: number;
+  totalViews: number;
+  totalLikes: number;
+  lastPublishedAt: string;
+}
+
 export type ContentSort = 'latest' | 'popular';
 
 const contentTypes: ContentType[] = ['moment', 'note', 'page', 'post', 'project'];
@@ -87,6 +94,17 @@ export function groupContentCounts(items: SiteContentItem[]): Record<ContentType
   }
 
   return counts;
+}
+
+export function getSiteStats(items: SiteContentItem[]): SiteStats {
+  const publicItems = getPublicContent(items);
+
+  return {
+    publicCount: publicItems.length,
+    totalViews: publicItems.reduce((sum, item) => sum + (item.viewCount ?? 0), 0),
+    totalLikes: publicItems.reduce((sum, item) => sum + (item.likeCount ?? 0), 0),
+    lastPublishedAt: publicItems[0]?.publishedAt ?? '',
+  };
 }
 
 export function groupContentByMonth(items: SiteContentItem[]): ContentArchiveGroup[] {

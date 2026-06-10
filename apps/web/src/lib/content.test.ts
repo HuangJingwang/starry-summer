@@ -7,6 +7,7 @@ import {
   groupContentByMonth,
   getFeaturedContent,
   getPublicContent,
+  getSiteStats,
   groupContentByCategory,
   groupContentCounts,
   normalizeContentSort,
@@ -62,6 +63,48 @@ describe('web content helpers', () => {
         { id: '3', title: 'C', type: 'moment', status: 'published', visibility: 'public', publishedAt: '2026-01-03' },
       ]),
     ).toEqual({ moment: 1, note: 0, page: 0, post: 2, project: 0 });
+  });
+
+  test('summarizes public site statistics from visible content', () => {
+    expect(
+      getSiteStats([
+        {
+          id: 'post',
+          title: 'Post',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-10',
+          viewCount: 20,
+          likeCount: 3,
+        },
+        {
+          id: 'note',
+          title: 'Note',
+          type: 'note',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-12',
+          viewCount: 5,
+          likeCount: 2,
+        },
+        {
+          id: 'draft',
+          title: 'Draft',
+          type: 'post',
+          status: 'draft',
+          visibility: 'public',
+          publishedAt: '2026-06-13',
+          viewCount: 999,
+          likeCount: 999,
+        },
+      ]),
+    ).toEqual({
+      publicCount: 2,
+      totalViews: 25,
+      totalLikes: 5,
+      lastPublishedAt: '2026-06-12',
+    });
   });
 
   test('searches public title summary and tags only', () => {

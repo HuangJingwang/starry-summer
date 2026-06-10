@@ -2,13 +2,13 @@ import Image from 'next/image';
 
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { getFeaturedContent, groupContentCounts } from '@/lib/content';
+import { getFeaturedContent, getSiteStats } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
 
 export default async function HomePage() {
   const content = await loadSiteContent();
   const featured = getFeaturedContent(content).slice(0, 3);
-  const counts = groupContentCounts(content);
+  const stats = getSiteStats(content);
 
   return (
     <SiteShell>
@@ -38,20 +38,20 @@ export default async function HomePage() {
 
         <section className="stats-band" aria-label="Site statistics">
           <div>
-            <strong>{counts.post}</strong>
-            <span>Articles</span>
+            <strong>{formatNumber(stats.publicCount)}</strong>
+            <span>Published</span>
           </div>
           <div>
-            <strong>{counts.note}</strong>
-            <span>Notes</span>
+            <strong>{formatNumber(stats.totalViews)}</strong>
+            <span>Views</span>
           </div>
           <div>
-            <strong>{counts.moment}</strong>
-            <span>Moments</span>
+            <strong>{formatNumber(stats.totalLikes)}</strong>
+            <span>Likes</span>
           </div>
           <div>
-            <strong>{counts.project}</strong>
-            <span>Projects</span>
+            <strong>{stats.lastPublishedAt || 'Soon'}</strong>
+            <span>Updated</span>
           </div>
         </section>
 
@@ -69,4 +69,8 @@ export default async function HomePage() {
       </main>
     </SiteShell>
   );
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
 }
