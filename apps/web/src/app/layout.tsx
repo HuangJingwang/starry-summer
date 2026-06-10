@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
 
+import { loadPublicSettings } from '@/lib/settings';
 import './styles.css';
 
-export const metadata: Metadata = {
-  title: 'Starry Summer',
-  description: 'A personal content platform for writing, notes, moments, projects, and reader interaction.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await loadPublicSettings(undefined, {
+    apiBaseUrl: process.env.API_BASE_URL,
+  });
+
+  return {
+    title: settings.profile.title,
+    description: settings.profile.description,
+  };
+}
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
