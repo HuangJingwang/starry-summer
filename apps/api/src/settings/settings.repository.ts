@@ -7,6 +7,7 @@ export interface SiteProfileSettings {
 export interface SiteHeroSettings {
   tagline: string;
   backgroundImageUrl: string;
+  motto: string;
 }
 
 export interface SiteSettings {
@@ -38,6 +39,7 @@ export const defaultSiteSettings: SiteSettings = {
   hero: {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
     backgroundImageUrl: '/hero-workspace.png',
+    motto: 'Build a public trail of private work.',
   },
   navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
   updatedAt: '2026-06-10T00:00:00.000Z',

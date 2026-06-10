@@ -40,12 +40,14 @@ describe('SettingsService', () => {
       hero: {
         tagline: '  A public trail of private work.  ',
         backgroundImageUrl: '  https://cdn.example.com/hero.jpg  ',
+        motto: '  Stay curious, keep shipping.  ',
       },
     });
 
     expect(updated.hero).toEqual({
       tagline: 'A public trail of private work.',
       backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+      motto: 'Stay curious, keep shipping.',
     });
   });
 });

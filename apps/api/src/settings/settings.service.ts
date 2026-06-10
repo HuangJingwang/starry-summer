@@ -41,5 +41,6 @@ function normalizeHero(input: Partial<SiteHeroSettings>): Partial<SiteHeroSettin
   return {
     tagline: input.tagline?.trim(),
     backgroundImageUrl: input.backgroundImageUrl?.trim(),
+    motto: input.motto?.trim(),
   };
 }

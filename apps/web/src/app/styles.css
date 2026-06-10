@@ -140,6 +140,15 @@ textarea {
   max-width: 660px;
 }
 
+.hero__motto {
+  border-left: 3px solid #f0c6a2;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-top: -4px;
+  padding-left: 14px;
+}
+
 .hero__actions {
   display: flex;
   flex-wrap: wrap;

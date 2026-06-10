@@ -13,6 +13,7 @@ const settings: SiteSettings = {
   hero: {
     tagline: 'Writing in public.',
     backgroundImageUrl: '/hero.png',
+    motto: 'Small notes compound.',
   },
   navigation: ['posts', 'projects'],
   updatedAt: '2026-06-10',

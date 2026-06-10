@@ -7,6 +7,7 @@ export interface SiteProfileSettings {
 export interface SiteHeroSettings {
   tagline: string;
   backgroundImageUrl: string;
+  motto: string;
 }
 
 export interface SiteSettings {
@@ -44,6 +45,7 @@ export const defaultSettings: SiteSettings = {
   hero: {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
     backgroundImageUrl: '/hero-workspace.png',
+    motto: 'Build a public trail of private work.',
   },
   navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
   updatedAt: '',
@@ -59,6 +61,7 @@ export function normalizeSiteSettings(input: Partial<SiteSettings>): SiteSetting
     hero: {
       tagline: input.hero?.tagline ?? defaultSettings.hero.tagline,
       backgroundImageUrl: input.hero?.backgroundImageUrl ?? defaultSettings.hero.backgroundImageUrl,
+      motto: input.hero?.motto ?? defaultSettings.hero.motto,
     },
     navigation: Array.isArray(input.navigation) ? input.navigation : defaultSettings.navigation,
     updatedAt: input.updatedAt ?? '',

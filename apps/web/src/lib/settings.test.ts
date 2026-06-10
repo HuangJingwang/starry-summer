@@ -20,6 +20,7 @@ describe('settings client helpers', () => {
         hero: {
           tagline: 'Keep a public trail of quiet work.',
           backgroundImageUrl: 'https://cdn.example.com/background.jpg',
+          motto: 'Stay curious, keep shipping.',
         },
         navigation: ['posts', 'notes'],
         updatedAt: '2026-06-10T00:00:00.000Z',
@@ -33,6 +34,7 @@ describe('settings client helpers', () => {
       hero: {
         tagline: 'Keep a public trail of quiet work.',
         backgroundImageUrl: 'https://cdn.example.com/background.jpg',
+        motto: 'Stay curious, keep shipping.',
       },
       navigation: ['posts', 'notes'],
       updatedAt: '2026-06-10T00:00:00.000Z',
@@ -41,6 +43,7 @@ describe('settings client helpers', () => {
     expect(normalizeSiteSettings({}).hero).toEqual({
       tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
       backgroundImageUrl: '/hero-workspace.png',
+      motto: 'Build a public trail of private work.',
     });
     expect(normalizeSiteSettings({}).navigation).toContain('series');
   });
@@ -84,6 +87,7 @@ describe('settings client helpers', () => {
         hero: {
           tagline: 'A personal operating base.',
           backgroundImageUrl: '/cover.jpg',
+          motto: 'Stay curious, keep shipping.',
         },
       }),
     ).toEqual({
@@ -103,6 +107,7 @@ describe('settings client helpers', () => {
           hero: {
             tagline: 'A personal operating base.',
             backgroundImageUrl: '/cover.jpg',
+            motto: 'Stay curious, keep shipping.',
           },
         }),
       },
@@ -122,6 +127,7 @@ describe('settings client helpers', () => {
             hero: {
               tagline: 'A public note to the future.',
               backgroundImageUrl: '/public-cover.jpg',
+              motto: 'Small notes compound.',
             },
             navigation: ['posts'],
             updatedAt: '2026-06-10T00:00:00.000Z',
@@ -137,6 +143,7 @@ describe('settings client helpers', () => {
       hero: {
         tagline: 'A public note to the future.',
         backgroundImageUrl: '/public-cover.jpg',
+        motto: 'Small notes compound.',
       },
       navigation: ['posts'],
       updatedAt: '2026-06-10T00:00:00.000Z',

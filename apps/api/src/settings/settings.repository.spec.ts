@@ -15,6 +15,7 @@ describe('InMemorySettingsRepository', () => {
       hero: {
         tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
         backgroundImageUrl: '/hero-workspace.png',
+        motto: 'Build a public trail of private work.',
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
       updatedAt: '2026-06-10T00:00:00.000Z',
@@ -41,6 +42,7 @@ describe('InMemorySettingsRepository', () => {
       hero: {
         tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
         backgroundImageUrl: '/hero-workspace.png',
+        motto: 'Build a public trail of private work.',
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
     });
@@ -53,6 +55,7 @@ describe('InMemorySettingsRepository', () => {
       hero: {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+        motto: 'Stay curious, keep shipping.',
       },
     });
 
@@ -63,6 +66,7 @@ describe('InMemorySettingsRepository', () => {
       hero: {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+        motto: 'Stay curious, keep shipping.',
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
     });

@@ -50,7 +50,7 @@ export function mapSettingsRows(rows: SettingRow[]): SiteSettings {
 
   return {
     profile: isProfile(profileRow?.value) ? profileRow.value : defaultSiteSettings.profile,
-    hero: isHero(heroRow?.value) ? heroRow.value : defaultSiteSettings.hero,
+    hero: normalizeHeroSettings(heroRow?.value),
     navigation: isNavigation(navigationRow?.value) ? navigationRow.value : defaultSiteSettings.navigation,
     updatedAt: (newest ?? new Date(defaultSiteSettings.updatedAt)).toISOString(),
   };
@@ -108,13 +108,22 @@ function isProfile(value: unknown): value is SiteProfileSettings {
   );
 }
 
-function isHero(value: unknown): value is SiteHeroSettings {
-  return (
-    Boolean(value) &&
-    typeof value === 'object' &&
-    typeof (value as SiteHeroSettings).tagline === 'string' &&
-    typeof (value as SiteHeroSettings).backgroundImageUrl === 'string'
-  );
+function normalizeHeroSettings(value: unknown): SiteHeroSettings {
+  if (!value || typeof value !== 'object') {
+    return defaultSiteSettings.hero;
+  }
+
+  const hero = value as Partial<SiteHeroSettings>;
+
+  if (typeof hero.tagline !== 'string' || typeof hero.backgroundImageUrl !== 'string') {
+    return defaultSiteSettings.hero;
+  }
+
+  return {
+    tagline: hero.tagline,
+    backgroundImageUrl: hero.backgroundImageUrl,
+    motto: typeof hero.motto === 'string' ? hero.motto : defaultSiteSettings.hero.motto,
+  };
 }
 
 function isNavigation(value: unknown): value is string[] {

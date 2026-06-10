@@ -61,6 +61,7 @@ export function SettingsManager() {
       hero: {
         tagline: String(formData.get('tagline') ?? ''),
         backgroundImageUrl: String(formData.get('backgroundImageUrl') ?? ''),
+        motto: String(formData.get('motto') ?? ''),
       },
       navigation: String(formData.get('navigation') ?? '').split(','),
     });
@@ -100,6 +101,10 @@ export function SettingsManager() {
       <label>
         首页短句
         <input name="tagline" defaultValue={settings.hero.tagline} />
+      </label>
+      <label>
+        首页箴言
+        <input name="motto" defaultValue={settings.hero.motto} />
       </label>
       <label>
         备用首页背景
