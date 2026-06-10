@@ -24,6 +24,28 @@ export interface AdminRouteAccessInput {
 }
 
 export const ADMIN_SESSION_COOKIE = 'ss_session';
+const defaultSessionSecret = 'development-session-secret';
+
+export interface AdminSessionSecretEnv {
+  NODE_ENV?: string;
+  SESSION_SECRET?: string;
+}
+
+export function resolveAdminSessionSecret(env: AdminSessionSecretEnv): string {
+  const sessionSecret = env.SESSION_SECRET ?? defaultSessionSecret;
+
+  if (
+    env.NODE_ENV === 'production' &&
+    (sessionSecret.length < 32 ||
+      sessionSecret.startsWith('replace-') ||
+      sessionSecret.startsWith('change-') ||
+      sessionSecret === defaultSessionSecret)
+  ) {
+    throw new Error('SESSION_SECRET must be at least 32 characters and not a placeholder in production');
+  }
+
+  return sessionSecret;
+}
 
 export function verifyAdminSessionToken(
   token: string | undefined,

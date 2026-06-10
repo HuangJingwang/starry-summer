@@ -2,7 +2,7 @@ import { createHmac } from 'node:crypto';
 
 import { describe, expect, test } from 'vitest';
 
-import { getAdminRouteAccessDecision, verifyAdminSessionToken } from './admin-route-guard';
+import { getAdminRouteAccessDecision, resolveAdminSessionSecret, verifyAdminSessionToken } from './admin-route-guard';
 
 const sessionSecret = 'test-session-secret';
 const now = Date.parse('2026-06-11T00:00:00.000Z');
@@ -119,5 +119,20 @@ describe('admin route guard helpers', () => {
       action: 'redirect',
       destination: '/admin/login?next=%2Fadmin%2Fcontent',
     });
+  });
+
+  test('rejects weak admin session secrets in production', () => {
+    expect(() =>
+      resolveAdminSessionSecret({
+        NODE_ENV: 'production',
+        SESSION_SECRET: 'development-session-secret',
+      }),
+    ).toThrow('SESSION_SECRET must be at least 32 characters and not a placeholder in production');
+    expect(
+      resolveAdminSessionSecret({
+        NODE_ENV: 'production',
+        SESSION_SECRET: '12345678901234567890123456789012',
+      }),
+    ).toBe('12345678901234567890123456789012');
   });
 });

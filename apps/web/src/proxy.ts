@@ -1,15 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { ADMIN_SESSION_COOKIE, getAdminRouteAccessDecision } from './lib/admin-route-guard';
-
-const defaultSessionSecret = 'development-session-secret';
+import { ADMIN_SESSION_COOKIE, getAdminRouteAccessDecision, resolveAdminSessionSecret } from './lib/admin-route-guard';
 
 export function proxy(request: NextRequest) {
   const decision = getAdminRouteAccessDecision({
     pathname: request.nextUrl.pathname,
     search: request.nextUrl.search,
     sessionToken: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
-    sessionSecret: process.env.SESSION_SECRET ?? defaultSessionSecret,
+    sessionSecret: resolveAdminSessionSecret(process.env),
     adminEmail: process.env.ADMIN_EMAIL,
   });
 
