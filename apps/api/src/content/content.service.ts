@@ -14,6 +14,9 @@ export interface ContentRecord {
   bodyMarkdown: string;
   sourceType: ContentSourceType;
   sourceUrl: string;
+  coverAssetId?: string;
+  coverImageUrl?: string;
+  coverAltText?: string;
   status: ContentStatus;
   visibility: ContentVisibility;
   allowComments: boolean;
@@ -37,6 +40,7 @@ export interface CreateDraftInput {
   bodyMarkdown: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
+  coverAssetId?: string;
   categories?: string[];
   tags?: string[];
   project?: ProjectMetadata;
@@ -50,6 +54,7 @@ export type UpdateContentInput = Partial<{
   bodyMarkdown: string;
   sourceType: ContentSourceType;
   sourceUrl: string;
+  coverAssetId: string;
   allowComments: boolean;
   pinned: boolean;
   featured: boolean;
@@ -93,6 +98,7 @@ export class ContentService {
       bodyMarkdown: input.bodyMarkdown,
       sourceType: input.sourceType ?? 'original',
       sourceUrl: normalizeSourceUrl(input.sourceUrl),
+      coverAssetId: normalizeOptionalText(input.coverAssetId),
       status: 'draft',
       visibility: 'public',
       allowComments: true,
@@ -147,6 +153,7 @@ export class ContentService {
       ...input,
       categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
       tags: input.tags ? normalizeTaxonomyLabels(input.tags) : undefined,
+      coverAssetId: input.coverAssetId !== undefined ? normalizeOptionalText(input.coverAssetId) : undefined,
       project: input.project !== undefined ? normalizeProjectMetadata(input.project) ?? {} : undefined,
       updatedAt: new Date().toISOString(),
     });
@@ -224,6 +231,7 @@ export class ContentService {
     const visibility = document.frontmatter.visibility === 'private' ? 'private' : 'public';
     const sourceType = document.frontmatter.sourceType === 'repost' ? 'repost' : 'original';
     const sourceUrl = normalizeSourceUrl(String(document.frontmatter.sourceUrl ?? ''));
+    const coverAssetId = normalizeOptionalText(String(document.frontmatter.coverAssetId ?? ''));
     const categories = normalizeTaxonomyLabels(toStringArray(document.frontmatter.categories));
     const tags = normalizeTaxonomyLabels(toStringArray(document.frontmatter.tags));
     const allowComments = document.frontmatter.allowComments === false ? false : true;
@@ -239,6 +247,7 @@ export class ContentService {
       bodyMarkdown: document.body,
       sourceType,
       sourceUrl,
+      coverAssetId,
       categories,
       tags,
       project,
@@ -288,6 +297,7 @@ export class ContentService {
         summary: record.summary,
         sourceType: record.sourceType,
         sourceUrl: record.sourceUrl,
+        coverAssetId: record.coverAssetId ?? '',
         type: record.type,
         status: record.status,
         visibility: record.visibility,
@@ -364,6 +374,12 @@ function normalizeTaxonomyLabels(labels: string[] | undefined): string[] {
 
 function normalizeSourceUrl(value: string | undefined): string {
   return value?.trim() ?? '';
+}
+
+function normalizeOptionalText(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+
+  return normalized || undefined;
 }
 
 function projectToFrontmatter(project: ProjectMetadata): MarkdownFrontmatterValue {

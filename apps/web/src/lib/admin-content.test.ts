@@ -262,6 +262,9 @@ describe('admin content helpers', () => {
         featured: true,
         sourceType: 'repost',
         sourceUrl: 'https://example.com/original',
+        coverAssetId: 'asset-1',
+        coverImageUrl: '/uploads/cover.png',
+        coverAltText: 'Cover image',
         allowComments: false,
         pinned: true,
         viewCount: 10,
@@ -293,6 +296,9 @@ describe('admin content helpers', () => {
       featured: true,
       sourceType: 'repost',
       sourceUrl: 'https://example.com/original',
+      coverAssetId: 'asset-1',
+      coverImageUrl: '/uploads/cover.png',
+      coverAltText: 'Cover image',
       allowComments: false,
       pinned: true,
       viewCount: 10,
@@ -460,6 +466,7 @@ describe('admin content helpers', () => {
     formData.set('summary', ' Form summary ');
     formData.set('sourceType', 'repost');
     formData.set('sourceUrl', ' https://example.com/source ');
+    formData.set('coverAssetId', ' cover-asset-1 ');
     formData.set('bodyMarkdown', '# Form Title');
     formData.set('categories', 'Projects, Platform, Projects');
     formData.set('tags', 'Next.js, Launch');
@@ -481,6 +488,7 @@ describe('admin content helpers', () => {
       summary: 'Form summary',
       sourceType: 'repost',
       sourceUrl: 'https://example.com/source',
+      coverAssetId: 'cover-asset-1',
       bodyMarkdown: '# Form Title',
       allowComments: true,
       pinned: false,

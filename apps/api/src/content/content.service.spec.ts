@@ -19,6 +19,7 @@ describe('ContentService', () => {
       slug: 'hello-platform',
       summary: 'A launch note',
       bodyMarkdown: '# Hello Platform',
+      coverAssetId: ' cover-asset-1 ',
       categories: [' Platform ', 'Writing', 'Platform'],
       tags: ['Next.js', '  Architecture ', 'Next.js'],
     });
@@ -27,6 +28,7 @@ describe('ContentService', () => {
     expect(draft.visibility).toBe('public');
     expect(draft.sourceType).toBe('original');
     expect(draft.sourceUrl).toBe('');
+    expect(draft.coverAssetId).toBe('cover-asset-1');
     expect(draft.title).toBe('Hello Platform');
     expect(draft.categories).toEqual(['Platform', 'Writing']);
     expect(draft.tags).toEqual(['Next.js', 'Architecture']);
@@ -214,6 +216,7 @@ describe('ContentService', () => {
       pinned: true,
       sourceType: 'repost',
       sourceUrl: 'https://example.com/original-post',
+      coverAssetId: ' cover-asset-2 ',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
       project: {
@@ -240,6 +243,7 @@ describe('ContentService', () => {
       pinned: true,
       sourceType: 'repost',
       sourceUrl: 'https://example.com/original-post',
+      coverAssetId: 'cover-asset-2',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
       project: {

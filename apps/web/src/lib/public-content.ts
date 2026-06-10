@@ -14,6 +14,9 @@ export interface PublicContentApiRecord {
   pinned?: boolean;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
+  coverAssetId?: string;
+  coverImageUrl?: string;
+  coverAltText?: string;
   categories?: string[];
   tags?: string[];
   bodyMarkdown?: string;
@@ -84,6 +87,7 @@ export function buildPublicContentListRequest(options: PublicContentListRequestO
 
 export function normalizePublicContentItem(record: PublicContentApiRecord): SiteContentItem {
   const project = normalizeProjectMetadata(record.project);
+  const cover = normalizeCoverMetadata(record);
 
   return {
     id: record.id,
@@ -98,6 +102,7 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     pinned: record.pinned ?? false,
     sourceType: record.sourceType ?? 'original',
     sourceUrl: record.sourceUrl ?? '',
+    ...cover,
     categories: record.categories ?? [],
     tags: record.tags ?? [],
     bodyMarkdown: record.bodyMarkdown ?? '',
@@ -105,6 +110,18 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
     ...(project ? { project } : {}),
+  };
+}
+
+function normalizeCoverMetadata(record: Pick<PublicContentApiRecord, 'coverAssetId' | 'coverImageUrl' | 'coverAltText'>): Pick<SiteContentItem, 'coverAssetId' | 'coverImageUrl' | 'coverAltText'> {
+  const coverAssetId = record.coverAssetId?.trim();
+  const coverImageUrl = record.coverImageUrl?.trim();
+  const coverAltText = record.coverAltText?.trim();
+
+  return {
+    ...(coverAssetId ? { coverAssetId } : {}),
+    ...(coverImageUrl ? { coverImageUrl } : {}),
+    ...(coverAltText ? { coverAltText } : {}),
   };
 }
 

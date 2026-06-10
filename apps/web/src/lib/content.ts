@@ -11,6 +11,9 @@ export interface SiteContentItem {
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
+  coverAssetId?: string;
+  coverImageUrl?: string;
+  coverAltText?: string;
   slug?: string;
   featured?: boolean;
   categories?: string[];
@@ -291,6 +294,8 @@ export const seedContent: SiteContentItem[] = [
       '这个站点会优先保证内容所有权、部署稳定性和后台写作效率。',
     ].join('\n'),
     slug: 'personal-content-platform',
+    coverImageUrl: '/hero-workspace.png',
+    coverAltText: 'Workspace cover image',
     featured: true,
     categories: ['Writing', 'Platform'],
     tags: ['Platform', 'Writing', 'System'],
@@ -334,6 +339,8 @@ export const seedContent: SiteContentItem[] = [
       '当前技术栈选择 Next.js、NestJS、PostgreSQL 和 Docker Compose，方便先在一台云服务器上稳定运行，再按规模逐步拆分。',
     ].join('\n'),
     slug: 'starry-summer',
+    coverImageUrl: '/hero-workspace.png',
+    coverAltText: 'Workspace cover image',
     featured: true,
     categories: ['Projects', 'Platform'],
     tags: ['Next.js', 'NestJS', 'PostgreSQL'],

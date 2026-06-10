@@ -16,6 +16,9 @@ export interface ContentItemRow {
   body_markdown: string;
   source_type: ContentSourceType;
   source_url: string;
+  cover_asset_id?: string | null;
+  cover_asset_url?: string | null;
+  cover_asset_alt_text?: string | null;
   status: ContentStatus;
   visibility: ContentVisibility;
   allow_comments: boolean;
@@ -50,6 +53,9 @@ export function mapContentRow(row: ContentItemRow): ContentRecord {
     bodyMarkdown: row.body_markdown,
     sourceType: row.source_type,
     sourceUrl: row.source_url,
+    coverAssetId: row.cover_asset_id ?? undefined,
+    coverImageUrl: row.cover_asset_url ?? undefined,
+    coverAltText: row.cover_asset_alt_text ?? undefined,
     status: row.status,
     visibility: row.visibility,
     allowComments: row.allow_comments,
@@ -77,6 +83,7 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         body_markdown,
         source_type,
         source_url,
+        cover_asset_id,
         status,
         visibility,
         allow_comments,
@@ -91,7 +98,7 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         project_ended_at,
         published_at
       )
-      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       returning *
     `,
     values: [
@@ -102,6 +109,7 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
       input.bodyMarkdown,
       input.sourceType,
       input.sourceUrl,
+      input.coverAssetId ?? null,
       input.status,
       input.visibility,
       input.allowComments,
@@ -287,11 +295,14 @@ export function buildContentSelect(whereClause: string, orderClause = ''): strin
   return `
     select
       ci.*,
+      cover_assets.public_url as cover_asset_url,
+      cover_assets.alt_text as cover_asset_alt_text,
       ci.view_count + coalesce(view_counts.count, 0) as view_count,
       ci.like_count + coalesce(like_counts.count, 0) as like_count,
       coalesce(array_remove(array_agg(distinct c.name), null), '{}') as categories,
       coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags
     from content_items ci
+    left join assets cover_assets on cover_assets.id = ci.cover_asset_id
     left join (
       select target_type, target_id, count(*)::int as count
       from view_events
@@ -307,7 +318,7 @@ export function buildContentSelect(whereClause: string, orderClause = ''): strin
     left join content_tags ct on ct.content_id = ci.id
     left join tags t on t.id = ct.tag_id
     ${whereClause}
-    group by ci.id, like_counts.count, view_counts.count
+    group by ci.id, cover_assets.public_url, cover_assets.alt_text, like_counts.count, view_counts.count
     ${orderClause}
   `;
 }
@@ -464,6 +475,7 @@ function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown>
     ['bodyMarkdown', 'body_markdown'],
     ['sourceType', 'source_type'],
     ['sourceUrl', 'source_url'],
+    ['coverAssetId', 'cover_asset_id'],
     ['status', 'status'],
     ['visibility', 'visibility'],
     ['allowComments', 'allow_comments'],

@@ -50,6 +50,9 @@ export interface AdminContentApiRecord {
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
+  coverAssetId?: string;
+  coverImageUrl?: string;
+  coverAltText?: string;
   allowComments?: boolean;
   pinned?: boolean;
   viewCount?: number;
@@ -70,6 +73,7 @@ export interface AdminContentPayload {
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
+  coverAssetId?: string;
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
@@ -118,6 +122,7 @@ function dateOnly(value: string | null | undefined): string {
 
 export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteContentItem {
   const project = normalizeProjectMetadata(record.project);
+  const cover = normalizeCoverMetadata(record);
 
   return {
     id: record.id,
@@ -138,7 +143,20 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     tags: record.tags ?? [],
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
+    ...cover,
     ...(project ? { project } : {}),
+  };
+}
+
+function normalizeCoverMetadata(record: Pick<AdminContentApiRecord, 'coverAssetId' | 'coverImageUrl' | 'coverAltText'>): Pick<SiteContentItem, 'coverAssetId' | 'coverImageUrl' | 'coverAltText'> {
+  const coverAssetId = record.coverAssetId?.trim();
+  const coverImageUrl = record.coverImageUrl?.trim();
+  const coverAltText = record.coverAltText?.trim();
+
+  return {
+    ...(coverAssetId ? { coverAssetId } : {}),
+    ...(coverImageUrl ? { coverImageUrl } : {}),
+    ...(coverAltText ? { coverAltText } : {}),
   };
 }
 
@@ -161,6 +179,7 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     summary: input.summary?.trim(),
     sourceType: input.sourceType === 'repost' ? 'repost' : 'original',
     sourceUrl: input.sourceUrl?.trim() ?? '',
+    coverAssetId: normalizeOptionalText(input.coverAssetId),
     categories: normalizeList(input.categories),
     tags: normalizeList(input.tags),
     ...(project ? { project } : {}),
@@ -171,6 +190,12 @@ function formText(formData: FormData, key: string): string {
   return String(formData.get(key) ?? '');
 }
 
+function normalizeOptionalText(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+
+  return normalized || undefined;
+}
+
 export function buildContentPayloadFromFormData(formData: FormData): AdminContentPayload {
   return normalizeContentPayload({
     title: formText(formData, 'title'),
@@ -179,6 +204,7 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     summary: formText(formData, 'summary'),
     sourceType: formText(formData, 'sourceType') as ContentSourceType,
     sourceUrl: formText(formData, 'sourceUrl'),
+    coverAssetId: formText(formData, 'coverAssetId'),
     bodyMarkdown: formText(formData, 'bodyMarkdown'),
     categories: splitList(formText(formData, 'categories')),
     tags: splitList(formText(formData, 'tags')),

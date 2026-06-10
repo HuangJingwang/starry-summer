@@ -153,6 +153,7 @@ export function AssetManager() {
                 <span>
                   {asset.usage} · {asset.mimeType} · {formatBytes(asset.byteSize)}
                 </span>
+                <code>{asset.id}</code>
               </div>
               <a href={asset.publicUrl} target="_blank" rel="noreferrer">
                 {asset.publicUrl}

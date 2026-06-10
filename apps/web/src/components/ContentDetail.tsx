@@ -30,6 +30,11 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       <p className="eyebrow">{item.type}</p>
       <h1>{item.title}</h1>
       <p className="detail__summary">{item.summary}</p>
+      {item.coverImageUrl ? (
+        <figure className="detail-cover">
+          <img src={item.coverImageUrl} alt={item.coverAltText || item.title} />
+        </figure>
+      ) : null}
       <div className="detail__meta">
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
         <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>

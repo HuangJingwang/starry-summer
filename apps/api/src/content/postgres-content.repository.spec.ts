@@ -22,6 +22,9 @@ describe('PostgresContentRepository mapping', () => {
       body_markdown: '# Hello',
       source_type: 'repost',
       source_url: 'https://example.com/original',
+      cover_asset_id: 'asset-1',
+      cover_asset_url: '/uploads/cover.png',
+      cover_asset_alt_text: 'Cover image',
       status: 'published',
       visibility: 'public',
       allow_comments: true,
@@ -53,6 +56,9 @@ describe('PostgresContentRepository mapping', () => {
       bodyMarkdown: '# Hello',
       sourceType: 'repost',
       sourceUrl: 'https://example.com/original',
+      coverAssetId: 'asset-1',
+      coverImageUrl: '/uploads/cover.png',
+      coverAltText: 'Cover image',
       status: 'published',
       visibility: 'public',
       allowComments: true,
@@ -86,6 +92,7 @@ describe('PostgresContentRepository mapping', () => {
       bodyMarkdown: '# Note',
       sourceType: 'original',
       sourceUrl: '',
+      coverAssetId: 'asset-2',
       status: 'draft',
       visibility: 'public',
       allowComments: true,
@@ -111,6 +118,7 @@ describe('PostgresContentRepository mapping', () => {
     expect(insert.sql).toContain('body_markdown');
     expect(insert.sql).toContain('source_type');
     expect(insert.sql).toContain('source_url');
+    expect(insert.sql).toContain('cover_asset_id');
     expect(insert.values).toEqual([
       'note',
       'Note',
@@ -119,6 +127,7 @@ describe('PostgresContentRepository mapping', () => {
       '# Note',
       'original',
       '',
+      'asset-2',
       'draft',
       'public',
       true,
@@ -144,6 +153,7 @@ describe('PostgresContentRepository mapping', () => {
       bodyMarkdown: '# Updated',
       sourceType: 'repost',
       sourceUrl: 'https://example.com/updated',
+      coverAssetId: 'asset-3',
       status: 'archived',
       categories: ['Notes'],
       tags: ['Markdown'],
@@ -162,12 +172,13 @@ describe('PostgresContentRepository mapping', () => {
     expect(update?.sql).toContain('body_markdown = $4');
     expect(update?.sql).toContain('source_type = $5');
     expect(update?.sql).toContain('source_url = $6');
-    expect(update?.sql).toContain('status = $7');
-    expect(update?.sql).toContain('project_status = $8');
-    expect(update?.sql).toContain('project_links = $9');
-    expect(update?.sql).toContain('project_stack = $10');
-    expect(update?.sql).toContain('project_started_at = $11');
-    expect(update?.sql).toContain('project_ended_at = $12');
+    expect(update?.sql).toContain('cover_asset_id = $7');
+    expect(update?.sql).toContain('status = $8');
+    expect(update?.sql).toContain('project_status = $9');
+    expect(update?.sql).toContain('project_links = $10');
+    expect(update?.sql).toContain('project_stack = $11');
+    expect(update?.sql).toContain('project_started_at = $12');
+    expect(update?.sql).toContain('project_ended_at = $13');
     expect(update?.values).toEqual([
       'content-1',
       'note',
@@ -175,6 +186,7 @@ describe('PostgresContentRepository mapping', () => {
       '# Updated',
       'repost',
       'https://example.com/updated',
+      'asset-3',
       'archived',
       'completed',
       { repository: 'https://github.com/me/updated' },
@@ -196,11 +208,13 @@ describe('PostgresContentRepository mapping', () => {
     const select = buildContentSelect('where ci.status = $1', 'order by ci.published_at desc');
 
     expect(select).toContain('left join');
+    expect(select).toContain('cover_assets.public_url as cover_asset_url');
+    expect(select).toContain('left join assets cover_assets');
     expect(select).toContain('content_likes');
     expect(select).toContain('view_events');
     expect(select).toContain('ci.view_count + coalesce(view_counts.count, 0) as view_count');
     expect(select).toContain('ci.like_count + coalesce(like_counts.count, 0) as like_count');
-    expect(select).toContain('group by ci.id, like_counts.count, view_counts.count');
+    expect(select).toContain('group by ci.id, cover_assets.public_url, cover_assets.alt_text, like_counts.count, view_counts.count');
     expect(select).toContain('where ci.status = $1');
     expect(select).toContain('order by ci.published_at desc');
   });

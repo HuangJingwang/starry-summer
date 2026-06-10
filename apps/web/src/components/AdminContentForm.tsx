@@ -22,6 +22,9 @@ interface AdminContentFormInitialValue {
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
+  coverAssetId?: string;
+  coverImageUrl?: string;
+  coverAltText?: string;
   categories?: string[];
   tags?: string[];
   allowComments?: boolean;
@@ -146,7 +149,17 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
           原文链接
           <input name="sourceUrl" defaultValue={initialValue?.sourceUrl ?? ''} placeholder="https://example.com/original" />
         </label>
+        <label>
+          封面资产 ID
+          <input name="coverAssetId" defaultValue={initialValue?.coverAssetId ?? ''} placeholder="上传封面后填入资产 ID" />
+        </label>
       </div>
+      {initialValue?.coverImageUrl ? (
+        <a className="cover-preview" href={initialValue.coverImageUrl} target="_blank" rel="noreferrer">
+          <img src={initialValue.coverImageUrl} alt={initialValue.coverAltText || initialValue.title || 'Content cover'} />
+          <span>查看当前封面</span>
+        </a>
+      ) : null}
       <div className="form-grid">
         <label>
           分类
