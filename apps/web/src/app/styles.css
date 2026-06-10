@@ -576,6 +576,24 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.form-options {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+}
+
+.form-options label {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.form-options input {
+  min-height: auto;
+  width: auto;
+}
+
 .editor-grid {
   display: grid;
   gap: 16px;

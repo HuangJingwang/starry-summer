@@ -22,6 +22,90 @@ export interface MarkdownPreviewModel {
   wordCount: number;
 }
 
+export interface AdminContentPayload {
+  type?: ContentType;
+  title?: string;
+  slug?: string;
+  summary?: string;
+  bodyMarkdown?: string;
+  allowComments?: boolean;
+  pinned?: boolean;
+  featured?: boolean;
+}
+
+export interface AdminContentRequest {
+  url: string;
+  init: RequestInit;
+}
+
+export type AdminContentAction = 'publish' | 'archive' | 'restore-draft';
+
+function normalizeSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function normalizeContentPayload(input: AdminContentPayload): AdminContentPayload {
+  return {
+    ...input,
+    title: input.title?.trim(),
+    slug: input.slug ? normalizeSlug(input.slug) : undefined,
+    summary: input.summary?.trim(),
+  };
+}
+
+function formText(formData: FormData, key: string): string {
+  return String(formData.get(key) ?? '');
+}
+
+export function buildContentPayloadFromFormData(formData: FormData): AdminContentPayload {
+  return normalizeContentPayload({
+    title: formText(formData, 'title'),
+    slug: formText(formData, 'slug'),
+    type: formText(formData, 'type') as ContentType,
+    summary: formText(formData, 'summary'),
+    bodyMarkdown: formText(formData, 'bodyMarkdown'),
+    allowComments: formData.has('allowComments'),
+    pinned: formData.has('pinned'),
+    featured: formData.has('featured'),
+  });
+}
+
+function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentPayload): AdminContentRequest {
+  return {
+    url,
+    init: {
+      method,
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(normalizeContentPayload(input)),
+    },
+  };
+}
+
+export function buildCreateDraftRequest(input: AdminContentPayload): AdminContentRequest {
+  return jsonRequest('/api/admin/content', 'POST', input);
+}
+
+export function buildUpdateContentRequest(id: string, input: AdminContentPayload): AdminContentRequest {
+  return jsonRequest(`/api/admin/content/${id}`, 'PATCH', input);
+}
+
+export function buildAdminContentActionRequest(id: string, action: AdminContentAction): AdminContentRequest {
+  return {
+    url: `/api/admin/content/${id}/${action}`,
+    init: {
+      method: 'PATCH',
+      credentials: 'include',
+    },
+  };
+}
+
 export function getAdminContentStats(items: SiteContentItem[]): AdminContentStats {
   return {
     total: items.length,

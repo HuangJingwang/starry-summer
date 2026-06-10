@@ -70,6 +70,60 @@ describe('ContentService', () => {
     await expect(service.publish(draft.id)).rejects.toThrow('Content is not ready to publish');
   });
 
+  test('updates editable content fields before publishing', async () => {
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Old Title',
+      slug: 'old-title',
+      summary: 'Old summary',
+      bodyMarkdown: '# Old',
+    });
+
+    const updated = await service.updateContent(draft.id, {
+      title: 'New Title',
+      slug: 'new-title',
+      summary: 'New summary',
+      bodyMarkdown: '# New',
+      type: 'note',
+      allowComments: false,
+      featured: true,
+      pinned: true,
+    });
+
+    expect(updated).toMatchObject({
+      id: draft.id,
+      title: 'New Title',
+      slug: 'new-title',
+      summary: 'New summary',
+      bodyMarkdown: '# New',
+      type: 'note',
+      allowComments: false,
+      featured: true,
+      pinned: true,
+    });
+  });
+
+  test('archives and restores content from the admin workflow', async () => {
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Archive Me',
+      slug: 'archive-me',
+      summary: 'Temporary',
+      bodyMarkdown: '# Archive Me',
+    });
+    await service.publish(draft.id);
+
+    const archived = await service.archive(draft.id);
+
+    expect(archived.status).toBe('archived');
+    expect(await service.listPublic({ type: 'post' })).toEqual([]);
+
+    const restored = await service.restoreDraft(draft.id);
+
+    expect(restored.status).toBe('draft');
+    expect(restored.publishedAt).toBeNull();
+  });
+
   test('imports Markdown with front matter as a draft', async () => {
     const imported = await service.importMarkdown(
       [

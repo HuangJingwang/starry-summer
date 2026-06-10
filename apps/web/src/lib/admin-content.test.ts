@@ -1,6 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import { createMarkdownPreview, filterAdminContent, getAdminContentStats } from './admin-content';
+import {
+  buildAdminContentActionRequest,
+  buildCreateDraftRequest,
+  buildContentPayloadFromFormData,
+  buildUpdateContentRequest,
+  createMarkdownPreview,
+  filterAdminContent,
+  getAdminContentStats,
+} from './admin-content';
 import type { SiteContentItem } from './content';
 
 const items: SiteContentItem[] = [
@@ -59,5 +67,78 @@ describe('admin content helpers', () => {
     expect(preview.title).toBe('Hello');
     expect(preview.excerpt).toBe('This is a first paragraph with useful context.');
     expect(preview.wordCount).toBe(9);
+  });
+
+  test('builds a normalized create draft request', () => {
+    expect(
+      buildCreateDraftRequest({
+        title: ' New Post ',
+        slug: 'New Post',
+        type: 'post',
+        summary: ' Summary ',
+        bodyMarkdown: '# New Post',
+        allowComments: true,
+        pinned: false,
+        featured: true,
+      }),
+    ).toEqual({
+      url: '/api/admin/content',
+      init: {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: 'New Post',
+          slug: 'new-post',
+          type: 'post',
+          summary: 'Summary',
+          bodyMarkdown: '# New Post',
+          allowComments: true,
+          pinned: false,
+          featured: true,
+        }),
+      },
+    });
+  });
+
+  test('builds update and lifecycle action requests', () => {
+    expect(buildUpdateContentRequest('content-1', { title: 'Saved', slug: 'saved' })).toMatchObject({
+      url: '/api/admin/content/content-1',
+      init: {
+        method: 'PATCH',
+        credentials: 'include',
+      },
+    });
+    expect(buildAdminContentActionRequest('content-1', 'archive')).toEqual({
+      url: '/api/admin/content/content-1/archive',
+      init: {
+        method: 'PATCH',
+        credentials: 'include',
+      },
+    });
+  });
+
+  test('reads content form data into an API payload', () => {
+    const formData = new FormData();
+    formData.set('title', ' Form Title ');
+    formData.set('slug', 'Form Title');
+    formData.set('type', 'project');
+    formData.set('summary', ' Form summary ');
+    formData.set('bodyMarkdown', '# Form Title');
+    formData.set('allowComments', 'on');
+    formData.set('featured', 'on');
+
+    expect(buildContentPayloadFromFormData(formData)).toEqual({
+      title: 'Form Title',
+      slug: 'form-title',
+      type: 'project',
+      summary: 'Form summary',
+      bodyMarkdown: '# Form Title',
+      allowComments: true,
+      pinned: false,
+      featured: true,
+    });
   });
 });

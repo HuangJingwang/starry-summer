@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import {
   buildContentInsert,
+  buildContentUpdate,
   mapContentRow,
   type ContentItemRow,
 } from './postgres-content.repository';
@@ -80,6 +81,30 @@ describe('PostgresContentRepository mapping', () => {
       0,
       0,
       null,
+    ]);
+  });
+
+  test('builds update SQL for editable content fields', () => {
+    const update = buildContentUpdate('content-1', {
+      type: 'note',
+      title: 'Updated',
+      bodyMarkdown: '# Updated',
+      status: 'archived',
+      updatedAt: '2026-06-10T02:00:00.000Z',
+    });
+
+    expect(update).not.toBeNull();
+    expect(update?.sql).toContain('type = $2');
+    expect(update?.sql).toContain('title = $3');
+    expect(update?.sql).toContain('body_markdown = $4');
+    expect(update?.sql).toContain('status = $5');
+    expect(update?.values).toEqual([
+      'content-1',
+      'note',
+      'Updated',
+      '# Updated',
+      'archived',
+      '2026-06-10T02:00:00.000Z',
     ]);
   });
 });

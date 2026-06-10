@@ -32,6 +32,17 @@ export interface CreateDraftInput {
   bodyMarkdown: string;
 }
 
+export type UpdateContentInput = Partial<{
+  type: ContentType;
+  title: string;
+  slug: string;
+  summary: string;
+  bodyMarkdown: string;
+  allowComments: boolean;
+  pinned: boolean;
+  featured: boolean;
+}>;
+
 export interface PublicContentFilter {
   type?: ContentType;
 }
@@ -69,6 +80,16 @@ export class ContentService {
     return this.repository.listPublic(filter);
   }
 
+  async updateContent(id: string, input: UpdateContentInput): Promise<ContentRecord> {
+    await this.getRecord(id);
+    const updated = await this.repository.update(id, {
+      ...input,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return this.ensureRecord(updated, id);
+  }
+
   async publish(id: string): Promise<ContentRecord> {
     const record = await this.getRecord(id);
 
@@ -81,6 +102,27 @@ export class ContentService {
       status: 'published' as const,
       updatedAt: now,
       publishedAt: record.publishedAt ?? now,
+    });
+
+    return this.ensureRecord(updated, id);
+  }
+
+  async archive(id: string): Promise<ContentRecord> {
+    await this.getRecord(id);
+    const updated = await this.repository.update(id, {
+      status: 'archived',
+      updatedAt: new Date().toISOString(),
+    });
+
+    return this.ensureRecord(updated, id);
+  }
+
+  async restoreDraft(id: string): Promise<ContentRecord> {
+    await this.getRecord(id);
+    const updated = await this.repository.update(id, {
+      status: 'draft',
+      publishedAt: null,
+      updatedAt: new Date().toISOString(),
     });
 
     return this.ensureRecord(updated, id);

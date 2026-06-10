@@ -91,6 +91,21 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
   };
 }
 
+export function buildContentUpdate(id: string, patch: Partial<ContentRecord>): SqlStatement | null {
+  const entries = Object.entries(toDatabasePatch(patch));
+
+  if (entries.length === 0) {
+    return null;
+  }
+
+  const assignments = entries.map(([column], index) => `${column} = $${index + 2}`).join(', ');
+
+  return {
+    sql: `update content_items set ${assignments} where id = $1 returning *`,
+    values: [id, ...entries.map(([, value]) => value)],
+  };
+}
+
 export class PostgresContentRepository implements ContentRepository {
   private readonly pool: pg.Pool;
 
@@ -146,18 +161,13 @@ export class PostgresContentRepository implements ContentRepository {
   }
 
   async update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null> {
-    const entries = Object.entries(toDatabasePatch(patch));
+    const statement = buildContentUpdate(id, patch);
 
-    if (entries.length === 0) {
+    if (!statement) {
       return this.findById(id);
     }
 
-    const assignments = entries.map(([column], index) => `${column} = $${index + 2}`).join(', ');
-    const values = [id, ...entries.map(([, value]) => value)];
-    const result = await this.pool.query<ContentItemRow>(
-      `update content_items set ${assignments} where id = $1 returning *`,
-      values,
-    );
+    const result = await this.pool.query<ContentItemRow>(statement.sql, statement.values);
 
     return result.rows[0] ? mapContentRow(result.rows[0]) : null;
   }
@@ -166,6 +176,7 @@ export class PostgresContentRepository implements ContentRepository {
 function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   const mapping: Array<[keyof ContentRecord, string]> = [
+    ['type', 'type'],
     ['title', 'title'],
     ['slug', 'slug'],
     ['summary', 'summary'],
