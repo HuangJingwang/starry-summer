@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': `${fileURLToPath(new URL('./src', import.meta.url))}`,
+      '@starry-summer/markdown': `${root}/packages/markdown/src/index.ts`,
       '@starry-summer/shared': `${root}/packages/shared/src/index.ts`,
     },
   },

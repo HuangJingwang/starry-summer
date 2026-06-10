@@ -1,6 +1,7 @@
 import { renderMarkdown } from '@starry-summer/markdown';
 
 import { getContentHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
 import { CommentForm } from './CommentForm';
@@ -12,7 +13,9 @@ function isCommentTargetType(type: SiteContentItem['type']): type is CommentTarg
 }
 
 export async function ContentDetail({ item, adjacent }: { item: SiteContentItem; adjacent?: AdjacentContent }) {
-  const bodyHtml = await renderMarkdown(item.bodyMarkdown || item.summary || '');
+  const markdown = item.bodyMarkdown || item.summary || '';
+  const bodyHtml = await renderMarkdown(markdown);
+  const tableOfContents = buildContentTableOfContents(markdown);
   const comments = isCommentTargetType(item.type) ? await loadApprovedComments(item.type, item.id) : [];
   const commentSection = isCommentTargetType(item.type) ? (
     <section className="detail-comments" aria-label="Comments">
@@ -47,6 +50,18 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         <span>{item.viewCount ?? 0} views</span>
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>
+      {tableOfContents.length > 0 ? (
+        <nav className="detail-toc" aria-label="文章目录">
+          <p className="eyebrow">目录</p>
+          <ol>
+            {tableOfContents.map((heading) => (
+              <li key={heading.slug} className={`detail-toc__item detail-toc__item--depth-${heading.depth}`}>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      ) : null}
       <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
       {adjacent ? (
         <nav className="adjacent-content" aria-label="Adjacent content">

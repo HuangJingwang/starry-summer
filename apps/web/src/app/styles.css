@@ -412,6 +412,44 @@ textarea {
   padding: 22px;
 }
 
+.detail-toc {
+  background: color-mix(in srgb, var(--panel) 86%, white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 0 0 18px;
+  padding: 18px 20px;
+}
+
+.detail-toc .eyebrow {
+  margin-bottom: 10px;
+}
+
+.detail-toc ol {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.detail-toc__item {
+  line-height: 1.45;
+}
+
+.detail-toc__item--depth-3 {
+  padding-left: 18px;
+}
+
+.detail-toc a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.detail-toc a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .detail__body > :first-child {
   margin-top: 0;
 }
