@@ -34,4 +34,18 @@ describe('SettingsService', () => {
       description: 'Notes and daily writing.',
     });
   });
+
+  test('trims hero settings before saving', async () => {
+    const updated = await service.updateSettings({
+      hero: {
+        tagline: '  A public trail of private work.  ',
+        backgroundImageUrl: '  https://cdn.example.com/hero.jpg  ',
+      },
+    });
+
+    expect(updated.hero).toEqual({
+      tagline: 'A public trail of private work.',
+      backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+    });
+  });
 });

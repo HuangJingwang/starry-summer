@@ -3,6 +3,7 @@ import pg from 'pg';
 import {
   defaultSiteSettings,
   type SettingsRepository,
+  type SiteHeroSettings,
   type SiteProfileSettings,
   type SiteSettings,
   type UpdateSiteSettingsInput,
@@ -21,12 +22,12 @@ export interface SqlStatement {
   values: unknown[];
 }
 
-type SettingKey = 'profile' | 'navigation';
+type SettingKey = 'profile' | 'navigation' | 'hero';
 
 export function buildSettingsSelect(): SqlStatement {
   return {
-    sql: 'select key, value, updated_at from site_settings where key in ($1, $2)',
-    values: ['profile', 'navigation'],
+    sql: 'select key, value, updated_at from site_settings where key in ($1, $2, $3)',
+    values: ['profile', 'navigation', 'hero'],
   };
 }
 
@@ -44,10 +45,12 @@ export function buildSettingsUpsert(key: SettingKey, value: unknown): SqlStateme
 export function mapSettingsRows(rows: SettingRow[]): SiteSettings {
   const profileRow = rows.find((row) => row.key === 'profile');
   const navigationRow = rows.find((row) => row.key === 'navigation');
+  const heroRow = rows.find((row) => row.key === 'hero');
   const newest = rows.map((row) => row.updated_at).sort((a, b) => b.getTime() - a.getTime())[0];
 
   return {
     profile: isProfile(profileRow?.value) ? profileRow.value : defaultSiteSettings.profile,
+    hero: isHero(heroRow?.value) ? heroRow.value : defaultSiteSettings.hero,
     navigation: isNavigation(navigationRow?.value) ? navigationRow.value : defaultSiteSettings.navigation,
     updatedAt: (newest ?? new Date(defaultSiteSettings.updatedAt)).toISOString(),
   };
@@ -82,6 +85,15 @@ export class PostgresSettingsRepository implements SettingsRepository {
       await this.pool.query(statement.sql, statement.values);
     }
 
+    if (input.hero) {
+      const current = await this.get();
+      const statement = buildSettingsUpsert('hero', {
+        ...current.hero,
+        ...input.hero,
+      });
+      await this.pool.query(statement.sql, statement.values);
+    }
+
     return this.get();
   }
 }
@@ -93,6 +105,15 @@ function isProfile(value: unknown): value is SiteProfileSettings {
     typeof (value as SiteProfileSettings).title === 'string' &&
     typeof (value as SiteProfileSettings).ownerName === 'string' &&
     typeof (value as SiteProfileSettings).description === 'string'
+  );
+}
+
+function isHero(value: unknown): value is SiteHeroSettings {
+  return (
+    Boolean(value) &&
+    typeof value === 'object' &&
+    typeof (value as SiteHeroSettings).tagline === 'string' &&
+    typeof (value as SiteHeroSettings).backgroundImageUrl === 'string'
   );
 }
 

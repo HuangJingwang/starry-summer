@@ -12,6 +12,10 @@ describe('InMemorySettingsRepository', () => {
         ownerName: 'Owner',
         description: 'A personal content platform.',
       },
+      hero: {
+        tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+        backgroundImageUrl: '/hero-workspace.png',
+      },
       navigation: ['posts', 'notes', 'moments', 'projects', 'guestbook', 'about'],
       updatedAt: '2026-06-10T00:00:00.000Z',
     });
@@ -33,6 +37,32 @@ describe('InMemorySettingsRepository', () => {
         title: 'New Title',
         ownerName: 'HJW',
         description: 'A quieter personal archive.',
+      },
+      hero: {
+        tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+        backgroundImageUrl: '/hero-workspace.png',
+      },
+      navigation: ['posts', 'notes', 'moments', 'projects', 'guestbook', 'about'],
+    });
+  });
+
+  test('updates hero settings without replacing profile or navigation', async () => {
+    const repository = new InMemorySettingsRepository(() => '2026-06-10T00:00:00.000Z');
+
+    await repository.update({
+      hero: {
+        tagline: 'A public trail of private work.',
+        backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+      },
+    });
+
+    await expect(repository.get()).resolves.toMatchObject({
+      profile: {
+        title: 'Starry Summer',
+      },
+      hero: {
+        tagline: 'A public trail of private work.',
+        backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'guestbook', 'about'],
     });

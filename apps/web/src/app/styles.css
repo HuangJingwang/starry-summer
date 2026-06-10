@@ -94,7 +94,10 @@ textarea {
 }
 
 .hero__image {
-  object-fit: cover;
+  background-position: center;
+  background-size: cover;
+  inset: 0;
+  position: absolute;
 }
 
 .hero__overlay {

@@ -17,6 +17,10 @@ describe('settings client helpers', () => {
           ownerName: 'Owner',
           description: 'Notes',
         },
+        hero: {
+          tagline: 'Keep a public trail of quiet work.',
+          backgroundImageUrl: 'https://cdn.example.com/background.jpg',
+        },
         navigation: ['posts', 'notes'],
         updatedAt: '2026-06-10T00:00:00.000Z',
       }),
@@ -26,8 +30,17 @@ describe('settings client helpers', () => {
         ownerName: 'Owner',
         description: 'Notes',
       },
+      hero: {
+        tagline: 'Keep a public trail of quiet work.',
+        backgroundImageUrl: 'https://cdn.example.com/background.jpg',
+      },
       navigation: ['posts', 'notes'],
       updatedAt: '2026-06-10T00:00:00.000Z',
+    });
+
+    expect(normalizeSiteSettings({}).hero).toEqual({
+      tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+      backgroundImageUrl: '/hero-workspace.png',
     });
   });
 
@@ -67,6 +80,10 @@ describe('settings client helpers', () => {
           ownerName: 'Owner',
           description: 'Notes',
         },
+        hero: {
+          tagline: 'A personal operating base.',
+          backgroundImageUrl: '/cover.jpg',
+        },
       }),
     ).toEqual({
       url: '/api/admin/settings',
@@ -81,6 +98,10 @@ describe('settings client helpers', () => {
             title: 'My Blog',
             ownerName: 'Owner',
             description: 'Notes',
+          },
+          hero: {
+            tagline: 'A personal operating base.',
+            backgroundImageUrl: '/cover.jpg',
           },
         }),
       },
@@ -97,6 +118,10 @@ describe('settings client helpers', () => {
               ownerName: 'Owner',
               description: 'Public description',
             },
+            hero: {
+              tagline: 'A public note to the future.',
+              backgroundImageUrl: '/public-cover.jpg',
+            },
             navigation: ['posts'],
             updatedAt: '2026-06-10T00:00:00.000Z',
           }),
@@ -107,6 +132,10 @@ describe('settings client helpers', () => {
         title: 'Public Blog',
         ownerName: 'Owner',
         description: 'Public description',
+      },
+      hero: {
+        tagline: 'A public note to the future.',
+        backgroundImageUrl: '/public-cover.jpg',
       },
       navigation: ['posts'],
       updatedAt: '2026-06-10T00:00:00.000Z',

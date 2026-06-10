@@ -58,6 +58,10 @@ export function SettingsManager() {
         ownerName: String(formData.get('ownerName') ?? ''),
         description: String(formData.get('description') ?? ''),
       },
+      hero: {
+        tagline: String(formData.get('tagline') ?? ''),
+        backgroundImageUrl: String(formData.get('backgroundImageUrl') ?? ''),
+      },
       navigation: String(formData.get('navigation') ?? '').split(','),
     });
 
@@ -92,6 +96,14 @@ export function SettingsManager() {
       <label>
         SEO description
         <textarea name="description" rows={4} defaultValue={settings.profile.description} />
+      </label>
+      <label>
+        首页短句
+        <input name="tagline" defaultValue={settings.hero.tagline} />
+      </label>
+      <label>
+        备用首页背景
+        <input name="backgroundImageUrl" defaultValue={settings.hero.backgroundImageUrl} placeholder="/hero-workspace.png" />
       </label>
       <label>
         Navigation

@@ -20,6 +20,14 @@ describe('PostgresSettingsRepository', () => {
         updated_at: new Date('2026-06-10T00:00:00.000Z'),
       },
       {
+        key: 'hero',
+        value: {
+          tagline: 'A public trail of private work.',
+          backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+        },
+        updated_at: new Date('2026-06-10T02:00:00.000Z'),
+      },
+      {
         key: 'navigation',
         value: ['posts', 'notes'],
         updated_at: new Date('2026-06-10T01:00:00.000Z'),
@@ -32,15 +40,19 @@ describe('PostgresSettingsRepository', () => {
         ownerName: 'Owner',
         description: 'A personal content platform.',
       },
+      hero: {
+        tagline: 'A public trail of private work.',
+        backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+      },
       navigation: ['posts', 'notes'],
-      updatedAt: '2026-06-10T01:00:00.000Z',
+      updatedAt: '2026-06-10T02:00:00.000Z',
     });
   });
 
   test('builds settings select and upsert SQL', () => {
     expect(buildSettingsSelect()).toEqual({
-      sql: 'select key, value, updated_at from site_settings where key in ($1, $2)',
-      values: ['profile', 'navigation'],
+      sql: 'select key, value, updated_at from site_settings where key in ($1, $2, $3)',
+      values: ['profile', 'navigation', 'hero'],
     });
     expect(
       buildSettingsUpsert('profile', {
@@ -56,5 +68,11 @@ describe('PostgresSettingsRepository', () => {
     `,
       values: ['profile', JSON.stringify({ title: 'My Blog', ownerName: 'Owner', description: 'Notes' })],
     });
+    expect(
+      buildSettingsUpsert('hero', {
+        tagline: 'A public trail of private work.',
+        backgroundImageUrl: '/hero.jpg',
+      }).values,
+    ).toEqual(['hero', JSON.stringify({ tagline: 'A public trail of private work.', backgroundImageUrl: '/hero.jpg' })]);
   });
 });

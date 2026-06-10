@@ -1,39 +1,42 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
+import { loadRandomAsset } from '@/lib/assets';
 import { getFeaturedContent, getPopularContent, getSiteStats } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
+import { loadPublicSettings } from '@/lib/settings';
 
 export default async function HomePage() {
-  const content = await loadSiteContent();
+  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
+  const [content, settings, backgroundAsset] = await Promise.all([
+    loadSiteContent(),
+    loadPublicSettings(undefined, { apiBaseUrl }),
+    loadRandomAsset({ usage: 'background', apiBaseUrl }),
+  ]);
   const featured = getFeaturedContent(content).slice(0, 3);
   const popular = getPopularContent(content, {
     excludeIds: featured.map((item) => item.id),
     limit: 3,
   });
   const stats = getSiteStats(content);
+  const heroBackground = backgroundAsset?.publicUrl || settings.hero.backgroundImageUrl;
 
   return (
     <SiteShell>
       <main>
         <section className="hero">
-          <Image
+          <div
             className="hero__image"
-            src="/hero-workspace.png"
-            alt="A calm desk workspace with notebook and laptop for writing"
-            fill
-            priority
-            sizes="100vw"
+            role="img"
+            aria-label="A calm visual backdrop for writing and personal notes"
+            style={{ backgroundImage: `url("${heroBackground}")` }}
           />
           <div className="hero__overlay" />
           <div className="hero__content">
             <p className="eyebrow">Personal content platform</p>
             <h1>Starry Summer</h1>
-            <p>
-              记录文章、笔记、日常和项目，把零散想法整理成一个可以长期部署、迁移和扩展的个人内容系统。
-            </p>
+            <p>{settings.hero.tagline}</p>
             <div className="hero__actions" aria-label="Primary actions">
               <a href="/posts">Read writing</a>
               <a href="/projects">View projects</a>

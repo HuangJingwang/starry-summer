@@ -4,14 +4,21 @@ export interface SiteProfileSettings {
   description: string;
 }
 
+export interface SiteHeroSettings {
+  tagline: string;
+  backgroundImageUrl: string;
+}
+
 export interface SiteSettings {
   profile: SiteProfileSettings;
+  hero: SiteHeroSettings;
   navigation: string[];
   updatedAt: string;
 }
 
 export interface UpdateSiteSettingsInput {
   profile?: SiteProfileSettings;
+  hero?: SiteHeroSettings;
   navigation?: string[];
 }
 
@@ -34,6 +41,10 @@ export const defaultSettings: SiteSettings = {
     ownerName: 'Owner',
     description: 'A personal content platform.',
   },
+  hero: {
+    tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+    backgroundImageUrl: '/hero-workspace.png',
+  },
   navigation: ['posts', 'notes', 'moments', 'projects', 'guestbook', 'about'],
   updatedAt: '',
 };
@@ -44,6 +55,10 @@ export function normalizeSiteSettings(input: Partial<SiteSettings>): SiteSetting
       title: input.profile?.title ?? defaultSettings.profile.title,
       ownerName: input.profile?.ownerName ?? defaultSettings.profile.ownerName,
       description: input.profile?.description ?? defaultSettings.profile.description,
+    },
+    hero: {
+      tagline: input.hero?.tagline ?? defaultSettings.hero.tagline,
+      backgroundImageUrl: input.hero?.backgroundImageUrl ?? defaultSettings.hero.backgroundImageUrl,
     },
     navigation: Array.isArray(input.navigation) ? input.navigation : defaultSettings.navigation,
     updatedAt: input.updatedAt ?? '',

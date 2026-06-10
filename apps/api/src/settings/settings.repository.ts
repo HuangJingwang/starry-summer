@@ -4,14 +4,21 @@ export interface SiteProfileSettings {
   description: string;
 }
 
+export interface SiteHeroSettings {
+  tagline: string;
+  backgroundImageUrl: string;
+}
+
 export interface SiteSettings {
   profile: SiteProfileSettings;
+  hero: SiteHeroSettings;
   navigation: string[];
   updatedAt: string;
 }
 
 export interface UpdateSiteSettingsInput {
   profile?: Partial<SiteProfileSettings>;
+  hero?: Partial<SiteHeroSettings>;
   navigation?: string[];
 }
 
@@ -28,6 +35,10 @@ export const defaultSiteSettings: SiteSettings = {
     ownerName: 'Owner',
     description: 'A personal content platform.',
   },
+  hero: {
+    tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+    backgroundImageUrl: '/hero-workspace.png',
+  },
   navigation: ['posts', 'notes', 'moments', 'projects', 'guestbook', 'about'],
   updatedAt: '2026-06-10T00:00:00.000Z',
 };
@@ -39,6 +50,7 @@ export class InMemorySettingsRepository implements SettingsRepository {
     this.settings = {
       ...defaultSiteSettings,
       profile: { ...defaultSiteSettings.profile },
+      hero: { ...defaultSiteSettings.hero },
       navigation: [...defaultSiteSettings.navigation],
       updatedAt: this.now(),
     };
@@ -54,6 +66,10 @@ export class InMemorySettingsRepository implements SettingsRepository {
         ...this.settings.profile,
         ...input.profile,
       },
+      hero: {
+        ...this.settings.hero,
+        ...input.hero,
+      },
       navigation: input.navigation ? [...input.navigation] : [...this.settings.navigation],
       updatedAt: this.now(),
     };
@@ -66,6 +82,7 @@ export function cloneSettings(settings: SiteSettings): SiteSettings {
   return {
     ...settings,
     profile: { ...settings.profile },
+    hero: { ...settings.hero },
     navigation: [...settings.navigation],
   };
 }
