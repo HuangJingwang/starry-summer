@@ -1,8 +1,10 @@
-import { getContentHref, getPublicContent, seedContent } from '@/lib/content';
+import { getContentHref } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export function GET() {
+export async function GET() {
   const siteUrl = process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000';
-  const items = getPublicContent(seedContent)
+  const content = await loadSiteContent();
+  const items = content
     .map((item) => {
       const href = `${siteUrl}${getContentHref(item)}`;
 

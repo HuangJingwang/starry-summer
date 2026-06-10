@@ -2,11 +2,13 @@ import Image from 'next/image';
 
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { getFeaturedContent, groupContentCounts, seedContent } from '@/lib/content';
+import { getFeaturedContent, groupContentCounts } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export default function HomePage() {
-  const featured = getFeaturedContent(seedContent).slice(0, 3);
-  const counts = groupContentCounts(seedContent);
+export default async function HomePage() {
+  const content = await loadSiteContent();
+  const featured = getFeaturedContent(content).slice(0, 3);
+  const counts = groupContentCounts(content);
 
   return (
     <SiteShell>

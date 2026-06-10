@@ -1,9 +1,11 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { groupContentByCategory, seedContent } from '@/lib/content';
+import { groupContentByCategory } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export default function CategoriesPage() {
-  const groups = groupContentByCategory(seedContent);
+export default async function CategoriesPage() {
+  const content = await loadSiteContent();
+  const groups = groupContentByCategory(content);
   const total = groups.reduce((count, group) => count + group.items.length, 0);
 
   return (

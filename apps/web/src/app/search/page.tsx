@@ -1,6 +1,7 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { searchContent, seedContent } from '@/lib/content';
+import { searchContent } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
 export default async function SearchPage({
   searchParams,
@@ -8,7 +9,8 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q = '' } = await searchParams;
-  const results = searchContent(seedContent, q);
+  const content = await loadSiteContent();
+  const results = searchContent(content, q);
 
   return (
     <SiteShell>

@@ -1,9 +1,9 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { getPublicContent, seedContent } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export default function ProjectsPage() {
-  const projects = getPublicContent(seedContent, 'project');
+export default async function ProjectsPage() {
+  const projects = await loadSiteContent('project');
 
   return (
     <SiteShell>

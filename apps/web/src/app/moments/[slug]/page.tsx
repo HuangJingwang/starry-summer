@@ -2,11 +2,13 @@ import { notFound } from 'next/navigation';
 
 import { ContentDetail } from '@/components/ContentDetail';
 import { SiteShell } from '@/components/SiteShell';
-import { getAdjacentContent, getContentBySlug, seedContent } from '@/lib/content';
+import { getAdjacentContent, getContentBySlug } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
 export default async function MomentDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const item = getContentBySlug(seedContent, 'moment', slug);
+  const content = await loadSiteContent();
+  const item = getContentBySlug(content, 'moment', slug);
 
   if (!item) {
     notFound();
@@ -15,7 +17,7 @@ export default async function MomentDetailPage({ params }: { params: Promise<{ s
   return (
     <SiteShell>
       <main className="page-main narrow">
-        <ContentDetail item={item} adjacent={getAdjacentContent(seedContent, item.id)} />
+        <ContentDetail item={item} adjacent={getAdjacentContent(content, item.id)} />
       </main>
     </SiteShell>
   );

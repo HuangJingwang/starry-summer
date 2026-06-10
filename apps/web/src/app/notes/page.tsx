@@ -1,9 +1,9 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { getPublicContent, seedContent } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export default function NotesPage() {
-  const notes = getPublicContent(seedContent, 'note');
+export default async function NotesPage() {
+  const notes = await loadSiteContent('note');
 
   return (
     <SiteShell>

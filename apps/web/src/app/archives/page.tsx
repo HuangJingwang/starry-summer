@@ -1,10 +1,12 @@
 import Link from 'next/link';
 
 import { SiteShell } from '@/components/SiteShell';
-import { getContentHref, groupContentByMonth, seedContent } from '@/lib/content';
+import { getContentHref, groupContentByMonth } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export default function ArchivesPage() {
-  const groups = groupContentByMonth(seedContent);
+export default async function ArchivesPage() {
+  const content = await loadSiteContent();
+  const groups = groupContentByMonth(content);
   const total = groups.reduce((count, group) => count + group.items.length, 0);
 
   return (

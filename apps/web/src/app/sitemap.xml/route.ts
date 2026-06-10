@@ -1,9 +1,10 @@
-import { getContentHref, getPublicContent, seedContent } from '@/lib/content';
+import { getContentHref } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
 
-export function GET() {
+export async function GET() {
   const siteUrl = process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000';
   const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'categories', 'archives', 'guestbook', 'about', 'search'];
-  const contentRoutes = getPublicContent(seedContent).map((item) => getContentHref(item).slice(1));
+  const contentRoutes = (await loadSiteContent()).map((item) => getContentHref(item).slice(1));
   const urls = [...staticRoutes, ...contentRoutes]
     .map((route) => {
       const loc = route ? `${siteUrl}/${route}` : siteUrl;
