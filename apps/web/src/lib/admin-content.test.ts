@@ -297,6 +297,7 @@ describe('admin content helpers', () => {
           series: ['Build Log'],
           sourceType: 'original',
           sourceUrl: '',
+          coverAssetId: '',
         }),
       },
     });
@@ -694,6 +695,28 @@ describe('admin content helpers', () => {
         stack: ['Next.js', 'PostgreSQL'],
         startedAt: '2026-01-01',
       },
+    });
+  });
+
+  test('keeps empty clearable metadata fields in form payloads', () => {
+    const formData = new FormData();
+    formData.set('title', ' Clear Metadata ');
+    formData.set('slug', 'clear-metadata');
+    formData.set('type', 'post');
+    formData.set('summary', ' Summary ');
+    formData.set('seoTitle', ' ');
+    formData.set('seoDescription', '');
+    formData.set('sourceType', 'original');
+    formData.set('sourceUrl', '');
+    formData.set('coverAssetId', ' ');
+    formData.set('visibility', 'public');
+    formData.set('bodyMarkdown', '# Clear Metadata');
+
+    expect(buildContentPayloadFromFormData(formData)).toMatchObject({
+      seoTitle: '',
+      seoDescription: '',
+      sourceUrl: '',
+      coverAssetId: '',
     });
   });
 });

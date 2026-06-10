@@ -2,7 +2,7 @@ import pg from 'pg';
 
 import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
-import type { AdminContentFilter, ContentRecord, PublicContentFilter } from './content.service';
+import type { AdminContentFilter, ContentRecord, ContentRecordPatch, PublicContentFilter } from './content.service';
 import type { ContentRepository, CreateContentRecordInput } from './content.repository';
 
 const { Pool } = pg;
@@ -137,7 +137,7 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
   };
 }
 
-export function buildContentUpdate(id: string, patch: Partial<ContentRecord>): SqlStatement | null {
+export function buildContentUpdate(id: string, patch: ContentRecordPatch): SqlStatement | null {
   const entries = Object.entries(toDatabasePatch(patch));
 
   if (entries.length === 0) {
@@ -248,7 +248,7 @@ export class PostgresContentRepository implements ContentRepository {
     return result.rows.map(mapContentRow);
   }
 
-  async update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null> {
+  async update(id: string, patch: ContentRecordPatch): Promise<ContentRecord | null> {
     const client = await this.pool.connect();
 
     try {
@@ -568,7 +568,7 @@ function slugifyTaxonomyLabel(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown> {
+function toDatabasePatch(patch: ContentRecordPatch): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   const mapping: Array<[keyof ContentRecord, string]> = [
     ['type', 'type'],

@@ -231,7 +231,7 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     seoDescription: input.seoDescription?.trim(),
     sourceType: input.sourceType === 'repost' ? 'repost' : 'original',
     sourceUrl: input.sourceUrl?.trim() ?? '',
-    coverAssetId: normalizeOptionalText(input.coverAssetId),
+    coverAssetId: input.coverAssetId?.trim() ?? '',
     visibility: validContentVisibility.has(input.visibility as ContentVisibility) ? input.visibility : undefined,
     categories: normalizeList(input.categories),
     tags: normalizeList(input.tags),
@@ -242,12 +242,6 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
 
 function formText(formData: FormData, key: string): string {
   return String(formData.get(key) ?? '');
-}
-
-function normalizeOptionalText(value: string | undefined): string | undefined {
-  const normalized = value?.trim();
-
-  return normalized || undefined;
 }
 
 export function buildContentPayloadFromFormData(formData: FormData): AdminContentPayload {

@@ -218,6 +218,28 @@ describe('PostgresContentRepository mapping', () => {
     ]);
   });
 
+  test('builds update SQL that clears nullable metadata fields', () => {
+    const update = buildContentUpdate('content-1', {
+      seoTitle: null,
+      seoDescription: null,
+      coverAssetId: null,
+      updatedAt: '2026-06-10T02:00:00.000Z',
+    });
+
+    expect(update).not.toBeNull();
+    expect(update?.sql).toContain('seo_title = $2');
+    expect(update?.sql).toContain('seo_description = $3');
+    expect(update?.sql).toContain('cover_asset_id = $4');
+    expect(update?.sql).toContain('updated_at = $5');
+    expect(update?.values).toEqual([
+      'content-1',
+      null,
+      null,
+      null,
+      '2026-06-10T02:00:00.000Z',
+    ]);
+  });
+
   test('builds content delete SQL', () => {
     expect(buildContentDelete('content-1')).toEqual({
       sql: 'delete from content_items where id = $1 returning id',

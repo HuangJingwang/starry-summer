@@ -35,6 +35,14 @@ export interface ContentRecord {
   publishedAt: string | null;
 }
 
+type NullableContentMetadataKey = 'seoTitle' | 'seoDescription' | 'coverAssetId';
+
+export type ContentRecordPatch = Partial<Omit<ContentRecord, NullableContentMetadataKey>> & {
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  coverAssetId?: string | null;
+};
+
 export interface CreateDraftInput {
   type: ContentType;
   title: string;
@@ -168,9 +176,9 @@ export class ContentService {
       categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
       tags: input.tags ? normalizeTaxonomyLabels(input.tags) : undefined,
       series: input.series ? normalizeTaxonomyLabels(input.series) : undefined,
-      ...(input.seoTitle !== undefined ? { seoTitle: normalizeOptionalText(input.seoTitle) } : {}),
-      ...(input.seoDescription !== undefined ? { seoDescription: normalizeOptionalText(input.seoDescription) } : {}),
-      coverAssetId: input.coverAssetId !== undefined ? normalizeOptionalText(input.coverAssetId) : undefined,
+      ...(input.seoTitle !== undefined ? { seoTitle: normalizeNullableOptionalText(input.seoTitle) } : {}),
+      ...(input.seoDescription !== undefined ? { seoDescription: normalizeNullableOptionalText(input.seoDescription) } : {}),
+      coverAssetId: input.coverAssetId !== undefined ? normalizeNullableOptionalText(input.coverAssetId) : undefined,
       project: input.project !== undefined ? normalizeProjectMetadata(input.project) ?? {} : undefined,
       updatedAt: new Date().toISOString(),
     });
@@ -406,6 +414,10 @@ function normalizeOptionalText(value: string | undefined): string | undefined {
   const normalized = value?.trim();
 
   return normalized || undefined;
+}
+
+function normalizeNullableOptionalText(value: string | undefined): string | null {
+  return normalizeOptionalText(value) ?? null;
 }
 
 function projectToFrontmatter(project: ProjectMetadata): MarkdownFrontmatterValue {

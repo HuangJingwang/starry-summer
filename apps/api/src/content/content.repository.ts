@@ -1,4 +1,4 @@
-import type { AdminContentFilter, ContentRecord, PublicContentFilter } from './content.service';
+import type { AdminContentFilter, ContentRecord, ContentRecordPatch, PublicContentFilter } from './content.service';
 
 export type CreateContentRecordInput = Omit<ContentRecord, 'createdAt' | 'id' | 'updatedAt'>;
 
@@ -8,7 +8,7 @@ export interface ContentRepository {
   findBySlug(slug: string): Promise<ContentRecord | null>;
   listAdmin(filter?: AdminContentFilter): Promise<ContentRecord[]>;
   listPublic(filter?: PublicContentFilter): Promise<ContentRecord[]>;
-  update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null>;
+  update(id: string, patch: ContentRecordPatch): Promise<ContentRecord | null>;
   delete(id: string): Promise<boolean>;
 }
 
@@ -59,22 +59,23 @@ export class InMemoryContentRepository implements ContentRepository {
       .sort((a, b) => sortPublicContent(a, b, filter.sort ?? 'latest'));
   }
 
-  async update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null> {
+  async update(id: string, patch: ContentRecordPatch): Promise<ContentRecord | null> {
     const record = this.records.get(id);
 
     if (!record) {
       return null;
     }
 
+    const normalizedPatch = normalizeRecordPatchForMemory(patch);
     const updated = {
       ...record,
-      ...patch,
-      categories: patch.categories ? [...patch.categories] : record.categories,
-      tags: patch.tags ? [...patch.tags] : record.tags,
-      series: patch.series ? [...patch.series] : record.series,
-      project: patch.project !== undefined ? cloneProjectMetadata(patch.project) : record.project,
+      ...normalizedPatch,
+      categories: normalizedPatch.categories ? [...normalizedPatch.categories] : record.categories,
+      tags: normalizedPatch.tags ? [...normalizedPatch.tags] : record.tags,
+      series: normalizedPatch.series ? [...normalizedPatch.series] : record.series,
+      project: normalizedPatch.project !== undefined ? cloneProjectMetadata(normalizedPatch.project) : record.project,
       id: record.id,
-      updatedAt: patch.updatedAt ?? this.now(),
+      updatedAt: normalizedPatch.updatedAt ?? this.now(),
     };
     this.records.set(id, updated);
 
@@ -84,6 +85,25 @@ export class InMemoryContentRepository implements ContentRepository {
   async delete(id: string): Promise<boolean> {
     return this.records.delete(id);
   }
+}
+
+function normalizeRecordPatchForMemory(patch: ContentRecordPatch): Partial<ContentRecord> {
+  const result: Partial<ContentRecord> = {};
+
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === undefined) {
+      continue;
+    }
+
+    if ((key === 'seoTitle' || key === 'seoDescription' || key === 'coverAssetId') && value === null) {
+      result[key] = undefined;
+      continue;
+    }
+
+    (result as Record<string, unknown>)[key] = value;
+  }
+
+  return result;
 }
 
 function cloneProjectMetadata(project: ContentRecord['project']): ContentRecord['project'] {

@@ -274,6 +274,41 @@ describe('ContentService', () => {
     });
   });
 
+  test('passes nullable metadata clears through to the repository', async () => {
+    const capturedPatches: unknown[] = [];
+    const originalUpdate = repository.update.bind(repository);
+    repository.update = async (id, patch) => {
+      capturedPatches.push(patch);
+      return originalUpdate(id, patch);
+    };
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Clearable Metadata',
+      slug: 'clearable-metadata',
+      summary: 'Has metadata',
+      seoTitle: 'Search title',
+      seoDescription: 'Search description',
+      bodyMarkdown: '# Clearable Metadata',
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/source',
+      coverAssetId: 'cover-asset-1',
+    });
+
+    await service.updateContent(draft.id, {
+      seoTitle: '',
+      seoDescription: ' ',
+      sourceUrl: '',
+      coverAssetId: '',
+    });
+
+    expect(capturedPatches.at(-1)).toMatchObject({
+      seoTitle: null,
+      seoDescription: null,
+      sourceUrl: '',
+      coverAssetId: null,
+    });
+  });
+
   test('rejects duplicate content slugs', async () => {
     const first = await service.createDraft({
       type: 'post',
