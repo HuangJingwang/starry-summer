@@ -52,4 +52,16 @@ describe('deployment configuration', () => {
     expect(env).toContain('LOCAL_UPLOAD_PUBLIC_URL=/uploads');
     expect(deployment).toContain('Back up the `api-uploads` Docker volume when `STORAGE_DRIVER=local`.');
   });
+
+  test('passes S3 public URL and path style settings through deployment config', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
+    const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(env).toContain('S3_PUBLIC_BASE_URL=http://localhost:9000/starry-summer');
+    expect(env).toContain('S3_FORCE_PATH_STYLE=true');
+    expect(compose).toContain('S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-http://localhost:9000/starry-summer}');
+    expect(compose).toContain('S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}');
+    expect(deployment).toContain('S3_FORCE_PATH_STYLE');
+  });
 });
