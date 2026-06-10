@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import type { AssetStorage, StoredAsset } from './storage.service.js';
 import { LocalAssetStorage, S3AssetStorage } from './storage.service.js';
@@ -34,10 +34,11 @@ export class AssetsService {
   ) {}
 
   async upload(input: UploadAssetInput): Promise<AssetRecord> {
+    const bytes = decodeBase64Payload(input.base64);
     const stored = await this.storage.save({
       filename: input.filename,
       mimeType: input.mimeType,
-      bytes: Buffer.from(input.base64, 'base64'),
+      bytes,
     });
 
     return this.repository.create({
@@ -82,6 +83,16 @@ export class AssetsService {
       throw new NotFoundException(`Asset ${id} was not found`);
     }
   }
+}
+
+function decodeBase64Payload(value: string): Buffer {
+  const normalized = value.replace(/\s+/g, '');
+
+  if (!normalized || normalized.length % 4 === 1 || !/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) {
+    throw new BadRequestException('Asset upload payload must be valid base64');
+  }
+
+  return Buffer.from(normalized, 'base64');
 }
 
 export function createAssetStorage(): AssetStorage {

@@ -32,6 +32,35 @@ describe('createAssetStorage', () => {
 });
 
 describe('AssetsService', () => {
+  test('rejects malformed base64 upload payloads before storage writes', async () => {
+    let saveCalls = 0;
+    const service = new AssetsService(
+      {
+        save: async () => {
+          saveCalls += 1;
+
+          return {
+            storageKey: 'should-not-exist.png',
+            publicUrl: '/uploads/should-not-exist.png',
+            mimeType: 'image/png',
+            byteSize: 1,
+          };
+        },
+        delete: async () => undefined,
+      },
+      new InMemoryAssetRepository(),
+    );
+
+    await expect(
+      service.upload({
+        filename: 'broken.png',
+        mimeType: 'image/png',
+        base64: 'not-base64!!',
+      }),
+    ).rejects.toThrow('Asset upload payload must be valid base64');
+    expect(saveCalls).toBe(0);
+  });
+
   test('stores uploaded asset metadata and filters the gallery by usage', async () => {
     const repository = new InMemoryAssetRepository(() => '2026-06-10T00:00:00.000Z');
     const service = new AssetsService(
