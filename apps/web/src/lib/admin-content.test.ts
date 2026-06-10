@@ -139,6 +139,12 @@ describe('admin content helpers', () => {
   });
 
   test('filters content by type status and search text', () => {
+    const draftPost = items.find((item) => item.id === 'draft-post');
+
+    if (!draftPost) {
+      throw new Error('Expected draft-post fixture');
+    }
+
     expect(filterAdminContent(items, { type: 'note' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { status: 'draft' }).map((item) => item.id)).toEqual(['draft-post']);
     expect(filterAdminContent(items, { status: 'private' }).map((item) => item.id)).toEqual(['private-project']);
@@ -148,6 +154,18 @@ describe('admin content helpers', () => {
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'knowledge' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { query: 'research notes' }).map((item) => item.id)).toEqual(['published-note']);
+    expect(
+      filterAdminContent(
+        [
+          {
+            ...draftPost,
+            seoTitle: 'Search Console Draft',
+            seoDescription: 'Canonical launch checklist',
+          },
+        ],
+        { query: 'canonical launch' },
+      ).map((item) => item.id),
+    ).toEqual(['draft-post']);
   });
 
   test('filters project content by stack terms', () => {

@@ -133,6 +133,8 @@ function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFi
     record.title,
     record.slug,
     record.summary,
+    record.seoTitle ?? '',
+    record.seoDescription ?? '',
     record.bodyMarkdown,
     ...record.categories,
     ...record.tags,

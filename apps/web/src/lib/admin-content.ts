@@ -727,6 +727,8 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
       const searchable = [
         item.title,
         item.summary ?? '',
+        item.seoTitle ?? '',
+        item.seoDescription ?? '',
         ...(item.categories ?? []),
         ...(item.tags ?? []),
         ...(item.series ?? []),

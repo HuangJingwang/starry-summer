@@ -429,6 +429,8 @@ export function buildAdminContentSelect(filter: AdminContentFilter = {}): SqlSta
         lower(ci.title) like ${placeholder}
         or lower(ci.slug) like ${placeholder}
         or lower(ci.summary) like ${placeholder}
+        or lower(ci.seo_title) like ${placeholder}
+        or lower(ci.seo_description) like ${placeholder}
         or lower(ci.body_markdown) like ${placeholder}
         or exists (
           select 1

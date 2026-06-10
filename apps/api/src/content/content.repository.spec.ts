@@ -205,6 +205,14 @@ describe('InMemoryContentRepository', () => {
     expect((await repository.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ query: 'platform journal' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ query: 'draft-post' })).map((item) => item.id)).toEqual([draft.id]);
+
+    await repository.update(draft.id, {
+      seoTitle: 'Search Console Draft',
+      seoDescription: 'Canonical launch checklist',
+    });
+
+    expect((await repository.listAdmin({ query: 'search console' })).map((item) => item.id)).toEqual([draft.id]);
+    expect((await repository.listAdmin({ query: 'canonical launch' })).map((item) => item.id)).toEqual([draft.id]);
   });
 
   test('lists public records by popularity when requested', async () => {

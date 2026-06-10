@@ -264,6 +264,8 @@ describe('PostgresContentRepository mapping', () => {
     expect(statement.sql).toContain('tags');
     expect(statement.sql).toContain('series');
     expect(statement.sql).toContain('order by ci.updated_at desc');
+    expect(statement.sql).toContain('lower(ci.seo_title) like $5');
+    expect(statement.sql).toContain('lower(ci.seo_description) like $5');
     expect(statement.values).toEqual(['project', 'lab', 'roadmap', 'build log', '%roadmap%']);
   });
 
