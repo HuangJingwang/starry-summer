@@ -2,6 +2,7 @@ import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestj
 
 import { AdminAuthGuard } from './admin-auth.guard.js';
 import { AuthService, type LoginInput } from './auth.service.js';
+import { LoginRateLimitGuard } from './login-rate-limit.guard.js';
 
 interface CookieResponse {
   cookie(name: string, value: string, options: Record<string, unknown>): void;
@@ -19,6 +20,7 @@ export class AuthController {
   constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   @Post('login')
+  @UseGuards(LoginRateLimitGuard)
   async login(@Body() input: LoginInput, @Res({ passthrough: true }) response: CookieResponse) {
     const session = await this.authService.login(input);
 

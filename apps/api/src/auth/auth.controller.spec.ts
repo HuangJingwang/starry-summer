@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { SELF_DECLARED_DEPS_METADATA } from '@nestjs/common/constants';
+import { GUARDS_METADATA, SELF_DECLARED_DEPS_METADATA } from '@nestjs/common/constants';
 
 import { AuthController, type AuthenticatedRequest } from './auth.controller';
 import { AuthService } from './auth.service';
 import { createPasswordHash } from './password';
+import { LoginRateLimitGuard } from './login-rate-limit.guard';
 
 function createController() {
   return new AuthController(
@@ -19,6 +20,12 @@ describe('AuthController', () => {
   test('declares auth service injection explicitly for runtime bootstrap', () => {
     expect(Reflect.getMetadata(SELF_DECLARED_DEPS_METADATA, AuthController)).toEqual([
       { index: 0, param: AuthService },
+    ]);
+  });
+
+  test('rate limits login attempts before credential verification', () => {
+    expect(Reflect.getMetadata(GUARDS_METADATA, AuthController.prototype.login)).toEqual([
+      LoginRateLimitGuard,
     ]);
   });
 
