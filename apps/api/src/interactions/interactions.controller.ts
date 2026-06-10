@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
+import { PublicInteractionRateLimitGuard } from '../security/public-interaction-rate-limit.guard.js';
 import {
   InteractionsService,
   type CreateCommentInput,
@@ -13,6 +14,7 @@ export class InteractionsController {
   constructor(private readonly interactionsService: InteractionsService) {}
 
   @Post('comments')
+  @UseGuards(PublicInteractionRateLimitGuard)
   createComment(@Body() input: CreateCommentInput) {
     return this.interactionsService.createComment(input);
   }
@@ -29,11 +31,13 @@ export class InteractionsController {
   }
 
   @Post('likes/:targetType/:targetId')
+  @UseGuards(PublicInteractionRateLimitGuard)
   likeContent(@Param('targetType') targetType: ContentType, @Param('targetId') targetId: string) {
     return this.interactionsService.likeContent(targetType, targetId);
   }
 
   @Post('guestbook')
+  @UseGuards(PublicInteractionRateLimitGuard)
   createGuestbookEntry(@Body() input: CreateGuestbookEntryInput) {
     return this.interactionsService.createGuestbookEntry(input);
   }
