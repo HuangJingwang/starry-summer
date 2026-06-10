@@ -14,6 +14,7 @@ import {
   buildSetContentVisibilityRequest,
   buildUpdateContentRequest,
   buildAdminContentDashboard,
+  getAdminContentUpdatedLabel,
   createMarkdownPreview,
   filterAdminContent,
   getAdminContentStats,
@@ -216,6 +217,21 @@ describe('admin content helpers', () => {
         { type: 'project', query: 'postgresql' },
       ).map((item) => item.id),
     ).toEqual(['stacked-project']);
+  });
+
+  test('formats admin table updated dates from updatedAt before publishedAt', () => {
+    expect(
+      getAdminContentUpdatedLabel({
+        publishedAt: '',
+        updatedAt: '2026-06-11T08:30:00.000Z',
+      }),
+    ).toBe('2026-06-11');
+
+    expect(
+      getAdminContentUpdatedLabel({
+        publishedAt: '2026-06-10',
+      }),
+    ).toBe('2026-06-10');
   });
 
   test('normalizes URL search params into valid admin content filters', () => {
@@ -507,6 +523,7 @@ describe('admin content helpers', () => {
       viewCount: 10,
       likeCount: 2,
       publishedAt: '2026-06-10',
+      updatedAt: '2026-06-10',
       categories: ['Writing'],
       tags: ['Platform'],
       series: ['Build Log'],
@@ -566,6 +583,7 @@ describe('admin content helpers', () => {
           viewCount: 0,
           likeCount: 0,
           publishedAt: '2026-06-10',
+          updatedAt: '2026-06-10',
           categories: ['Notes'],
           tags: ['API'],
           series: ['Build Log'],
@@ -645,6 +663,7 @@ describe('admin content helpers', () => {
         viewCount: 0,
         likeCount: 0,
         publishedAt: '2026-06-10',
+        updatedAt: '2026-06-10',
         categories: ['Writing'],
         tags: ['API'],
         series: ['Build Log'],

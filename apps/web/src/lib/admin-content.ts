@@ -167,6 +167,10 @@ function dateOnly(value: string | null | undefined): string {
   return value?.slice(0, 10) || '';
 }
 
+export function getAdminContentUpdatedLabel(item: Pick<SiteContentItem, 'publishedAt' | 'updatedAt'>): string {
+  return dateOnly(item.updatedAt) || dateOnly(item.publishedAt) || 'Never';
+}
+
 export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteContentItem {
   const project = normalizeProjectMetadata(record.project);
   const cover = normalizeCoverMetadata(record);
@@ -193,6 +197,7 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     series: record.series ?? [],
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
+    updatedAt: dateOnly(record.updatedAt) || undefined,
     ...cover,
     ...(project ? { project } : {}),
   };

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { filterAdminContent } from '@/lib/admin-content';
+import { filterAdminContent, getAdminContentUpdatedLabel } from '@/lib/admin-content';
 import type { SiteContentItem } from '@/lib/content';
 
 export function AdminContentTable({
@@ -36,7 +36,7 @@ export function AdminContentTable({
           <span>{item.title}</span>
           <span>{item.type}</span>
           <span>{item.visibility === 'private' ? 'private' : item.status}</span>
-          <span>{item.publishedAt}</span>
+          <span>{getAdminContentUpdatedLabel(item)}</span>
           <Link href={`/admin/content/${item.id}`}>Edit</Link>
         </div>
       ))}
