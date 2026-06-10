@@ -79,6 +79,32 @@ describe('SEO helpers', () => {
     });
   });
 
+  test('uses content cover images in social metadata', () => {
+    expect(
+      buildContentMetadata(
+        {
+          ...content,
+          coverImageUrl: '/uploads/public-post.png',
+          coverAltText: 'A calm writing desk',
+        },
+        defaultSettings,
+        'https://example.com/',
+      ),
+    ).toMatchObject({
+      openGraph: {
+        images: [
+          {
+            url: 'https://example.com/uploads/public-post.png',
+            alt: 'A calm writing desk',
+          },
+        ],
+      },
+      twitter: {
+        images: ['https://example.com/uploads/public-post.png'],
+      },
+    });
+  });
+
   test('builds RSS XML from site settings and public content', () => {
     const xml = buildRssXml(defaultSettings, 'https://example.com', [content]);
 

@@ -49,8 +49,10 @@ export function buildSiteMetadata(settings: SiteSettings, siteUrl: string): Meta
 
 export function buildContentMetadata(item: SiteContentItem, settings: SiteSettings, siteUrl: string): Metadata {
   const href = getContentHref(item);
-  const url = `${normalizePublicSiteUrl(siteUrl)}${href}`;
+  const publicSiteUrl = normalizePublicSiteUrl(siteUrl);
+  const url = `${publicSiteUrl}${href}`;
   const description = item.summary || settings.profile.description;
+  const coverImageUrl = normalizeMetadataImageUrl(item.coverImageUrl, publicSiteUrl);
 
   return {
     title: `${item.title} | ${settings.profile.title}`,
@@ -66,11 +68,22 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
       type: 'article',
       publishedTime: item.publishedAt,
       tags: item.tags,
+      ...(coverImageUrl
+        ? {
+            images: [
+              {
+                url: coverImageUrl,
+                alt: item.coverAltText || item.title,
+              },
+            ],
+          }
+        : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title: item.title,
       description,
+      ...(coverImageUrl ? { images: [coverImageUrl] } : {}),
     },
   };
 }
@@ -134,4 +147,18 @@ function escapeXml(value: string): string {
 
 function escapeCdata(value: string): string {
   return value.replace(/\]\]>/g, ']]]]><![CDATA[>');
+}
+
+function normalizeMetadataImageUrl(imageUrl: string | undefined, siteUrl: string): string | undefined {
+  const normalized = imageUrl?.trim();
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  return `${normalizePublicSiteUrl(siteUrl)}/${normalized.replace(/^\/+/, '')}`;
 }
