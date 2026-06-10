@@ -378,6 +378,230 @@ textarea {
   gap: 8px;
 }
 
+.admin-layout {
+  background: #eef2f0;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  align-content: start;
+  background: #121817;
+  color: #fff;
+  display: grid;
+  gap: 24px;
+  padding: 22px;
+}
+
+.admin-sidebar nav {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-sidebar nav a,
+.admin-home-link {
+  border-radius: 8px;
+  color: #d9e4e1;
+  min-height: 38px;
+  padding: 10px 12px;
+}
+
+.admin-sidebar nav a:hover,
+.admin-home-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-content {
+  padding: clamp(18px, 4vw, 48px);
+}
+
+.admin-panel.wide {
+  max-width: 1180px;
+  width: 100%;
+}
+
+.admin-heading-row,
+.admin-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.admin-actions {
+  justify-content: flex-start;
+}
+
+.admin-actions a,
+.admin-actions button,
+.admin-heading-row a,
+.content-form button,
+.split-panels button {
+  background: var(--accent);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  min-height: 40px;
+  padding: 10px 14px;
+}
+
+.admin-actions button + button {
+  background: #38413f;
+}
+
+.admin-filter,
+.content-form,
+.form-grid,
+.split-panels,
+.moderation-list {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-filter {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  grid-template-columns: 1fr 160px 160px auto;
+  margin: 22px 0;
+  padding: 14px;
+}
+
+.admin-filter input,
+.admin-filter select,
+.content-form input,
+.content-form select,
+.content-form textarea,
+.editor-pane textarea,
+.split-panels input,
+.split-panels textarea {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 42px;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.admin-filter button {
+  background: var(--dark);
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  min-height: 42px;
+  padding: 10px 14px;
+}
+
+.admin-table {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.admin-table__row {
+  align-items: center;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) 90px 100px 130px 70px;
+  min-height: 54px;
+  padding: 12px 14px;
+}
+
+.admin-table__row:first-child {
+  border-top: 0;
+}
+
+.admin-table__head {
+  background: #e2e8e5;
+  color: #52605d;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.content-form {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 22px;
+  padding: 18px;
+}
+
+.content-form label,
+.editor-pane label {
+  display: grid;
+  gap: 8px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.editor-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+}
+
+.editor-pane textarea {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.preview-pane,
+.split-panels section,
+.moderation-list article,
+.asset-dropzone {
+  background: #f8faf8;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.preview-pane h2 {
+  margin: 0 0 12px;
+}
+
+.preview-pane p,
+.split-panels p,
+.moderation-list p,
+.asset-dropzone span {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.split-panels {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.split-panels:has(section:nth-child(3)) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.moderation-list article span {
+  color: var(--accent-2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.asset-dropzone {
+  align-items: center;
+  border-style: dashed;
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  text-align: center;
+}
+
 @media (max-width: 820px) {
   .site-header {
     grid-template-columns: 1fr;
@@ -395,8 +619,19 @@ textarea {
   .stats-band,
   .content-grid,
   .admin-grid,
-  .search-form {
+  .search-form,
+  .admin-layout,
+  .admin-filter,
+  .admin-table__row,
+  .form-grid,
+  .editor-grid,
+  .split-panels,
+  .split-panels:has(section:nth-child(3)) {
     grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: static;
   }
 
   .hero {
