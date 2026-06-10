@@ -13,7 +13,7 @@
     "dev:api": "npm run start:dev --workspace @starry-summer/api",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present && npm run test:ops",
-    "test:ops": "bash scripts/smoke.test.sh && bash scripts/backup.test.sh && bash scripts/dockerfile.test.sh",
+    "test:ops": "bash scripts/smoke.test.sh && bash scripts/backup.test.sh && bash scripts/restore.test.sh && bash scripts/dockerfile.test.sh",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "auth:hash-password": "npm run hash-password --workspace @starry-summer/api",

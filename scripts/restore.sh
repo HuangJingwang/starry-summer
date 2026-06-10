@@ -56,7 +56,7 @@ restore_volume() {
 }
 
 docker compose up -d postgres
-docker compose exec -T postgres psql -U "$postgres_user" "$postgres_db" < "$backup_dir/postgres.sql"
+docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U "$postgres_user" "$postgres_db" < "$backup_dir/postgres.sql"
 
 restore_volume "${compose_project_name}_api-uploads" "api-uploads.tar.gz"
 restore_volume "${compose_project_name}_minio-data" "minio-data.tar.gz"
