@@ -44,4 +44,15 @@ describe('Markdown rendering', () => {
     expect(html).toContain('<h2 id="开始-2">开始</h2>');
     expect(html).toContain('<h4 id="deep-detail">Deep detail</h4>');
   });
+
+  test('renders code blocks with language labels copy buttons and highlighted tokens', async () => {
+    const html = await renderMarkdown(['```ts', 'const answer = "42";', '```'].join('\n'));
+
+    expect(html).toContain('class="markdown-code-block"');
+    expect(html).toContain('class="markdown-code-block__language">ts</span>');
+    expect(html).toContain('type="button"');
+    expect(html).toContain('data-copy-code="true"');
+    expect(html).toContain('class="token keyword">const</span>');
+    expect(html).toContain('class="token string">"42"</span>');
+  });
 });

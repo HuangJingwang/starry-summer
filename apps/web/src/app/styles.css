@@ -699,6 +699,68 @@ textarea {
   margin-top: 1.4em;
 }
 
+.markdown-code-block {
+  background: #11161a;
+  border: 1px solid #263036;
+  border-radius: 8px;
+  color: #d7e1e8;
+  margin: 22px 0;
+  overflow: hidden;
+}
+
+.markdown-code-block__bar {
+  align-items: center;
+  background: #1b2328;
+  border-bottom: 1px solid #2d383f;
+  display: flex;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 0 10px 0 14px;
+}
+
+.markdown-code-block__language {
+  color: #8fb6c7;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.markdown-code-block__copy {
+  background: #e3ece8;
+  border: 0;
+  border-radius: 999px;
+  color: #11161a;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  min-height: 28px;
+  padding: 4px 10px;
+}
+
+.markdown-code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.markdown-code-block code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.markdown-code-block .token.keyword {
+  color: #87c6ff;
+}
+
+.markdown-code-block .token.string {
+  color: #a9d18e;
+}
+
+.markdown-code-block .token.comment {
+  color: #7f9099;
+}
+
 .detail-comments {
   display: grid;
   gap: 16px;

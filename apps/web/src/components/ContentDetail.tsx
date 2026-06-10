@@ -5,6 +5,7 @@ import { canShowComments, estimateReadingTime, getContentHref, getContentTaxonom
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
+import { CodeCopyEnhancer } from './CodeCopyEnhancer';
 import { CommentForm } from './CommentForm';
 import { LikeButton } from './LikeButton';
 import { ViewTracker } from './ViewTracker';
@@ -83,6 +84,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
           </ol>
         </nav>
       ) : null}
+      <CodeCopyEnhancer />
       <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
       {adjacent ? (
         <nav className="adjacent-content" aria-label="Adjacent content">
