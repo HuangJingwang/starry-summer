@@ -43,6 +43,7 @@ describe('home profile model', () => {
       ownerName: 'Jing',
       title: 'Starry Summer',
       description: 'Personal notes and projects.',
+      motto: 'Small notes compound.',
       stats: {
         publicCount: 4,
         totalViews: 10,

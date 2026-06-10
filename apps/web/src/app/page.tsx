@@ -71,6 +71,7 @@ export default async function HomePage() {
             <p className="eyebrow">Profile</p>
             <h2>{profile.ownerName}</h2>
             <p>{profile.description}</p>
+            {profile.motto ? <blockquote>{profile.motto}</blockquote> : null}
             <dl>
               <div>
                 <dt>Site</dt>

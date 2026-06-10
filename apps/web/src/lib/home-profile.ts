@@ -5,6 +5,7 @@ export interface HomeProfileModel {
   ownerName: string;
   title: string;
   description: string;
+  motto: string;
   stats: SiteStats;
   latestProject?: SiteContentItem;
   latestMoment?: SiteContentItem;
@@ -15,6 +16,7 @@ export function buildHomeProfileModel(settings: SiteSettings, content: SiteConte
     ownerName: settings.profile.ownerName,
     title: settings.profile.title,
     description: settings.profile.description,
+    motto: settings.hero.motto,
     stats: getSiteStats(content),
     latestProject: getPublicContent(content, 'project')[0],
     latestMoment: getPublicContent(content, 'moment')[0],
