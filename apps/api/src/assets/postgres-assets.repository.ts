@@ -78,6 +78,13 @@ export function buildAssetSelect(filter: AssetListFilter = {}): SqlStatement {
   };
 }
 
+export function buildAssetFindById(id: string): SqlStatement {
+  return {
+    sql: 'select * from assets where id = $1 limit 1',
+    values: [id],
+  };
+}
+
 export function buildAssetDelete(id: string): SqlStatement {
   return {
     sql: 'delete from assets where id = $1 returning id',
@@ -109,6 +116,13 @@ export class PostgresAssetsRepository implements AssetRepository {
     const result = await this.pool.query<AssetRow>(statement.sql, statement.values);
 
     return result.rows.map(mapAssetRow);
+  }
+
+  async findById(id: string): Promise<AssetRecord | null> {
+    const statement = buildAssetFindById(id);
+    const result = await this.pool.query<AssetRow>(statement.sql, statement.values);
+
+    return result.rows[0] ? mapAssetRow(result.rows[0]) : null;
   }
 
   async delete(id: string): Promise<boolean> {

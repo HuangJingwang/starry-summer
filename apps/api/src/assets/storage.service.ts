@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { basename, dirname, extname, join } from 'node:path';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, extname, join, resolve, sep } from 'node:path';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 export interface UploadValidationInput {
   mimeType: string;
@@ -22,6 +22,7 @@ export interface StoredAsset {
 
 export interface AssetStorage {
   save(input: SaveAssetInput): Promise<StoredAsset>;
+  delete(storageKey: string): Promise<void>;
 }
 
 export interface S3AssetStorageOptions {
@@ -33,7 +34,7 @@ export interface S3AssetStorageOptions {
   secretAccessKey?: string;
   forcePathStyle?: boolean;
   now?: () => Date;
-  send?: (command: PutObjectCommand) => Promise<unknown>;
+  send?: (command: DeleteObjectCommand | PutObjectCommand) => Promise<unknown>;
 }
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
@@ -86,13 +87,24 @@ export class LocalAssetStorage implements AssetStorage {
     };
   }
 
+  async delete(storageKey: string): Promise<void> {
+    const target = resolve(this.options.uploadDir, storageKey);
+    const root = resolve(this.options.uploadDir);
+
+    if (target !== root && !target.startsWith(`${root}${sep}`)) {
+      throw new Error('Unsafe storage key');
+    }
+
+    await rm(target, { force: true });
+  }
+
   private createStorageKey(filename: string): string {
     return createStorageKey(filename, this.options.now?.() ?? new Date());
   }
 }
 
 export class S3AssetStorage implements AssetStorage {
-  private readonly sendCommand: (command: PutObjectCommand) => Promise<unknown>;
+  private readonly sendCommand: (command: DeleteObjectCommand | PutObjectCommand) => Promise<unknown>;
 
   constructor(private readonly options: S3AssetStorageOptions) {
     if (options.send) {
@@ -139,6 +151,15 @@ export class S3AssetStorage implements AssetStorage {
       mimeType: input.mimeType,
       byteSize: input.bytes.byteLength,
     };
+  }
+
+  async delete(storageKey: string): Promise<void> {
+    await this.sendCommand(
+      new DeleteObjectCommand({
+        Bucket: this.options.bucket,
+        Key: storageKey,
+      }),
+    );
   }
 }
 

@@ -68,6 +68,14 @@ export class AssetsService {
   }
 
   async delete(id: string): Promise<void> {
+    const asset = await this.repository.findById(id);
+
+    if (!asset) {
+      throw new NotFoundException(`Asset ${id} was not found`);
+    }
+
+    await this.storage.delete(asset.storageKey);
+
     const deleted = await this.repository.delete(id);
 
     if (!deleted) {

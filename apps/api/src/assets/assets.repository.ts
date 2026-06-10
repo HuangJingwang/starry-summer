@@ -20,6 +20,7 @@ export interface AssetListFilter {
 
 export interface AssetRepository {
   create(input: CreateAssetRecordInput): Promise<AssetRecord>;
+  findById(id: string): Promise<AssetRecord | null>;
   list(filter?: AssetListFilter): Promise<AssetRecord[]>;
   delete(id: string): Promise<boolean>;
 }
@@ -42,6 +43,10 @@ export class InMemoryAssetRepository implements AssetRepository {
     this.records.set(record.id, record);
 
     return record;
+  }
+
+  async findById(id: string): Promise<AssetRecord | null> {
+    return this.records.get(id) ?? null;
   }
 
   async list(filter: AssetListFilter = {}): Promise<AssetRecord[]> {

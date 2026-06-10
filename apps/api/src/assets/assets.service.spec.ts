@@ -42,6 +42,7 @@ describe('AssetsService', () => {
           mimeType: 'image/png',
           byteSize: 9,
         }),
+        delete: async () => undefined,
       },
       repository,
     );
@@ -84,6 +85,7 @@ describe('AssetsService', () => {
           mimeType: input.mimeType,
           byteSize: input.bytes.byteLength,
         }),
+        delete: async () => undefined,
       },
       repository,
       () => 0.75,
@@ -108,6 +110,7 @@ describe('AssetsService', () => {
 
   test('deletes uploaded asset metadata from the gallery', async () => {
     const repository = new InMemoryAssetRepository(() => '2026-06-10T00:00:00.000Z');
+    const deletedStorageKeys: string[] = [];
     const service = new AssetsService(
       {
         save: async (input) => ({
@@ -116,6 +119,9 @@ describe('AssetsService', () => {
           mimeType: input.mimeType,
           byteSize: input.bytes.byteLength,
         }),
+        delete: async (storageKey) => {
+          deletedStorageKeys.push(storageKey);
+        },
       },
       repository,
     );
@@ -128,7 +134,9 @@ describe('AssetsService', () => {
     });
 
     await expect(service.delete(uploaded.id)).resolves.toBeUndefined();
+    expect(deletedStorageKeys).toEqual(['unused.png']);
     await expect(service.list()).resolves.toEqual([]);
     await expect(service.delete(uploaded.id)).rejects.toThrow('Asset 1 was not found');
+    expect(deletedStorageKeys).toEqual(['unused.png']);
   });
 });
