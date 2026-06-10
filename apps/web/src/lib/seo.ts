@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { getContentHref, type SiteContentItem } from './content';
+import { getContentHref, groupContentBySeries, type SiteContentItem } from './content';
 import type { SiteSettings } from './settings';
 
 const defaultSiteUrl = 'http://localhost:3000';
@@ -104,6 +104,23 @@ export function buildRssXml(settings: SiteSettings, siteUrl: string, content: Si
     '</channel>',
     '</rss>',
   ].join('');
+}
+
+export function buildSitemapXml(siteUrl: string, content: SiteContentItem[]): string {
+  const url = normalizePublicSiteUrl(siteUrl);
+  const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'series', 'categories', 'archives', 'guestbook', 'about', 'search'];
+  const contentRoutes = content.map((item) => getContentHref(item).slice(1));
+  const seriesRoutes = groupContentBySeries(content).map((group) => `series/${group.key}`);
+  const routes = [...new Set([...staticRoutes, ...contentRoutes, ...seriesRoutes])];
+  const urls = routes
+    .map((route) => {
+      const loc = route ? `${url}/${route}` : url;
+
+      return `<url><loc>${escapeXml(loc)}</loc></url>`;
+    })
+    .join('');
+
+  return `<?xml version="1.0" encoding="UTF-8" ?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
 }
 
 function escapeXml(value: string): string {

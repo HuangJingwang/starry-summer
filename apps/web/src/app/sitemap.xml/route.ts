@@ -1,20 +1,11 @@
-import { getContentHref } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
-import { normalizePublicSiteUrl } from '@/lib/seo';
+import { buildSitemapXml, normalizePublicSiteUrl } from '@/lib/seo';
 
 export async function GET() {
   const siteUrl = normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL);
-  const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'categories', 'archives', 'guestbook', 'about', 'search'];
-  const contentRoutes = (await loadSiteContent()).map((item) => getContentHref(item).slice(1));
-  const urls = [...staticRoutes, ...contentRoutes]
-    .map((route) => {
-      const loc = route ? `${siteUrl}/${route}` : siteUrl;
+  const content = await loadSiteContent();
 
-      return `<url><loc>${loc}</loc></url>`;
-    })
-    .join('');
-
-  return new Response(`<?xml version="1.0" encoding="UTF-8" ?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, {
+  return new Response(buildSitemapXml(siteUrl, content), {
     headers: {
       'content-type': 'application/xml; charset=utf-8',
     },

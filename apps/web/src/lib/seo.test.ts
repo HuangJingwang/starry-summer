@@ -6,6 +6,7 @@ import {
   buildContentMetadata,
   buildRobotsText,
   buildRssXml,
+  buildSitemapXml,
   buildSiteMetadata,
   normalizePublicSiteUrl,
 } from './seo';
@@ -87,5 +88,19 @@ describe('SEO helpers', () => {
     expect(xml).toContain('<title><![CDATA[Public Post]]></title>');
     expect(xml).toContain('<link>https://example.com/posts/public-post</link>');
     expect(xml).toContain('<description><![CDATA[A public post summary.]]></description>');
+  });
+
+  test('builds sitemap XML with static content and series URLs', () => {
+    const xml = buildSitemapXml('https://example.com', [
+      {
+        ...content,
+        series: ['Platform Journal'],
+      },
+    ]);
+
+    expect(xml).toContain('<loc>https://example.com</loc>');
+    expect(xml).toContain('<loc>https://example.com/series</loc>');
+    expect(xml).toContain('<loc>https://example.com/posts/public-post</loc>');
+    expect(xml).toContain('<loc>https://example.com/series/platform-journal</loc>');
   });
 });
