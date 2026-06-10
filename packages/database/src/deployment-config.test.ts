@@ -145,6 +145,7 @@ describe('deployment configuration', () => {
     const tempDirectory = await mkdtemp(join(tmpdir(), 'starry-summer-env-'));
     const safeEnvPath = join(tempDirectory, '.env');
     const localStorageEnvPath = join(tempDirectory, '.env.local-storage');
+    const unsafeLocalUploadUrlPath = join(tempDirectory, '.env.unsafe-local-upload-url');
     const unsafeS3EnvPath = join(tempDirectory, '.env.unsafe-s3');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
@@ -156,6 +157,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
+    expect(doctorScript).toContain('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.');
     expect(deployment).toContain('npm run ops:doctor');
 
     await expect(execFileAsync('bash', ['scripts/doctor.sh', '.env.example'], { cwd: repoRoot })).rejects.toMatchObject({
@@ -176,6 +178,18 @@ describe('deployment configuration', () => {
     );
     await expect(execFileAsync('bash', ['scripts/doctor.sh', localStorageEnvPath], { cwd: repoRoot })).resolves.toMatchObject({
       stdout: expect.stringContaining('Deployment environment looks ready.'),
+    });
+    await writeFile(
+      unsafeLocalUploadUrlPath,
+      [
+        safeEnv,
+        'STORAGE_DRIVER=local',
+        'LOCAL_UPLOAD_PUBLIC_URL=https://assets.example.com/uploads',
+      ].join('\n'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeLocalUploadUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.'),
     });
     await writeFile(
       unsafeS3EnvPath,

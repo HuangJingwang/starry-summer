@@ -96,6 +96,14 @@ case "${STORAGE_DRIVER:-local}" in
     ;;
 esac
 
+if [[ "${STORAGE_DRIVER:-local}" == "local" ]]; then
+  local_upload_public_url="${LOCAL_UPLOAD_PUBLIC_URL:-/uploads}"
+
+  if [[ "$local_upload_public_url" != /* || "$local_upload_public_url" == //* ]]; then
+    fail "LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local."
+  fi
+fi
+
 if [[ "${STORAGE_DRIVER:-local}" == "s3" ]]; then
   case "${S3_ACCESS_KEY:-}" in
     "" | minioadmin | access-key | change-me-before-production)
