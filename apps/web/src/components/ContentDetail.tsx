@@ -1,4 +1,4 @@
-import type { SiteContentItem } from '@/lib/content';
+import { getContentHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { CommentForm } from './CommentForm';
 import { LikeButton } from './LikeButton';
@@ -7,7 +7,7 @@ function isCommentTargetType(type: SiteContentItem['type']): type is CommentTarg
   return type === 'post' || type === 'note' || type === 'project';
 }
 
-export function ContentDetail({ item }: { item: SiteContentItem }) {
+export function ContentDetail({ item, adjacent }: { item: SiteContentItem; adjacent?: AdjacentContent }) {
   const commentForm = isCommentTargetType(item.type) ? (
     <CommentForm targetType={item.type} targetId={item.id} />
   ) : null;
@@ -27,6 +27,26 @@ export function ContentDetail({ item }: { item: SiteContentItem }) {
           这是当前内容详情页的基础形态。后续会接入 API 中的 Markdown 渲染结果，并展示目录、代码高亮、评论和点赞。
         </p>
       </div>
+      {adjacent ? (
+        <nav className="adjacent-content" aria-label="Adjacent content">
+          {adjacent.previous ? (
+            <a href={getContentHref(adjacent.previous)}>
+              <span>上一篇</span>
+              <strong>{adjacent.previous.title}</strong>
+            </a>
+          ) : (
+            <span className="adjacent-content__empty">没有更早内容</span>
+          )}
+          {adjacent.next ? (
+            <a href={getContentHref(adjacent.next)}>
+              <span>下一篇</span>
+              <strong>{adjacent.next.title}</strong>
+            </a>
+          ) : (
+            <span className="adjacent-content__empty">没有更新内容</span>
+          )}
+        </nav>
+      ) : null}
       {commentForm}
     </article>
   );

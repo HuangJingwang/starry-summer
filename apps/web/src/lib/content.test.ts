@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 import {
   getContentBySlug,
   getContentHref,
+  getAdjacentContent,
+  groupContentByMonth,
   getFeaturedContent,
   getPublicContent,
   groupContentCounts,
@@ -114,5 +116,33 @@ describe('web content helpers', () => {
 
     expect(item?.id).toBe('1');
     expect(getContentBySlug([], 'post', 'missing')).toBeNull();
+  });
+
+  test('groups public content into archive months', () => {
+    const groups = groupContentByMonth([
+      { id: '1', title: 'A', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-10' },
+      { id: '2', title: 'B', type: 'note', status: 'published', visibility: 'public', publishedAt: '2026-06-01' },
+      { id: '3', title: 'C', type: 'project', status: 'published', visibility: 'public', publishedAt: '2026-05-30' },
+      { id: '4', title: 'Draft', type: 'post', status: 'draft', visibility: 'public', publishedAt: '2026-06-20' },
+    ]);
+
+    expect(groups).toEqual([
+      { key: '2026-06', label: '2026 年 06 月', items: expect.arrayContaining([expect.objectContaining({ id: '1' }), expect.objectContaining({ id: '2' })]) },
+      { key: '2026-05', label: '2026 年 05 月', items: [expect.objectContaining({ id: '3' })] },
+    ]);
+  });
+
+  test('finds adjacent public content in timeline order', () => {
+    const adjacent = getAdjacentContent(
+      [
+        { id: 'old', title: 'Old', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01', slug: 'old' },
+        { id: 'current', title: 'Current', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-02-01', slug: 'current' },
+        { id: 'new', title: 'New', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-03-01', slug: 'new' },
+      ],
+      'current',
+    );
+
+    expect(adjacent.previous?.id).toBe('old');
+    expect(adjacent.next?.id).toBe('new');
   });
 });

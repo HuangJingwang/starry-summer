@@ -15,6 +15,17 @@ export interface SiteContentItem {
   likeCount?: number;
 }
 
+export interface ContentArchiveGroup {
+  key: string;
+  label: string;
+  items: SiteContentItem[];
+}
+
+export interface AdjacentContent {
+  previous: SiteContentItem | null;
+  next: SiteContentItem | null;
+}
+
 const contentTypes: ContentType[] = ['moment', 'note', 'page', 'post', 'project'];
 
 export function getPublicContent(items: SiteContentItem[], type?: ContentType): SiteContentItem[] {
@@ -42,6 +53,41 @@ export function groupContentCounts(items: SiteContentItem[]): Record<ContentType
   }
 
   return counts;
+}
+
+export function groupContentByMonth(items: SiteContentItem[]): ContentArchiveGroup[] {
+  const groups = new Map<string, SiteContentItem[]>();
+
+  for (const item of getPublicContent(items)) {
+    const key = item.publishedAt.slice(0, 7);
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  }
+
+  return [...groups.entries()].map(([key, groupItems]) => {
+    const [year, month] = key.split('-');
+
+    return {
+      key,
+      label: `${year} 年 ${month} 月`,
+      items: groupItems,
+    };
+  });
+}
+
+export function getAdjacentContent(items: SiteContentItem[], currentId: string): AdjacentContent {
+  const timeline = [...getPublicContent(items)].reverse();
+  const index = timeline.findIndex((item) => item.id === currentId);
+
+  if (index === -1) {
+    return { previous: null, next: null };
+  }
+
+  return {
+    previous: timeline[index - 1] ?? null,
+    next: timeline[index + 1] ?? null,
+  };
 }
 
 export function searchContent(items: SiteContentItem[], query: string): SiteContentItem[] {

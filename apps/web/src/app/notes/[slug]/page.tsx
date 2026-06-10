@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { ContentDetail } from '@/components/ContentDetail';
 import { SiteShell } from '@/components/SiteShell';
-import { getContentBySlug, seedContent } from '@/lib/content';
+import { getAdjacentContent, getContentBySlug, seedContent } from '@/lib/content';
 
 export default async function NoteDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -15,7 +15,7 @@ export default async function NoteDetailPage({ params }: { params: Promise<{ slu
   return (
     <SiteShell>
       <main className="page-main narrow">
-        <ContentDetail item={item} />
+        <ContentDetail item={item} adjacent={getAdjacentContent(seedContent, item.id)} />
       </main>
     </SiteShell>
   );
