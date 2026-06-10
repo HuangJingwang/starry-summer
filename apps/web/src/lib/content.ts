@@ -80,6 +80,21 @@ export function canShowComments(item: SiteContentItem): boolean {
   return ['post', 'note', 'project'].includes(item.type) && item.allowComments !== false;
 }
 
+export function estimateReadingTime(markdown: string): string {
+  const normalized = markdown.trim();
+
+  if (!normalized) {
+    return '1 min read';
+  }
+
+  const cjkCharacters = normalized.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu)?.length ?? 0;
+  const latinWords = normalized.replace(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu, ' ').match(/[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)*/g)?.length ?? 0;
+  const equivalentWords = latinWords + cjkCharacters;
+  const minutes = Math.max(1, Math.ceil(equivalentWords / 200));
+
+  return `${minutes} min read`;
+}
+
 function sortPublicContent(a: SiteContentItem, b: SiteContentItem, sort: ContentSort): number {
   if (Boolean(a.pinned) !== Boolean(b.pinned)) {
     return a.pinned ? -1 : 1;

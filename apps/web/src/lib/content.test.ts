@@ -16,6 +16,7 @@ import {
   groupContentCounts,
   groupContentBySeries,
   normalizeContentSort,
+  estimateReadingTime,
   searchContent,
 } from './content';
 
@@ -68,6 +69,12 @@ describe('web content helpers', () => {
     expect(canShowComments({ ...base, type: 'post', allowComments: false })).toBe(false);
     expect(canShowComments({ ...base, type: 'moment' })).toBe(false);
     expect(canShowComments({ ...base, type: 'page' })).toBe(false);
+  });
+
+  test('estimates reading time from mixed Chinese and English content', () => {
+    expect(estimateReadingTime('短文')).toBe('1 min read');
+    expect(estimateReadingTime('word '.repeat(401))).toBe('3 min read');
+    expect(estimateReadingTime('中文'.repeat(260))).toBe('3 min read');
   });
 
   test('returns featured content before regular content', () => {

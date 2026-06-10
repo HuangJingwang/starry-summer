@@ -1,7 +1,7 @@
 import { renderMarkdown } from '@starry-summer/markdown';
 import Link from 'next/link';
 
-import { canShowComments, getContentHref, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { canShowComments, estimateReadingTime, getContentHref, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
@@ -17,6 +17,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const markdown = item.bodyMarkdown || item.summary || '';
   const bodyHtml = await renderMarkdown(markdown);
   const tableOfContents = buildContentTableOfContents(markdown);
+  const readingTime = estimateReadingTime(markdown);
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="Comments">
       <h2>评论</h2>
@@ -38,6 +39,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       ) : null}
       <div className="detail__meta">
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
+        <span>{readingTime}</span>
         <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>
         {item.sourceType === 'repost' && item.sourceUrl ? (
           <a href={item.sourceUrl} target="_blank" rel="nofollow noopener noreferrer">
