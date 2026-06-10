@@ -5,6 +5,7 @@ export type CreateContentRecordInput = Omit<ContentRecord, 'createdAt' | 'id' | 
 export interface ContentRepository {
   create(input: CreateContentRecordInput): Promise<ContentRecord>;
   findById(id: string): Promise<ContentRecord | null>;
+  findBySlug(slug: string): Promise<ContentRecord | null>;
   listAdmin(): Promise<ContentRecord[]>;
   listPublic(filter?: PublicContentFilter): Promise<ContentRecord[]>;
   update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null>;
@@ -36,6 +37,10 @@ export class InMemoryContentRepository implements ContentRepository {
 
   async findById(id: string): Promise<ContentRecord | null> {
     return this.records.get(id) ?? null;
+  }
+
+  async findBySlug(slug: string): Promise<ContentRecord | null> {
+    return [...this.records.values()].find((record) => record.slug === slug) ?? null;
   }
 
   async listAdmin(): Promise<ContentRecord[]> {

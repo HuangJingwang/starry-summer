@@ -155,6 +155,10 @@ describe('PostgresContentRepository mapping', () => {
     expect(select).toContain('order by ci.published_at desc');
   });
 
+  test('builds slug lookup selects', () => {
+    expect(buildContentSelect('where ci.slug = $1')).toContain('where ci.slug = $1');
+  });
+
   test('builds popular order clauses from persisted interaction counts', () => {
     const select = buildContentSelect('where ci.status = $1', buildPublicContentOrderClause('popular'));
 

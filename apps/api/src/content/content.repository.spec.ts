@@ -27,6 +27,8 @@ describe('InMemoryContentRepository', () => {
     });
 
     expect(await repository.findById(record.id)).toEqual(record);
+    expect(await repository.findBySlug('hello')).toEqual(record);
+    expect(await repository.findBySlug('missing')).toBeNull();
   });
 
   test('updates existing records immutably', async () => {

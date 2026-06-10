@@ -167,6 +167,12 @@ export class PostgresContentRepository implements ContentRepository {
     return this.findByIdWithClient(this.pool, id);
   }
 
+  async findBySlug(slug: string): Promise<ContentRecord | null> {
+    const result = await this.pool.query<ContentItemRow>(buildContentSelect('where ci.slug = $1'), [slug]);
+
+    return result.rows[0] ? mapContentRow(result.rows[0]) : null;
+  }
+
   async listAdmin(): Promise<ContentRecord[]> {
     const result = await this.pool.query<ContentItemRow>(
       buildContentSelect('where true', 'order by ci.updated_at desc'),

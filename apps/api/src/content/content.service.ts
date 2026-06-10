@@ -72,6 +72,8 @@ export class ContentService {
   ) {}
 
   async createDraft(input: CreateDraftInput): Promise<ContentRecord> {
+    await this.ensureSlugAvailable(input.slug);
+
     return this.repository.create({
       type: input.type,
       title: input.title,
@@ -107,6 +109,11 @@ export class ContentService {
 
   async updateContent(id: string, input: UpdateContentInput): Promise<ContentRecord> {
     await this.getRecord(id);
+
+    if (input.slug) {
+      await this.ensureSlugAvailable(input.slug, id);
+    }
+
     const updated = await this.repository.update(id, {
       ...input,
       categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
@@ -262,6 +269,14 @@ export class ContentService {
     }
 
     throw new NotFoundException(`Content ${id} was not found`);
+  }
+
+  private async ensureSlugAvailable(slug: string, currentId?: string): Promise<void> {
+    const existing = await this.repository.findBySlug(slug);
+
+    if (existing && existing.id !== currentId) {
+      throw new UnprocessableEntityException('Content slug is already in use');
+    }
   }
 
   private slugify(value: string): string {

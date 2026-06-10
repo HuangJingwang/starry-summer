@@ -143,6 +143,39 @@ describe('ContentService', () => {
     });
   });
 
+  test('rejects duplicate content slugs', async () => {
+    const first = await service.createDraft({
+      type: 'post',
+      title: 'First Post',
+      slug: 'shared-slug',
+      summary: 'First',
+      bodyMarkdown: '# First',
+    });
+    const second = await service.createDraft({
+      type: 'note',
+      title: 'Second Note',
+      slug: 'second-note',
+      summary: 'Second',
+      bodyMarkdown: '# Second',
+    });
+
+    await expect(
+      service.createDraft({
+        type: 'project',
+        title: 'Duplicate Project',
+        slug: 'shared-slug',
+        summary: 'Duplicate',
+        bodyMarkdown: '# Duplicate',
+      }),
+    ).rejects.toThrow('Content slug is already in use');
+    await expect(service.updateContent(second.id, { slug: first.slug })).rejects.toThrow('Content slug is already in use');
+    await expect(service.updateContent(first.id, { summary: 'Updated with same slug', slug: first.slug })).resolves.toMatchObject({
+      id: first.id,
+      slug: first.slug,
+      summary: 'Updated with same slug',
+    });
+  });
+
   test('returns a full admin content record by id', async () => {
     const draft = await service.createDraft({
       type: 'post',
