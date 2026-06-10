@@ -1,26 +1,21 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-const navItems = [
-  { href: '/', label: 'Home' },
-  { href: '/posts', label: 'Writing' },
-  { href: '/notes', label: 'Notes' },
-  { href: '/moments', label: 'Moments' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/categories', label: 'Categories' },
-  { href: '/archives', label: 'Archives' },
-  { href: '/search', label: 'Search' },
-  { href: '/about', label: 'About' },
-  { href: '/guestbook', label: 'Guestbook' },
-];
+import { buildPublicNavigation } from '@/lib/navigation';
+import { loadPublicSettings } from '@/lib/settings';
 
-export function SiteShell({ children }: { children: ReactNode }) {
+export async function SiteShell({ children }: { children: ReactNode }) {
+  const settings = await loadPublicSettings(undefined, {
+    apiBaseUrl: process.env.API_BASE_URL,
+  });
+  const navItems = buildPublicNavigation(settings.navigation);
+
   return (
     <div className="site-shell">
       <header className="site-header">
-        <Link className="brand" href="/" aria-label="Starry Summer home">
+        <Link className="brand" href="/" aria-label={`${settings.profile.title} home`}>
           <span className="brand-mark">S</span>
-          <span>Starry Summer</span>
+          <span>{settings.profile.title}</span>
         </Link>
         <nav className="site-nav" aria-label="Primary navigation">
           {navItems.map((item) => (
