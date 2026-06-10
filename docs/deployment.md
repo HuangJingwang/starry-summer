@@ -49,6 +49,12 @@ Verify:
 - `https://$DOMAIN/admin/login` opens the admin login screen.
 - `https://$DOMAIN/api/health` returns API health through Caddy.
 
+Run database migrations before enabling persistent API repositories:
+
+```bash
+DATABASE_URL="postgresql://starry:change-me@localhost:5432/starry_summer" npm run db:migrate
+```
+
 ## 4. Backup
 
 PostgreSQL dump:
@@ -99,6 +105,6 @@ docker compose logs -f web api caddy
 
 - Do not use default MinIO, PostgreSQL, or session credentials.
 - Keep `.env` out of git.
-- Add database migrations before switching the API from in-memory repositories to PostgreSQL.
+- Run `npm run db:migrate` after schema changes and before deploying API code that depends on them.
 - Use an external managed object store if the server has limited disk space.
 - Keep regular off-server backups.

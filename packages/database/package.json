@@ -1,5 +1,5 @@
 {
-  "name": "@starry-summer/markdown",
+  "name": "@starry-summer/database",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,18 +8,16 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run --exclude dist/**",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrate": "tsx src/cli.ts"
   },
   "dependencies": {
-    "gray-matter": "^4.0.3",
-    "rehype-stringify": "^10.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.2",
-    "sanitize-html": "^2.17.0",
-    "unified": "^11.0.5"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@types/sanitize-html": "^2.16.0",
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   }

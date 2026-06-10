@@ -7,7 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/apps/api/src/main.js",
     "start:dev": "tsx watch src/main.ts",
-    "test": "vitest run --pool=forks",
+    "test": "vitest run --pool=forks --exclude dist/**",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
