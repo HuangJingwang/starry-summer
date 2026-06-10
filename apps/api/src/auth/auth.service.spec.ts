@@ -1,10 +1,14 @@
-import { describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createHmac } from 'node:crypto';
 
 import { AuthService } from './auth.service';
 import { createPasswordHash } from './password';
 
 describe('AuthService', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   test('logs in the configured admin and returns a verifiable session', async () => {
     const service = new AuthService({
       adminEmail: 'owner@example.com',
@@ -81,5 +85,18 @@ describe('AuthService', () => {
     const signature = createHmac('sha256', sessionSecret).update(encodedPayload).digest('base64url');
 
     expect(service.verifySession(`${encodedPayload}.${signature}`)).toBeNull();
+  });
+
+  test('rejects weak session secrets in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+
+    expect(
+      () =>
+        new AuthService({
+          adminEmail: 'owner@example.com',
+          adminPasswordHash: createPasswordHash('secret-password', 'auth-service-salt'),
+          sessionSecret: 'change-me-before-production',
+        }),
+    ).toThrow('SESSION_SECRET must be at least 32 characters and not a placeholder in production');
   });
 });

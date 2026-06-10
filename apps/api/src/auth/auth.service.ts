@@ -38,6 +38,7 @@ export class AuthService {
       adminPasswordHash: config?.adminPasswordHash ?? process.env.ADMIN_PASSWORD_HASH ?? '',
       sessionSecret: config?.sessionSecret ?? process.env.SESSION_SECRET ?? 'development-session-secret',
     };
+    assertProductionSessionSecret(this.config.sessionSecret);
   }
 
   async login(input: LoginInput): Promise<AdminSession> {
@@ -102,5 +103,20 @@ export class AuthService {
 
   private sign(value: string): string {
     return createHmac('sha256', this.config.sessionSecret).update(value).digest('base64url');
+  }
+}
+
+function assertProductionSessionSecret(sessionSecret: string): void {
+  if (process.env.NODE_ENV !== 'production') {
+    return;
+  }
+
+  if (
+    sessionSecret.length < 32 ||
+    sessionSecret.startsWith('replace-') ||
+    sessionSecret.startsWith('change-') ||
+    sessionSecret === 'development-session-secret'
+  ) {
+    throw new Error('SESSION_SECRET must be at least 32 characters and not a placeholder in production');
   }
 }
