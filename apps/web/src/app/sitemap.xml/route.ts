@@ -1,8 +1,9 @@
 import { getContentHref } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
+import { normalizePublicSiteUrl } from '@/lib/seo';
 
 export async function GET() {
-  const siteUrl = process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000';
+  const siteUrl = normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL);
   const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'categories', 'archives', 'guestbook', 'about', 'search'];
   const contentRoutes = (await loadSiteContent()).map((item) => getContentHref(item).slice(1));
   const urls = [...staticRoutes, ...contentRoutes]

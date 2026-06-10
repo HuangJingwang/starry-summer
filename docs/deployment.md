@@ -20,7 +20,7 @@ cp .env.example .env
 Required production changes:
 
 - `DOMAIN`: your public domain, for example `example.com`.
-- `PUBLIC_SITE_URL`: `https://example.com`.
+- `PUBLIC_SITE_URL`: `https://example.com`. This value is used by `robots.txt`, `sitemap.xml`, RSS, canonical links, and Open Graph metadata.
 - `ACME_EMAIL`: email used by Caddy for HTTPS certificates.
 - `SESSION_SECRET`: a long random string.
 - `ADMIN_EMAIL`: owner login email.

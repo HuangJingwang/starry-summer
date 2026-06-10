@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { buildSiteMetadata, normalizePublicSiteUrl } from '@/lib/seo';
 import { loadPublicSettings } from '@/lib/settings';
 import './styles.css';
 
@@ -8,10 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
     apiBaseUrl: process.env.API_BASE_URL,
   });
 
-  return {
-    title: settings.profile.title,
-    description: settings.profile.description,
-  };
+  return buildSiteMetadata(settings, normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL));
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
