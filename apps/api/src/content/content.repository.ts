@@ -8,6 +8,7 @@ export interface ContentRepository {
   listAdmin(): Promise<ContentRecord[]>;
   listPublic(filter?: PublicContentFilter): Promise<ContentRecord[]>;
   update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null>;
+  delete(id: string): Promise<boolean>;
 }
 
 export const CONTENT_REPOSITORY = Symbol('CONTENT_REPOSITORY');
@@ -66,6 +67,10 @@ export class InMemoryContentRepository implements ContentRepository {
     this.records.set(id, updated);
 
     return updated;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    return this.records.delete(id);
   }
 }
 

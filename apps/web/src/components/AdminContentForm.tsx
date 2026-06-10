@@ -7,6 +7,7 @@ import {
   buildAdminContentActionRequest,
   buildContentPayloadFromFormData,
   buildCreateDraftRequest,
+  buildDeleteContentRequest,
   buildUpdateContentRequest,
   createMarkdownPreview,
 } from '@/lib/admin-content';
@@ -80,6 +81,24 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     } catch {
       setState('error');
       setMessage('保存失败，请确认已登录且 API 服务可用。');
+    }
+  }
+
+  async function runDelete() {
+    if (!initialValue?.id || !window.confirm('Permanently delete this archived content?')) {
+      return;
+    }
+
+    setState('submitting');
+    setMessage('');
+
+    try {
+      await send(buildDeleteContentRequest(initialValue.id));
+      setState('success');
+      setMessage('已永久删除。');
+    } catch {
+      setState('error');
+      setMessage('删除失败，请先确认内容已归档且 API 服务可用。');
     }
   }
 
@@ -183,6 +202,11 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
             <button type="submit" formAction={(formData) => runSave(formData, 'restore-draft')} disabled={state === 'submitting'}>
               Restore draft
             </button>
+            {initialValue?.status === 'archived' ? (
+              <button type="button" onClick={runDelete} disabled={state === 'submitting'}>
+                Delete permanently
+              </button>
+            ) : null}
           </>
         ) : null}
       </div>

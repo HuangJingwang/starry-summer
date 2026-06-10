@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  buildContentDelete,
   buildContentInsert,
   buildPublicContentOrderClause,
   buildContentSelect,
@@ -132,6 +133,13 @@ describe('PostgresContentRepository mapping', () => {
       'archived',
       '2026-06-10T02:00:00.000Z',
     ]);
+  });
+
+  test('builds content delete SQL', () => {
+    expect(buildContentDelete('content-1')).toEqual({
+      sql: 'delete from content_items where id = $1 returning id',
+      values: ['content-1'],
+    });
   });
 
   test('builds content selects with persisted like and view counts', () => {

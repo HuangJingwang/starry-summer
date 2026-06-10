@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { ContentVisibility } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -49,6 +49,11 @@ export class AdminContentController {
   @Patch(':id/restore-draft')
   restoreDraft(@Param('id') id: string) {
     return this.contentService.restoreDraft(id);
+  }
+
+  @Delete(':id')
+  deleteArchived(@Param('id') id: string) {
+    return this.contentService.deleteArchived(id);
   }
 
   @Patch(':id/visibility')

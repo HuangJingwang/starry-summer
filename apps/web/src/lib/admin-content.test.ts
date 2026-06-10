@@ -9,6 +9,7 @@ import {
   buildImportMarkdownArchiveRequest,
   buildImportMarkdownRequest,
   buildContentPayloadFromFormData,
+  buildDeleteContentRequest,
   buildListAdminContentRequest,
   buildUpdateContentRequest,
   createMarkdownPreview,
@@ -146,6 +147,13 @@ describe('admin content helpers', () => {
       url: '/api/admin/content/content-1/archive',
       init: {
         method: 'PATCH',
+        credentials: 'include',
+      },
+    });
+    expect(buildDeleteContentRequest('content-1')).toEqual({
+      url: '/api/admin/content/content-1',
+      init: {
+        method: 'DELETE',
         credentials: 'include',
       },
     });

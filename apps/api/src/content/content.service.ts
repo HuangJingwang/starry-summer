@@ -155,6 +155,20 @@ export class ContentService {
     return this.ensureRecord(updated, id);
   }
 
+  async deleteArchived(id: string): Promise<void> {
+    const record = await this.getRecord(id);
+
+    if (record.status !== 'archived') {
+      throw new UnprocessableEntityException('Only archived content can be permanently deleted');
+    }
+
+    const deleted = await this.repository.delete(id);
+
+    if (!deleted) {
+      throw new NotFoundException(`Content ${id} was not found`);
+    }
+  }
+
   async setVisibility(id: string, visibility: ContentVisibility): Promise<ContentRecord> {
     await this.getRecord(id);
     const updated = await this.repository.update(id, {

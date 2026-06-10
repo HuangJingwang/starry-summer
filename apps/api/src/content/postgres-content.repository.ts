@@ -118,6 +118,13 @@ export function buildContentUpdate(id: string, patch: Partial<ContentRecord>): S
   };
 }
 
+export function buildContentDelete(id: string): SqlStatement {
+  return {
+    sql: 'delete from content_items where id = $1 returning id',
+    values: [id],
+  };
+}
+
 export class PostgresContentRepository implements ContentRepository {
   private readonly pool: pg.Pool;
 
@@ -220,6 +227,13 @@ export class PostgresContentRepository implements ContentRepository {
     } finally {
       client.release();
     }
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const statement = buildContentDelete(id);
+    const result = await this.pool.query<{ id: string }>(statement.sql, statement.values);
+
+    return Boolean(result.rows[0]);
   }
 
   private async findByIdWithClient(client: Queryable, id: string): Promise<ContentRecord | null> {

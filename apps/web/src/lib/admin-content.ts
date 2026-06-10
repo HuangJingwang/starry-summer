@@ -347,6 +347,16 @@ export function buildAdminContentActionRequest(id: string, action: AdminContentA
   };
 }
 
+export function buildDeleteContentRequest(id: string): AdminContentRequest {
+  return {
+    url: `/api/admin/content/${id}`,
+    init: {
+      method: 'DELETE',
+      credentials: 'include',
+    },
+  };
+}
+
 export function buildExportMarkdownRequest(id: string): AdminContentRequest {
   return {
     url: `/api/admin/content/${id}/export`,

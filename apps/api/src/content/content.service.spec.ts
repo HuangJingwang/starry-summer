@@ -179,6 +179,22 @@ describe('ContentService', () => {
     expect(restored.publishedAt).toBeNull();
   });
 
+  test('permanently deletes archived content only', async () => {
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Delete Me',
+      slug: 'delete-me',
+      summary: 'Temporary',
+      bodyMarkdown: '# Delete Me',
+    });
+
+    await expect(service.deleteArchived(draft.id)).rejects.toThrow('Only archived content can be permanently deleted');
+
+    await service.archive(draft.id);
+    await expect(service.deleteArchived(draft.id)).resolves.toBeUndefined();
+    await expect(service.getAdminRecord(draft.id)).rejects.toThrow('Content 1 was not found');
+  });
+
   test('imports Markdown with front matter as a draft', async () => {
     const imported = await service.importMarkdown(
       [
