@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
+import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
 import {
   InteractionsService,
   type CreateCommentInput,
@@ -22,6 +23,7 @@ export class InteractionsController {
   }
 
   @Patch('admin/comments/:id/moderate')
+  @UseGuards(AdminAuthGuard)
   moderateComment(@Param('id') id: string, @Body('status') status: ModerationStatus) {
     return this.interactionsService.moderateComment(id, status);
   }
