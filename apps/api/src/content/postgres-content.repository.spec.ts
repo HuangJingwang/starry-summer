@@ -19,6 +19,8 @@ describe('PostgresContentRepository mapping', () => {
       title: 'Hello',
       slug: 'hello',
       summary: 'Intro',
+      seo_title: 'Hello SEO',
+      seo_description: 'Search intro',
       body_markdown: '# Hello',
       source_type: 'repost',
       source_url: 'https://example.com/original',
@@ -54,6 +56,8 @@ describe('PostgresContentRepository mapping', () => {
       title: 'Hello',
       slug: 'hello',
       summary: 'Intro',
+      seoTitle: 'Hello SEO',
+      seoDescription: 'Search intro',
       bodyMarkdown: '# Hello',
       sourceType: 'repost',
       sourceUrl: 'https://example.com/original',
@@ -91,6 +95,8 @@ describe('PostgresContentRepository mapping', () => {
       title: 'Note',
       slug: 'note',
       summary: 'Short note',
+      seoTitle: 'Note SEO',
+      seoDescription: 'Search note',
       bodyMarkdown: '# Note',
       sourceType: 'original',
       sourceUrl: '',
@@ -118,6 +124,8 @@ describe('PostgresContentRepository mapping', () => {
     });
 
     expect(insert.sql).toContain('insert into content_items');
+    expect(insert.sql).toContain('seo_title');
+    expect(insert.sql).toContain('seo_description');
     expect(insert.sql).toContain('body_markdown');
     expect(insert.sql).toContain('source_type');
     expect(insert.sql).toContain('source_url');
@@ -127,6 +135,8 @@ describe('PostgresContentRepository mapping', () => {
       'Note',
       'note',
       'Short note',
+      'Note SEO',
+      'Search note',
       '# Note',
       'original',
       '',
@@ -153,6 +163,8 @@ describe('PostgresContentRepository mapping', () => {
     const update = buildContentUpdate('content-1', {
       type: 'note',
       title: 'Updated',
+      seoTitle: 'Updated SEO',
+      seoDescription: 'Updated search description',
       bodyMarkdown: '# Updated',
       sourceType: 'repost',
       sourceUrl: 'https://example.com/updated',
@@ -173,20 +185,24 @@ describe('PostgresContentRepository mapping', () => {
     expect(update).not.toBeNull();
     expect(update?.sql).toContain('type = $2');
     expect(update?.sql).toContain('title = $3');
-    expect(update?.sql).toContain('body_markdown = $4');
-    expect(update?.sql).toContain('source_type = $5');
-    expect(update?.sql).toContain('source_url = $6');
-    expect(update?.sql).toContain('cover_asset_id = $7');
-    expect(update?.sql).toContain('status = $8');
-    expect(update?.sql).toContain('project_status = $9');
-    expect(update?.sql).toContain('project_links = $10');
-    expect(update?.sql).toContain('project_stack = $11');
-    expect(update?.sql).toContain('project_started_at = $12');
-    expect(update?.sql).toContain('project_ended_at = $13');
+    expect(update?.sql).toContain('seo_title = $4');
+    expect(update?.sql).toContain('seo_description = $5');
+    expect(update?.sql).toContain('body_markdown = $6');
+    expect(update?.sql).toContain('source_type = $7');
+    expect(update?.sql).toContain('source_url = $8');
+    expect(update?.sql).toContain('cover_asset_id = $9');
+    expect(update?.sql).toContain('status = $10');
+    expect(update?.sql).toContain('project_status = $11');
+    expect(update?.sql).toContain('project_links = $12');
+    expect(update?.sql).toContain('project_stack = $13');
+    expect(update?.sql).toContain('project_started_at = $14');
+    expect(update?.sql).toContain('project_ended_at = $15');
     expect(update?.values).toEqual([
       'content-1',
       'note',
       'Updated',
+      'Updated SEO',
+      'Updated search description',
       '# Updated',
       'repost',
       'https://example.com/updated',

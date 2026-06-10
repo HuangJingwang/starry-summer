@@ -11,6 +11,8 @@ export interface ContentRecord {
   title: string;
   slug: string;
   summary: string;
+  seoTitle?: string;
+  seoDescription?: string;
   bodyMarkdown: string;
   sourceType: ContentSourceType;
   sourceUrl: string;
@@ -38,6 +40,8 @@ export interface CreateDraftInput {
   title: string;
   slug: string;
   summary: string;
+  seoTitle?: string;
+  seoDescription?: string;
   bodyMarkdown: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
@@ -53,6 +57,8 @@ export type UpdateContentInput = Partial<{
   title: string;
   slug: string;
   summary: string;
+  seoTitle: string;
+  seoDescription: string;
   bodyMarkdown: string;
   sourceType: ContentSourceType;
   sourceUrl: string;
@@ -99,6 +105,8 @@ export class ContentService {
       title: input.title,
       slug: input.slug,
       summary: input.summary,
+      seoTitle: normalizeOptionalText(input.seoTitle),
+      seoDescription: normalizeOptionalText(input.seoDescription),
       bodyMarkdown: input.bodyMarkdown,
       sourceType: input.sourceType ?? 'original',
       sourceUrl: normalizeSourceUrl(input.sourceUrl),
@@ -159,6 +167,8 @@ export class ContentService {
       categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
       tags: input.tags ? normalizeTaxonomyLabels(input.tags) : undefined,
       series: input.series ? normalizeTaxonomyLabels(input.series) : undefined,
+      ...(input.seoTitle !== undefined ? { seoTitle: normalizeOptionalText(input.seoTitle) } : {}),
+      ...(input.seoDescription !== undefined ? { seoDescription: normalizeOptionalText(input.seoDescription) } : {}),
       coverAssetId: input.coverAssetId !== undefined ? normalizeOptionalText(input.coverAssetId) : undefined,
       project: input.project !== undefined ? normalizeProjectMetadata(input.project) ?? {} : undefined,
       updatedAt: new Date().toISOString(),
@@ -234,6 +244,8 @@ export class ContentService {
     const title = String(document.frontmatter.title ?? 'Untitled');
     const slug = String(document.frontmatter.slug ?? this.slugify(title));
     const summary = String(document.frontmatter.summary ?? '');
+    const seoTitle = normalizeOptionalText(String(document.frontmatter.seoTitle ?? ''));
+    const seoDescription = normalizeOptionalText(String(document.frontmatter.seoDescription ?? ''));
     const visibility = document.frontmatter.visibility === 'private' ? 'private' : 'public';
     const sourceType = document.frontmatter.sourceType === 'repost' ? 'repost' : 'original';
     const sourceUrl = normalizeSourceUrl(String(document.frontmatter.sourceUrl ?? ''));
@@ -251,6 +263,8 @@ export class ContentService {
       title,
       slug,
       summary,
+      seoTitle,
+      seoDescription,
       bodyMarkdown: document.body,
       sourceType,
       sourceUrl,
@@ -303,6 +317,8 @@ export class ContentService {
         title: record.title,
         slug: record.slug,
         summary: record.summary,
+        ...(record.seoTitle ? { seoTitle: record.seoTitle } : {}),
+        ...(record.seoDescription ? { seoDescription: record.seoDescription } : {}),
         sourceType: record.sourceType,
         sourceUrl: record.sourceUrl,
         coverAssetId: record.coverAssetId ?? '',

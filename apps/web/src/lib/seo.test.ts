@@ -79,6 +79,31 @@ describe('SEO helpers', () => {
     });
   });
 
+  test('uses per-content SEO title and description when provided', () => {
+    expect(
+      buildContentMetadata(
+        {
+          ...content,
+          seoTitle: 'Custom Search Title',
+          seoDescription: 'Custom search description.',
+        },
+        defaultSettings,
+        'https://example.com',
+      ),
+    ).toMatchObject({
+      title: 'Custom Search Title',
+      description: 'Custom search description.',
+      openGraph: {
+        title: 'Custom Search Title',
+        description: 'Custom search description.',
+      },
+      twitter: {
+        title: 'Custom Search Title',
+        description: 'Custom search description.',
+      },
+    });
+  });
+
   test('uses content cover images in social metadata', () => {
     expect(
       buildContentMetadata(

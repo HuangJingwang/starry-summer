@@ -51,17 +51,19 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
   const href = getContentHref(item);
   const publicSiteUrl = normalizePublicSiteUrl(siteUrl);
   const url = `${publicSiteUrl}${href}`;
-  const description = item.summary || settings.profile.description;
+  const socialTitle = item.seoTitle?.trim() || item.title;
+  const metadataTitle = item.seoTitle?.trim() || `${item.title} | ${settings.profile.title}`;
+  const description = item.seoDescription?.trim() || item.summary || settings.profile.description;
   const coverImageUrl = normalizeMetadataImageUrl(item.coverImageUrl, publicSiteUrl);
 
   return {
-    title: `${item.title} | ${settings.profile.title}`,
+    title: metadataTitle,
     description,
     alternates: {
       canonical: href,
     },
     openGraph: {
-      title: item.title,
+      title: socialTitle,
       description,
       url,
       siteName: settings.profile.title,
@@ -81,7 +83,7 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
     },
     twitter: {
       card: 'summary_large_image',
-      title: item.title,
+      title: socialTitle,
       description,
       ...(coverImageUrl ? { images: [coverImageUrl] } : {}),
     },

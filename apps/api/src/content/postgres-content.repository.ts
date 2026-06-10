@@ -13,6 +13,8 @@ export interface ContentItemRow {
   title: string;
   slug: string;
   summary: string;
+  seo_title?: string | null;
+  seo_description?: string | null;
   body_markdown: string;
   source_type: ContentSourceType;
   source_url: string;
@@ -51,6 +53,8 @@ export function mapContentRow(row: ContentItemRow): ContentRecord {
     title: row.title,
     slug: row.slug,
     summary: row.summary,
+    seoTitle: row.seo_title ?? undefined,
+    seoDescription: row.seo_description ?? undefined,
     bodyMarkdown: row.body_markdown,
     sourceType: row.source_type,
     sourceUrl: row.source_url,
@@ -82,6 +86,8 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         title,
         slug,
         summary,
+        seo_title,
+        seo_description,
         body_markdown,
         source_type,
         source_url,
@@ -100,7 +106,7 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         project_ended_at,
         published_at
       )
-      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       returning *
     `,
     values: [
@@ -108,6 +114,8 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
       input.title,
       input.slug,
       input.summary,
+      input.seoTitle ?? null,
+      input.seoDescription ?? null,
       input.bodyMarkdown,
       input.sourceType,
       input.sourceUrl,
@@ -509,6 +517,8 @@ function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown>
     ['title', 'title'],
     ['slug', 'slug'],
     ['summary', 'summary'],
+    ['seoTitle', 'seo_title'],
+    ['seoDescription', 'seo_description'],
     ['bodyMarkdown', 'body_markdown'],
     ['sourceType', 'source_type'],
     ['sourceUrl', 'source_url'],

@@ -217,6 +217,8 @@ describe('admin content helpers', () => {
       title: 'Draft title',
       slug: 'draft-title',
       summary: 'Draft summary',
+      seoTitle: 'Draft SEO title',
+      seoDescription: 'Draft SEO description',
       visibility: 'private',
       bodyMarkdown: '# Draft',
       savedAt: '2026-06-11T00:00:00.000Z',
@@ -226,6 +228,8 @@ describe('admin content helpers', () => {
       title: 'Draft title',
       slug: 'draft-title',
       summary: 'Draft summary',
+      seoTitle: 'Draft SEO title',
+      seoDescription: 'Draft SEO description',
       visibility: 'private',
       bodyMarkdown: '# Draft',
       savedAt: '2026-06-11T00:00:00.000Z',
@@ -241,6 +245,8 @@ describe('admin content helpers', () => {
         slug: 'New Post',
         type: 'post',
         summary: ' Summary ',
+        seoTitle: ' New Post SEO ',
+        seoDescription: ' Search preview ',
         bodyMarkdown: '# New Post',
         allowComments: true,
         pinned: false,
@@ -262,6 +268,8 @@ describe('admin content helpers', () => {
           slug: 'new-post',
           type: 'post',
           summary: 'Summary',
+          seoTitle: 'New Post SEO',
+          seoDescription: 'Search preview',
           bodyMarkdown: '# New Post',
           allowComments: true,
           pinned: false,
@@ -397,6 +405,8 @@ describe('admin content helpers', () => {
         title: 'Draft from API',
         slug: 'draft-from-api',
         summary: 'API summary',
+        seoTitle: 'API SEO title',
+        seoDescription: 'API SEO description',
         bodyMarkdown: '# Draft from API',
         status: 'draft',
         visibility: 'public',
@@ -432,6 +442,8 @@ describe('admin content helpers', () => {
       title: 'Draft from API',
       slug: 'draft-from-api',
       summary: 'API summary',
+      seoTitle: 'API SEO title',
+      seoDescription: 'API SEO description',
       bodyMarkdown: '# Draft from API',
       status: 'draft',
       visibility: 'public',
@@ -547,6 +559,8 @@ describe('admin content helpers', () => {
           title: 'API Post',
           slug: 'api-post',
           summary: 'API summary',
+          seoTitle: 'API Post SEO',
+          seoDescription: 'API Post search description',
           bodyMarkdown: '# API Post',
           status: 'draft',
           visibility: 'public',
@@ -569,6 +583,8 @@ describe('admin content helpers', () => {
         title: 'API Post',
         slug: 'api-post',
         summary: 'API summary',
+        seoTitle: 'API Post SEO',
+        seoDescription: 'API Post search description',
         bodyMarkdown: '# API Post',
         status: 'draft',
         visibility: 'public',
@@ -611,6 +627,8 @@ describe('admin content helpers', () => {
     formData.set('slug', 'Form Title');
     formData.set('type', 'project');
     formData.set('summary', ' Form summary ');
+    formData.set('seoTitle', ' Form SEO title ');
+    formData.set('seoDescription', ' Form SEO description ');
     formData.set('sourceType', 'repost');
     formData.set('sourceUrl', ' https://example.com/source ');
     formData.set('coverAssetId', ' cover-asset-1 ');
@@ -635,6 +653,8 @@ describe('admin content helpers', () => {
       slug: 'form-title',
       type: 'project',
       summary: 'Form summary',
+      seoTitle: 'Form SEO title',
+      seoDescription: 'Form SEO description',
       sourceType: 'repost',
       sourceUrl: 'https://example.com/source',
       coverAssetId: 'cover-asset-1',

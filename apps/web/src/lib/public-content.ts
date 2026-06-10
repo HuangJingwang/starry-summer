@@ -8,6 +8,8 @@ export interface PublicContentApiRecord {
   title: string;
   slug: string;
   summary?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   status: ContentStatus;
   visibility?: SiteContentItem['visibility'];
   featured?: boolean;
@@ -99,6 +101,8 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     publishedAt: dateOnly(record.publishedAt) || dateOnly(record.updatedAt) || dateOnly(record.createdAt),
     updatedAt: dateOnly(record.updatedAt),
     summary: record.summary ?? '',
+    seoTitle: record.seoTitle?.trim() || undefined,
+    seoDescription: record.seoDescription?.trim() || undefined,
     slug: record.slug,
     featured: record.featured ?? false,
     pinned: record.pinned ?? false,

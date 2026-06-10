@@ -70,6 +70,8 @@ export interface ContentDraftSnapshot {
   title: string;
   slug: string;
   summary: string;
+  seoTitle?: string;
+  seoDescription?: string;
   visibility: ContentVisibility;
   bodyMarkdown: string;
   savedAt: string;
@@ -81,6 +83,8 @@ export interface AdminContentApiRecord {
   title: string;
   slug: string;
   summary?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   status: ContentStatus;
   visibility?: SiteContentItem['visibility'];
   featured?: boolean;
@@ -108,6 +112,8 @@ export interface AdminContentPayload {
   title?: string;
   slug?: string;
   summary?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
@@ -173,6 +179,8 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     visibility: record.visibility ?? 'public',
     publishedAt: dateOnly(record.publishedAt) || dateOnly(record.updatedAt) || dateOnly(record.createdAt),
     summary: record.summary ?? '',
+    seoTitle: record.seoTitle?.trim() || undefined,
+    seoDescription: record.seoDescription?.trim() || undefined,
     slug: record.slug,
     featured: record.featured ?? false,
     bodyMarkdown: record.bodyMarkdown ?? '',
@@ -219,6 +227,8 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     title: input.title?.trim(),
     slug: input.slug ? normalizeSlug(input.slug) : undefined,
     summary: input.summary?.trim(),
+    seoTitle: input.seoTitle?.trim(),
+    seoDescription: input.seoDescription?.trim(),
     sourceType: input.sourceType === 'repost' ? 'repost' : 'original',
     sourceUrl: input.sourceUrl?.trim() ?? '',
     coverAssetId: normalizeOptionalText(input.coverAssetId),
@@ -246,6 +256,8 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     slug: formText(formData, 'slug'),
     type: formText(formData, 'type') as ContentType,
     summary: formText(formData, 'summary'),
+    seoTitle: formText(formData, 'seoTitle'),
+    seoDescription: formText(formData, 'seoDescription'),
     sourceType: formText(formData, 'sourceType') as ContentSourceType,
     sourceUrl: formText(formData, 'sourceUrl'),
     coverAssetId: formText(formData, 'coverAssetId'),
@@ -799,6 +811,8 @@ export function parseContentDraftSnapshot(value: string | null): ContentDraftSna
       title: parsed.title,
       slug: parsed.slug,
       summary: parsed.summary,
+      ...(typeof parsed.seoTitle === 'string' ? { seoTitle: parsed.seoTitle } : {}),
+      ...(typeof parsed.seoDescription === 'string' ? { seoDescription: parsed.seoDescription } : {}),
       visibility: parsed.visibility as ContentVisibility,
       bodyMarkdown: parsed.bodyMarkdown,
       savedAt: parsed.savedAt,

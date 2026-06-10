@@ -18,6 +18,8 @@ describe('ContentService', () => {
       title: 'Hello Platform',
       slug: 'hello-platform',
       summary: 'A launch note',
+      seoTitle: ' Hello Platform SEO ',
+      seoDescription: ' A searchable launch note. ',
       bodyMarkdown: '# Hello Platform',
       coverAssetId: ' cover-asset-1 ',
       categories: [' Platform ', 'Writing', 'Platform'],
@@ -31,6 +33,8 @@ describe('ContentService', () => {
     expect(draft.sourceUrl).toBe('');
     expect(draft.coverAssetId).toBe('cover-asset-1');
     expect(draft.title).toBe('Hello Platform');
+    expect(draft.seoTitle).toBe('Hello Platform SEO');
+    expect(draft.seoDescription).toBe('A searchable launch note.');
     expect(draft.categories).toEqual(['Platform', 'Writing']);
     expect(draft.tags).toEqual(['Next.js', 'Architecture']);
     expect(draft.series).toEqual(['Build Log', 'Platform Journal']);
@@ -214,6 +218,8 @@ describe('ContentService', () => {
       title: 'New Title',
       slug: 'new-title',
       summary: 'New summary',
+      seoTitle: 'Custom Search Title',
+      seoDescription: 'Custom search description.',
       bodyMarkdown: '# New',
       type: 'note',
       allowComments: false,
@@ -242,6 +248,8 @@ describe('ContentService', () => {
       title: 'New Title',
       slug: 'new-title',
       summary: 'New summary',
+      seoTitle: 'Custom Search Title',
+      seoDescription: 'Custom search description.',
       bodyMarkdown: '# New',
       type: 'note',
       allowComments: false,
@@ -358,6 +366,8 @@ describe('ContentService', () => {
         'title: Imported Note',
         'slug: imported-note',
         'summary: Imported from a Markdown archive',
+        'seoTitle: Imported Note SEO',
+        'seoDescription: Imported search description',
         'sourceType: repost',
         'sourceUrl: https://example.com/source',
         'status: published',
@@ -376,6 +386,8 @@ describe('ContentService', () => {
     expect(imported.title).toBe('Imported Note');
     expect(imported.slug).toBe('imported-note');
     expect(imported.summary).toBe('Imported from a Markdown archive');
+    expect(imported.seoTitle).toBe('Imported Note SEO');
+    expect(imported.seoDescription).toBe('Imported search description');
     expect(imported.sourceType).toBe('repost');
     expect(imported.sourceUrl).toBe('https://example.com/source');
     expect(imported.status).toBe('draft');
@@ -393,6 +405,8 @@ describe('ContentService', () => {
       title: 'Export Me',
       slug: 'export-me',
       summary: 'Portable content',
+      seoTitle: 'Export SEO Title',
+      seoDescription: 'Export SEO description',
       bodyMarkdown: '# Export Me',
       series: ['Platform Journal'],
     });
@@ -403,6 +417,8 @@ describe('ContentService', () => {
     expect(exported).toContain('title: Export Me');
     expect(exported).toContain('slug: export-me');
     expect(exported).toContain('summary: Portable content');
+    expect(exported).toContain('seoTitle: Export SEO Title');
+    expect(exported).toContain('seoDescription: Export SEO description');
     expect(exported).toContain('sourceType: original');
     expect(exported).toContain("sourceUrl: ''");
     expect(exported).toContain('allowComments: false');

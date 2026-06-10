@@ -9,6 +9,8 @@ export interface SiteContentItem {
   publishedAt: string;
   updatedAt?: string;
   summary?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;

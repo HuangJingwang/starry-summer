@@ -33,6 +33,8 @@ interface AdminContentFormInitialValue {
   status?: ContentStatus;
   visibility?: ContentVisibility;
   summary?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
   sourceUrl?: string;
@@ -162,6 +164,8 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       title: String(formData.get('title') ?? ''),
       slug: String(formData.get('slug') ?? ''),
       summary: String(formData.get('summary') ?? ''),
+      seoTitle: String(formData.get('seoTitle') ?? ''),
+      seoDescription: String(formData.get('seoDescription') ?? ''),
       visibility,
       bodyMarkdown: bodyMarkdownOverride ?? String(formData.get('bodyMarkdown') ?? markdown),
       savedAt: new Date().toISOString(),
@@ -203,6 +207,8 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       title?: HTMLInputElement;
       slug?: HTMLInputElement;
       summary?: HTMLTextAreaElement;
+      seoTitle?: HTMLInputElement;
+      seoDescription?: HTMLTextAreaElement;
       visibility?: HTMLSelectElement;
     };
 
@@ -216,6 +222,14 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
 
     if (controls.summary) {
       controls.summary.value = localDraft.summary;
+    }
+
+    if (controls.seoTitle) {
+      controls.seoTitle.value = localDraft.seoTitle ?? '';
+    }
+
+    if (controls.seoDescription) {
+      controls.seoDescription.value = localDraft.seoDescription ?? '';
     }
 
     if (controls.visibility) {
@@ -397,6 +411,16 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         摘要
         <textarea name="summary" rows={3} defaultValue={initialValue?.summary ?? ''} placeholder="用于列表页、SEO 和 RSS 的短摘要" />
       </label>
+      <div className="form-grid">
+        <label>
+          SEO 标题
+          <input name="seoTitle" defaultValue={initialValue?.seoTitle ?? ''} placeholder="留空则使用内容标题" />
+        </label>
+        <label>
+          SEO 描述
+          <textarea name="seoDescription" rows={2} defaultValue={initialValue?.seoDescription ?? ''} placeholder="留空则使用摘要或站点描述" />
+        </label>
+      </div>
       <div className="form-grid">
         <label>
           来源
