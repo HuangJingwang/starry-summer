@@ -2,6 +2,7 @@ import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
+import { BadRequestException } from '@nestjs/common';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { LocalAssetStorage, S3AssetStorage, assertAllowedUpload } from './storage.service';
@@ -18,18 +19,17 @@ describe('asset storage', () => {
   });
 
   test('rejects unsupported mime types', () => {
-    expect(() => assertAllowedUpload({ mimeType: 'application/x-msdownload', byteSize: 128 })).toThrow(
-      'Unsupported upload type',
-    );
+    expect(() => assertAllowedUpload({ mimeType: 'application/x-msdownload', byteSize: 128 })).toThrow(BadRequestException);
+    expect(() => assertAllowedUpload({ mimeType: 'application/x-msdownload', byteSize: 128 })).toThrow('Unsupported upload type');
   });
 
   test('rejects oversized files', () => {
-    expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 12 * 1024 * 1024 })).toThrow(
-      'Upload exceeds',
-    );
+    expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 12 * 1024 * 1024 })).toThrow(BadRequestException);
+    expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 12 * 1024 * 1024 })).toThrow('Upload exceeds');
   });
 
   test('rejects empty uploads', () => {
+    expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 0 })).toThrow(BadRequestException);
     expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 0 })).toThrow('Upload is empty');
   });
 

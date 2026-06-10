@@ -1,6 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { BadRequestException } from '@nestjs/common';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 export interface UploadValidationInput {
@@ -52,15 +53,15 @@ const allowedMimeTypes = new Set([
 
 export function assertAllowedUpload(input: UploadValidationInput): void {
   if (!allowedMimeTypes.has(input.mimeType)) {
-    throw new Error(`Unsupported upload type: ${input.mimeType}`);
+    throw new BadRequestException(`Unsupported upload type: ${input.mimeType}`);
   }
 
   if (input.byteSize <= 0) {
-    throw new Error('Upload is empty');
+    throw new BadRequestException('Upload is empty');
   }
 
   if (input.byteSize > MAX_UPLOAD_BYTES) {
-    throw new Error(`Upload exceeds ${MAX_UPLOAD_BYTES} bytes`);
+    throw new BadRequestException(`Upload exceeds ${MAX_UPLOAD_BYTES} bytes`);
   }
 }
 
