@@ -94,17 +94,19 @@ case "${STORAGE_DRIVER:-local}" in
     ;;
 esac
 
-case "${S3_ACCESS_KEY:-}" in
-  "" | minioadmin | access-key | change-me-before-production)
-    fail "S3_ACCESS_KEY must not use a default or placeholder value."
-    ;;
-esac
+if [[ "${STORAGE_DRIVER:-local}" == "s3" ]]; then
+  case "${S3_ACCESS_KEY:-}" in
+    "" | minioadmin | access-key | change-me-before-production)
+      fail "S3_ACCESS_KEY must not use a default or placeholder value when STORAGE_DRIVER=s3."
+      ;;
+  esac
 
-case "${S3_SECRET_KEY:-}" in
-  "" | minioadmin | secret-key | change-me-before-production)
-    fail "S3_SECRET_KEY must not use a default or placeholder value."
-    ;;
-esac
+  case "${S3_SECRET_KEY:-}" in
+    "" | minioadmin | secret-key | change-me-before-production)
+      fail "S3_SECRET_KEY must not use a default or placeholder value when STORAGE_DRIVER=s3."
+      ;;
+  esac
+fi
 
 if [[ "$errors" -gt 0 ]]; then
   echo "Deployment environment has $errors issue(s)."

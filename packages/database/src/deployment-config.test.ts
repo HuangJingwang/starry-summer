@@ -144,6 +144,8 @@ describe('deployment configuration', () => {
     ].join('\n');
     const tempDirectory = await mkdtemp(join(tmpdir(), 'starry-summer-env-'));
     const safeEnvPath = join(tempDirectory, '.env');
+    const localStorageEnvPath = join(tempDirectory, '.env.local-storage');
+    const unsafeS3EnvPath = join(tempDirectory, '.env.unsafe-s3');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
@@ -161,6 +163,31 @@ describe('deployment configuration', () => {
     await writeFile(safeEnvPath, safeEnv);
     await expect(execFileAsync('bash', ['scripts/doctor.sh', safeEnvPath], { cwd: repoRoot })).resolves.toMatchObject({
       stdout: expect.stringContaining('Deployment environment looks ready.'),
+    });
+    await writeFile(
+      localStorageEnvPath,
+      [
+        safeEnv,
+        'STORAGE_DRIVER=local',
+        'S3_ACCESS_KEY=minioadmin',
+        'S3_SECRET_KEY=minioadmin',
+      ].join('\n'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', localStorageEnvPath], { cwd: repoRoot })).resolves.toMatchObject({
+      stdout: expect.stringContaining('Deployment environment looks ready.'),
+    });
+    await writeFile(
+      unsafeS3EnvPath,
+      [
+        safeEnv,
+        'STORAGE_DRIVER=s3',
+        'S3_ACCESS_KEY=minioadmin',
+        'S3_SECRET_KEY=minioadmin',
+      ].join('\n'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeS3EnvPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('S3_ACCESS_KEY must not use a default or placeholder value when STORAGE_DRIVER=s3.'),
     });
     await writeFile(mismatchedSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://wrong.example.com'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
