@@ -50,6 +50,12 @@ export interface AdjacentContent {
   next: SiteContentItem | null;
 }
 
+export interface ContentTaxonomyGroup {
+  label: string;
+  ariaLabel: string;
+  items: string[];
+}
+
 export interface SiteStats {
   publicCount: number;
   totalViews: number;
@@ -94,6 +100,13 @@ export function estimateReadingTime(markdown: string): string {
   const minutes = Math.max(1, Math.ceil(equivalentWords / 200));
 
   return `${minutes} min read`;
+}
+
+export function getContentTaxonomyGroups(item: Pick<SiteContentItem, 'categories' | 'tags'>): ContentTaxonomyGroup[] {
+  return [
+    { label: '分类', ariaLabel: 'Categories', items: normalizeTaxonomyItems(item.categories) },
+    { label: '标签', ariaLabel: 'Tags', items: normalizeTaxonomyItems(item.tags) },
+  ].filter((group) => group.items.length > 0);
 }
 
 function sortPublicContent(a: SiteContentItem, b: SiteContentItem, sort: ContentSort): number {
@@ -315,6 +328,23 @@ function slugifyTaxonomyLabel(value: string): string {
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function normalizeTaxonomyItems(items: string[] | undefined): string[] {
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  for (const item of items ?? []) {
+    const value = item.trim();
+    const key = value.toLowerCase();
+
+    if (value && !seen.has(key)) {
+      normalized.push(value);
+      seen.add(key);
+    }
+  }
+
+  return normalized;
 }
 
 export const seedContent: SiteContentItem[] = [

@@ -5,6 +5,7 @@ import {
   getContentHref,
   getAdjacentContent,
   canShowComments,
+  getContentTaxonomyGroups,
   groupContentByMonth,
   getFeaturedContent,
   getContentBySeriesSlug,
@@ -75,6 +76,18 @@ describe('web content helpers', () => {
     expect(estimateReadingTime('短文')).toBe('1 min read');
     expect(estimateReadingTime('word '.repeat(401))).toBe('3 min read');
     expect(estimateReadingTime('中文'.repeat(260))).toBe('3 min read');
+  });
+
+  test('builds detail taxonomy groups from categories and tags', () => {
+    expect(
+      getContentTaxonomyGroups({
+        categories: ['Writing', ' ', 'Writing'],
+        tags: ['Next.js', 'Platform', 'Next.js'],
+      }),
+    ).toEqual([
+      { label: '分类', ariaLabel: 'Categories', items: ['Writing'] },
+      { label: '标签', ariaLabel: 'Tags', items: ['Next.js', 'Platform'] },
+    ]);
   });
 
   test('returns featured content before regular content', () => {
