@@ -46,6 +46,9 @@ case "$url" in
     printf 'HTTP/1.1 307 Temporary Redirect\r\nLocation: https://example.com/admin/login?next=%%2Fadmin%%2Fcontent\r\n\r\n' >"$header_file"
     printf '307'
     ;;
+  */api/health)
+    printf '%s' "${FAKE_API_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-api\"}}"
+    ;;
   */health)
     printf '{"status":"ok"}'
     ;;
@@ -74,5 +77,18 @@ SH
 chmod +x "$tmp_dir/curl"
 
 echo "Running smoke script tests"
-PATH="$tmp_dir:$PATH" CHECK_API_HEALTH=false bash "$repo_root/scripts/smoke.sh" "https://example.com"
+PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/smoke.sh" "https://example.com"
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='<html>web</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unexpected-api-health.log" 2>&1; then
+  echo "Smoke script accepted a non-API health response."
+  cat "$tmp_dir/unexpected-api-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"degraded","service":"starry-summer-api"}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/degraded-api-health.log" 2>&1; then
+  echo "Smoke script accepted a degraded API health response."
+  cat "$tmp_dir/degraded-api-health.log"
+  exit 1
+fi
+
 echo "Smoke script tests passed"

@@ -47,9 +47,25 @@ check_health() {
   fi
 }
 
+check_api_health() {
+  check_path "/api/health" "API health"
+
+  if ! grep -q '"service":"starry-summer-api"' "$response_file"; then
+    echo "API health endpoint did not return the API service marker."
+    cat "$response_file"
+    exit 1
+  fi
+
+  if ! grep -q '"status":"ok"' "$response_file"; then
+    echo "API health endpoint did not return status ok."
+    cat "$response_file"
+    exit 1
+  fi
+}
+
 check_health
 if [[ "${CHECK_API_HEALTH:-true}" == "true" ]]; then
-  check_path "/api/health" "API health"
+  check_api_health
 fi
 check_path "/" "home page"
 check_path "/admin/login" "admin login"
