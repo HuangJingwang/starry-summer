@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 import { AdminContentForm } from '@/components/AdminContentForm';
 import { AdminShell } from '@/components/AdminShell';
@@ -7,7 +8,11 @@ import { loadAdminContentItem } from '@/lib/admin-content';
 
 export default async function EditContentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { item } = await loadAdminContentItem(id, seedContent);
+  const cookieHeader = (await cookies()).toString();
+  const { item } = await loadAdminContentItem(id, seedContent, undefined, {
+    apiBaseUrl: process.env.API_BASE_URL,
+    cookieHeader,
+  });
 
   if (!item) {
     notFound();

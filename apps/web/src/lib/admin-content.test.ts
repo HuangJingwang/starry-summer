@@ -155,6 +155,24 @@ describe('admin content helpers', () => {
     });
   });
 
+  test('builds server admin content list requests with forwarded cookies', () => {
+    expect(
+      buildListAdminContentRequest({
+        apiBaseUrl: 'https://api.example.com/',
+        cookieHeader: 'ss_session=session-token',
+      }),
+    ).toEqual({
+      url: 'https://api.example.com/admin/content',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          cookie: 'ss_session=session-token',
+        },
+      },
+    });
+  });
+
   test('normalizes API content records for admin lists', () => {
     expect(
       normalizeAdminContentItem({
@@ -247,6 +265,21 @@ describe('admin content helpers', () => {
       init: {
         method: 'GET',
         credentials: 'include',
+      },
+    });
+    expect(
+      buildGetAdminContentRequest('content-1', {
+        apiBaseUrl: 'https://api.example.com',
+        cookieHeader: 'ss_session=session-token',
+      }),
+    ).toEqual({
+      url: 'https://api.example.com/admin/content/content-1',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          cookie: 'ss_session=session-token',
+        },
       },
     });
   });

@@ -14,6 +14,11 @@ export interface AdminContentSearchParams {
   type?: string;
 }
 
+export interface AdminContentRequestOptions {
+  apiBaseUrl?: string;
+  cookieHeader?: string;
+}
+
 export interface AdminContentStats {
   total: number;
   draft: number;
@@ -187,6 +192,24 @@ export function normalizeAdminContentSearchParams(params: AdminContentSearchPara
   return filters;
 }
 
+function withAdminRequestOptions(path: string, options: AdminContentRequestOptions = {}): Pick<AdminContentRequest, 'url'> & {
+  headers?: HeadersInit;
+} {
+  const headers = options.cookieHeader ? { cookie: options.cookieHeader } : undefined;
+
+  if (!options.apiBaseUrl) {
+    return {
+      url: path,
+      headers,
+    };
+  }
+
+  return {
+    url: `${options.apiBaseUrl.replace(/\/$/, '')}${path.replace(/^\/api/, '')}`,
+    headers,
+  };
+}
+
 function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentPayload): AdminContentRequest {
   return {
     url,
@@ -205,22 +228,28 @@ export function buildCreateDraftRequest(input: AdminContentPayload): AdminConten
   return jsonRequest('/api/admin/content', 'POST', input);
 }
 
-export function buildListAdminContentRequest(): AdminContentRequest {
+export function buildListAdminContentRequest(options: AdminContentRequestOptions = {}): AdminContentRequest {
+  const request = withAdminRequestOptions('/api/admin/content', options);
+
   return {
-    url: '/api/admin/content',
+    url: request.url,
     init: {
       method: 'GET',
       credentials: 'include',
+      ...(request.headers ? { headers: request.headers } : {}),
     },
   };
 }
 
-export function buildGetAdminContentRequest(id: string): AdminContentRequest {
+export function buildGetAdminContentRequest(id: string, options: AdminContentRequestOptions = {}): AdminContentRequest {
+  const request = withAdminRequestOptions(`/api/admin/content/${id}`, options);
+
   return {
-    url: `/api/admin/content/${id}`,
+    url: request.url,
     init: {
       method: 'GET',
       credentials: 'include',
+      ...(request.headers ? { headers: request.headers } : {}),
     },
   };
 }
@@ -228,8 +257,9 @@ export function buildGetAdminContentRequest(id: string): AdminContentRequest {
 export async function loadAdminContentItems(
   fallbackItems: SiteContentItem[],
   fetcher: AdminContentFetcher = (url, init) => fetch(url, init),
+  options: AdminContentRequestOptions = {},
 ): Promise<AdminContentLoadResult> {
-  const request = buildListAdminContentRequest();
+  const request = buildListAdminContentRequest(options);
 
   try {
     const response = await fetcher(request.url, request.init);
@@ -257,8 +287,9 @@ export async function loadAdminContentItem(
   id: string,
   fallbackItems: SiteContentItem[],
   fetcher: AdminContentFetcher = (url, init) => fetch(url, init),
+  options: AdminContentRequestOptions = {},
 ): Promise<AdminContentItemLoadResult> {
-  const request = buildGetAdminContentRequest(id);
+  const request = buildGetAdminContentRequest(id, options);
   const fallback = fallbackItems.find((item) => item.id === id) ?? null;
 
   try {

@@ -1,11 +1,17 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import { AdminShell } from '@/components/AdminShell';
-import { getAdminContentStats } from '@/lib/admin-content';
+import { getAdminContentStats, loadAdminContentItems } from '@/lib/admin-content';
 import { seedContent } from '@/lib/content';
 
-export default function AdminPage() {
-  const stats = getAdminContentStats(seedContent);
+export default async function AdminPage() {
+  const cookieHeader = (await cookies()).toString();
+  const { items } = await loadAdminContentItems(seedContent, undefined, {
+    apiBaseUrl: process.env.API_BASE_URL,
+    cookieHeader,
+  });
+  const stats = getAdminContentStats(items);
 
   return (
     <AdminShell>
