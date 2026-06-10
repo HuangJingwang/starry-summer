@@ -21,6 +21,44 @@ describe('asset client helpers', () => {
     });
   });
 
+  test('uses an optimized image file when it is smaller than the original upload', async () => {
+    const file = new File(['original-image-bytes'], 'Cover Image.PNG', { type: 'image/png' });
+    const optimized = new File(['webp'], 'cover-image.webp', { type: 'image/webp' });
+
+    await expect(
+      buildAssetUploadPayload(file, {
+        imageOptimizer: {
+          optimize: async () => optimized,
+        },
+      }),
+    ).resolves.toEqual({
+      filename: 'cover-image.webp',
+      mimeType: 'image/webp',
+      base64: 'd2VicA==',
+    });
+  });
+
+  test('keeps non-image attachments unchanged when preparing upload payloads', async () => {
+    const file = new File(['# Notes'], 'notes.md', { type: 'text/markdown' });
+    let optimizerCalls = 0;
+
+    await expect(
+      buildAssetUploadPayload(file, {
+        imageOptimizer: {
+          optimize: async () => {
+            optimizerCalls += 1;
+            return new File(['ignored'], 'ignored.webp', { type: 'image/webp' });
+          },
+        },
+      }),
+    ).resolves.toEqual({
+      filename: 'notes.md',
+      mimeType: 'text/markdown',
+      base64: 'IyBOb3Rlcw==',
+    });
+    expect(optimizerCalls).toBe(0);
+  });
+
   test('builds an authenticated asset upload request', () => {
     expect(
       buildAssetUploadRequest({

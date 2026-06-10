@@ -8,6 +8,14 @@ export interface AssetUploadPayload {
 
 export type AssetUsage = 'content' | 'cover' | 'background' | 'attachment';
 
+export interface ImageUploadOptimizer {
+  optimize(file: File): Promise<File | null>;
+}
+
+export interface AssetUploadPayloadOptions {
+  imageOptimizer?: ImageUploadOptimizer | null;
+}
+
 export interface StoredAsset {
   id: string;
   storageKey: string;
@@ -40,11 +48,13 @@ export interface MarkdownAssetInsertion {
   selectionEnd: number;
 }
 
-export async function buildAssetUploadPayload(file: File): Promise<AssetUploadPayload> {
+export async function buildAssetUploadPayload(file: File, options: AssetUploadPayloadOptions = {}): Promise<AssetUploadPayload> {
+  const uploadFile = await prepareUploadFile(file, options);
+
   return {
-    filename: file.name,
-    mimeType: file.type || 'application/octet-stream',
-    base64: bytesToBase64(new Uint8Array(await file.arrayBuffer())),
+    filename: uploadFile.name,
+    mimeType: uploadFile.type || 'application/octet-stream',
+    base64: bytesToBase64(new Uint8Array(await uploadFile.arrayBuffer())),
   };
 }
 
@@ -173,6 +183,115 @@ function buildAssetUrl(path: string, options: AssetRequestOptions): string {
   const params = new URLSearchParams({ usage: options.usage });
 
   return `${baseUrl}${apiPath}?${params.toString()}`;
+}
+
+async function prepareUploadFile(file: File, options: AssetUploadPayloadOptions): Promise<File> {
+  if (!canOptimizeImage(file)) {
+    return file;
+  }
+
+  const optimizer = options.imageOptimizer === undefined ? createBrowserImageUploadOptimizer() : options.imageOptimizer;
+
+  if (!optimizer) {
+    return file;
+  }
+
+  try {
+    const optimized = await optimizer.optimize(file);
+
+    if (optimized && optimized.size > 0 && optimized.size < file.size) {
+      return optimized;
+    }
+  } catch {
+    return file;
+  }
+
+  return file;
+}
+
+function canOptimizeImage(file: File): boolean {
+  return ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+}
+
+function createBrowserImageUploadOptimizer(): ImageUploadOptimizer | null {
+  if (typeof document === 'undefined' || typeof URL === 'undefined') {
+    return null;
+  }
+
+  return {
+    optimize: optimizeImageWithCanvas,
+  };
+}
+
+async function optimizeImageWithCanvas(file: File): Promise<File | null> {
+  const image = await loadUploadImage(file);
+
+  try {
+    const maxEdge = 1800;
+    const scale = Math.min(1, maxEdge / Math.max(image.width, image.height));
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      return null;
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/webp', 0.82);
+    });
+
+    if (!blob) {
+      return null;
+    }
+
+    return new File([blob], replaceImageExtension(file.name, 'webp'), {
+      type: 'image/webp',
+      lastModified: file.lastModified,
+    });
+  } finally {
+    releaseUploadImage(image);
+  }
+}
+
+async function loadUploadImage(file: File): Promise<ImageBitmap | HTMLImageElement> {
+  if (typeof createImageBitmap === 'function') {
+    return createImageBitmap(file);
+  }
+
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Image upload preview failed'));
+    };
+    image.src = objectUrl;
+  });
+}
+
+function releaseUploadImage(image: ImageBitmap | HTMLImageElement): void {
+  if ('close' in image) {
+    image.close();
+  }
+}
+
+function replaceImageExtension(filename: string, extension: string): string {
+  const nextExtension = extension.replace(/^\.+/, '') || 'webp';
+  const baseName = filename.replace(/\.[^.]*$/, '').trim() || 'image';
+
+  return `${baseName}.${nextExtension}`;
 }
 
 function filenameFromStorageKey(storageKey: string): string {
