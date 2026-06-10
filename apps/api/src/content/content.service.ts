@@ -19,6 +19,8 @@ export interface ContentRecord {
   featured: boolean;
   viewCount: number;
   likeCount: number;
+  categories: string[];
+  tags: string[];
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
@@ -30,6 +32,8 @@ export interface CreateDraftInput {
   slug: string;
   summary: string;
   bodyMarkdown: string;
+  categories?: string[];
+  tags?: string[];
 }
 
 export type UpdateContentInput = Partial<{
@@ -41,6 +45,8 @@ export type UpdateContentInput = Partial<{
   allowComments: boolean;
   pinned: boolean;
   featured: boolean;
+  categories: string[];
+  tags: string[];
 }>;
 
 export interface PublicContentFilter {
@@ -66,6 +72,8 @@ export class ContentService {
       allowComments: true,
       pinned: false,
       featured: false,
+      categories: normalizeTaxonomyLabels(input.categories),
+      tags: normalizeTaxonomyLabels(input.tags),
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -84,6 +92,8 @@ export class ContentService {
     await this.getRecord(id);
     const updated = await this.repository.update(id, {
       ...input,
+      categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
+      tags: input.tags ? normalizeTaxonomyLabels(input.tags) : undefined,
       updatedAt: new Date().toISOString(),
     });
 
@@ -144,6 +154,8 @@ export class ContentService {
     const slug = String(document.frontmatter.slug ?? this.slugify(title));
     const summary = String(document.frontmatter.summary ?? '');
     const visibility = document.frontmatter.visibility === 'private' ? 'private' : 'public';
+    const categories = normalizeTaxonomyLabels(toStringArray(document.frontmatter.categories));
+    const tags = normalizeTaxonomyLabels(toStringArray(document.frontmatter.tags));
 
     const record = await this.createDraft({
       type,
@@ -151,6 +163,8 @@ export class ContentService {
       slug,
       summary,
       bodyMarkdown: document.body,
+      categories,
+      tags,
     });
 
     return this.setVisibility(record.id, visibility);
@@ -167,6 +181,8 @@ export class ContentService {
         type: record.type,
         status: record.status,
         visibility: record.visibility,
+        categories: record.categories,
+        tags: record.tags,
         publishedAt: record.publishedAt,
         updatedAt: record.updatedAt,
       },
@@ -193,4 +209,33 @@ export class ContentService {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
+}
+
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map(String);
+  }
+
+  if (typeof value === 'string') {
+    return value.split(',');
+  }
+
+  return [];
+}
+
+function normalizeTaxonomyLabels(labels: string[] | undefined): string[] {
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  for (const label of labels ?? []) {
+    const next = label.trim();
+    const key = next.toLowerCase();
+
+    if (next && !seen.has(key)) {
+      normalized.push(next);
+      seen.add(key);
+    }
+  }
+
+  return normalized;
 }

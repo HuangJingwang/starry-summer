@@ -24,6 +24,7 @@ const items: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-10',
     summary: 'A draft',
+    categories: ['Drafts'],
     tags: ['Writing'],
   },
   {
@@ -34,6 +35,7 @@ const items: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-09',
     summary: 'A note',
+    categories: ['Knowledge Base'],
     tags: ['Archive'],
   },
   {
@@ -44,6 +46,7 @@ const items: SiteContentItem[] = [
     visibility: 'private',
     publishedAt: '2026-06-08',
     summary: 'Private work',
+    categories: ['Lab'],
     tags: ['Lab'],
   },
 ];
@@ -63,6 +66,7 @@ describe('admin content helpers', () => {
     expect(filterAdminContent(items, { type: 'note' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { status: 'draft' }).map((item) => item.id)).toEqual(['draft-post']);
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
+    expect(filterAdminContent(items, { query: 'knowledge' }).map((item) => item.id)).toEqual(['published-note']);
   });
 
   test('normalizes URL search params into valid admin content filters', () => {
@@ -95,6 +99,8 @@ describe('admin content helpers', () => {
         allowComments: true,
         pinned: false,
         featured: true,
+        categories: ['Writing', 'Platform'],
+        tags: ['Next.js', 'Architecture'],
       }),
     ).toEqual({
       url: '/api/admin/content',
@@ -113,6 +119,8 @@ describe('admin content helpers', () => {
           allowComments: true,
           pinned: false,
           featured: true,
+          categories: ['Writing', 'Platform'],
+          tags: ['Next.js', 'Architecture'],
         }),
       },
     });
@@ -158,6 +166,8 @@ describe('admin content helpers', () => {
         featured: true,
         viewCount: 10,
         likeCount: 2,
+        categories: ['Writing'],
+        tags: ['Platform'],
         createdAt: '2026-06-09T00:00:00.000Z',
         updatedAt: '2026-06-10T00:00:00.000Z',
         publishedAt: null,
@@ -174,7 +184,8 @@ describe('admin content helpers', () => {
       viewCount: 10,
       likeCount: 2,
       publishedAt: '2026-06-10',
-      tags: [],
+      categories: ['Writing'],
+      tags: ['Platform'],
     });
   });
 
@@ -188,8 +199,10 @@ describe('admin content helpers', () => {
             title: 'API Note',
             slug: 'api-note',
             status: 'published',
-            visibility: 'public',
-            updatedAt: '2026-06-10T00:00:00.000Z',
+          visibility: 'public',
+          categories: ['Notes'],
+          tags: ['API'],
+          updatedAt: '2026-06-10T00:00:00.000Z',
           },
         ]),
       );
@@ -210,7 +223,8 @@ describe('admin content helpers', () => {
           viewCount: 0,
           likeCount: 0,
           publishedAt: '2026-06-10',
-          tags: [],
+          categories: ['Notes'],
+          tags: ['API'],
         },
       ],
     });
@@ -232,6 +246,8 @@ describe('admin content helpers', () => {
     formData.set('type', 'project');
     formData.set('summary', ' Form summary ');
     formData.set('bodyMarkdown', '# Form Title');
+    formData.set('categories', 'Projects, Platform, Projects');
+    formData.set('tags', 'Next.js, Launch');
     formData.set('allowComments', 'on');
     formData.set('featured', 'on');
 
@@ -244,6 +260,8 @@ describe('admin content helpers', () => {
       allowComments: true,
       pinned: false,
       featured: true,
+      categories: ['Projects', 'Platform'],
+      tags: ['Next.js', 'Launch'],
     });
   });
 });

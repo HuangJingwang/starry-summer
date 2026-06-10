@@ -22,6 +22,8 @@ export class InMemoryContentRepository implements ContentRepository {
     const now = this.now();
     const record: ContentRecord = {
       ...input,
+      categories: [...input.categories],
+      tags: [...input.tags],
       id: String(this.nextId++),
       createdAt: now,
       updatedAt: now,
@@ -56,6 +58,8 @@ export class InMemoryContentRepository implements ContentRepository {
     const updated = {
       ...record,
       ...patch,
+      categories: patch.categories ? [...patch.categories] : record.categories,
+      tags: patch.tags ? [...patch.tags] : record.tags,
       id: record.id,
       updatedAt: patch.updatedAt ?? this.now(),
     };

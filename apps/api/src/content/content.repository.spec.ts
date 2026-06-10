@@ -17,6 +17,8 @@ describe('InMemoryContentRepository', () => {
       allowComments: true,
       pinned: false,
       featured: false,
+      categories: ['Writing'],
+      tags: ['Platform'],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -38,6 +40,8 @@ describe('InMemoryContentRepository', () => {
       allowComments: true,
       pinned: false,
       featured: false,
+      categories: [],
+      tags: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -46,6 +50,8 @@ describe('InMemoryContentRepository', () => {
     const updated = await repository.update(record.id, {
       status: 'published',
       publishedAt: '2026-06-10T00:00:00.000Z',
+      categories: ['Updated'],
+      tags: ['Release'],
     });
 
     if (!updated) {
@@ -53,7 +59,10 @@ describe('InMemoryContentRepository', () => {
     }
 
     expect(updated.status).toBe('published');
+    expect(updated.categories).toEqual(['Updated']);
+    expect(updated.tags).toEqual(['Release']);
     expect(record.status).toBe('draft');
+    expect(record.categories).toEqual([]);
   });
 
   test('lists admin records by newest update first', async () => {
@@ -70,6 +79,8 @@ describe('InMemoryContentRepository', () => {
       allowComments: true,
       pinned: false,
       featured: false,
+      categories: [],
+      tags: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -86,6 +97,8 @@ describe('InMemoryContentRepository', () => {
       allowComments: true,
       pinned: false,
       featured: false,
+      categories: [],
+      tags: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,

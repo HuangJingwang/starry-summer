@@ -17,11 +17,15 @@ describe('ContentService', () => {
       slug: 'hello-platform',
       summary: 'A launch note',
       bodyMarkdown: '# Hello Platform',
+      categories: [' Platform ', 'Writing', 'Platform'],
+      tags: ['Next.js', '  Architecture ', 'Next.js'],
     });
 
     expect(draft.status).toBe('draft');
     expect(draft.visibility).toBe('public');
     expect(draft.title).toBe('Hello Platform');
+    expect(draft.categories).toEqual(['Platform', 'Writing']);
+    expect(draft.tags).toEqual(['Next.js', 'Architecture']);
   });
 
   test('public listings exclude drafts and private content', async () => {
@@ -88,6 +92,8 @@ describe('ContentService', () => {
       allowComments: false,
       featured: true,
       pinned: true,
+      categories: ['Notes', 'Writing'],
+      tags: ['Markdown', 'Draft'],
     });
 
     expect(updated).toMatchObject({
@@ -100,6 +106,8 @@ describe('ContentService', () => {
       allowComments: false,
       featured: true,
       pinned: true,
+      categories: ['Notes', 'Writing'],
+      tags: ['Markdown', 'Draft'],
     });
   });
 
@@ -161,6 +169,8 @@ describe('ContentService', () => {
     expect(exported).toContain('title: Export Me');
     expect(exported).toContain('slug: export-me');
     expect(exported).toContain('summary: Portable content');
+    expect(exported).toContain('categories: []');
+    expect(exported).toContain('tags: []');
     expect(exported).toContain('# Export Me');
   });
 });

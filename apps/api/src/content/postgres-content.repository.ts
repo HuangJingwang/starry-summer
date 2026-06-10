@@ -19,6 +19,8 @@ export interface ContentItemRow {
   allow_comments: boolean;
   pinned: boolean;
   featured: boolean;
+  categories?: string[] | null;
+  tags?: string[] | null;
   view_count: number;
   like_count: number;
   created_at: Date;
@@ -44,6 +46,8 @@ export function mapContentRow(row: ContentItemRow): ContentRecord {
     allowComments: row.allow_comments,
     pinned: row.pinned,
     featured: row.featured,
+    categories: row.categories ?? [],
+    tags: row.tags ?? [],
     viewCount: row.view_count,
     likeCount: row.like_count,
     createdAt: row.created_at.toISOString(),
@@ -114,46 +118,65 @@ export class PostgresContentRepository implements ContentRepository {
   }
 
   async create(input: CreateContentRecordInput): Promise<ContentRecord> {
-    const statement = buildContentInsert(input);
-    const result = await this.pool.query<ContentItemRow>(statement.sql, statement.values);
-    const row = result.rows[0];
+    const client = await this.pool.connect();
 
-    if (!row) {
-      throw new Error('PostgreSQL did not return the created content row');
+    try {
+      await client.query('begin');
+      const statement = buildContentInsert(input);
+      const result = await client.query<ContentItemRow>(statement.sql, statement.values);
+      const row = result.rows[0];
+
+      if (!row) {
+        throw new Error('PostgreSQL did not return the created content row');
+      }
+
+      await syncTaxonomyLabels(client, row.id, 'category', input.categories);
+      await syncTaxonomyLabels(client, row.id, 'tag', input.tags);
+      const created = await this.findByIdWithClient(client, row.id);
+      await client.query('commit');
+
+      if (!created) {
+        throw new Error('PostgreSQL did not return the created content relations');
+      }
+
+      return created;
+    } catch (error) {
+      await client.query('rollback');
+      throw error;
+    } finally {
+      client.release();
     }
-
-    return mapContentRow(row);
   }
 
   async findById(id: string): Promise<ContentRecord | null> {
-    const result = await this.pool.query<ContentItemRow>('select * from content_items where id = $1', [id]);
-
-    return result.rows[0] ? mapContentRow(result.rows[0]) : null;
+    return this.findByIdWithClient(this.pool, id);
   }
 
   async listAdmin(): Promise<ContentRecord[]> {
-    const result = await this.pool.query<ContentItemRow>('select * from content_items order by updated_at desc');
+    const result = await this.pool.query<ContentItemRow>(
+      buildContentSelect('where true', 'order by ci.updated_at desc'),
+    );
 
     return result.rows.map(mapContentRow);
   }
 
   async listPublic(filter: { type?: ContentType } = {}): Promise<ContentRecord[]> {
     const values: unknown[] = [];
-    const typeClause = filter.type ? 'and type = $1' : '';
+    const typeClause = filter.type ? 'and ci.type = $1' : '';
 
     if (filter.type) {
       values.push(filter.type);
     }
 
     const result = await this.pool.query<ContentItemRow>(
-      `
-        select *
-        from content_items
-        where status = 'published'
-          and visibility = 'public'
-          ${typeClause}
-        order by published_at desc
-      `,
+      buildContentSelect(
+        `
+          where ci.status = 'published'
+            and ci.visibility = 'public'
+            ${typeClause}
+        `,
+        'order by ci.published_at desc',
+      ),
       values,
     );
 
@@ -161,16 +184,122 @@ export class PostgresContentRepository implements ContentRepository {
   }
 
   async update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null> {
-    const statement = buildContentUpdate(id, patch);
+    const client = await this.pool.connect();
 
-    if (!statement) {
-      return this.findById(id);
+    try {
+      await client.query('begin');
+      const statement = buildContentUpdate(id, patch);
+
+      if (statement) {
+        await client.query<ContentItemRow>(statement.sql, statement.values);
+      }
+
+      if (patch.categories) {
+        await syncTaxonomyLabels(client, id, 'category', patch.categories);
+      }
+
+      if (patch.tags) {
+        await syncTaxonomyLabels(client, id, 'tag', patch.tags);
+      }
+
+      const updated = await this.findByIdWithClient(client, id);
+      await client.query('commit');
+
+      return updated;
+    } catch (error) {
+      await client.query('rollback');
+      throw error;
+    } finally {
+      client.release();
     }
+  }
 
-    const result = await this.pool.query<ContentItemRow>(statement.sql, statement.values);
+  private async findByIdWithClient(client: Queryable, id: string): Promise<ContentRecord | null> {
+    const result = await client.query<ContentItemRow>(buildContentSelect('where ci.id = $1'), [id]);
 
     return result.rows[0] ? mapContentRow(result.rows[0]) : null;
   }
+}
+
+interface Queryable {
+  query<T extends pg.QueryResultRow>(sql: string, values?: unknown[]): Promise<pg.QueryResult<T>>;
+}
+
+type TaxonomyKind = 'category' | 'tag';
+
+const taxonomyConfig: Record<TaxonomyKind, { table: string; joinTable: string; joinColumn: string }> = {
+  category: {
+    table: 'categories',
+    joinTable: 'content_categories',
+    joinColumn: 'category_id',
+  },
+  tag: {
+    table: 'tags',
+    joinTable: 'content_tags',
+    joinColumn: 'tag_id',
+  },
+};
+
+function buildContentSelect(whereClause: string, orderClause = ''): string {
+  return `
+    select
+      ci.*,
+      coalesce(array_remove(array_agg(distinct c.name), null), '{}') as categories,
+      coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags
+    from content_items ci
+    left join content_categories cc on cc.content_id = ci.id
+    left join categories c on c.id = cc.category_id
+    left join content_tags ct on ct.content_id = ci.id
+    left join tags t on t.id = ct.tag_id
+    ${whereClause}
+    group by ci.id
+    ${orderClause}
+  `;
+}
+
+async function syncTaxonomyLabels(client: Queryable, contentId: string, kind: TaxonomyKind, labels: string[]): Promise<void> {
+  const config = taxonomyConfig[kind];
+
+  await client.query(`delete from ${config.joinTable} where content_id = $1`, [contentId]);
+
+  for (const label of labels) {
+    const name = label.trim();
+
+    if (!name) {
+      continue;
+    }
+
+    const slug = slugifyTaxonomyLabel(name);
+    const term = await client.query<{ id: string }>(
+      `
+        insert into ${config.table} (name, slug)
+        values ($1, $2)
+        on conflict (slug) do update set name = excluded.name
+        returning id
+      `,
+      [name, slug],
+    );
+    const termId = term.rows[0]?.id;
+
+    if (termId) {
+      await client.query(
+        `
+          insert into ${config.joinTable} (content_id, ${config.joinColumn})
+          values ($1, $2)
+          on conflict do nothing
+        `,
+        [contentId, termId],
+      );
+    }
+  }
+}
+
+function slugifyTaxonomyLabel(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown> {

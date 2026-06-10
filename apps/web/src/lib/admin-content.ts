@@ -39,6 +39,7 @@ export interface AdminContentApiRecord {
   featured?: boolean;
   viewCount?: number;
   likeCount?: number;
+  categories?: string[];
   tags?: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -54,6 +55,8 @@ export interface AdminContentPayload {
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
+  categories?: string[];
+  tags?: string[];
 }
 
 export interface AdminContentRequest {
@@ -88,6 +91,7 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     summary: record.summary ?? '',
     slug: record.slug,
     featured: record.featured ?? false,
+    categories: record.categories ?? [],
     tags: record.tags ?? [],
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
@@ -108,6 +112,8 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     title: input.title?.trim(),
     slug: input.slug ? normalizeSlug(input.slug) : undefined,
     summary: input.summary?.trim(),
+    categories: normalizeList(input.categories),
+    tags: normalizeList(input.tags),
   };
 }
 
@@ -122,10 +128,33 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     type: formText(formData, 'type') as ContentType,
     summary: formText(formData, 'summary'),
     bodyMarkdown: formText(formData, 'bodyMarkdown'),
+    categories: splitList(formText(formData, 'categories')),
+    tags: splitList(formText(formData, 'tags')),
     allowComments: formData.has('allowComments'),
     pinned: formData.has('pinned'),
     featured: formData.has('featured'),
   });
+}
+
+function splitList(value: string): string[] {
+  return value.split(',');
+}
+
+function normalizeList(values: string[] | undefined): string[] {
+  const normalized: string[] = [];
+  const seen = new Set<string>();
+
+  for (const value of values ?? []) {
+    const next = value.trim();
+    const key = next.toLowerCase();
+
+    if (next && !seen.has(key)) {
+      normalized.push(next);
+      seen.add(key);
+    }
+  }
+
+  return normalized;
 }
 
 export function normalizeAdminContentSearchParams(params: AdminContentSearchParams): AdminContentFilters {
@@ -238,7 +267,9 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
         return true;
       }
 
-      const searchable = [item.title, item.summary ?? '', ...(item.tags ?? [])].join(' ').toLowerCase();
+      const searchable = [item.title, item.summary ?? '', ...(item.categories ?? []), ...(item.tags ?? [])]
+        .join(' ')
+        .toLowerCase();
 
       return searchable.includes(normalizedQuery);
     })

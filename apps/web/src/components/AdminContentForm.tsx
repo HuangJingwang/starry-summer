@@ -19,6 +19,8 @@ interface AdminContentFormInitialValue {
   status?: ContentStatus;
   summary?: string;
   bodyMarkdown?: string;
+  categories?: string[];
+  tags?: string[];
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
@@ -109,6 +111,16 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         摘要
         <textarea name="summary" rows={3} defaultValue={initialValue?.summary ?? ''} placeholder="用于列表页、SEO 和 RSS 的短摘要" />
       </label>
+      <div className="form-grid">
+        <label>
+          分类
+          <input name="categories" defaultValue={(initialValue?.categories ?? []).join(', ')} placeholder="Writing, Platform" />
+        </label>
+        <label>
+          标签
+          <input name="tags" defaultValue={(initialValue?.tags ?? []).join(', ')} placeholder="Markdown, Next.js" />
+        </label>
+      </div>
       <div className="form-options">
         <label>
           <input name="allowComments" type="checkbox" defaultChecked={initialValue?.allowComments ?? true} />
