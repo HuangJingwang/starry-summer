@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import { InMemoryContentRepository } from './content.repository';
 import { ContentService } from './content.service';
 
 describe('ContentService', () => {
   let service: ContentService;
 
   beforeEach(() => {
-    service = new ContentService();
+    service = new ContentService(new InMemoryContentRepository());
   });
 
   test('creates drafts for admin authoring', async () => {

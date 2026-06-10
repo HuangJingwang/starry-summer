@@ -55,6 +55,8 @@ Run database migrations before enabling persistent API repositories:
 DATABASE_URL="postgresql://starry:change-me@localhost:5432/starry_summer" npm run db:migrate
 ```
 
+Production Docker Compose defaults `CONTENT_REPOSITORY_DRIVER` to `postgres`. Local development can keep `CONTENT_REPOSITORY_DRIVER=memory` until PostgreSQL is running.
+
 ## 4. Backup
 
 PostgreSQL dump:

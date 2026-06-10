@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { parseMarkdownDocument, serializeMarkdownDocument } from '@starry-summer/markdown';
 import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
-import { canPublishContent, isPublicContent } from '@starry-summer/shared';
+import { canPublishContent } from '@starry-summer/shared';
+
+import { CONTENT_REPOSITORY, type ContentRepository } from './content.repository.js';
 
 export interface ContentRecord {
   id: string;
@@ -36,13 +38,13 @@ export interface PublicContentFilter {
 
 @Injectable()
 export class ContentService {
-  private readonly records = new Map<string, ContentRecord>();
-  private nextId = 1;
+  constructor(
+    @Inject(CONTENT_REPOSITORY)
+    private readonly repository: ContentRepository,
+  ) {}
 
   async createDraft(input: CreateDraftInput): Promise<ContentRecord> {
-    const now = new Date().toISOString();
-    const record: ContentRecord = {
-      id: String(this.nextId++),
+    return this.repository.create({
       type: input.type,
       title: input.title,
       slug: input.slug,
@@ -55,55 +57,43 @@ export class ContentService {
       featured: false,
       viewCount: 0,
       likeCount: 0,
-      createdAt: now,
-      updatedAt: now,
       publishedAt: null,
-    };
-
-    this.records.set(record.id, record);
-    return record;
+    });
   }
 
   async listAdmin(): Promise<ContentRecord[]> {
-    return [...this.records.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    return this.repository.listAdmin();
   }
 
   async listPublic(filter: PublicContentFilter = {}): Promise<ContentRecord[]> {
-    return [...this.records.values()]
-      .filter((record) => isPublicContent(record))
-      .filter((record) => (filter.type ? record.type === filter.type : true))
-      .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''));
+    return this.repository.listPublic(filter);
   }
 
   async publish(id: string): Promise<ContentRecord> {
-    const record = this.getRecord(id);
+    const record = await this.getRecord(id);
 
     if (!canPublishContent(record)) {
       throw new UnprocessableEntityException('Content is not ready to publish');
     }
 
     const now = new Date().toISOString();
-    const updated = {
-      ...record,
+    const updated = await this.repository.update(id, {
       status: 'published' as const,
       updatedAt: now,
       publishedAt: record.publishedAt ?? now,
-    };
-    this.records.set(id, updated);
+    });
 
-    return updated;
+    return this.ensureRecord(updated, id);
   }
 
   async setVisibility(id: string, visibility: ContentVisibility): Promise<ContentRecord> {
-    const record = this.getRecord(id);
-    const updated = {
-      ...record,
+    await this.getRecord(id);
+    const updated = await this.repository.update(id, {
       visibility,
       updatedAt: new Date().toISOString(),
-    };
-    this.records.set(id, updated);
+    });
 
-    return updated;
+    return this.ensureRecord(updated, id);
   }
 
   async importMarkdown(markdown: string, type: ContentType): Promise<ContentRecord> {
@@ -125,7 +115,7 @@ export class ContentService {
   }
 
   async exportMarkdown(id: string): Promise<string> {
-    const record = this.getRecord(id);
+    const record = await this.getRecord(id);
 
     return serializeMarkdownDocument({
       frontmatter: {
@@ -142,14 +132,16 @@ export class ContentService {
     });
   }
 
-  private getRecord(id: string): ContentRecord {
-    const record = this.records.get(id);
+  private async getRecord(id: string): Promise<ContentRecord> {
+    return this.ensureRecord(await this.repository.findById(id), id);
+  }
 
-    if (!record) {
-      throw new NotFoundException(`Content ${id} was not found`);
+  private ensureRecord(record: ContentRecord | null, id: string): ContentRecord {
+    if (record) {
+      return record;
     }
 
-    return record;
+    throw new NotFoundException(`Content ${id} was not found`);
   }
 
   private slugify(value: string): string {
