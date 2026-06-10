@@ -19,4 +19,4 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY apps/api/package.json ./apps/api/package.json
 EXPOSE 4000
-CMD ["npm", "run", "start", "--workspace", "@starry-summer/api"]
+CMD ["node", "apps/api/dist/apps/api/src/main.js"]
