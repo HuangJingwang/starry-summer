@@ -17,6 +17,7 @@ import {
   createMarkdownPreview,
   filterAdminContent,
   getAdminContentStats,
+  getInitialContentTypeFromSearchParams,
   getContentDraftStorageKey,
   getUnsavedContentWarning,
   loadAdminContentItems,
@@ -120,6 +121,23 @@ describe('admin content helpers', () => {
     ]);
   });
 
+  test('builds project dashboard status links and counts against the project admin route', () => {
+    const dashboard = buildAdminContentDashboard(items, { type: 'project', status: 'published' }, { basePath: '/admin/projects' });
+
+    expect(dashboard.statusCards).toContainEqual({
+      label: 'All',
+      value: 1,
+      href: '/admin/projects',
+      active: false,
+    });
+    expect(dashboard.statusCards).toContainEqual({
+      label: 'Published',
+      value: 1,
+      href: '/admin/projects?status=published',
+      active: true,
+    });
+  });
+
   test('filters content by type status and search text', () => {
     expect(filterAdminContent(items, { type: 'note' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { status: 'draft' }).map((item) => item.id)).toEqual(['draft-post']);
@@ -130,6 +148,26 @@ describe('admin content helpers', () => {
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'knowledge' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { query: 'research notes' }).map((item) => item.id)).toEqual(['published-note']);
+  });
+
+  test('filters project content by stack terms', () => {
+    expect(
+      filterAdminContent(
+        [
+          {
+            id: 'stacked-project',
+            title: 'Stacked Project',
+            type: 'project',
+            status: 'published',
+            visibility: 'public',
+            publishedAt: '2026-06-11',
+            summary: '',
+            project: { stack: ['Next.js', 'PostgreSQL'] },
+          },
+        ],
+        { type: 'project', query: 'postgresql' },
+      ).map((item) => item.id),
+    ).toEqual(['stacked-project']);
   });
 
   test('normalizes URL search params into valid admin content filters', () => {
@@ -151,6 +189,11 @@ describe('admin content helpers', () => {
     expect(normalizeAdminContentSearchParams({ q: 'x', status: 'deleted', type: 'article' })).toEqual({
       query: 'x',
     });
+  });
+
+  test('gets a safe initial content type from URL search params', () => {
+    expect(getInitialContentTypeFromSearchParams({ type: 'project' })).toBe('project');
+    expect(getInitialContentTypeFromSearchParams({ type: 'article' })).toBeUndefined();
   });
 
   test('creates a readable Markdown preview model', () => {

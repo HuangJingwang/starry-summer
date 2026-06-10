@@ -16,6 +16,7 @@ interface AdminContentManagerProps {
   category?: string;
   tag?: string;
   series?: string;
+  basePath?: string;
 }
 
 export function AdminContentManager({
@@ -26,6 +27,7 @@ export function AdminContentManager({
   category,
   tag,
   series,
+  basePath = '/admin/content',
 }: AdminContentManagerProps) {
   const [result, setResult] = useState<AdminContentLoadResult>({
     source: 'fallback',
@@ -62,7 +64,7 @@ export function AdminContentManager({
     };
   }, [fallbackItems, query, status, type, category, tag, series]);
 
-  const dashboard = buildAdminContentDashboard(result.items, { query, status, type, category, tag, series });
+  const dashboard = buildAdminContentDashboard(result.items, { query, status, type, category, tag, series }, { basePath });
 
   return (
     <div className="admin-content-manager">

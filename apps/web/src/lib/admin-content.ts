@@ -56,6 +56,10 @@ export interface AdminContentDashboard {
   recentItems: AdminContentRecentItem[];
 }
 
+export interface AdminContentDashboardOptions {
+  basePath?: string;
+}
+
 export interface MarkdownPreviewModel {
   title: string;
   excerpt: string;
@@ -386,6 +390,10 @@ export function normalizeAdminContentSearchParams(params: AdminContentSearchPara
   return filters;
 }
 
+export function getInitialContentTypeFromSearchParams(params: Pick<AdminContentSearchParams, 'type'>): ContentType | undefined {
+  return params.type && validContentTypes.has(params.type as ContentType) ? (params.type as ContentType) : undefined;
+}
+
 function withAdminRequestOptions(path: string, options: AdminContentRequestOptions = {}): Pick<AdminContentRequest, 'url'> & {
   headers?: HeadersInit;
 } {
@@ -650,20 +658,27 @@ export function getAdminContentStats(items: SiteContentItem[]): AdminContentStat
   };
 }
 
-export function buildAdminContentDashboard(items: SiteContentItem[], filters: AdminContentFilters = {}): AdminContentDashboard {
+export function buildAdminContentDashboard(
+  items: SiteContentItem[],
+  filters: AdminContentFilters = {},
+  options: AdminContentDashboardOptions = {},
+): AdminContentDashboard {
   const stats = getAdminContentStats(items);
   const filteredItems = filterAdminContent(items, filters);
+  const { status: _status, ...statusBaseFilters } = filters;
+  const statusStats = getAdminContentStats(filterAdminContent(items, statusBaseFilters));
+  const basePath = options.basePath ?? '/admin/content';
 
   return {
     stats,
     filteredTotal: filteredItems.length,
     activeFilters: getActiveAdminFilterLabels(filters),
     statusCards: [
-      { label: 'All', value: stats.total, href: '/admin/content', active: !filters.status },
-      { label: 'Drafts', value: stats.draft, href: '/admin/content?status=draft', active: filters.status === 'draft' },
-      { label: 'Published', value: stats.published, href: '/admin/content?status=published', active: filters.status === 'published' },
-      { label: 'Private', value: stats.private, href: '/admin/content?status=private', active: filters.status === 'private' },
-      { label: 'Archived', value: stats.archived, href: '/admin/content?status=archived', active: filters.status === 'archived' },
+      { label: 'All', value: statusStats.total, href: basePath, active: !filters.status },
+      { label: 'Drafts', value: statusStats.draft, href: `${basePath}?status=draft`, active: filters.status === 'draft' },
+      { label: 'Published', value: statusStats.published, href: `${basePath}?status=published`, active: filters.status === 'published' },
+      { label: 'Private', value: statusStats.private, href: `${basePath}?status=private`, active: filters.status === 'private' },
+      { label: 'Archived', value: statusStats.archived, href: `${basePath}?status=archived`, active: filters.status === 'archived' },
     ],
     recentItems: filteredItems.slice(0, 5).map((item) => ({
       id: item.id,
@@ -697,7 +712,15 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
         return true;
       }
 
-      const searchable = [item.title, item.summary ?? '', ...(item.categories ?? []), ...(item.tags ?? []), ...(item.series ?? [])]
+      const searchable = [
+        item.title,
+        item.summary ?? '',
+        ...(item.categories ?? []),
+        ...(item.tags ?? []),
+        ...(item.series ?? []),
+        ...(item.project?.stack ?? []),
+        item.project?.status ?? '',
+      ]
         .join(' ')
         .toLowerCase();
 

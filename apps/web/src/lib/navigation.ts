@@ -17,6 +17,19 @@ const navigationByKey: Record<string, NavigationItem> = {
   guestbook: { href: '/guestbook', label: 'Guestbook' },
 };
 
+const adminNavigation: NavigationItem[] = [
+  { href: '/admin', label: 'Overview' },
+  { href: '/admin/content', label: 'Content' },
+  { href: '/admin/projects', label: 'Projects' },
+  { href: '/admin/content/new', label: 'New' },
+  { href: '/admin/comments', label: 'Comments' },
+  { href: '/admin/guestbook', label: 'Guestbook' },
+  { href: '/admin/taxonomy', label: 'Taxonomy' },
+  { href: '/admin/assets', label: 'Assets' },
+  { href: '/admin/export', label: 'Export' },
+  { href: '/admin/settings', label: 'Settings' },
+];
+
 export function buildPublicNavigation(keys: string[]): NavigationItem[] {
   const items: NavigationItem[] = [{ href: '/', label: 'Home' }];
   const seen = new Set<string>();
@@ -32,4 +45,8 @@ export function buildPublicNavigation(keys: string[]): NavigationItem[] {
   }
 
   return items;
+}
+
+export function buildAdminNavigation(): NavigationItem[] {
+  return adminNavigation;
 }
