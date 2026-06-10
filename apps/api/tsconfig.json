@@ -2,13 +2,18 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": "../..",
     "declaration": true,
     "declarationMap": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@starry-summer/shared": ["../../packages/shared/src/index.ts"],
+      "@starry-summer/markdown": ["../../packages/markdown/src/index.ts"]
+    },
     "types": ["node", "vitest/globals"]
   },
   "include": ["src"]
