@@ -34,6 +34,28 @@ export interface AdminContentStats {
   archived: number;
 }
 
+export interface AdminContentStatusCard {
+  label: string;
+  value: number;
+  href: string;
+  active: boolean;
+}
+
+export interface AdminContentRecentItem {
+  id: string;
+  title: string;
+  href: string;
+  meta: string;
+}
+
+export interface AdminContentDashboard {
+  stats: AdminContentStats;
+  filteredTotal: number;
+  activeFilters: string[];
+  statusCards: AdminContentStatusCard[];
+  recentItems: AdminContentRecentItem[];
+}
+
 export interface MarkdownPreviewModel {
   title: string;
   excerpt: string;
@@ -597,6 +619,30 @@ export function getAdminContentStats(items: SiteContentItem[]): AdminContentStat
   };
 }
 
+export function buildAdminContentDashboard(items: SiteContentItem[], filters: AdminContentFilters = {}): AdminContentDashboard {
+  const stats = getAdminContentStats(items);
+  const filteredItems = filterAdminContent(items, filters);
+
+  return {
+    stats,
+    filteredTotal: filteredItems.length,
+    activeFilters: getActiveAdminFilterLabels(filters),
+    statusCards: [
+      { label: 'All', value: stats.total, href: '/admin/content', active: !filters.status },
+      { label: 'Drafts', value: stats.draft, href: '/admin/content?status=draft', active: filters.status === 'draft' },
+      { label: 'Published', value: stats.published, href: '/admin/content?status=published', active: filters.status === 'published' },
+      { label: 'Private', value: stats.private, href: '/admin/content?status=private', active: filters.status === 'private' },
+      { label: 'Archived', value: stats.archived, href: '/admin/content?status=archived', active: filters.status === 'archived' },
+    ],
+    recentItems: filteredItems.slice(0, 5).map((item) => ({
+      id: item.id,
+      title: item.title,
+      href: `/admin/content/${item.id}`,
+      meta: `${item.type} / ${item.visibility === 'private' ? 'private' : item.status} / ${item.publishedAt}`,
+    })),
+  };
+}
+
 export function filterAdminContent(items: SiteContentItem[], filters: AdminContentFilters): SiteContentItem[] {
   const normalizedQuery = filters.query?.trim().toLowerCase() ?? '';
   const normalizedCategory = filters.category?.trim().toLowerCase() ?? '';
@@ -631,6 +677,17 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
 
 function includesTaxonomyLabel(labels: string[] | undefined, normalizedFilter: string): boolean {
   return labels?.some((label) => label.trim().toLowerCase() === normalizedFilter) ?? false;
+}
+
+function getActiveAdminFilterLabels(filters: AdminContentFilters): string[] {
+  return [
+    filters.query ? `Search: ${filters.query}` : '',
+    filters.type ? `Type: ${filters.type}` : '',
+    filters.status ? `Status: ${filters.status}` : '',
+    filters.category ? `Category: ${filters.category}` : '',
+    filters.tag ? `Tag: ${filters.tag}` : '',
+    filters.series ? `Series: ${filters.series}` : '',
+  ].filter(Boolean);
 }
 
 export function createMarkdownPreview(markdown: string): MarkdownPreviewModel {

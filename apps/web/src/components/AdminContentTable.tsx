@@ -40,6 +40,7 @@ export function AdminContentTable({
           <Link href={`/admin/content/${item.id}`}>Edit</Link>
         </div>
       ))}
+      {filtered.length === 0 ? <p className="admin-table__empty">没有匹配的内容。</p> : null}
     </div>
   );
 }

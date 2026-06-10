@@ -1146,13 +1146,97 @@ textarea {
 
 .admin-content-manager {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 .admin-data-note {
   color: var(--muted);
   font-size: 0.88rem;
   margin: 0;
+}
+
+.admin-status-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.admin-status-grid a {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  text-decoration: none;
+}
+
+.admin-status-grid a.active {
+  background: #1f2a27;
+  border-color: #1f2a27;
+  color: #fff;
+}
+
+.admin-status-grid span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-status-grid a.active span {
+  color: #d7e7df;
+}
+
+.admin-status-grid strong {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.admin-content-summary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(280px, 1.3fr);
+}
+
+.admin-content-summary > div {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.admin-content-summary strong {
+  font-size: 0.94rem;
+}
+
+.admin-content-summary span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.admin-content-summary ol {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-content-summary li {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(120px, 1fr) minmax(150px, auto);
+}
+
+.admin-content-summary a {
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
 }
 
 .admin-table__row {
@@ -1175,6 +1259,12 @@ textarea {
   font-size: 0.84rem;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.admin-table__empty {
+  color: var(--muted);
+  margin: 0;
+  padding: 18px 14px;
 }
 
 .content-form {
@@ -1468,6 +1558,9 @@ textarea {
   .search-form,
   .admin-layout,
   .admin-filter,
+  .admin-status-grid,
+  .admin-content-summary,
+  .admin-content-summary li,
   .admin-table__row,
   .form-grid,
   .project-meta,

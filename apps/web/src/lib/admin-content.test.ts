@@ -12,6 +12,7 @@ import {
   buildDeleteContentRequest,
   buildListAdminContentRequest,
   buildUpdateContentRequest,
+  buildAdminContentDashboard,
   createMarkdownPreview,
   filterAdminContent,
   getAdminContentStats,
@@ -70,6 +71,48 @@ describe('admin content helpers', () => {
       private: 1,
       archived: 0,
     });
+  });
+
+  test('builds a dashboard model for admin content operations', () => {
+    const dashboard = buildAdminContentDashboard(
+      [
+        ...items,
+        {
+          id: 'archived-page',
+          title: 'Archived Page',
+          type: 'page',
+          status: 'archived',
+          visibility: 'public',
+          publishedAt: '2026-06-01',
+          summary: 'Old page',
+        },
+      ],
+      { query: 'lab', status: 'private', type: 'project' },
+    );
+
+    expect(dashboard.stats).toEqual({
+      total: 4,
+      draft: 1,
+      published: 2,
+      private: 1,
+      archived: 1,
+    });
+    expect(dashboard.filteredTotal).toBe(1);
+    expect(dashboard.activeFilters).toEqual(['Search: lab', 'Type: project', 'Status: private']);
+    expect(dashboard.statusCards).toContainEqual({
+      label: 'Private',
+      value: 1,
+      href: '/admin/content?status=private',
+      active: true,
+    });
+    expect(dashboard.recentItems).toEqual([
+      {
+        id: 'private-project',
+        title: 'Private Project',
+        href: '/admin/content/private-project',
+        meta: 'project / private / 2026-06-08',
+      },
+    ]);
   });
 
   test('filters content by type status and search text', () => {

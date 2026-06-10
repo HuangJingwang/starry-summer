@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
-import { loadAdminContentItems, type AdminContentLoadResult } from '@/lib/admin-content';
+import { buildAdminContentDashboard, loadAdminContentItems, type AdminContentLoadResult } from '@/lib/admin-content';
 import type { SiteContentItem } from '@/lib/content';
 
 import { AdminContentTable } from './AdminContentTable';
@@ -61,6 +62,8 @@ export function AdminContentManager({
     };
   }, [fallbackItems, query, status, type, category, tag, series]);
 
+  const dashboard = buildAdminContentDashboard(result.items, { query, status, type, category, tag, series });
+
   return (
     <div className="admin-content-manager">
       <p className="admin-data-note">
@@ -70,6 +73,35 @@ export function AdminContentManager({
             ? `已加载 ${result.items.length} 条后台内容。`
             : '当前显示本地样例内容。'}
       </p>
+      <div className="admin-status-grid" aria-label="Content status overview">
+        {dashboard.statusCards.map((card) => (
+          <Link key={card.label} className={card.active ? 'active' : ''} href={card.href}>
+            <span>{card.label}</span>
+            <strong>{card.value}</strong>
+          </Link>
+        ))}
+      </div>
+      <div className="admin-content-summary">
+        <div>
+          <strong>{dashboard.filteredTotal}</strong>
+          <span>{dashboard.activeFilters.length > 0 ? dashboard.activeFilters.join(' / ') : 'All content'}</span>
+        </div>
+        <div>
+          <strong>最近更新</strong>
+          {dashboard.recentItems.length > 0 ? (
+            <ol>
+              {dashboard.recentItems.map((item) => (
+                <li key={item.id}>
+                  <Link href={item.href}>{item.title}</Link>
+                  <span>{item.meta}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <span>暂无匹配内容</span>
+          )}
+        </div>
+      </div>
       <AdminContentTable items={result.items} query={query} status={status} type={type} category={category} tag={tag} series={series} />
     </div>
   );
