@@ -12,6 +12,7 @@ export default defineConfig({
     },
   },
   test: {
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
     pool: 'forks',
   },
 });

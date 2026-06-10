@@ -27,6 +27,7 @@ Required production changes:
 - `ADMIN_PASSWORD_HASH`: a strong password hash generated before first real login.
 - `POSTGRES_PASSWORD`: a strong database password.
 - `S3_ACCESS_KEY` and `S3_SECRET_KEY`: strong MinIO credentials when self-hosting MinIO.
+- `STORAGE_DRIVER`: keep `local` until the S3/MinIO storage driver is enabled, then switch to `s3`.
 
 ## 3. First Boot
 
