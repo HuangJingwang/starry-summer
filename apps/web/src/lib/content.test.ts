@@ -107,7 +107,7 @@ describe('web content helpers', () => {
     });
   });
 
-  test('searches public title summary and tags only', () => {
+  test('searches public title summary taxonomy and body text', () => {
     const results = searchContent(
       [
         {
@@ -136,12 +136,50 @@ describe('web content helpers', () => {
           visibility: 'public',
           publishedAt: '2026-01-03',
           summary: 'Built with Next.js',
+          categories: ['Platform'],
+          bodyMarkdown: 'Deployment notes for a personal cloud server.',
         },
       ],
-      'archive',
+      'cloud server',
     );
 
-    expect(results.map((item) => item.id)).toEqual(['1']);
+    expect(results.map((item) => item.id)).toEqual(['3']);
+  });
+
+  test('ranks title matches before taxonomy and body matches', () => {
+    const results = searchContent(
+      [
+        {
+          id: 'body',
+          title: 'Deployment Note',
+          type: 'note',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-12',
+          bodyMarkdown: 'This note mentions PostgreSQL in the body.',
+        },
+        {
+          id: 'category',
+          title: 'Database Work',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-11',
+          categories: ['PostgreSQL'],
+        },
+        {
+          id: 'title',
+          title: 'PostgreSQL Backup Plan',
+          type: 'project',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-10',
+        },
+      ],
+      'postgresql',
+    );
+
+    expect(results.map((item) => item.id)).toEqual(['title', 'category', 'body']);
   });
 
   test('builds public content hrefs', () => {

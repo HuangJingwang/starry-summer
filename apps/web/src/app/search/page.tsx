@@ -9,8 +9,9 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q = '' } = await searchParams;
+  const query = q.trim();
   const content = await loadSiteContent();
-  const results = searchContent(content, q);
+  const results = searchContent(content, query);
 
   return (
     <SiteShell>
@@ -21,14 +22,19 @@ export default async function SearchPage({
           <p>搜索已发布的文章、笔记、日常和项目。</p>
         </div>
         <form className="search-form" action="/search">
-          <input name="q" defaultValue={q} placeholder="输入关键词" aria-label="Search query" />
+          <input name="q" defaultValue={query} placeholder="输入关键词" aria-label="Search query" />
           <button type="submit">搜索</button>
         </form>
-        <div className="content-grid">
-          {results.map((item) => (
-            <ContentCard key={item.id} item={item} />
-          ))}
-        </div>
+        {query ? <p className="search-summary">找到 {results.length} 条结果</p> : null}
+        {query && results.length === 0 ? (
+          <p className="empty-state">没有找到匹配内容。</p>
+        ) : (
+          <div className="content-grid">
+            {results.map((item) => (
+              <ContentCard key={item.id} item={item} />
+            ))}
+          </div>
+        )}
       </main>
     </SiteShell>
   );

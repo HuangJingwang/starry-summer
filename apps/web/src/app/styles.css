@@ -327,6 +327,11 @@ textarea {
   padding: 12px 18px;
 }
 
+.search-summary {
+  color: var(--muted);
+  margin: -4px 0 18px;
+}
+
 .about-list {
   display: grid;
   gap: 16px;

@@ -160,17 +160,53 @@ export function getAdjacentContent(items: SiteContentItem[], currentId: string):
 }
 
 export function searchContent(items: SiteContentItem[], query: string): SiteContentItem[] {
-  const normalizedQuery = query.trim().toLowerCase();
+  const terms = normalizeSearchTerms(query);
 
-  if (normalizedQuery.length === 0) {
+  if (terms.length === 0) {
     return [];
   }
 
-  return getPublicContent(items).filter((item) => {
-    const searchable = [item.title, item.summary ?? '', ...(item.tags ?? [])].join(' ').toLowerCase();
+  return getPublicContent(items)
+    .map((item) => ({ item, score: scoreSearchResult(item, terms) }))
+    .filter((result) => result.score > 0)
+    .sort((a, b) => b.score - a.score || b.item.publishedAt.localeCompare(a.item.publishedAt))
+    .map((result) => result.item);
+}
 
-    return searchable.includes(normalizedQuery);
-  });
+function normalizeSearchTerms(query: string): string[] {
+  return query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function scoreSearchResult(item: SiteContentItem, terms: string[]): number {
+  const title = item.title.toLowerCase();
+  const summary = (item.summary ?? '').toLowerCase();
+  const taxonomy = [...(item.categories ?? []), ...(item.tags ?? [])].join(' ').toLowerCase();
+  const body = (item.bodyMarkdown ?? '').toLowerCase();
+  const combined = [title, summary, taxonomy, body].join(' ');
+
+  if (!terms.every((term) => combined.includes(term))) {
+    return 0;
+  }
+
+  return terms.reduce((score, term) => {
+    if (title.includes(term)) {
+      return score + 8;
+    }
+
+    if (summary.includes(term)) {
+      return score + 5;
+    }
+
+    if (taxonomy.includes(term)) {
+      return score + 3;
+    }
+
+    return score + 1;
+  }, 0);
 }
 
 export function getContentHref(item: SiteContentItem): string {
