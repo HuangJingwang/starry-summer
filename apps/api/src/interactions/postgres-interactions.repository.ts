@@ -21,6 +21,8 @@ export interface CommentRow {
   author_name: string;
   body: string;
   status: ModerationStatus;
+  ip_hash?: string | null;
+  user_agent?: string | null;
   created_at: Date;
 }
 
@@ -29,6 +31,8 @@ export interface GuestbookEntryRow {
   author_name: string;
   body: string;
   status: ModerationStatus;
+  ip_hash?: string | null;
+  user_agent?: string | null;
   created_at: Date;
 }
 
@@ -51,6 +55,7 @@ export function mapCommentRow(row: CommentRow): CommentRecord {
     authorName: row.author_name,
     body: row.body,
     status: row.status,
+    ...mapModerationMetadata(row),
     createdAt: row.created_at.toISOString(),
   };
 }
@@ -61,6 +66,7 @@ export function mapGuestbookRow(row: GuestbookEntryRow): GuestbookEntryRecord {
     authorName: row.author_name,
     body: row.body,
     status: row.status,
+    ...mapModerationMetadata(row),
     createdAt: row.created_at.toISOString(),
   };
 }
@@ -72,12 +78,14 @@ export function buildCommentInsert(input: CreateCommentInput): SqlStatement {
         target_type,
         target_id,
         author_name,
-        body
+        body,
+        ip_hash,
+        user_agent
       )
-      values ($1, $2, $3, $4)
+      values ($1, $2, $3, $4, $5, $6)
       returning *
     `,
-    values: [input.targetType, input.targetId, input.authorName, input.body],
+    values: [input.targetType, input.targetId, input.authorName, input.body, input.ipHash ?? null, input.userAgent ?? null],
   };
 }
 
@@ -86,12 +94,14 @@ export function buildGuestbookInsert(input: CreateGuestbookEntryInput): SqlState
     sql: `
       insert into guestbook_entries (
         author_name,
-        body
+        body,
+        ip_hash,
+        user_agent
       )
-      values ($1, $2)
+      values ($1, $2, $3, $4)
       returning *
     `,
-    values: [input.authorName, input.body],
+    values: [input.authorName, input.body, input.ipHash ?? null, input.userAgent ?? null],
   };
 }
 
@@ -226,7 +236,7 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
       values,
     );
 
-    return result.rows.map(mapCommentRow);
+    return result.rows.map(stripModerationMetadataFromCommentRow);
   }
 
   async listApprovedComments(targetType: CommentRecord['targetType'], targetId: string): Promise<CommentRecord[]> {
@@ -332,10 +342,29 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
       `,
     );
 
-    return result.rows.map(mapGuestbookRow);
+    return result.rows.map(stripModerationMetadataFromGuestbookRow);
   }
 }
 
 function resolveActorHash(actorHashOrCreate: string | (() => string)): string {
   return typeof actorHashOrCreate === 'function' ? actorHashOrCreate() : actorHashOrCreate;
+}
+
+function mapModerationMetadata(row: { ip_hash?: string | null; user_agent?: string | null }): Pick<CommentRecord, 'ipHash' | 'userAgent'> {
+  return {
+    ...(row.ip_hash ? { ipHash: row.ip_hash } : {}),
+    ...(row.user_agent ? { userAgent: row.user_agent } : {}),
+  };
+}
+
+function stripModerationMetadataFromCommentRow(row: CommentRow): CommentRecord {
+  const { ipHash: _ipHash, userAgent: _userAgent, ...record } = mapCommentRow(row);
+
+  return record;
+}
+
+function stripModerationMetadataFromGuestbookRow(row: GuestbookEntryRow): GuestbookEntryRecord {
+  const { ipHash: _ipHash, userAgent: _userAgent, ...record } = mapGuestbookRow(row);
+
+  return record;
 }

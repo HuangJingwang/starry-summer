@@ -24,6 +24,8 @@ describe('PostgresInteractionsRepository mapping', () => {
       author_name: 'Reader',
       body: 'Nice writing.',
       status: 'approved',
+      ip_hash: 'ip-hash-1',
+      user_agent: 'Mozilla/5.0',
       created_at: new Date('2026-06-10T00:00:00.000Z'),
     };
 
@@ -34,6 +36,8 @@ describe('PostgresInteractionsRepository mapping', () => {
       authorName: 'Reader',
       body: 'Nice writing.',
       status: 'approved',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
       createdAt: '2026-06-10T00:00:00.000Z',
     });
   });
@@ -44,6 +48,8 @@ describe('PostgresInteractionsRepository mapping', () => {
       author_name: 'Visitor',
       body: 'Hello there.',
       status: 'pending',
+      ip_hash: 'ip-hash-1',
+      user_agent: 'Mozilla/5.0',
       created_at: new Date('2026-06-10T01:00:00.000Z'),
     };
 
@@ -52,6 +58,8 @@ describe('PostgresInteractionsRepository mapping', () => {
       authorName: 'Visitor',
       body: 'Hello there.',
       status: 'pending',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
       createdAt: '2026-06-10T01:00:00.000Z',
     });
   });
@@ -62,16 +70,22 @@ describe('PostgresInteractionsRepository mapping', () => {
       targetId: '11111111-1111-4111-8111-111111111111',
       authorName: 'Reader',
       body: 'Nice writing.',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
     });
 
     expect(insert.sql).toContain('insert into comments');
     expect(insert.sql).toContain('target_type');
+    expect(insert.sql).toContain('ip_hash');
+    expect(insert.sql).toContain('user_agent');
     expect(insert.sql).toContain('returning *');
     expect(insert.values).toEqual([
       'post',
       '11111111-1111-4111-8111-111111111111',
       'Reader',
       'Nice writing.',
+      'ip-hash-1',
+      'Mozilla/5.0',
     ]);
   });
 
@@ -79,11 +93,15 @@ describe('PostgresInteractionsRepository mapping', () => {
     const insert = buildGuestbookInsert({
       authorName: 'Visitor',
       body: 'Hello from the guestbook.',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
     });
 
     expect(insert.sql).toContain('insert into guestbook_entries');
     expect(insert.sql).toContain('author_name');
-    expect(insert.values).toEqual(['Visitor', 'Hello from the guestbook.']);
+    expect(insert.sql).toContain('ip_hash');
+    expect(insert.sql).toContain('user_agent');
+    expect(insert.values).toEqual(['Visitor', 'Hello from the guestbook.', 'ip-hash-1', 'Mozilla/5.0']);
   });
 
   test('builds moderation updates for known interaction tables', () => {

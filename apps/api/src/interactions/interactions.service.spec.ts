@@ -25,11 +25,15 @@ describe('InteractionsService', () => {
       targetId: 'post-1',
       authorName: ' Reader ',
       body: ' Nice writing. ',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
     });
 
     expect(comment.status).toBe('pending');
     expect(comment.authorName).toBe('Reader');
     expect(comment.body).toBe('Nice writing.');
+    expect(comment.ipHash).toBe('ip-hash-1');
+    expect(comment.userAgent).toBe('Mozilla/5.0');
     expect(allowedCommentTargets).toEqual([{ targetType: 'post', targetId: 'post-1' }]);
     expect(await service.listApprovedComments('post', 'post-1')).toEqual([]);
   });
@@ -177,11 +181,15 @@ describe('InteractionsService', () => {
     const entry = await service.createGuestbookEntry({
       authorName: ' Visitor ',
       body: ' Hello from the guestbook. ',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
     });
 
     expect(entry.status).toBe('pending');
     expect(entry.authorName).toBe('Visitor');
     expect(entry.body).toBe('Hello from the guestbook.');
+    expect(entry.ipHash).toBe('ip-hash-1');
+    expect(entry.userAgent).toBe('Mozilla/5.0');
     expect(await service.listApprovedGuestbookEntries()).toEqual([]);
   });
 

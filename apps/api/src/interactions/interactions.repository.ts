@@ -49,6 +49,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
       body: input.body,
       status: 'pending',
       createdAt: this.now(),
+      ...buildModerationMetadata(input),
     };
 
     this.comments.set(comment.id, comment);
@@ -84,7 +85,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
         comment.targetType === targetType &&
         comment.targetId === targetId &&
         isVisibleSubmission(comment),
-    );
+    ).map(stripModerationMetadata);
   }
 
   async likeContent(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
@@ -138,6 +139,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
       body: input.body,
       status: 'pending',
       createdAt: this.now(),
+      ...buildModerationMetadata(input),
     };
 
     this.guestbookEntries.set(entry.id, entry);
@@ -168,12 +170,25 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
   }
 
   async listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]> {
-    return [...this.guestbookEntries.values()].filter(isVisibleSubmission);
+    return [...this.guestbookEntries.values()].filter(isVisibleSubmission).map(stripModerationMetadata);
   }
 
   private targetKey(targetType: ContentType, targetId: string): string {
     return `${targetType}:${targetId}`;
   }
+}
+
+function buildModerationMetadata(input: { ipHash?: string; userAgent?: string }): Pick<CommentRecord, 'ipHash' | 'userAgent'> {
+  return {
+    ...(input.ipHash ? { ipHash: input.ipHash } : {}),
+    ...(input.userAgent ? { userAgent: input.userAgent } : {}),
+  };
+}
+
+function stripModerationMetadata<T extends CommentRecord | GuestbookEntryRecord>(record: T): T {
+  const { ipHash: _ipHash, userAgent: _userAgent, ...publicRecord } = record;
+
+  return publicRecord as T;
 }
 
 function sortNewestModerationFirst(

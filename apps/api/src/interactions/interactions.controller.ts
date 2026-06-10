@@ -26,10 +26,11 @@ export class InteractionsController {
 
   @Post('comments')
   @UseGuards(PublicInteractionRateLimitGuard)
-  createComment(@Body() input: CreateCommentRequest) {
+  createComment(@Body() input: CreateCommentRequest, @Req() request: PublicInteractionRequest) {
     return this.interactionsService.createComment({
       ...input,
       targetType: parseCommentTargetType(input.targetType),
+      ...createPublicSubmissionMetadata(request),
     });
   }
 
@@ -78,8 +79,11 @@ export class InteractionsController {
 
   @Post('guestbook')
   @UseGuards(PublicInteractionRateLimitGuard)
-  createGuestbookEntry(@Body() input: CreateGuestbookEntryInput) {
-    return this.interactionsService.createGuestbookEntry(input);
+  createGuestbookEntry(@Body() input: CreateGuestbookEntryInput, @Req() request: PublicInteractionRequest) {
+    return this.interactionsService.createGuestbookEntry({
+      ...input,
+      ...createPublicSubmissionMetadata(request),
+    });
   }
 
   @Get('guestbook')
@@ -152,6 +156,17 @@ function createPublicActorHash(request: PublicInteractionRequest): string {
   return createHash('sha256').update(`${secret}\n${ip}\n${userAgent}`).digest('hex');
 }
 
+function createPublicSubmissionMetadata(request: PublicInteractionRequest): { ipHash: string; userAgent: string } {
+  return {
+    ipHash: createPublicActorHash(request),
+    userAgent: normalizeUserAgent(firstHeaderValue(request.headers?.['user-agent'])),
+  };
+}
+
 function firstHeaderValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function normalizeUserAgent(value: string | undefined): string {
+  return (value?.trim() || 'unknown-agent').slice(0, 500);
 }

@@ -1526,6 +1526,10 @@ textarea {
   color: var(--muted);
 }
 
+.moderation-source {
+  overflow-wrap: anywhere;
+}
+
 .asset-dropzone {
   align-items: center;
   border-style: dashed;

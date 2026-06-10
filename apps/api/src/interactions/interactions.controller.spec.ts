@@ -24,13 +24,20 @@ describe('InteractionsController', () => {
 
   test('accepts supported comment targets', () => {
     const controller = new InteractionsController(interactionsService as never);
+    const request = {
+      headers: {
+        'user-agent': 'Mozilla/5.0',
+        'x-forwarded-for': '203.0.113.10, 10.0.0.1',
+      },
+      ip: '127.0.0.1',
+    };
 
     controller.createComment({
       targetType: 'post',
       targetId: 'post-1',
       authorName: 'Ada',
       body: 'Nice',
-    });
+    }, request);
     controller.listApprovedComments('note', 'note-1');
 
     expect(interactionsService.createComment).toHaveBeenCalledWith({
@@ -38,6 +45,8 @@ describe('InteractionsController', () => {
       targetId: 'post-1',
       authorName: 'Ada',
       body: 'Nice',
+      ipHash: expect.stringMatching(/^[a-f0-9]{64}$/),
+      userAgent: 'Mozilla/5.0',
     });
     expect(interactionsService.listApprovedComments).toHaveBeenCalledWith('note', 'note-1');
   });
@@ -50,7 +59,7 @@ describe('InteractionsController', () => {
       targetId: 'about',
       authorName: 'Ada',
       body: 'Nice',
-    })).toThrow('Unsupported comment target type: page');
+    }, { headers: {} })).toThrow('Unsupported comment target type: page');
     expect(() => controller.listApprovedComments('moment', 'daily-1')).toThrow('Unsupported comment target type: moment');
     expect(interactionsService.createComment).not.toHaveBeenCalled();
     expect(interactionsService.listApprovedComments).not.toHaveBeenCalled();
@@ -100,6 +109,30 @@ describe('InteractionsController', () => {
     expect(likeActorHash).toBe(viewActorHash);
     expect(() => controller.likeContent('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
     expect(() => controller.recordView('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
+  });
+
+  test('adds moderation metadata to guestbook entries', () => {
+    const controller = new InteractionsController(interactionsService as never);
+
+    controller.createGuestbookEntry(
+      {
+        authorName: 'Ada',
+        body: 'Hello',
+      },
+      {
+        headers: {
+          'user-agent': 'Safari',
+          'x-real-ip': '198.51.100.9',
+        },
+      },
+    );
+
+    expect(interactionsService.createGuestbookEntry).toHaveBeenCalledWith({
+      authorName: 'Ada',
+      body: 'Hello',
+      ipHash: expect.stringMatching(/^[a-f0-9]{64}$/),
+      userAgent: 'Safari',
+    });
   });
 
   test('deletes moderated submissions from admin routes', () => {

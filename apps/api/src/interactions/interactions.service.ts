@@ -12,6 +12,8 @@ export interface CommentRecord {
   body: string;
   status: ModerationStatus;
   createdAt: string;
+  ipHash?: string;
+  userAgent?: string;
 }
 
 export interface CreateCommentInput {
@@ -19,6 +21,8 @@ export interface CreateCommentInput {
   targetId: string;
   authorName: string;
   body: string;
+  ipHash?: string;
+  userAgent?: string;
 }
 
 export interface GuestbookEntryRecord {
@@ -27,11 +31,15 @@ export interface GuestbookEntryRecord {
   body: string;
   status: ModerationStatus;
   createdAt: string;
+  ipHash?: string;
+  userAgent?: string;
 }
 
 export interface CreateGuestbookEntryInput {
   authorName: string;
   body: string;
+  ipHash?: string;
+  userAgent?: string;
 }
 
 export interface ModerationListFilter {
@@ -112,7 +120,10 @@ export class InteractionsService {
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
-    return this.repository.createGuestbookEntry(normalizePublicSubmission(input));
+    return this.repository.createGuestbookEntry({
+      ...input,
+      ...normalizePublicSubmission(input),
+    });
   }
 
   async moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord> {

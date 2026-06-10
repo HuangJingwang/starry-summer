@@ -124,6 +124,12 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
               {record.targetType && record.targetId ? `${record.targetType}:${record.targetId} · ` : ''}
               {record.createdAt.slice(0, 10)}
             </small>
+            {record.ipHash || record.userAgent ? (
+              <small className="moderation-source">
+                {record.ipHash ? `source ${record.ipHash.slice(0, 12)}` : 'source unknown'}
+                {record.userAgent ? ` · ${record.userAgent}` : ''}
+              </small>
+            ) : null}
             <div className="admin-actions">
               {actionOptions.map((action) => (
                 <button

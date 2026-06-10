@@ -170,6 +170,8 @@ describe('interaction client helpers', () => {
         authorName: 'Reader',
         body: 'Nice.',
         status: 'pending',
+        ipHash: 'ip-hash-1',
+        userAgent: 'Mozilla/5.0',
         createdAt: '2026-06-10T00:00:00.000Z',
       }),
     ).toEqual({
@@ -179,6 +181,8 @@ describe('interaction client helpers', () => {
       authorName: 'Reader',
       body: 'Nice.',
       status: 'pending',
+      ipHash: 'ip-hash-1',
+      userAgent: 'Mozilla/5.0',
       createdAt: '2026-06-10T00:00:00.000Z',
     });
   });

@@ -40,6 +40,8 @@ export interface ModerationRecord {
   createdAt: string;
   targetType?: CommentTargetType;
   targetId?: string;
+  ipHash?: string;
+  userAgent?: string;
 }
 
 const jsonHeaders = {
@@ -210,5 +212,7 @@ export function normalizeModerationRecord(input: Partial<ModerationRecord> & { i
     body: input.body ?? '',
     status: input.status ?? 'pending',
     createdAt: input.createdAt ?? '',
+    ipHash: input.ipHash,
+    userAgent: input.userAgent,
   };
 }
