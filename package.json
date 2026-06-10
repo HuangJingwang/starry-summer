@@ -17,7 +17,9 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "auth:hash-password": "npm run hash-password --workspace @starry-summer/api",
     "auth:secret": "npm run session-secret --workspace @starry-summer/api",
-    "db:migrate": "npm run migrate --workspace @starry-summer/database"
+    "db:migrate": "npm run migrate --workspace @starry-summer/database",
+    "ops:backup": "bash scripts/backup.sh",
+    "ops:restore": "bash scripts/restore.sh"
   },
   "engines": {
     "node": ">=22.0.0",

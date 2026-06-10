@@ -76,7 +76,7 @@ describe('deployment configuration', () => {
     expect(caddy).toContain('handle /uploads/*');
     expect(env).toContain('LOCAL_UPLOAD_DIR=/app/uploads');
     expect(env).toContain('LOCAL_UPLOAD_PUBLIC_URL=/uploads');
-    expect(deployment).toContain('Back up the `api-uploads` Docker volume when `STORAGE_DRIVER=local`.');
+    expect(deployment).toContain('`api-uploads.tar.gz`: uploaded files when using local uploads.');
   });
 
   test('passes S3 public URL and path style settings through deployment config', async () => {
@@ -89,6 +89,25 @@ describe('deployment configuration', () => {
     expect(compose).toContain('S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-http://localhost:9000/starry-summer}');
     expect(compose).toContain('S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}');
     expect(deployment).toContain('S3_FORCE_PATH_STYLE');
+  });
+
+  test('provides repeatable backup and restore scripts for cloud operations', async () => {
+    const backupScript = await readFile(join(repoRoot, 'scripts/backup.sh'), 'utf8');
+    const restoreScript = await readFile(join(repoRoot, 'scripts/restore.sh'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(packageJson.scripts?.['ops:backup']).toBe('bash scripts/backup.sh');
+    expect(packageJson.scripts?.['ops:restore']).toBe('bash scripts/restore.sh');
+    expect(backupScript).toContain('docker compose exec -T postgres pg_dump');
+    expect(backupScript).toContain('docker run --rm');
+    expect(backupScript).toContain('api-uploads');
+    expect(restoreScript).toContain('docker compose exec -T postgres psql');
+    expect(restoreScript).toContain('docker run --rm');
+    expect(deployment).toContain('npm run ops:backup');
+    expect(deployment).toContain('npm run ops:restore -- backups/starry-summer-YYYY-MM-DD');
   });
 
   test('sets baseline security headers at the reverse proxy', async () => {

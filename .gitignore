@@ -12,6 +12,7 @@ coverage/
 .env.local
 .env.*.local
 uploads/
+backups/
 
 # Logs
 *.log

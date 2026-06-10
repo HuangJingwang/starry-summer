@@ -77,17 +77,26 @@ Production Docker Compose uses `CONTENT_REPOSITORY_DRIVER=postgres`. Local devel
 
 ## 4. Backup
 
-PostgreSQL dump:
+Create a timestamped operational backup:
 
 ```bash
-docker compose exec postgres pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > backups/starry-summer-$(date +%F).sql
+npm run ops:backup
 ```
 
-MinIO data:
+This writes a directory such as `backups/starry-summer-2026-06-11-030000` containing:
 
-- For self-hosted MinIO, back up the `minio-data` Docker volume or configure object replication.
-- For cloud S3/OSS, enable provider lifecycle and backup policies.
-- Back up the `api-uploads` Docker volume when `STORAGE_DRIVER=local`.
+- `postgres.sql`: PostgreSQL dump.
+- `api-uploads.tar.gz`: uploaded files when using local uploads.
+- `minio-data.tar.gz`: self-hosted MinIO data when the local Compose volume exists.
+- `manifest.txt`: timestamp, Compose project name, and git revision.
+
+You can pass a fixed output directory:
+
+```bash
+npm run ops:backup -- backups/starry-summer-before-upgrade
+```
+
+For cloud S3/OSS, also enable provider lifecycle and backup policies.
 
 Markdown export:
 
@@ -97,16 +106,22 @@ Markdown export:
 
 ## 5. Restore
 
-Restore PostgreSQL from a dump:
+Restore from an operational backup:
 
 ```bash
-docker compose exec -T postgres psql -U "$POSTGRES_USER" "$POSTGRES_DB" < backups/starry-summer-YYYY-MM-DD.sql
+RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD
 ```
 
-Restore assets:
+The restore script imports `postgres.sql` into PostgreSQL and restores `api-uploads` and `minio-data` archives when those files are present.
 
-- Restore the MinIO volume or copy objects back to the configured bucket.
-- Confirm uploaded images load from public pages.
+After restore, run:
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+Then confirm uploaded images load from public pages.
 
 Restore from Markdown when you do not want to restore the whole database:
 
