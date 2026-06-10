@@ -61,6 +61,60 @@ describe('AssetsService', () => {
     expect(saveCalls).toBe(0);
   });
 
+  test('rejects invalid upload field types before storage writes', async () => {
+    let saveCalls = 0;
+    const service = new AssetsService(
+      {
+        save: async () => {
+          saveCalls += 1;
+
+          return {
+            storageKey: 'should-not-exist.png',
+            publicUrl: '/uploads/should-not-exist.png',
+            mimeType: 'image/png',
+            byteSize: 1,
+          };
+        },
+        delete: async () => undefined,
+      },
+      new InMemoryAssetRepository(),
+    );
+
+    await expect(
+      service.upload({
+        filename: 123,
+        mimeType: 'image/png',
+        base64: Buffer.from('png-bytes').toString('base64'),
+      } as never),
+    ).rejects.toThrow('Asset upload filename, mimeType, and base64 must be strings');
+    expect(saveCalls).toBe(0);
+  });
+
+  test('rejects missing upload bodies before storage writes', async () => {
+    let saveCalls = 0;
+    const service = new AssetsService(
+      {
+        save: async () => {
+          saveCalls += 1;
+
+          return {
+            storageKey: 'should-not-exist.png',
+            publicUrl: '/uploads/should-not-exist.png',
+            mimeType: 'image/png',
+            byteSize: 1,
+          };
+        },
+        delete: async () => undefined,
+      },
+      new InMemoryAssetRepository(),
+    );
+
+    await expect(service.upload(null as never)).rejects.toThrow(
+      'Asset upload filename, mimeType, and base64 must be strings',
+    );
+    expect(saveCalls).toBe(0);
+  });
+
   test('stores uploaded asset metadata and filters the gallery by usage', async () => {
     const repository = new InMemoryAssetRepository(() => '2026-06-10T00:00:00.000Z');
     const service = new AssetsService(

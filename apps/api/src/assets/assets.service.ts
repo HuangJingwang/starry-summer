@@ -34,6 +34,7 @@ export class AssetsService {
   ) {}
 
   async upload(input: UploadAssetInput): Promise<AssetRecord> {
+    assertUploadInput(input);
     const bytes = decodeBase64Payload(input.base64);
     const stored = await this.storage.save({
       filename: input.filename,
@@ -82,6 +83,16 @@ export class AssetsService {
     if (!deleted) {
       throw new NotFoundException(`Asset ${id} was not found`);
     }
+  }
+}
+
+function assertUploadInput(input: UploadAssetInput): void {
+  if (
+    typeof input?.filename !== 'string' ||
+    typeof input.mimeType !== 'string' ||
+    typeof input.base64 !== 'string'
+  ) {
+    throw new BadRequestException('Asset upload filename, mimeType, and base64 must be strings');
   }
 }
 
