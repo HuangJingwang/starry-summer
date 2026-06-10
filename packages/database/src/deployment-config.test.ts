@@ -15,6 +15,17 @@ describe('deployment configuration', () => {
     expect(compose).toContain('condition: service_completed_successfully');
   });
 
+  test('waits for web and API health checks before routing traffic', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(compose).toContain('http://127.0.0.1:3000/health');
+    expect(compose).toContain('http://127.0.0.1:4000/health');
+    expect(compose).toContain('web:\n        condition: service_healthy');
+    expect(compose).toContain('api:\n        condition: service_healthy');
+    expect(deployment).toContain('`https://$DOMAIN/health` returns Web health through Caddy.');
+  });
+
   test('uses container network hosts in the production env example', async () => {
     const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
 

@@ -63,6 +63,7 @@ docker compose logs -f web api caddy
 Verify:
 
 - `https://$DOMAIN` opens the public site.
+- `https://$DOMAIN/health` returns Web health through Caddy.
 - `https://$DOMAIN/admin/login` opens the admin login screen.
 - `https://$DOMAIN/api/health` returns API health through Caddy.
 

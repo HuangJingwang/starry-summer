@@ -9,7 +9,13 @@ services:
       PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost}
     depends_on:
       api:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(async r => { const body = await r.json(); process.exit(r.ok && body.status === 'ok' ? 0 : 1); }).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     restart: unless-stopped
 
   api:
@@ -45,6 +51,12 @@ services:
         condition: service_started
       minio:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:4000/health').then(async r => { const body = await r.json(); process.exit(r.ok && body.status === 'ok' ? 0 : 1); }).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     restart: unless-stopped
 
   migrate:
@@ -94,9 +106,9 @@ services:
     image: caddy:2.10-alpine
     depends_on:
       web:
-        condition: service_started
+        condition: service_healthy
       api:
-        condition: service_started
+        condition: service_healthy
     environment:
       DOMAIN: ${DOMAIN:-localhost}
       ACME_EMAIL: ${ACME_EMAIL:-owner@example.com}
