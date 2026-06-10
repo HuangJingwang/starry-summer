@@ -22,7 +22,7 @@ check_admin_protected_redirect() {
 
   echo "Checking admin protected redirect: $SITE_URL/admin/content"
   status_code=$(curl --silent --show-error --output /dev/null --dump-header "$header_file" --write-out "%{http_code}" --max-time 10 "$SITE_URL/admin/content")
-  location=$(awk 'BEGIN { IGNORECASE = 1 } /^location:/ { sub(/\r$/, "", $2); print $2; exit }' "$header_file")
+  location=$(awk 'tolower($1) == "location:" { sub(/\r$/, "", $0); sub(/^[^:]+:[[:space:]]*/, "", $0); print $0; exit }' "$header_file")
   rm -f "$header_file"
 
   if [[ "$status_code" != "307" && "$status_code" != "308" && "$status_code" != "302" && "$status_code" != "301" ]]; then
@@ -30,7 +30,7 @@ check_admin_protected_redirect() {
     exit 1
   fi
 
-  if [[ "$location" != /admin/login* ]]; then
+  if [[ "$location" != /admin/login* && "$location" != "$SITE_URL/admin/login"* ]]; then
     echo "Location header did not point to /admin/login."
     echo "Location: ${location:-<missing>}"
     exit 1
