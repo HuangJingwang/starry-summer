@@ -213,6 +213,7 @@ export class ContentService {
     const sourceUrl = normalizeSourceUrl(String(document.frontmatter.sourceUrl ?? ''));
     const categories = normalizeTaxonomyLabels(toStringArray(document.frontmatter.categories));
     const tags = normalizeTaxonomyLabels(toStringArray(document.frontmatter.tags));
+    const allowComments = document.frontmatter.allowComments === false ? false : true;
 
     const record = await this.createDraft({
       type,
@@ -225,6 +226,12 @@ export class ContentService {
       categories,
       tags,
     });
+
+    const updated = await this.updateContent(record.id, { allowComments });
+
+    if (updated.visibility === visibility) {
+      return updated;
+    }
 
     return this.setVisibility(record.id, visibility);
   }
@@ -267,6 +274,7 @@ export class ContentService {
         type: record.type,
         status: record.status,
         visibility: record.visibility,
+        allowComments: record.allowComments,
         categories: record.categories,
         tags: record.tags,
         publishedAt: record.publishedAt,
