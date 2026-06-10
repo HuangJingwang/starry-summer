@@ -4,11 +4,12 @@ import { buildPublicNavigation } from './navigation';
 
 describe('public navigation helpers', () => {
   test('always keeps home and maps configured navigation keys', () => {
-    expect(buildPublicNavigation(['posts', 'projects', 'series', 'guestbook'])).toEqual([
+    expect(buildPublicNavigation(['posts', 'projects', 'series', 'tags', 'guestbook'])).toEqual([
       { href: '/', label: 'Home' },
       { href: '/posts', label: 'Writing' },
       { href: '/projects', label: 'Projects' },
       { href: '/series', label: 'Series' },
+      { href: '/tags', label: 'Tags' },
       { href: '/guestbook', label: 'Guestbook' },
     ]);
   });

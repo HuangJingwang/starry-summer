@@ -45,6 +45,12 @@ export interface ContentSeriesGroup {
   items: SiteContentItem[];
 }
 
+export interface ContentTagGroup {
+  key: string;
+  label: string;
+  items: SiteContentItem[];
+}
+
 export interface AdjacentContent {
   previous: SiteContentItem | null;
   next: SiteContentItem | null;
@@ -230,6 +236,31 @@ export function getContentBySeriesSlug(items: SiteContentItem[], slug: string): 
 
 export function getSeriesHref(series: string): string {
   return `/series/${slugifyTaxonomyLabel(series)}`;
+}
+
+export function groupContentByTag(items: SiteContentItem[]): ContentTagGroup[] {
+  const groups = new Map<string, ContentTagGroup>();
+
+  for (const item of getPublicContent(items)) {
+    const tagLabels = new Set(item.tags?.map((tag) => tag.trim()).filter(Boolean) ?? []);
+
+    for (const tag of tagLabels) {
+      const key = slugifyTaxonomyLabel(tag);
+      const group = groups.get(key) ?? { key, label: tag, items: [] };
+      group.items.push(item);
+      groups.set(key, group);
+    }
+  }
+
+  return [...groups.values()].sort((a, b) => b.items.length - a.items.length || a.label.localeCompare(b.label));
+}
+
+export function getContentByTagSlug(items: SiteContentItem[], slug: string): ContentTagGroup | null {
+  return groupContentByTag(items).find((group) => group.key === slug) ?? null;
+}
+
+export function getTagHref(tag: string): string {
+  return `/tags/${slugifyTaxonomyLabel(tag)}`;
 }
 
 export function getAdjacentContent(items: SiteContentItem[], currentId: string): AdjacentContent {

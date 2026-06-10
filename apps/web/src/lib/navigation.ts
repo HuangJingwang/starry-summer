@@ -10,6 +10,7 @@ const navigationByKey: Record<string, NavigationItem> = {
   projects: { href: '/projects', label: 'Projects' },
   series: { href: '/series', label: 'Series' },
   categories: { href: '/categories', label: 'Categories' },
+  tags: { href: '/tags', label: 'Tags' },
   archives: { href: '/archives', label: 'Archives' },
   search: { href: '/search', label: 'Search' },
   about: { href: '/about', label: 'About' },

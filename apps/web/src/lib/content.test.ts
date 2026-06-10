@@ -9,13 +9,16 @@ import {
   groupContentByMonth,
   getFeaturedContent,
   getContentBySeriesSlug,
+  getContentByTagSlug,
   getPopularContent,
   getPublicContent,
   getSeriesHref,
+  getTagHref,
   getSiteStats,
   groupContentByCategory,
   groupContentCounts,
   groupContentBySeries,
+  groupContentByTag,
   normalizeContentSort,
   estimateReadingTime,
   searchContent,
@@ -449,6 +452,51 @@ describe('web content helpers', () => {
     ]);
   });
 
+  test('groups public content by tag newest first', () => {
+    const groups = groupContentByTag([
+      {
+        id: 'old',
+        title: 'Old',
+        type: 'post',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-01-01',
+        tags: ['Next.js', 'Platform'],
+      },
+      {
+        id: 'new',
+        title: 'New',
+        type: 'note',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-02-01',
+        tags: ['Next.js'],
+      },
+      {
+        id: 'private',
+        title: 'Private',
+        type: 'project',
+        status: 'published',
+        visibility: 'private',
+        publishedAt: '2026-03-01',
+        tags: ['Next.js'],
+      },
+    ]);
+
+    expect(groups).toEqual([
+      {
+        key: 'next-js',
+        label: 'Next.js',
+        items: [expect.objectContaining({ id: 'new' }), expect.objectContaining({ id: 'old' })],
+      },
+      {
+        key: 'platform',
+        label: 'Platform',
+        items: [expect.objectContaining({ id: 'old' })],
+      },
+    ]);
+  });
+
   test('finds public content by series slug', () => {
     const items = [
       {
@@ -474,6 +522,24 @@ describe('web content helpers', () => {
     expect(getContentBySeriesSlug(items, 'platform-journal')?.items.map((item) => item.id)).toEqual(['one']);
     expect(getContentBySeriesSlug(items, 'missing')).toBeNull();
     expect(getSeriesHref('Platform Journal')).toBe('/series/platform-journal');
+  });
+
+  test('finds public content by tag slug', () => {
+    const items = [
+      {
+        id: 'one',
+        title: 'One',
+        type: 'post' as const,
+        status: 'published' as const,
+        visibility: 'public' as const,
+        publishedAt: '2026-01-01',
+        tags: ['Next.js'],
+      },
+    ];
+
+    expect(getContentByTagSlug(items, 'next-js')?.items.map((item) => item.id)).toEqual(['one']);
+    expect(getContentByTagSlug(items, 'missing')).toBeNull();
+    expect(getTagHref('Next.js')).toBe('/tags/next-js');
   });
 
   test('finds adjacent public content in timeline order', () => {
