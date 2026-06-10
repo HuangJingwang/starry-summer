@@ -17,14 +17,14 @@ function createHttpContext(path: string): ExecutionContext {
 }
 
 describe('PublicInteractionRateLimitGuard', () => {
-  test('allows view tracking at the same frequency as likes', () => {
+  test('allows view tracking at the same frequency as likes', async () => {
     const guard = new PublicInteractionRateLimitGuard(new RateLimitService(() => 1_000));
     const context = createHttpContext('/views/:targetType/:targetId');
 
     for (let index = 0; index < 30; index += 1) {
-      expect(guard.canActivate(context)).toBe(true);
+      await expect(guard.canActivate(context)).resolves.toBe(true);
     }
 
-    expect(() => guard.canActivate(context)).toThrow('Rate limit exceeded');
+    await expect(guard.canActivate(context)).rejects.toThrow('Rate limit exceeded');
   });
 });

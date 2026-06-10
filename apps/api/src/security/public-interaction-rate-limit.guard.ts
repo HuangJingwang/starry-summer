@@ -15,12 +15,12 @@ interface HttpRequest {
 export class PublicInteractionRateLimitGuard implements CanActivate {
   constructor(@Inject(RateLimitService) private readonly rateLimitService: RateLimitService) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<HttpRequest>();
     const actor = this.actorKey(request);
     const route = request.route?.path ?? 'interaction';
     const lightweightInteraction = route.includes('likes') || route.includes('views');
-    const result = this.rateLimitService.consume(`${route}:${actor}`, {
+    const result = await this.rateLimitService.consume(`${route}:${actor}`, {
       limit: lightweightInteraction ? 30 : 8,
       windowMs: 60_000,
     });
