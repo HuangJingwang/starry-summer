@@ -72,6 +72,7 @@ describe('admin content helpers', () => {
   test('filters content by type status and search text', () => {
     expect(filterAdminContent(items, { type: 'note' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { status: 'draft' }).map((item) => item.id)).toEqual(['draft-post']);
+    expect(filterAdminContent(items, { status: 'private' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'knowledge' }).map((item) => item.id)).toEqual(['published-note']);
   });

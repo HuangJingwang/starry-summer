@@ -425,7 +425,13 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
 
   return items
     .filter((item) => (filters.type ? item.type === filters.type : true))
-    .filter((item) => (filters.status ? item.status === filters.status : true))
+    .filter((item) => {
+      if (!filters.status) {
+        return true;
+      }
+
+      return filters.status === 'private' ? item.visibility === 'private' : item.status === filters.status;
+    })
     .filter((item) => {
       if (!normalizedQuery) {
         return true;

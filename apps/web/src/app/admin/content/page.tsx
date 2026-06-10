@@ -37,6 +37,7 @@ export default async function AdminContentPage({
             <option value="">All status</option>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
+            <option value="private">Private</option>
             <option value="archived">Archived</option>
           </select>
           <button type="submit">Filter</button>
