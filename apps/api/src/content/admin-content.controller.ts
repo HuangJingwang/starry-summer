@@ -26,4 +26,14 @@ export class AdminContentController {
   setVisibility(@Param('id') id: string, @Body('visibility') visibility: ContentVisibility) {
     return this.contentService.setVisibility(id, visibility);
   }
+
+  @Post('import')
+  importMarkdown(@Body('markdown') markdown: string, @Body('type') type: CreateDraftInput['type']) {
+    return this.contentService.importMarkdown(markdown, type);
+  }
+
+  @Get(':id/export')
+  exportMarkdown(@Param('id') id: string) {
+    return this.contentService.exportMarkdown(id);
+  }
 }

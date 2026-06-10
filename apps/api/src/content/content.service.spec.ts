@@ -68,4 +68,44 @@ describe('ContentService', () => {
 
     await expect(service.publish(draft.id)).rejects.toThrow('Content is not ready to publish');
   });
+
+  test('imports Markdown with front matter as a draft', async () => {
+    const imported = await service.importMarkdown(
+      [
+        '---',
+        'title: Imported Note',
+        'slug: imported-note',
+        'summary: Imported from a Markdown archive',
+        'status: published',
+        'visibility: private',
+        '---',
+        '# Imported Note',
+      ].join('\n'),
+      'note',
+    );
+
+    expect(imported.title).toBe('Imported Note');
+    expect(imported.slug).toBe('imported-note');
+    expect(imported.summary).toBe('Imported from a Markdown archive');
+    expect(imported.status).toBe('draft');
+    expect(imported.visibility).toBe('private');
+    expect(imported.bodyMarkdown).toBe('# Imported Note');
+  });
+
+  test('exports content as Markdown with front matter', async () => {
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Export Me',
+      slug: 'export-me',
+      summary: 'Portable content',
+      bodyMarkdown: '# Export Me',
+    });
+
+    const exported = await service.exportMarkdown(draft.id);
+
+    expect(exported).toContain('title: Export Me');
+    expect(exported).toContain('slug: export-me');
+    expect(exported).toContain('summary: Portable content');
+    expect(exported).toContain('# Export Me');
+  });
 });

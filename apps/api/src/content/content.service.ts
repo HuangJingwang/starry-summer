@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { parseMarkdownDocument, serializeMarkdownDocument } from '@starry-summer/markdown';
 import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 import { canPublishContent, isPublicContent } from '@starry-summer/shared';
 
@@ -105,6 +106,42 @@ export class ContentService {
     return updated;
   }
 
+  async importMarkdown(markdown: string, type: ContentType): Promise<ContentRecord> {
+    const document = parseMarkdownDocument(markdown);
+    const title = String(document.frontmatter.title ?? 'Untitled');
+    const slug = String(document.frontmatter.slug ?? this.slugify(title));
+    const summary = String(document.frontmatter.summary ?? '');
+    const visibility = document.frontmatter.visibility === 'private' ? 'private' : 'public';
+
+    const record = await this.createDraft({
+      type,
+      title,
+      slug,
+      summary,
+      bodyMarkdown: document.body,
+    });
+
+    return this.setVisibility(record.id, visibility);
+  }
+
+  async exportMarkdown(id: string): Promise<string> {
+    const record = this.getRecord(id);
+
+    return serializeMarkdownDocument({
+      frontmatter: {
+        title: record.title,
+        slug: record.slug,
+        summary: record.summary,
+        type: record.type,
+        status: record.status,
+        visibility: record.visibility,
+        publishedAt: record.publishedAt,
+        updatedAt: record.updatedAt,
+      },
+      body: record.bodyMarkdown,
+    });
+  }
+
   private getRecord(id: string): ContentRecord {
     const record = this.records.get(id);
 
@@ -113,5 +150,13 @@ export class ContentService {
     }
 
     return record;
+  }
+
+  private slugify(value: string): string {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 }
