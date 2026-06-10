@@ -1,4 +1,4 @@
-import type { ContentSourceType, ContentStatus, ContentType } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
 import type { SiteContentItem } from './content';
 
@@ -56,6 +56,7 @@ export interface AdminContentApiRecord {
   likeCount?: number;
   categories?: string[];
   tags?: string[];
+  project?: ProjectMetadata;
   createdAt?: string;
   updatedAt?: string;
   publishedAt?: string | null;
@@ -74,6 +75,7 @@ export interface AdminContentPayload {
   featured?: boolean;
   categories?: string[];
   tags?: string[];
+  project?: ProjectMetadata;
 }
 
 export interface AdminMarkdownImportPayload {
@@ -106,12 +108,17 @@ export type AdminContentAction = 'publish' | 'archive' | 'restore-draft';
 
 const validContentStatuses = new Set<ContentStatus>(['draft', 'published', 'private', 'archived']);
 const validContentTypes = new Set<ContentType>(['post', 'note', 'moment', 'page', 'project']);
+const validProjectStatuses = new Set<ProjectStatus>(['active', 'paused', 'completed', 'archived']);
+const projectLinkKeys: Array<keyof ProjectLinks> = ['website', 'repository', 'demo', 'article'];
+const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 
 function dateOnly(value: string | null | undefined): string {
   return value?.slice(0, 10) || '';
 }
 
 export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteContentItem {
+  const project = normalizeProjectMetadata(record.project);
+
   return {
     id: record.id,
     title: record.title,
@@ -131,6 +138,7 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     tags: record.tags ?? [],
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
+    ...(project ? { project } : {}),
   };
 }
 
@@ -143,8 +151,11 @@ function normalizeSlug(value: string): string {
 }
 
 function normalizeContentPayload(input: AdminContentPayload): AdminContentPayload {
+  const project = input.project !== undefined ? normalizeProjectMetadata(input.project) : undefined;
+  const { project: _project, ...rest } = input;
+
   return {
-    ...input,
+    ...rest,
     title: input.title?.trim(),
     slug: input.slug ? normalizeSlug(input.slug) : undefined,
     summary: input.summary?.trim(),
@@ -152,6 +163,7 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     sourceUrl: input.sourceUrl?.trim() ?? '',
     categories: normalizeList(input.categories),
     tags: normalizeList(input.tags),
+    ...(project ? { project } : {}),
   };
 }
 
@@ -173,6 +185,7 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     allowComments: formData.has('allowComments'),
     pinned: formData.has('pinned'),
     featured: formData.has('featured'),
+    project: buildProjectMetadataFromFormData(formData),
   });
 }
 
@@ -195,6 +208,79 @@ function normalizeList(values: string[] | undefined): string[] {
   }
 
   return normalized;
+}
+
+function buildProjectMetadataFromFormData(formData: FormData): ProjectMetadata | undefined {
+  return {
+    status: formText(formData, 'projectStatus') as ProjectStatus,
+    links: {
+      website: formText(formData, 'projectWebsiteUrl'),
+      repository: formText(formData, 'projectRepositoryUrl'),
+      demo: formText(formData, 'projectDemoUrl'),
+      article: formText(formData, 'projectArticleUrl'),
+    },
+    stack: splitList(formText(formData, 'projectStack')),
+    startedAt: formText(formData, 'projectStartedAt'),
+    endedAt: formText(formData, 'projectEndedAt'),
+  };
+}
+
+function normalizeProjectMetadata(project: ProjectMetadata | undefined): ProjectMetadata | undefined {
+  if (!project) {
+    return undefined;
+  }
+
+  const normalized: ProjectMetadata = {};
+  const links = normalizeProjectLinks(project.links);
+  const stack = normalizeList(project.stack);
+  const startedAt = normalizeDateOnly(project.startedAt);
+  const endedAt = normalizeDateOnly(project.endedAt);
+
+  if (validProjectStatuses.has(project.status as ProjectStatus)) {
+    normalized.status = project.status;
+  }
+
+  if (links) {
+    normalized.links = links;
+  }
+
+  if (stack.length > 0) {
+    normalized.stack = stack;
+  }
+
+  if (startedAt) {
+    normalized.startedAt = startedAt;
+  }
+
+  if (endedAt) {
+    normalized.endedAt = endedAt;
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function normalizeProjectLinks(links: ProjectLinks | undefined): ProjectLinks | undefined {
+  if (!links) {
+    return undefined;
+  }
+
+  const normalized: ProjectLinks = {};
+
+  for (const key of projectLinkKeys) {
+    const value = links[key]?.trim();
+
+    if (value) {
+      normalized[key] = value;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function normalizeDateOnly(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+
+  return normalized && dateOnlyPattern.test(normalized) ? normalized : undefined;
 }
 
 export function normalizeAdminContentSearchParams(params: AdminContentSearchParams): AdminContentFilters {

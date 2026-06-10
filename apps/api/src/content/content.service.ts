@@ -1,6 +1,6 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { parseMarkdownDocument, serializeMarkdownDocument } from '@starry-summer/markdown';
-import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
+import { parseMarkdownDocument, serializeMarkdownDocument, type MarkdownFrontmatterValue } from '@starry-summer/markdown';
+import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 import { canPublishContent } from '@starry-summer/shared';
 
 import { CONTENT_REPOSITORY, type ContentRepository } from './content.repository.js';
@@ -23,6 +23,7 @@ export interface ContentRecord {
   likeCount: number;
   categories: string[];
   tags: string[];
+  project?: ProjectMetadata;
   createdAt: string;
   updatedAt: string;
   publishedAt: string | null;
@@ -38,6 +39,7 @@ export interface CreateDraftInput {
   sourceUrl?: string;
   categories?: string[];
   tags?: string[];
+  project?: ProjectMetadata;
 }
 
 export type UpdateContentInput = Partial<{
@@ -53,6 +55,7 @@ export type UpdateContentInput = Partial<{
   featured: boolean;
   categories: string[];
   tags: string[];
+  project: ProjectMetadata;
 }>;
 
 export interface AdminContentFilter {
@@ -97,6 +100,7 @@ export class ContentService {
       featured: false,
       categories: normalizeTaxonomyLabels(input.categories),
       tags: normalizeTaxonomyLabels(input.tags),
+      project: normalizeProjectMetadata(input.project),
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -143,6 +147,7 @@ export class ContentService {
       ...input,
       categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
       tags: input.tags ? normalizeTaxonomyLabels(input.tags) : undefined,
+      project: input.project !== undefined ? normalizeProjectMetadata(input.project) ?? {} : undefined,
       updatedAt: new Date().toISOString(),
     });
 
@@ -224,6 +229,7 @@ export class ContentService {
     const allowComments = document.frontmatter.allowComments === false ? false : true;
     const featured = document.frontmatter.featured === true;
     const pinned = document.frontmatter.pinned === true;
+    const project = normalizeProjectMetadata(document.frontmatter.project as unknown as ProjectMetadata | undefined);
 
     const record = await this.createDraft({
       type,
@@ -235,6 +241,7 @@ export class ContentService {
       sourceUrl,
       categories,
       tags,
+      project,
     });
 
     const updated = await this.updateContent(record.id, { allowComments, featured, pinned });
@@ -289,6 +296,7 @@ export class ContentService {
         pinned: record.pinned,
         categories: record.categories,
         tags: record.tags,
+        ...(record.project ? { project: projectToFrontmatter(record.project) } : {}),
         publishedAt: record.publishedAt,
         updatedAt: record.updatedAt,
       },
@@ -356,6 +364,101 @@ function normalizeTaxonomyLabels(labels: string[] | undefined): string[] {
 
 function normalizeSourceUrl(value: string | undefined): string {
   return value?.trim() ?? '';
+}
+
+function projectToFrontmatter(project: ProjectMetadata): MarkdownFrontmatterValue {
+  const frontmatter: Record<string, MarkdownFrontmatterValue> = {};
+
+  if (project.status) {
+    frontmatter.status = project.status;
+  }
+
+  if (project.links) {
+    frontmatter.links = Object.fromEntries(
+      Object.entries(project.links).filter(([, value]) => Boolean(value)),
+    ) as Record<string, MarkdownFrontmatterValue>;
+  }
+
+  if (project.stack) {
+    frontmatter.stack = project.stack;
+  }
+
+  if (project.startedAt) {
+    frontmatter.startedAt = project.startedAt;
+  }
+
+  if (project.endedAt) {
+    frontmatter.endedAt = project.endedAt;
+  }
+
+  return frontmatter;
+}
+
+const projectStatuses = new Set<ProjectStatus>(['active', 'paused', 'completed', 'archived']);
+const projectLinkKeys: Array<keyof ProjectLinks> = ['website', 'repository', 'demo', 'article'];
+const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
+
+function normalizeProjectMetadata(project: ProjectMetadata | undefined): ProjectMetadata | undefined {
+  if (!project || typeof project !== 'object') {
+    return undefined;
+  }
+
+  const normalized: ProjectMetadata = {};
+  const status = normalizeProjectStatus(project.status);
+  const links = normalizeProjectLinks(project.links);
+  const stack = normalizeTaxonomyLabels(project.stack);
+  const startedAt = normalizeDateOnly(project.startedAt);
+  const endedAt = normalizeDateOnly(project.endedAt);
+
+  if (status) {
+    normalized.status = status;
+  }
+
+  if (links) {
+    normalized.links = links;
+  }
+
+  if (stack.length > 0) {
+    normalized.stack = stack;
+  }
+
+  if (startedAt) {
+    normalized.startedAt = startedAt;
+  }
+
+  if (endedAt) {
+    normalized.endedAt = endedAt;
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function normalizeProjectStatus(status: ProjectMetadata['status']): ProjectStatus | undefined {
+  return projectStatuses.has(status as ProjectStatus) ? status : undefined;
+}
+
+function normalizeProjectLinks(links: ProjectMetadata['links']): ProjectLinks | undefined {
+  if (!links || typeof links !== 'object') {
+    return undefined;
+  }
+
+  const normalized: ProjectLinks = {};
+
+  for (const key of projectLinkKeys) {
+    const value = links[key]?.trim();
+
+    if (value) {
+      normalized[key] = value;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function normalizeDateOnly(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+
+  return normalized && dateOnlyPattern.test(normalized) ? normalized : undefined;
 }
 
 function parseMarkdownArchiveSections(markdown: string): Array<{ type: ContentType; markdown: string }> {

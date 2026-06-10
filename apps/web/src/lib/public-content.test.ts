@@ -67,9 +67,19 @@ describe('public content API helpers', () => {
         allowComments: false,
         viewCount: 12,
         likeCount: 3,
+        project: {
+          status: 'completed',
+          links: {
+            website: 'https://example.com',
+            demo: 'https://demo.example.com',
+          },
+          stack: ['Next.js', 'NestJS'],
+          startedAt: '2025-01-01',
+          endedAt: '2026-01-01',
+        },
         updatedAt: '2026-06-10T01:00:00.000Z',
         publishedAt: '2026-06-10T00:00:00.000Z',
-      }),
+      } as any),
     ).toEqual({
       id: 'api-post',
       type: 'post',
@@ -88,6 +98,16 @@ describe('public content API helpers', () => {
       allowComments: false,
       viewCount: 12,
       likeCount: 3,
+      project: {
+        status: 'completed',
+        links: {
+          website: 'https://example.com',
+          demo: 'https://demo.example.com',
+        },
+        stack: ['Next.js', 'NestJS'],
+        startedAt: '2025-01-01',
+        endedAt: '2026-01-01',
+      },
       publishedAt: '2026-06-10',
     });
   });

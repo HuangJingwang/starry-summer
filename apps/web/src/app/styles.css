@@ -413,6 +413,58 @@ textarea {
   padding: 4px 10px;
 }
 
+.project-meta {
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 18px;
+  padding: 18px 20px;
+}
+
+.project-meta div {
+  display: grid;
+  gap: 8px;
+}
+
+.project-meta span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.project-meta strong {
+  color: var(--ink);
+}
+
+.project-meta ul,
+.project-meta p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-meta li,
+.project-meta a {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  padding: 6px 10px;
+  text-decoration: none;
+}
+
+.project-meta a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .detail__body {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -964,6 +1016,19 @@ textarea {
   width: auto;
 }
 
+.project-fields {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.project-fields h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 .editor-grid {
   display: grid;
   gap: 16px;
@@ -1150,6 +1215,7 @@ textarea {
   .admin-filter,
   .admin-table__row,
   .form-grid,
+  .project-meta,
   .moderation-toolbar,
   .editor-grid,
   .adjacent-content,

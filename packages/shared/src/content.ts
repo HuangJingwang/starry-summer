@@ -6,6 +6,23 @@ export type ContentType = 'post' | 'note' | 'moment' | 'page' | 'project';
 
 export type ContentSourceType = 'original' | 'repost';
 
+export type ProjectStatus = 'active' | 'paused' | 'completed' | 'archived';
+
+export interface ProjectLinks {
+  website?: string;
+  repository?: string;
+  demo?: string;
+  article?: string;
+}
+
+export interface ProjectMetadata {
+  status?: ProjectStatus;
+  links?: ProjectLinks;
+  stack?: string[];
+  startedAt?: string;
+  endedAt?: string;
+}
+
 export interface ContentVisibilityInput {
   status: ContentStatus;
   visibility: ContentVisibility;

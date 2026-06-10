@@ -1,6 +1,14 @@
 import matter from 'gray-matter';
 
-export type MarkdownFrontmatter = Record<string, string | number | boolean | string[] | null>;
+export type MarkdownFrontmatterValue =
+  | string
+  | number
+  | boolean
+  | null
+  | MarkdownFrontmatterValue[]
+  | { [key: string]: MarkdownFrontmatterValue };
+
+export type MarkdownFrontmatter = Record<string, MarkdownFrontmatterValue>;
 
 export interface MarkdownDocument {
   frontmatter: MarkdownFrontmatter;

@@ -32,6 +32,39 @@ describe('ContentService', () => {
     expect(draft.tags).toEqual(['Next.js', 'Architecture']);
   });
 
+  test('normalizes project metadata when creating project drafts', async () => {
+    const draft = await service.createDraft({
+      type: 'project',
+      title: 'Project Platform',
+      slug: 'project-platform',
+      summary: 'A project profile',
+      bodyMarkdown: '# Project Platform',
+      project: {
+        status: 'active',
+        links: {
+          website: ' https://example.com ',
+          repository: ' https://github.com/me/project ',
+          demo: '',
+          article: ' https://example.com/writeup ',
+        },
+        stack: [' Next.js ', 'PostgreSQL', 'next.js', ''],
+        startedAt: ' 2026-01-01 ',
+        endedAt: '',
+      },
+    } as any);
+
+    expect(draft.project).toEqual({
+      status: 'active',
+      links: {
+        website: 'https://example.com',
+        repository: 'https://github.com/me/project',
+        article: 'https://example.com/writeup',
+      },
+      stack: ['Next.js', 'PostgreSQL'],
+      startedAt: '2026-01-01',
+    });
+  });
+
   test('public listings exclude drafts and private content', async () => {
     const draft = await service.createDraft({
       type: 'post',
@@ -183,6 +216,16 @@ describe('ContentService', () => {
       sourceUrl: 'https://example.com/original-post',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
+      project: {
+        status: 'completed',
+        links: {
+          website: 'https://example.com/project',
+          repository: ' https://github.com/me/project ',
+        },
+        stack: ['NestJS', 'PostgreSQL', 'nestjs'],
+        startedAt: '2025-12-01',
+        endedAt: '2026-02-01',
+      },
     });
 
     expect(updated).toMatchObject({
@@ -199,6 +242,16 @@ describe('ContentService', () => {
       sourceUrl: 'https://example.com/original-post',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
+      project: {
+        status: 'completed',
+        links: {
+          website: 'https://example.com/project',
+          repository: 'https://github.com/me/project',
+        },
+        stack: ['NestJS', 'PostgreSQL'],
+        startedAt: '2025-12-01',
+        endedAt: '2026-02-01',
+      },
     });
   });
 

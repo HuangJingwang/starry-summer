@@ -26,6 +26,7 @@ export class InMemoryContentRepository implements ContentRepository {
       ...input,
       categories: [...input.categories],
       tags: [...input.tags],
+      project: cloneProjectMetadata(input.project),
       id: String(this.nextId++),
       createdAt: now,
       updatedAt: now,
@@ -68,6 +69,7 @@ export class InMemoryContentRepository implements ContentRepository {
       ...patch,
       categories: patch.categories ? [...patch.categories] : record.categories,
       tags: patch.tags ? [...patch.tags] : record.tags,
+      project: patch.project !== undefined ? cloneProjectMetadata(patch.project) : record.project,
       id: record.id,
       updatedAt: patch.updatedAt ?? this.now(),
     };
@@ -79,6 +81,16 @@ export class InMemoryContentRepository implements ContentRepository {
   async delete(id: string): Promise<boolean> {
     return this.records.delete(id);
   }
+}
+
+function cloneProjectMetadata(project: ContentRecord['project']): ContentRecord['project'] {
+  return project
+    ? {
+        ...project,
+        links: project.links ? { ...project.links } : undefined,
+        stack: project.stack ? [...project.stack] : undefined,
+      }
+    : undefined;
 }
 
 function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFilter): boolean {

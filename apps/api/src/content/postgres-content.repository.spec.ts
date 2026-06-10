@@ -31,6 +31,14 @@ describe('PostgresContentRepository mapping', () => {
       tags: ['Next.js', 'Architecture'],
       view_count: 10,
       like_count: 2,
+      project_status: 'active',
+      project_links: {
+        website: 'https://example.com',
+        repository: 'https://github.com/me/project',
+      },
+      project_stack: ['Next.js', 'PostgreSQL'],
+      project_started_at: '2026-01-01',
+      project_ended_at: null,
       created_at: new Date('2026-06-10T00:00:00.000Z'),
       updated_at: new Date('2026-06-10T01:00:00.000Z'),
       published_at: new Date('2026-06-10T00:30:00.000Z'),
@@ -54,6 +62,15 @@ describe('PostgresContentRepository mapping', () => {
       tags: ['Next.js', 'Architecture'],
       viewCount: 10,
       likeCount: 2,
+      project: {
+        status: 'active',
+        links: {
+          website: 'https://example.com',
+          repository: 'https://github.com/me/project',
+        },
+        stack: ['Next.js', 'PostgreSQL'],
+        startedAt: '2026-01-01',
+      },
       createdAt: '2026-06-10T00:00:00.000Z',
       updatedAt: '2026-06-10T01:00:00.000Z',
       publishedAt: '2026-06-10T00:30:00.000Z',
@@ -78,6 +95,15 @@ describe('PostgresContentRepository mapping', () => {
       tags: ['Markdown'],
       viewCount: 0,
       likeCount: 0,
+      project: {
+        status: 'paused',
+        links: {
+          demo: 'https://example.com/demo',
+        },
+        stack: ['Vue', 'Spring Boot'],
+        startedAt: '2025-01-01',
+        endedAt: '2025-12-31',
+      },
       publishedAt: null,
     });
 
@@ -100,6 +126,13 @@ describe('PostgresContentRepository mapping', () => {
       false,
       0,
       0,
+      'paused',
+      {
+        demo: 'https://example.com/demo',
+      },
+      ['Vue', 'Spring Boot'],
+      '2025-01-01',
+      '2025-12-31',
       null,
     ]);
   });
@@ -114,6 +147,12 @@ describe('PostgresContentRepository mapping', () => {
       status: 'archived',
       categories: ['Notes'],
       tags: ['Markdown'],
+      project: {
+        status: 'completed',
+        links: { repository: 'https://github.com/me/updated' },
+        stack: ['Next.js'],
+        startedAt: '2026-01-01',
+      },
       updatedAt: '2026-06-10T02:00:00.000Z',
     });
 
@@ -124,6 +163,11 @@ describe('PostgresContentRepository mapping', () => {
     expect(update?.sql).toContain('source_type = $5');
     expect(update?.sql).toContain('source_url = $6');
     expect(update?.sql).toContain('status = $7');
+    expect(update?.sql).toContain('project_status = $8');
+    expect(update?.sql).toContain('project_links = $9');
+    expect(update?.sql).toContain('project_stack = $10');
+    expect(update?.sql).toContain('project_started_at = $11');
+    expect(update?.sql).toContain('project_ended_at = $12');
     expect(update?.values).toEqual([
       'content-1',
       'note',
@@ -132,6 +176,11 @@ describe('PostgresContentRepository mapping', () => {
       'repost',
       'https://example.com/updated',
       'archived',
+      'completed',
+      { repository: 'https://github.com/me/updated' },
+      ['Next.js'],
+      '2026-01-01',
+      null,
       '2026-06-10T02:00:00.000Z',
     ]);
   });

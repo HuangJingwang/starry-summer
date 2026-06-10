@@ -41,6 +41,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         <span>{item.viewCount ?? 0} views</span>
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>
+      {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
       {tableOfContents.length > 0 ? (
         <nav className="detail-toc" aria-label="文章目录">
           <p className="eyebrow">目录</p>
@@ -76,6 +77,60 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       ) : null}
       {commentSection}
     </article>
+  );
+}
+
+function ProjectMeta({ item }: { item: SiteContentItem }) {
+  const project = item.project;
+
+  if (!project) {
+    return null;
+  }
+
+  const links = [
+    ['Website', project.links?.website],
+    ['Repository', project.links?.repository],
+    ['Demo', project.links?.demo],
+    ['Article', project.links?.article],
+  ].filter(([, href]) => Boolean(href)) as Array<[string, string]>;
+
+  return (
+    <section className="project-meta" aria-label="Project metadata">
+      <div>
+        <span>状态</span>
+        <strong>{project.status ?? 'active'}</strong>
+      </div>
+      {project.stack && project.stack.length > 0 ? (
+        <div>
+          <span>技术栈</span>
+          <ul>
+            {project.stack.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {project.startedAt || project.endedAt ? (
+        <div>
+          <span>周期</span>
+          <strong>
+            {project.startedAt ?? 'unknown'} - {project.endedAt ?? 'Present'}
+          </strong>
+        </div>
+      ) : null}
+      {links.length > 0 ? (
+        <div>
+          <span>链接</span>
+          <p>
+            {links.map(([label, href]) => (
+              <a key={label} href={href} target="_blank" rel="nofollow noopener noreferrer">
+                {label}
+              </a>
+            ))}
+          </p>
+        </div>
+      ) : null}
+    </section>
   );
 }
 

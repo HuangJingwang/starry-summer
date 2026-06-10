@@ -268,10 +268,19 @@ describe('admin content helpers', () => {
         likeCount: 2,
         categories: ['Writing'],
         tags: ['Platform'],
+        project: {
+          status: 'active',
+          links: {
+            website: 'https://example.com',
+            repository: 'https://github.com/me/project',
+          },
+          stack: ['Next.js', 'PostgreSQL'],
+          startedAt: '2026-01-01',
+        },
         createdAt: '2026-06-09T00:00:00.000Z',
         updatedAt: '2026-06-10T00:00:00.000Z',
         publishedAt: null,
-      }),
+      } as any),
     ).toEqual({
       id: 'content-1',
       type: 'post',
@@ -291,6 +300,15 @@ describe('admin content helpers', () => {
       publishedAt: '2026-06-10',
       categories: ['Writing'],
       tags: ['Platform'],
+      project: {
+        status: 'active',
+        links: {
+          website: 'https://example.com',
+          repository: 'https://github.com/me/project',
+        },
+        stack: ['Next.js', 'PostgreSQL'],
+        startedAt: '2026-01-01',
+      },
     });
   });
 
@@ -445,6 +463,14 @@ describe('admin content helpers', () => {
     formData.set('bodyMarkdown', '# Form Title');
     formData.set('categories', 'Projects, Platform, Projects');
     formData.set('tags', 'Next.js, Launch');
+    formData.set('projectStatus', 'active');
+    formData.set('projectWebsiteUrl', ' https://example.com ');
+    formData.set('projectRepositoryUrl', ' https://github.com/me/project ');
+    formData.set('projectDemoUrl', '');
+    formData.set('projectArticleUrl', ' https://example.com/writeup ');
+    formData.set('projectStack', 'Next.js, PostgreSQL, next.js');
+    formData.set('projectStartedAt', '2026-01-01');
+    formData.set('projectEndedAt', '');
     formData.set('allowComments', 'on');
     formData.set('featured', 'on');
 
@@ -461,6 +487,16 @@ describe('admin content helpers', () => {
       featured: true,
       categories: ['Projects', 'Platform'],
       tags: ['Next.js', 'Launch'],
+      project: {
+        status: 'active',
+        links: {
+          website: 'https://example.com',
+          repository: 'https://github.com/me/project',
+          article: 'https://example.com/writeup',
+        },
+        stack: ['Next.js', 'PostgreSQL'],
+        startedAt: '2026-01-01',
+      },
     });
   });
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { ContentSourceType, ContentStatus, ContentType } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ProjectMetadata } from '@starry-summer/shared';
 
 import {
   buildAdminContentActionRequest,
@@ -27,6 +27,7 @@ interface AdminContentFormInitialValue {
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
+  project?: ProjectMetadata;
 }
 
 interface AdminContentFormProps {
@@ -42,6 +43,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   const [state, setState] = useState<SaveState>('idle');
   const [message, setMessage] = useState('');
   const [markdown, setMarkdown] = useState(initialValue?.bodyMarkdown ?? fallbackMarkdown);
+  const [contentType, setContentType] = useState<ContentType>(initialValue?.type ?? 'post');
   const preview = useMemo(() => createMarkdownPreview(markdown), [markdown]);
 
   async function send(request: { url: string; init: RequestInit }) {
@@ -115,7 +117,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         </label>
         <label>
           类型
-          <select name="type" defaultValue={initialValue?.type ?? 'post'}>
+          <select name="type" value={contentType} onChange={(event) => setContentType(event.target.value as ContentType)}>
             <option value="post">Post</option>
             <option value="note">Note</option>
             <option value="moment">Moment</option>
@@ -155,6 +157,56 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
           <input name="tags" defaultValue={(initialValue?.tags ?? []).join(', ')} placeholder="Markdown, Next.js" />
         </label>
       </div>
+      {contentType === 'project' ? (
+        <section className="project-fields" aria-label="项目信息">
+          <div className="section-heading section-heading--row">
+            <div>
+              <p className="eyebrow">Project</p>
+              <h2>项目信息</h2>
+            </div>
+          </div>
+          <div className="form-grid">
+            <label>
+              项目状态
+              <select name="projectStatus" defaultValue={initialValue?.project?.status ?? ''}>
+                <option value="">未设置</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="completed">Completed</option>
+                <option value="archived">Archived</option>
+              </select>
+            </label>
+            <label>
+              技术栈
+              <input name="projectStack" defaultValue={(initialValue?.project?.stack ?? []).join(', ')} placeholder="Next.js, PostgreSQL" />
+            </label>
+            <label>
+              开始日期
+              <input name="projectStartedAt" type="date" defaultValue={initialValue?.project?.startedAt ?? ''} />
+            </label>
+            <label>
+              结束日期
+              <input name="projectEndedAt" type="date" defaultValue={initialValue?.project?.endedAt ?? ''} />
+            </label>
+            <label>
+              Website
+              <input name="projectWebsiteUrl" defaultValue={initialValue?.project?.links?.website ?? ''} placeholder="https://example.com" />
+            </label>
+            <label>
+              Repository
+              <input name="projectRepositoryUrl" defaultValue={initialValue?.project?.links?.repository ?? ''} placeholder="https://github.com/me/project" />
+            </label>
+            <label>
+              Demo
+              <input name="projectDemoUrl" defaultValue={initialValue?.project?.links?.demo ?? ''} placeholder="https://demo.example.com" />
+            </label>
+            <label>
+              Article
+              <input name="projectArticleUrl" defaultValue={initialValue?.project?.links?.article ?? ''} placeholder="https://example.com/writeup" />
+            </label>
+          </div>
+        </section>
+      ) : null}
       <div className="form-options">
         <label>
           <input name="allowComments" type="checkbox" defaultChecked={initialValue?.allowComments ?? true} />

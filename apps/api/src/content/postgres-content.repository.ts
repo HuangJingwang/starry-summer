@@ -1,6 +1,6 @@
 import pg from 'pg';
 
-import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
 import type { AdminContentFilter, ContentRecord, PublicContentFilter } from './content.service';
 import type { ContentRepository, CreateContentRecordInput } from './content.repository';
@@ -25,6 +25,11 @@ export interface ContentItemRow {
   tags?: string[] | null;
   view_count: number;
   like_count: number;
+  project_status?: ProjectStatus | null;
+  project_links?: ProjectLinks | null;
+  project_stack?: string[] | null;
+  project_started_at?: Date | string | null;
+  project_ended_at?: Date | string | null;
   created_at: Date;
   updated_at: Date;
   published_at: Date | null;
@@ -54,6 +59,7 @@ export function mapContentRow(row: ContentItemRow): ContentRecord {
     tags: row.tags ?? [],
     viewCount: row.view_count,
     likeCount: row.like_count,
+    project: mapProjectMetadata(row),
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
     publishedAt: row.published_at?.toISOString() ?? null,
@@ -78,9 +84,14 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         featured,
         view_count,
         like_count,
+        project_status,
+        project_links,
+        project_stack,
+        project_started_at,
+        project_ended_at,
         published_at
       )
-      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       returning *
     `,
     values: [
@@ -98,6 +109,11 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
       input.featured,
       input.viewCount,
       input.likeCount,
+      input.project?.status ?? null,
+      input.project?.links ?? {},
+      input.project?.stack ?? [],
+      input.project?.startedAt ?? null,
+      input.project?.endedAt ?? null,
       input.publishedAt,
     ],
   };
@@ -456,7 +472,6 @@ function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown>
     ['viewCount', 'view_count'],
     ['likeCount', 'like_count'],
     ['publishedAt', 'published_at'],
-    ['updatedAt', 'updated_at'],
   ];
 
   for (const [key, column] of mapping) {
@@ -465,5 +480,74 @@ function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown>
     }
   }
 
+  if (patch.project !== undefined) {
+    result.project_status = patch.project.status ?? null;
+    result.project_links = patch.project.links ?? {};
+    result.project_stack = patch.project.stack ?? [];
+    result.project_started_at = patch.project.startedAt ?? null;
+    result.project_ended_at = patch.project.endedAt ?? null;
+  }
+
+  if (patch.updatedAt !== undefined) {
+    result.updated_at = patch.updatedAt;
+  }
+
   return result;
+}
+
+function mapProjectMetadata(row: ContentItemRow): ProjectMetadata | undefined {
+  const project: ProjectMetadata = {};
+  const links = normalizeProjectLinks(row.project_links);
+  const stack = row.project_stack?.filter(Boolean) ?? [];
+  const startedAt = dateOnlyFromDatabase(row.project_started_at);
+  const endedAt = dateOnlyFromDatabase(row.project_ended_at);
+
+  if (row.project_status) {
+    project.status = row.project_status;
+  }
+
+  if (links) {
+    project.links = links;
+  }
+
+  if (stack.length > 0) {
+    project.stack = stack;
+  }
+
+  if (startedAt) {
+    project.startedAt = startedAt;
+  }
+
+  if (endedAt) {
+    project.endedAt = endedAt;
+  }
+
+  return Object.keys(project).length > 0 ? project : undefined;
+}
+
+function normalizeProjectLinks(links: ProjectLinks | null | undefined): ProjectLinks | undefined {
+  if (!links) {
+    return undefined;
+  }
+
+  const normalized: ProjectLinks = {};
+  const keys: Array<keyof ProjectLinks> = ['website', 'repository', 'demo', 'article'];
+
+  for (const key of keys) {
+    const value = links[key]?.trim();
+
+    if (value) {
+      normalized[key] = value;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function dateOnlyFromDatabase(value: Date | string | null | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return value instanceof Date ? value.toISOString().slice(0, 10) : value.slice(0, 10);
 }

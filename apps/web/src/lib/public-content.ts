@@ -1,4 +1,4 @@
-import type { ContentSourceType, ContentStatus, ContentType } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
 import { getPublicContent, seedContent, type ContentSort, type SiteContentItem } from './content';
 
@@ -20,6 +20,7 @@ export interface PublicContentApiRecord {
   allowComments?: boolean;
   viewCount?: number;
   likeCount?: number;
+  project?: ProjectMetadata;
   createdAt?: string;
   updatedAt?: string;
   publishedAt?: string | null;
@@ -48,6 +49,9 @@ export interface PublicContentLoadResult {
 function dateOnly(value: string | null | undefined): string {
   return value?.slice(0, 10) || '';
 }
+
+const validProjectStatuses = new Set<ProjectStatus>(['active', 'paused', 'completed', 'archived']);
+const projectLinkKeys: Array<keyof ProjectLinks> = ['website', 'repository', 'demo', 'article'];
 
 function getDefaultApiBaseUrl(): string {
   return process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
@@ -79,6 +83,8 @@ export function buildPublicContentListRequest(options: PublicContentListRequestO
 }
 
 export function normalizePublicContentItem(record: PublicContentApiRecord): SiteContentItem {
+  const project = normalizeProjectMetadata(record.project);
+
   return {
     id: record.id,
     title: record.title,
@@ -98,7 +104,58 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     allowComments: record.allowComments ?? true,
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
+    ...(project ? { project } : {}),
   };
+}
+
+function normalizeProjectMetadata(project: ProjectMetadata | undefined): ProjectMetadata | undefined {
+  if (!project) {
+    return undefined;
+  }
+
+  const normalized: ProjectMetadata = {};
+  const links = normalizeProjectLinks(project.links);
+  const stack = project.stack?.map((item) => item.trim()).filter(Boolean) ?? [];
+
+  if (validProjectStatuses.has(project.status as ProjectStatus)) {
+    normalized.status = project.status;
+  }
+
+  if (links) {
+    normalized.links = links;
+  }
+
+  if (stack.length > 0) {
+    normalized.stack = stack;
+  }
+
+  if (project.startedAt) {
+    normalized.startedAt = project.startedAt.slice(0, 10);
+  }
+
+  if (project.endedAt) {
+    normalized.endedAt = project.endedAt.slice(0, 10);
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+function normalizeProjectLinks(links: ProjectLinks | undefined): ProjectLinks | undefined {
+  if (!links) {
+    return undefined;
+  }
+
+  const normalized: ProjectLinks = {};
+
+  for (const key of projectLinkKeys) {
+    const value = links[key]?.trim();
+
+    if (value) {
+      normalized[key] = value;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
 }
 
 export async function loadPublicContentItems(

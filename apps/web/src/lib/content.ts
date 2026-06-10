@@ -1,4 +1,4 @@
-import { isPublicContent, type ContentSourceType, type ContentStatus, type ContentType, type ContentVisibility } from '@starry-summer/shared';
+import { isPublicContent, type ContentSourceType, type ContentStatus, type ContentType, type ContentVisibility, type ProjectMetadata } from '@starry-summer/shared';
 
 export interface SiteContentItem {
   id: string;
@@ -19,6 +19,7 @@ export interface SiteContentItem {
   likeCount?: number;
   allowComments?: boolean;
   pinned?: boolean;
+  project?: ProjectMetadata;
 }
 
 export interface ContentArchiveGroup {
@@ -336,6 +337,11 @@ export const seedContent: SiteContentItem[] = [
     featured: true,
     categories: ['Projects', 'Platform'],
     tags: ['Next.js', 'NestJS', 'PostgreSQL'],
+    project: {
+      status: 'active',
+      stack: ['Next.js', 'NestJS', 'PostgreSQL', 'Redis', 'Docker'],
+      startedAt: '2026-06-10',
+    },
     viewCount: 214,
     likeCount: 31,
   },

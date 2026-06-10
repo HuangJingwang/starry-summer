@@ -21,4 +21,30 @@ describe('Markdown front matter ownership helpers', () => {
     expect(text).toContain('slug: hello');
     expect(text.endsWith('# Hello\n')).toBe(true);
   });
+
+  test('serializes nested ownership metadata', () => {
+    const text = serializeMarkdownDocument({
+      frontmatter: {
+        title: 'Project',
+        project: {
+          status: 'active',
+          links: {
+            website: 'https://example.com',
+          },
+          stack: ['Next.js', 'PostgreSQL'],
+        },
+      },
+      body: '# Project',
+    });
+
+    const parsed = parseMarkdownDocument(text);
+
+    expect(parsed.frontmatter.project).toEqual({
+      status: 'active',
+      links: {
+        website: 'https://example.com',
+      },
+      stack: ['Next.js', 'PostgreSQL'],
+    });
+  });
 });
