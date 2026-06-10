@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation';
 import { AdminContentForm } from '@/components/AdminContentForm';
 import { AdminShell } from '@/components/AdminShell';
 import { seedContent } from '@/lib/content';
+import { loadAdminContentItem } from '@/lib/admin-content';
 
 export default async function EditContentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = seedContent.find((content) => content.id === id);
+  const { item } = await loadAdminContentItem(id, seedContent);
 
   if (!item) {
     notFound();
@@ -21,9 +22,9 @@ export default async function EditContentPage({ params }: { params: Promise<{ id
           mode="edit"
           initialValue={{
             ...item,
-            bodyMarkdown: `# ${item.title}\n\n${item.summary ?? ''}`,
-            allowComments: true,
-            pinned: false,
+            bodyMarkdown: item.bodyMarkdown || `# ${item.title}\n\n${item.summary ?? ''}`,
+            allowComments: item.allowComments ?? true,
+            pinned: item.pinned ?? false,
           }}
         />
       </section>

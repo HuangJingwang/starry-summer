@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 import {
   buildAdminContentActionRequest,
   buildCreateDraftRequest,
+  buildGetAdminContentRequest,
   buildContentPayloadFromFormData,
   buildListAdminContentRequest,
   buildUpdateContentRequest,
@@ -10,6 +11,7 @@ import {
   filterAdminContent,
   getAdminContentStats,
   loadAdminContentItems,
+  loadAdminContentItem,
   normalizeAdminContentItem,
   normalizeAdminContentSearchParams,
 } from './admin-content';
@@ -161,9 +163,12 @@ describe('admin content helpers', () => {
         title: 'Draft from API',
         slug: 'draft-from-api',
         summary: 'API summary',
+        bodyMarkdown: '# Draft from API',
         status: 'draft',
         visibility: 'public',
         featured: true,
+        allowComments: false,
+        pinned: true,
         viewCount: 10,
         likeCount: 2,
         categories: ['Writing'],
@@ -178,9 +183,12 @@ describe('admin content helpers', () => {
       title: 'Draft from API',
       slug: 'draft-from-api',
       summary: 'API summary',
+      bodyMarkdown: '# Draft from API',
       status: 'draft',
       visibility: 'public',
       featured: true,
+      allowComments: false,
+      pinned: true,
       viewCount: 10,
       likeCount: 2,
       publishedAt: '2026-06-10',
@@ -217,8 +225,11 @@ describe('admin content helpers', () => {
           title: 'API Note',
           slug: 'api-note',
           summary: '',
+          bodyMarkdown: '',
           status: 'published',
           visibility: 'public',
+          allowComments: true,
+          pinned: false,
           featured: false,
           viewCount: 0,
           likeCount: 0,
@@ -227,6 +238,70 @@ describe('admin content helpers', () => {
           tags: ['API'],
         },
       ],
+    });
+  });
+
+  test('builds admin content detail request', () => {
+    expect(buildGetAdminContentRequest('content-1')).toEqual({
+      url: '/api/admin/content/content-1',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+      },
+    });
+  });
+
+  test('loads a full admin content record from the API', async () => {
+    const result = await loadAdminContentItem('content-1', items, async () => {
+      return new Response(
+        JSON.stringify({
+          id: 'content-1',
+          type: 'post',
+          title: 'API Post',
+          slug: 'api-post',
+          summary: 'API summary',
+          bodyMarkdown: '# API Post',
+          status: 'draft',
+          visibility: 'public',
+          allowComments: false,
+          pinned: true,
+          featured: true,
+          categories: ['Writing'],
+          tags: ['API'],
+          updatedAt: '2026-06-10T00:00:00.000Z',
+        }),
+      );
+    });
+
+    expect(result).toEqual({
+      source: 'api',
+      item: {
+        id: 'content-1',
+        type: 'post',
+        title: 'API Post',
+        slug: 'api-post',
+        summary: 'API summary',
+        bodyMarkdown: '# API Post',
+        status: 'draft',
+        visibility: 'public',
+        allowComments: false,
+        pinned: true,
+        featured: true,
+        viewCount: 0,
+        likeCount: 0,
+        publishedAt: '2026-06-10',
+        categories: ['Writing'],
+        tags: ['API'],
+      },
+    });
+  });
+
+  test('falls back to seed content for admin edit pages when detail API is unavailable', async () => {
+    const result = await loadAdminContentItem('draft-post', items, async () => new Response('Unauthorized', { status: 401 }));
+
+    expect(result).toEqual({
+      source: 'fallback',
+      item: items[0],
     });
   });
 

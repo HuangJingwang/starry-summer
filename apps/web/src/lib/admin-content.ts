@@ -37,6 +37,9 @@ export interface AdminContentApiRecord {
   status: ContentStatus;
   visibility?: SiteContentItem['visibility'];
   featured?: boolean;
+  bodyMarkdown?: string;
+  allowComments?: boolean;
+  pinned?: boolean;
   viewCount?: number;
   likeCount?: number;
   categories?: string[];
@@ -69,6 +72,11 @@ export interface AdminContentLoadResult {
   items: SiteContentItem[];
 }
 
+export interface AdminContentItemLoadResult {
+  source: 'api' | 'fallback';
+  item: SiteContentItem | null;
+}
+
 export type AdminContentFetcher = (url: string, init: RequestInit) => Promise<Response>;
 
 export type AdminContentAction = 'publish' | 'archive' | 'restore-draft';
@@ -91,6 +99,9 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     summary: record.summary ?? '',
     slug: record.slug,
     featured: record.featured ?? false,
+    bodyMarkdown: record.bodyMarkdown ?? '',
+    allowComments: record.allowComments ?? true,
+    pinned: record.pinned ?? false,
     categories: record.categories ?? [],
     tags: record.tags ?? [],
     viewCount: record.viewCount ?? 0,
@@ -204,6 +215,16 @@ export function buildListAdminContentRequest(): AdminContentRequest {
   };
 }
 
+export function buildGetAdminContentRequest(id: string): AdminContentRequest {
+  return {
+    url: `/api/admin/content/${id}`,
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
 export async function loadAdminContentItems(
   fallbackItems: SiteContentItem[],
   fetcher: AdminContentFetcher = (url, init) => fetch(url, init),
@@ -229,6 +250,36 @@ export async function loadAdminContentItems(
     };
   } catch {
     return { source: 'fallback', items: fallbackItems };
+  }
+}
+
+export async function loadAdminContentItem(
+  id: string,
+  fallbackItems: SiteContentItem[],
+  fetcher: AdminContentFetcher = (url, init) => fetch(url, init),
+): Promise<AdminContentItemLoadResult> {
+  const request = buildGetAdminContentRequest(id);
+  const fallback = fallbackItems.find((item) => item.id === id) ?? null;
+
+  try {
+    const response = await fetcher(request.url, request.init);
+
+    if (!response.ok) {
+      return { source: 'fallback', item: fallback };
+    }
+
+    const data: unknown = await response.json();
+
+    if (!data || typeof data !== 'object') {
+      return { source: 'fallback', item: fallback };
+    }
+
+    return {
+      source: 'api',
+      item: normalizeAdminContentItem(data as AdminContentApiRecord),
+    };
+  } catch {
+    return { source: 'fallback', item: fallback };
   }
 }
 

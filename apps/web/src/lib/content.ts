@@ -15,6 +15,8 @@ export interface SiteContentItem {
   tags?: string[];
   viewCount?: number;
   likeCount?: number;
+  allowComments?: boolean;
+  pinned?: boolean;
 }
 
 export interface ContentArchiveGroup {

@@ -84,6 +84,10 @@ export class ContentService {
     return this.repository.listAdmin();
   }
 
+  async getAdminRecord(id: string): Promise<ContentRecord> {
+    return this.getRecord(id);
+  }
+
   async listPublic(filter: PublicContentFilter = {}): Promise<ContentRecord[]> {
     return this.repository.listPublic(filter);
   }

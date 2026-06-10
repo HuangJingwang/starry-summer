@@ -111,6 +111,21 @@ describe('ContentService', () => {
     });
   });
 
+  test('returns a full admin content record by id', async () => {
+    const draft = await service.createDraft({
+      type: 'post',
+      title: 'Editable Post',
+      slug: 'editable-post',
+      summary: 'Ready to edit',
+      bodyMarkdown: '# Editable Post',
+      categories: ['Writing'],
+      tags: ['Admin'],
+    });
+
+    await expect(service.getAdminRecord(draft.id)).resolves.toEqual(draft);
+    await expect(service.getAdminRecord('missing')).rejects.toThrow('Content missing was not found');
+  });
+
   test('archives and restores content from the admin workflow', async () => {
     const draft = await service.createDraft({
       type: 'post',

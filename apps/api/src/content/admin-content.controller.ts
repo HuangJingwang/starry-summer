@@ -14,6 +14,11 @@ export class AdminContentController {
     return this.contentService.listAdmin();
   }
 
+  @Get(':id')
+  getAdminRecord(@Param('id') id: string) {
+    return this.contentService.getAdminRecord(id);
+  }
+
   @Post()
   createDraft(@Body() input: CreateDraftInput) {
     return this.contentService.createDraft(input);
