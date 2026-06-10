@@ -7,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { LocalAssetStorage, S3AssetStorage, assertAllowedUpload } from './storage.service';
 
+const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
 describe('asset storage', () => {
   let dir: string;
 
@@ -33,6 +35,21 @@ describe('asset storage', () => {
     expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 0 })).toThrow('Upload is empty');
   });
 
+  test('rejects binary uploads whose content does not match the declared type', async () => {
+    const storage = new LocalAssetStorage({
+      uploadDir: dir,
+      publicBaseUrl: '/uploads',
+    });
+
+    await expect(
+      storage.save({
+        filename: 'fake.png',
+        mimeType: 'image/png',
+        bytes: Buffer.from('<script>alert(1)</script>'),
+      }),
+    ).rejects.toThrow('Upload content does not match declared type: image/png');
+  });
+
   test('stores files with safe keys and public urls', async () => {
     const storage = new LocalAssetStorage({
       uploadDir: dir,
@@ -44,12 +61,12 @@ describe('asset storage', () => {
     const result = await storage.save({
       filename: '../Hero Image.PNG',
       mimeType: 'image/png',
-      bytes: Buffer.from('png-bytes'),
+      bytes: pngBytes,
     });
 
     expect(result.storageKey).toBe('2026/06/10/hero-image-fixed.png');
     expect(result.publicUrl).toBe('/uploads/2026/06/10/hero-image-fixed.png');
-    await expect(readFile(join(dir, result.storageKey), 'utf8')).resolves.toBe('png-bytes');
+    await expect(readFile(join(dir, result.storageKey))).resolves.toEqual(pngBytes);
   });
 
   test('stores repeated filenames under distinct keys', async () => {
@@ -62,18 +79,18 @@ describe('asset storage', () => {
     });
 
     const first = await storage.save({
-      filename: 'Hero Image.PNG',
-      mimeType: 'image/png',
+      filename: 'Hero Note.txt',
+      mimeType: 'text/plain',
       bytes: Buffer.from('first'),
     });
     const second = await storage.save({
-      filename: 'Hero Image.PNG',
-      mimeType: 'image/png',
+      filename: 'Hero Note.txt',
+      mimeType: 'text/plain',
       bytes: Buffer.from('second'),
     });
 
-    expect(first.storageKey).toBe('2026/06/10/hero-image-first.png');
-    expect(second.storageKey).toBe('2026/06/10/hero-image-second.png');
+    expect(first.storageKey).toBe('2026/06/10/hero-note-first.txt');
+    expect(second.storageKey).toBe('2026/06/10/hero-note-second.txt');
     await expect(readFile(join(dir, first.storageKey), 'utf8')).resolves.toBe('first');
     await expect(readFile(join(dir, second.storageKey), 'utf8')).resolves.toBe('second');
   });
@@ -89,7 +106,7 @@ describe('asset storage', () => {
     const result = await storage.save({
       filename: 'Hero Image.PNG',
       mimeType: 'image/png',
-      bytes: Buffer.from('png-bytes'),
+      bytes: pngBytes,
     });
 
     await storage.delete(result.storageKey);
@@ -121,21 +138,21 @@ describe('asset storage', () => {
     const result = await storage.save({
       filename: '../Hero Image.PNG',
       mimeType: 'image/png',
-      bytes: Buffer.from('png-bytes'),
+      bytes: pngBytes,
     });
 
     expect(result).toEqual({
       storageKey: '2026/06/10/hero-image-fixed.png',
       publicUrl: 'https://assets.example.com/2026/06/10/hero-image-fixed.png',
       mimeType: 'image/png',
-      byteSize: 9,
+      byteSize: pngBytes.byteLength,
     });
     expect(sent).toHaveLength(1);
     expect(sent[0]).toMatchObject({
       input: {
         Bucket: 'starry-summer',
         Key: '2026/06/10/hero-image-fixed.png',
-        Body: Buffer.from('png-bytes'),
+        Body: pngBytes,
         ContentType: 'image/png',
       },
     });

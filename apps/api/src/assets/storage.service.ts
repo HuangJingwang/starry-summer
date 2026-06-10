@@ -7,6 +7,7 @@ import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client
 export interface UploadValidationInput {
   mimeType: string;
   byteSize: number;
+  bytes?: Buffer;
 }
 
 export interface SaveAssetInput {
@@ -63,6 +64,10 @@ export function assertAllowedUpload(input: UploadValidationInput): void {
   if (input.byteSize > MAX_UPLOAD_BYTES) {
     throw new BadRequestException(`Upload exceeds ${MAX_UPLOAD_BYTES} bytes`);
   }
+
+  if (input.bytes && !contentMatchesDeclaredType(input.mimeType, input.bytes)) {
+    throw new BadRequestException(`Upload content does not match declared type: ${input.mimeType}`);
+  }
 }
 
 export class LocalAssetStorage implements AssetStorage {
@@ -79,6 +84,7 @@ export class LocalAssetStorage implements AssetStorage {
     assertAllowedUpload({
       mimeType: input.mimeType,
       byteSize: input.bytes.byteLength,
+      bytes: input.bytes,
     });
 
     const storageKey = this.createStorageKey(input.filename);
@@ -140,6 +146,7 @@ export class S3AssetStorage implements AssetStorage {
     assertAllowedUpload({
       mimeType: input.mimeType,
       byteSize: input.bytes.byteLength,
+      bytes: input.bytes,
     });
 
     const storageKey = createStorageKey(input.filename, this.options.now?.() ?? new Date(), this.options.randomId);
@@ -193,4 +200,32 @@ function normalizeStorageKeySuffix(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '')
     .slice(0, 16) || randomUUID().replace(/-/g, '').slice(0, 8);
+}
+
+function contentMatchesDeclaredType(mimeType: string, bytes: Buffer): boolean {
+  if (mimeType === 'image/png') {
+    return startsWithBytes(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  }
+
+  if (mimeType === 'image/jpeg') {
+    return startsWithBytes(bytes, [0xff, 0xd8, 0xff]);
+  }
+
+  if (mimeType === 'image/gif') {
+    return bytes.subarray(0, 6).toString('ascii') === 'GIF87a' || bytes.subarray(0, 6).toString('ascii') === 'GIF89a';
+  }
+
+  if (mimeType === 'image/webp') {
+    return bytes.subarray(0, 4).toString('ascii') === 'RIFF' && bytes.subarray(8, 12).toString('ascii') === 'WEBP';
+  }
+
+  if (mimeType === 'application/pdf') {
+    return bytes.subarray(0, 5).toString('ascii') === '%PDF-';
+  }
+
+  return true;
+}
+
+function startsWithBytes(bytes: Buffer, signature: number[]): boolean {
+  return signature.every((value, index) => bytes[index] === value);
 }
