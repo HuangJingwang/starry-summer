@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { buildAssetUploadPayload, buildAssetUploadRequest, loadRandomAsset, normalizeStoredAsset } from './assets';
+import { buildAssetDeleteRequest, buildAssetUploadPayload, buildAssetUploadRequest, loadRandomAsset, normalizeStoredAsset } from './assets';
 
 describe('asset client helpers', () => {
   test('builds an upload payload from a browser file', async () => {
@@ -46,6 +46,13 @@ describe('asset client helpers', () => {
 
     expect(buildAssetListRequest({ usage: 'background' }).url).toBe('/api/assets?usage=background');
     expect(buildRandomAssetRequest({ usage: 'background' }).url).toBe('/api/assets/random?usage=background');
+    expect(buildAssetDeleteRequest('asset-1')).toEqual({
+      url: '/api/admin/assets/asset-1',
+      init: {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+    });
   });
 
   test('normalizes stored asset API data', () => {

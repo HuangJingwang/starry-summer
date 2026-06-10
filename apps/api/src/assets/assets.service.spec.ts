@@ -105,4 +105,30 @@ describe('AssetsService', () => {
     await expect(service.random({ usage: 'background' })).resolves.toEqual(second);
     await expect(service.random({ usage: 'cover' })).resolves.toBeNull();
   });
+
+  test('deletes uploaded asset metadata from the gallery', async () => {
+    const repository = new InMemoryAssetRepository(() => '2026-06-10T00:00:00.000Z');
+    const service = new AssetsService(
+      {
+        save: async (input) => ({
+          storageKey: input.filename,
+          publicUrl: `/uploads/${input.filename}`,
+          mimeType: input.mimeType,
+          byteSize: input.bytes.byteLength,
+        }),
+      },
+      repository,
+    );
+
+    const uploaded = await service.upload({
+      filename: 'unused.png',
+      mimeType: 'image/png',
+      base64: Buffer.from('unused').toString('base64'),
+      usage: 'content',
+    });
+
+    await expect(service.delete(uploaded.id)).resolves.toBeUndefined();
+    await expect(service.list()).resolves.toEqual([]);
+    await expect(service.delete(uploaded.id)).rejects.toThrow('Asset 1 was not found');
+  });
 });

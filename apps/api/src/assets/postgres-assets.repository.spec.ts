@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  buildAssetDelete,
   buildAssetInsert,
   buildAssetSelect,
   mapAssetRow,
@@ -63,6 +64,13 @@ describe('PostgresAssetsRepository mapping', () => {
     expect(buildAssetSelect()).toEqual({
       sql: 'select * from assets order by created_at desc',
       values: [],
+    });
+  });
+
+  test('builds asset delete SQL', () => {
+    expect(buildAssetDelete('asset-1')).toEqual({
+      sql: 'delete from assets where id = $1 returning id',
+      values: ['asset-1'],
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Query, UseGuards } from '@nestjs/common';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
 import { AssetsService, type UploadAssetInput } from './assets.service.js';
@@ -17,6 +17,11 @@ export class AssetsController {
   @Get()
   listAdmin(@Query('usage') usage?: AssetUsage) {
     return this.assetsService.list(usage ? { usage: normalizeAssetUsage(usage) } : {});
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.assetsService.delete(id);
   }
 }
 

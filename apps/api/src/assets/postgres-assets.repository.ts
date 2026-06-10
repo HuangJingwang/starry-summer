@@ -78,6 +78,13 @@ export function buildAssetSelect(filter: AssetListFilter = {}): SqlStatement {
   };
 }
 
+export function buildAssetDelete(id: string): SqlStatement {
+  return {
+    sql: 'delete from assets where id = $1 returning id',
+    values: [id],
+  };
+}
+
 export class PostgresAssetsRepository implements AssetRepository {
   private readonly pool: pg.Pool;
 
@@ -102,5 +109,12 @@ export class PostgresAssetsRepository implements AssetRepository {
     const result = await this.pool.query<AssetRow>(statement.sql, statement.values);
 
     return result.rows.map(mapAssetRow);
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const statement = buildAssetDelete(id);
+    const result = await this.pool.query<{ id: string }>(statement.sql, statement.values);
+
+    return Boolean(result.rows[0]);
   }
 }

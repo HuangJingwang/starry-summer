@@ -21,6 +21,7 @@ export interface AssetListFilter {
 export interface AssetRepository {
   create(input: CreateAssetRecordInput): Promise<AssetRecord>;
   list(filter?: AssetListFilter): Promise<AssetRecord[]>;
+  delete(id: string): Promise<boolean>;
 }
 
 export const ASSET_REPOSITORY = Symbol('ASSET_REPOSITORY');
@@ -47,6 +48,10 @@ export class InMemoryAssetRepository implements AssetRepository {
     return [...this.records.values()]
       .filter((record) => (filter.usage ? record.usage === filter.usage : true))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async delete(id: string): Promise<boolean> {
+    return this.records.delete(id);
   }
 }
 

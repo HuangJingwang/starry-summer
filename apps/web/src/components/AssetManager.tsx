@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import {
   buildAdminAssetListRequest,
+  buildAssetDeleteRequest,
   buildAssetUploadPayload,
   buildAssetUploadRequest,
   normalizeStoredAsset,
@@ -88,6 +89,31 @@ export function AssetManager() {
     }
   }
 
+  async function deleteAsset(asset: StoredAsset) {
+    if (!window.confirm(`删除资源 ${asset.storageKey}?`)) {
+      return;
+    }
+
+    setState('uploading');
+    setMessage('');
+
+    try {
+      const request = buildAssetDeleteRequest(asset.id);
+      const response = await fetch(request.url, request.init);
+
+      if (!response.ok) {
+        throw new Error(`Request failed with ${response.status}`);
+      }
+
+      setAssets((current) => current.filter((item) => item.id !== asset.id));
+      setState('success');
+      setMessage('资源已删除。');
+    } catch {
+      setState('error');
+      setMessage('删除失败，请确认已登录且 API 服务可用。');
+    }
+  }
+
   return (
     <div className="asset-manager">
       <form className="asset-dropzone" action={upload}>
@@ -131,6 +157,9 @@ export function AssetManager() {
               <a href={asset.publicUrl} target="_blank" rel="noreferrer">
                 {asset.publicUrl}
               </a>
+              <button type="button" onClick={() => deleteAsset(asset)} disabled={state === 'uploading'}>
+                Delete
+              </button>
             </article>
           ))}
         </div>

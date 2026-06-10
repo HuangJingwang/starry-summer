@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import type { AssetStorage, StoredAsset } from './storage.service.js';
 import { LocalAssetStorage, S3AssetStorage } from './storage.service.js';
@@ -65,6 +65,14 @@ export class AssetsService {
 
   random(filter: AssetListFilter = {}): Promise<AssetRecord | null> {
     return this.randomAsset(filter);
+  }
+
+  async delete(id: string): Promise<void> {
+    const deleted = await this.repository.delete(id);
+
+    if (!deleted) {
+      throw new NotFoundException(`Asset ${id} was not found`);
+    }
   }
 }
 

@@ -70,6 +70,16 @@ export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): A
   };
 }
 
+export function buildAssetDeleteRequest(id: string): AssetRequest {
+  return {
+    url: `/api/admin/assets/${id}`,
+    init: {
+      method: 'DELETE',
+      credentials: 'include',
+    },
+  };
+}
+
 export function buildRandomAssetRequest(options: AssetRequestOptions = {}): AssetRequest {
   return {
     url: buildAssetUrl('/api/assets/random', options),
