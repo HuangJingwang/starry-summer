@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import {
   buildGetAdminSettingsRequest,
   buildUpdateSettingsRequest,
+  formatSocialLinksText,
   normalizeSiteSettings,
+  parseSocialLinksText,
   type SiteSettings,
 } from '@/lib/settings';
 
@@ -57,6 +59,7 @@ export function SettingsManager() {
         title: String(formData.get('title') ?? ''),
         ownerName: String(formData.get('ownerName') ?? ''),
         description: String(formData.get('description') ?? ''),
+        socialLinks: parseSocialLinksText(String(formData.get('socialLinks') ?? '')),
       },
       hero: {
         tagline: String(formData.get('tagline') ?? ''),
@@ -97,6 +100,15 @@ export function SettingsManager() {
       <label>
         SEO description
         <textarea name="description" rows={4} defaultValue={settings.profile.description} />
+      </label>
+      <label>
+        社交链接
+        <textarea
+          name="socialLinks"
+          rows={4}
+          defaultValue={formatSocialLinksText(settings.profile.socialLinks)}
+          placeholder="GitHub | https://github.com/yourname"
+        />
       </label>
       <label>
         首页短句

@@ -153,6 +153,6 @@ create table if not exists site_settings (
 
 insert into site_settings (key, value)
 values
-  ('profile', '{"title":"Starry Summer","ownerName":"Owner","description":"A personal content platform."}'::jsonb),
+  ('profile', '{"title":"Starry Summer","ownerName":"Owner","description":"A personal content platform.","socialLinks":[]}'::jsonb),
   ('navigation', '["posts","notes","moments","projects","series","guestbook","about"]'::jsonb)
 on conflict (key) do nothing;

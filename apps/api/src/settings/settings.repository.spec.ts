@@ -11,6 +11,7 @@ describe('InMemorySettingsRepository', () => {
         title: 'Starry Summer',
         ownerName: 'Owner',
         description: 'A personal content platform.',
+        socialLinks: [],
       },
       hero: {
         tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
@@ -30,6 +31,12 @@ describe('InMemorySettingsRepository', () => {
         title: 'New Title',
         ownerName: 'HJW',
         description: 'A quieter personal archive.',
+        socialLinks: [
+          {
+            label: 'GitHub',
+            href: 'https://github.com/hjw',
+          },
+        ],
       },
     });
 
@@ -38,6 +45,12 @@ describe('InMemorySettingsRepository', () => {
         title: 'New Title',
         ownerName: 'HJW',
         description: 'A quieter personal archive.',
+        socialLinks: [
+          {
+            label: 'GitHub',
+            href: 'https://github.com/hjw',
+          },
+        ],
       },
       hero: {
         tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
@@ -69,6 +82,25 @@ describe('InMemorySettingsRepository', () => {
         motto: 'Stay curious, keep shipping.',
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
+    });
+  });
+
+  test('returns cloned social links', async () => {
+    const repository = new InMemorySettingsRepository(() => '2026-06-10T00:00:00.000Z');
+
+    await repository.update({
+      profile: {
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/hjw' }],
+      },
+    });
+
+    const settings = await repository.get();
+    settings.profile.socialLinks.push({ label: 'Broken', href: 'https://example.com' });
+
+    await expect(repository.get()).resolves.toMatchObject({
+      profile: {
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/hjw' }],
+      },
     });
   });
 });

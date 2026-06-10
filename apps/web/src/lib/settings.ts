@@ -2,6 +2,12 @@ export interface SiteProfileSettings {
   title: string;
   ownerName: string;
   description: string;
+  socialLinks: SiteSocialLink[];
+}
+
+export interface SiteSocialLink {
+  label: string;
+  href: string;
 }
 
 export interface SiteHeroSettings {
@@ -41,6 +47,7 @@ export const defaultSettings: SiteSettings = {
     title: 'Starry Summer',
     ownerName: 'Owner',
     description: 'A personal content platform.',
+    socialLinks: [],
   },
   hero: {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
@@ -57,6 +64,7 @@ export function normalizeSiteSettings(input: Partial<SiteSettings>): SiteSetting
       title: input.profile?.title ?? defaultSettings.profile.title,
       ownerName: input.profile?.ownerName ?? defaultSettings.profile.ownerName,
       description: input.profile?.description ?? defaultSettings.profile.description,
+      socialLinks: normalizeSocialLinks(input.profile?.socialLinks),
     },
     hero: {
       tagline: input.hero?.tagline ?? defaultSettings.hero.tagline,
@@ -66,6 +74,32 @@ export function normalizeSiteSettings(input: Partial<SiteSettings>): SiteSetting
     navigation: Array.isArray(input.navigation) ? input.navigation : defaultSettings.navigation,
     updatedAt: input.updatedAt ?? '',
   };
+}
+
+export function parseSocialLinksText(value: string): SiteSocialLink[] {
+  return normalizeSocialLinks(
+    value.split('\n').map((line) => {
+      const [label = '', ...hrefParts] = line.split('|');
+
+      return {
+        label,
+        href: hrefParts.join('|'),
+      };
+    }),
+  );
+}
+
+export function formatSocialLinksText(links: SiteSocialLink[]): string {
+  return links.map((link) => `${link.label} | ${link.href}`).join('\n');
+}
+
+function normalizeSocialLinks(links: SiteSocialLink[] | undefined): SiteSocialLink[] {
+  return (Array.isArray(links) ? links : [])
+    .map((link) => ({
+      label: link.label.trim(),
+      href: link.href.trim(),
+    }))
+    .filter((link) => link.label && link.href);
 }
 
 export function buildGetPublicSettingsRequest(options: PublicSettingsRequestOptions = {}): SettingsRequest {

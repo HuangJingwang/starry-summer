@@ -5,6 +5,7 @@ import {
   type SettingsRepository,
   type SiteHeroSettings,
   type SiteProfileSettings,
+  type SiteSocialLink,
   type SiteSettings,
   type UpdateSiteSettingsInput,
 } from './settings.repository.js';
@@ -30,11 +31,17 @@ export class SettingsService {
 }
 
 function normalizeProfile(input: Partial<SiteProfileSettings>): Partial<SiteProfileSettings> {
-  return {
+  const profile: Partial<SiteProfileSettings> = {
     title: input.title?.trim(),
     ownerName: input.ownerName?.trim(),
     description: input.description?.trim(),
   };
+
+  if (input.socialLinks) {
+    profile.socialLinks = normalizeSocialLinks(input.socialLinks);
+  }
+
+  return profile;
 }
 
 function normalizeHero(input: Partial<SiteHeroSettings>): Partial<SiteHeroSettings> {
@@ -43,4 +50,13 @@ function normalizeHero(input: Partial<SiteHeroSettings>): Partial<SiteHeroSettin
     backgroundImageUrl: input.backgroundImageUrl?.trim(),
     motto: input.motto?.trim(),
   };
+}
+
+function normalizeSocialLinks(links: SiteSocialLink[]): SiteSocialLink[] {
+  return links
+    .map((link) => ({
+      label: link.label.trim(),
+      href: link.href.trim(),
+    }))
+    .filter((link) => link.label && link.href);
 }

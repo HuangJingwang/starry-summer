@@ -9,6 +9,7 @@ const settings: SiteSettings = {
     title: 'Starry Summer',
     ownerName: 'Jing',
     description: 'Personal notes and projects.',
+    socialLinks: [],
   },
   hero: {
     tagline: 'Writing in public.',

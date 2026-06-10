@@ -16,6 +16,10 @@ describe('settings client helpers', () => {
           title: 'My Blog',
           ownerName: 'Owner',
           description: 'Notes',
+          socialLinks: [
+            { label: ' GitHub ', href: ' https://github.com/me ' },
+            { label: '', href: 'https://empty-label.example.com' },
+          ],
         },
         hero: {
           tagline: 'Keep a public trail of quiet work.',
@@ -30,6 +34,7 @@ describe('settings client helpers', () => {
         title: 'My Blog',
         ownerName: 'Owner',
         description: 'Notes',
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
       },
       hero: {
         tagline: 'Keep a public trail of quiet work.',
@@ -40,6 +45,7 @@ describe('settings client helpers', () => {
       updatedAt: '2026-06-10T00:00:00.000Z',
     });
 
+    expect(normalizeSiteSettings({}).profile.socialLinks).toEqual([]);
     expect(normalizeSiteSettings({}).hero).toEqual({
       tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
       backgroundImageUrl: '/hero-workspace.png',
@@ -83,6 +89,7 @@ describe('settings client helpers', () => {
           title: 'My Blog',
           ownerName: 'Owner',
           description: 'Notes',
+          socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
         },
         hero: {
           tagline: 'A personal operating base.',
@@ -103,6 +110,7 @@ describe('settings client helpers', () => {
             title: 'My Blog',
             ownerName: 'Owner',
             description: 'Notes',
+            socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
           },
           hero: {
             tagline: 'A personal operating base.',
@@ -123,6 +131,7 @@ describe('settings client helpers', () => {
               title: 'Public Blog',
               ownerName: 'Owner',
               description: 'Public description',
+              socialLinks: [{ label: 'GitHub', href: 'https://github.com/public-blog' }],
             },
             hero: {
               tagline: 'A public note to the future.',
@@ -139,6 +148,7 @@ describe('settings client helpers', () => {
         title: 'Public Blog',
         ownerName: 'Owner',
         description: 'Public description',
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/public-blog' }],
       },
       hero: {
         tagline: 'A public note to the future.',

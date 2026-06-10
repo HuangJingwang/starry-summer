@@ -2,6 +2,12 @@ export interface SiteProfileSettings {
   title: string;
   ownerName: string;
   description: string;
+  socialLinks: SiteSocialLink[];
+}
+
+export interface SiteSocialLink {
+  label: string;
+  href: string;
 }
 
 export interface SiteHeroSettings {
@@ -35,6 +41,7 @@ export const defaultSiteSettings: SiteSettings = {
     title: 'Starry Summer',
     ownerName: 'Owner',
     description: 'A personal content platform.',
+    socialLinks: [],
   },
   hero: {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
@@ -83,7 +90,10 @@ export class InMemorySettingsRepository implements SettingsRepository {
 export function cloneSettings(settings: SiteSettings): SiteSettings {
   return {
     ...settings,
-    profile: { ...settings.profile },
+    profile: {
+      ...settings.profile,
+      socialLinks: settings.profile.socialLinks.map((link) => ({ ...link })),
+    },
     hero: { ...settings.hero },
     navigation: [...settings.navigation],
   };

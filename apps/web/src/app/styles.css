@@ -507,6 +507,22 @@ textarea {
   gap: 16px;
 }
 
+.about-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: -6px 0 24px;
+}
+
+.about-social a {
+  background: var(--dark);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  min-height: 40px;
+  padding: 10px 14px;
+}
+
 .about-list div {
   background: var(--panel);
   border: 1px solid var(--line);

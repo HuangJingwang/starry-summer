@@ -25,6 +25,10 @@ describe('SettingsService', () => {
         title: '  My Blog  ',
         ownerName: '  Huang Jingwang  ',
         description: '  Notes and daily writing.  ',
+        socialLinks: [
+          { label: ' GitHub ', href: ' https://github.com/hjw ' },
+          { label: 'Empty', href: '   ' },
+        ],
       },
     });
 
@@ -32,6 +36,7 @@ describe('SettingsService', () => {
       title: 'My Blog',
       ownerName: 'Huang Jingwang',
       description: 'Notes and daily writing.',
+      socialLinks: [{ label: 'GitHub', href: 'https://github.com/hjw' }],
     });
   });
 

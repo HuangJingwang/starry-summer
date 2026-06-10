@@ -6,6 +6,7 @@ import {
   type SiteHeroSettings,
   type SiteProfileSettings,
   type SiteSettings,
+  type SiteSocialLink,
   type UpdateSiteSettingsInput,
 } from './settings.repository';
 
@@ -49,7 +50,7 @@ export function mapSettingsRows(rows: SettingRow[]): SiteSettings {
   const newest = rows.map((row) => row.updated_at).sort((a, b) => b.getTime() - a.getTime())[0];
 
   return {
-    profile: isProfile(profileRow?.value) ? profileRow.value : defaultSiteSettings.profile,
+    profile: normalizeProfileSettings(profileRow?.value),
     hero: normalizeHeroSettings(heroRow?.value),
     navigation: isNavigation(navigationRow?.value) ? navigationRow.value : defaultSiteSettings.navigation,
     updatedAt: (newest ?? new Date(defaultSiteSettings.updatedAt)).toISOString(),
@@ -98,14 +99,23 @@ export class PostgresSettingsRepository implements SettingsRepository {
   }
 }
 
-function isProfile(value: unknown): value is SiteProfileSettings {
-  return (
-    Boolean(value) &&
-    typeof value === 'object' &&
-    typeof (value as SiteProfileSettings).title === 'string' &&
-    typeof (value as SiteProfileSettings).ownerName === 'string' &&
-    typeof (value as SiteProfileSettings).description === 'string'
-  );
+function normalizeProfileSettings(value: unknown): SiteProfileSettings {
+  if (!value || typeof value !== 'object') {
+    return defaultSiteSettings.profile;
+  }
+
+  const profile = value as Partial<SiteProfileSettings>;
+
+  if (typeof profile.title !== 'string' || typeof profile.ownerName !== 'string' || typeof profile.description !== 'string') {
+    return defaultSiteSettings.profile;
+  }
+
+  return {
+    title: profile.title,
+    ownerName: profile.ownerName,
+    description: profile.description,
+    socialLinks: normalizeSocialLinks(profile.socialLinks),
+  };
 }
 
 function normalizeHeroSettings(value: unknown): SiteHeroSettings {
@@ -128,4 +138,17 @@ function normalizeHeroSettings(value: unknown): SiteHeroSettings {
 
 function isNavigation(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function normalizeSocialLinks(value: unknown): SiteSocialLink[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => ({
+      label: typeof item?.label === 'string' ? item.label.trim() : '',
+      href: typeof item?.href === 'string' ? item.href.trim() : '',
+    }))
+    .filter((item) => item.label && item.href);
 }

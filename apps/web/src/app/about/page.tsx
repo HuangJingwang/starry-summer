@@ -1,17 +1,27 @@
 import { SiteShell } from '@/components/SiteShell';
+import { loadPublicSettings } from '@/lib/settings';
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
+  const settings = await loadPublicSettings(undefined, { apiBaseUrl });
+
   return (
     <SiteShell>
       <main className="page-main narrow">
         <div className="page-title">
           <p className="eyebrow">About</p>
-          <h1>关于这个站点</h1>
-          <p>
-            Starry Summer 是一个个人内容平台，用来记录长期文章、短笔记、日常片段和项目作品。
-            它从单人创作后台开始，保留 Markdown 导入导出能力，并面向云服务器长期部署。
-          </p>
+          <h1>{settings.profile.ownerName}</h1>
+          <p>{settings.profile.description}</p>
         </div>
+        {settings.profile.socialLinks.length > 0 ? (
+          <section className="about-social" aria-label="Social links">
+            {settings.profile.socialLinks.map((link) => (
+              <a key={`${link.label}-${link.href}`} href={link.href} target="_blank" rel="noreferrer">
+                {link.label}
+              </a>
+            ))}
+          </section>
+        ) : null}
         <section className="about-list">
           <div>
             <h2>Writing</h2>

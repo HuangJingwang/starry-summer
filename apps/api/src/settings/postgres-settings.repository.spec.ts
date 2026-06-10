@@ -16,6 +16,7 @@ describe('PostgresSettingsRepository', () => {
           title: 'Starry Summer',
           ownerName: 'Owner',
           description: 'A personal content platform.',
+          socialLinks: [{ label: 'GitHub', href: 'https://github.com/owner' }],
         },
         updated_at: new Date('2026-06-10T00:00:00.000Z'),
       },
@@ -40,6 +41,7 @@ describe('PostgresSettingsRepository', () => {
         title: 'Starry Summer',
         ownerName: 'Owner',
         description: 'A personal content platform.',
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/owner' }],
       },
       hero: {
         tagline: 'A public trail of private work.',
@@ -48,6 +50,27 @@ describe('PostgresSettingsRepository', () => {
       },
       navigation: ['posts', 'notes'],
       updatedAt: '2026-06-10T02:00:00.000Z',
+    });
+  });
+
+  test('fills default social links for legacy profile settings', () => {
+    expect(
+      mapSettingsRows([
+        {
+          key: 'profile',
+          value: {
+            title: 'Starry Summer',
+            ownerName: 'Owner',
+            description: 'A personal content platform.',
+          },
+          updated_at: new Date('2026-06-10T00:00:00.000Z'),
+        },
+      ]).profile,
+    ).toEqual({
+      title: 'Starry Summer',
+      ownerName: 'Owner',
+      description: 'A personal content platform.',
+      socialLinks: [],
     });
   });
 
@@ -80,6 +103,7 @@ describe('PostgresSettingsRepository', () => {
         title: 'My Blog',
         ownerName: 'Owner',
         description: 'Notes',
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
       }),
     ).toEqual({
       sql: `
@@ -87,7 +111,15 @@ describe('PostgresSettingsRepository', () => {
       values ($1, $2::jsonb, now())
       on conflict (key) do update set value = excluded.value, updated_at = now()
     `,
-      values: ['profile', JSON.stringify({ title: 'My Blog', ownerName: 'Owner', description: 'Notes' })],
+      values: [
+        'profile',
+        JSON.stringify({
+          title: 'My Blog',
+          ownerName: 'Owner',
+          description: 'Notes',
+          socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
+        }),
+      ],
     });
     expect(
       buildSettingsUpsert('hero', {
