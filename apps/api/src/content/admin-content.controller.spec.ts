@@ -6,10 +6,12 @@ import { AdminContentController } from './admin-content.controller';
 describe('AdminContentController', () => {
   const contentService = {
     listAdmin: vi.fn(),
+    setVisibility: vi.fn(),
   };
 
   beforeEach(() => {
     contentService.listAdmin.mockReset();
+    contentService.setVisibility.mockReset();
   });
 
   test('serves Markdown exports as downloadable files', () => {
@@ -51,5 +53,14 @@ describe('AdminContentController', () => {
 
     expect(() => controller.listAdmin(undefined, 'reviewing', undefined)).toThrow('Unsupported content status: reviewing');
     expect(contentService.listAdmin).not.toHaveBeenCalled();
+  });
+
+  test('validates content visibility updates', () => {
+    const controller = new AdminContentController(contentService as never);
+
+    controller.setVisibility('content-1', 'private');
+
+    expect(contentService.setVisibility).toHaveBeenCalledWith('content-1', 'private');
+    expect(() => controller.setVisibility('content-1', 'friends-only' as never)).toThrow('Unsupported content visibility: friends-only');
   });
 });

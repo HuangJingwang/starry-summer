@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ContentSourceType, ContentStatus, ContentType, ProjectMetadata } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectMetadata } from '@starry-summer/shared';
 
 import {
   buildAdminContentActionRequest,
   buildContentPayloadFromFormData,
   buildCreateDraftRequest,
   buildDeleteContentRequest,
+  buildSetContentVisibilityRequest,
   buildUpdateContentRequest,
   createMarkdownPreview,
   getContentDraftStorageKey,
@@ -23,6 +24,7 @@ interface AdminContentFormInitialValue {
   slug?: string;
   type?: ContentType;
   status?: ContentStatus;
+  visibility?: ContentVisibility;
   summary?: string;
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
@@ -93,11 +95,13 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     }
 
     const formData = new FormData(formRef.current);
+    const visibility = formData.get('visibility') === 'private' ? 'private' : 'public';
 
     return {
       title: String(formData.get('title') ?? ''),
       slug: String(formData.get('slug') ?? ''),
       summary: String(formData.get('summary') ?? ''),
+      visibility,
       bodyMarkdown: String(formData.get('bodyMarkdown') ?? markdown),
       savedAt: new Date().toISOString(),
     };
@@ -133,6 +137,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       title?: HTMLInputElement;
       slug?: HTMLInputElement;
       summary?: HTMLTextAreaElement;
+      visibility?: HTMLSelectElement;
     };
 
     if (controls.title) {
@@ -145,6 +150,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
 
     if (controls.summary) {
       controls.summary.value = localDraft.summary;
+    }
+
+    if (controls.visibility) {
+      controls.visibility.value = localDraft.visibility;
     }
 
     setMarkdown(localDraft.bodyMarkdown);
@@ -184,12 +193,21 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     return typeof result?.id === 'string' ? result.id : initialValue?.id;
   }
 
+  async function syncVisibility(contentId: string, formData: FormData) {
+    const visibility = formData.get('visibility') === 'private' ? 'private' : 'public';
+    await send(buildSetContentVisibilityRequest(contentId, visibility));
+  }
+
   async function runSave(formData: FormData, lifecycle?: 'publish' | 'archive' | 'restore-draft') {
     setState('submitting');
     setMessage('');
 
     try {
       const contentId = lifecycle === 'archive' || lifecycle === 'restore-draft' ? initialValue?.id : await save(formData);
+
+      if (contentId && lifecycle !== 'archive' && lifecycle !== 'restore-draft') {
+        await syncVisibility(contentId, formData);
+      }
 
       if (lifecycle && contentId) {
         await send(buildAdminContentActionRequest(contentId, lifecycle));
@@ -276,6 +294,13 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         <label>
           状态
           <input value={initialValue?.status ?? 'draft'} readOnly />
+        </label>
+        <label>
+          可见性
+          <select name="visibility" defaultValue={initialValue?.visibility ?? 'public'}>
+            <option value="public">公开</option>
+            <option value="private">仅自己可见</option>
+          </select>
         </label>
       </div>
       <label>

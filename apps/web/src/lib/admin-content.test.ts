@@ -11,6 +11,7 @@ import {
   buildContentPayloadFromFormData,
   buildDeleteContentRequest,
   buildListAdminContentRequest,
+  buildSetContentVisibilityRequest,
   buildUpdateContentRequest,
   buildAdminContentDashboard,
   createMarkdownPreview,
@@ -173,6 +174,7 @@ describe('admin content helpers', () => {
       title: 'Draft title',
       slug: 'draft-title',
       summary: 'Draft summary',
+      visibility: 'private',
       bodyMarkdown: '# Draft',
       savedAt: '2026-06-11T00:00:00.000Z',
     });
@@ -181,6 +183,7 @@ describe('admin content helpers', () => {
       title: 'Draft title',
       slug: 'draft-title',
       summary: 'Draft summary',
+      visibility: 'private',
       bodyMarkdown: '# Draft',
       savedAt: '2026-06-11T00:00:00.000Z',
     });
@@ -250,6 +253,17 @@ describe('admin content helpers', () => {
       init: {
         method: 'DELETE',
         credentials: 'include',
+      },
+    });
+    expect(buildSetContentVisibilityRequest('content-1', 'private')).toEqual({
+      url: '/api/admin/content/content-1/visibility',
+      init: {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ visibility: 'private' }),
       },
     });
   });
@@ -557,6 +571,7 @@ describe('admin content helpers', () => {
     formData.set('sourceType', 'repost');
     formData.set('sourceUrl', ' https://example.com/source ');
     formData.set('coverAssetId', ' cover-asset-1 ');
+    formData.set('visibility', 'private');
     formData.set('bodyMarkdown', '# Form Title');
     formData.set('categories', 'Projects, Platform, Projects');
     formData.set('tags', 'Next.js, Launch');
@@ -580,6 +595,7 @@ describe('admin content helpers', () => {
       sourceType: 'repost',
       sourceUrl: 'https://example.com/source',
       coverAssetId: 'cover-asset-1',
+      visibility: 'private',
       bodyMarkdown: '# Form Title',
       allowComments: true,
       pinned: false,

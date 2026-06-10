@@ -72,7 +72,7 @@ export class AdminContentController {
 
   @Patch(':id/visibility')
   setVisibility(@Param('id') id: string, @Body('visibility') visibility: ContentVisibility) {
-    return this.contentService.setVisibility(id, visibility);
+    return this.contentService.setVisibility(id, parseContentVisibility(visibility));
   }
 
   @Post('import')
@@ -95,6 +95,7 @@ export class AdminContentController {
 
 const contentTypes = new Set<ContentType>(['post', 'note', 'moment', 'page', 'project']);
 const contentStatuses = new Set<ContentStatus>(['draft', 'published', 'private', 'archived']);
+const contentVisibilities = new Set<ContentVisibility>(['public', 'private']);
 
 function parseOptionalContentType(value: string | undefined): ContentType | undefined {
   if (value === undefined || value === '') {
@@ -118,6 +119,14 @@ function parseOptionalContentStatus(value: string | undefined): ContentStatus | 
   }
 
   return value as ContentStatus;
+}
+
+function parseContentVisibility(value: string | undefined): ContentVisibility {
+  if (!contentVisibilities.has(value as ContentVisibility)) {
+    throw new BadRequestException(`Unsupported content visibility: ${value}`);
+  }
+
+  return value as ContentVisibility;
 }
 
 function normalizeOptionalQuery(value: string | undefined): string | undefined {

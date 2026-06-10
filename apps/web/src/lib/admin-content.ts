@@ -1,4 +1,4 @@
-import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
 import type { SiteContentItem } from './content';
 
@@ -66,6 +66,7 @@ export interface ContentDraftSnapshot {
   title: string;
   slug: string;
   summary: string;
+  visibility: ContentVisibility;
   bodyMarkdown: string;
   savedAt: string;
 }
@@ -107,6 +108,7 @@ export interface AdminContentPayload {
   sourceType?: ContentSourceType;
   sourceUrl?: string;
   coverAssetId?: string;
+  visibility?: ContentVisibility;
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
@@ -145,6 +147,7 @@ export type AdminContentFetcher = (url: string, init: RequestInit) => Promise<Re
 export type AdminContentAction = 'publish' | 'archive' | 'restore-draft';
 
 const validContentStatuses = new Set<ContentStatus>(['draft', 'published', 'private', 'archived']);
+const validContentVisibility = new Set<ContentVisibility>(['public', 'private']);
 const validContentTypes = new Set<ContentType>(['post', 'note', 'moment', 'page', 'project']);
 const validProjectStatuses = new Set<ProjectStatus>(['active', 'paused', 'completed', 'archived']);
 const projectLinkKeys: Array<keyof ProjectLinks> = ['website', 'repository', 'demo', 'article'];
@@ -215,6 +218,7 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     sourceType: input.sourceType === 'repost' ? 'repost' : 'original',
     sourceUrl: input.sourceUrl?.trim() ?? '',
     coverAssetId: normalizeOptionalText(input.coverAssetId),
+    visibility: validContentVisibility.has(input.visibility as ContentVisibility) ? input.visibility : undefined,
     categories: normalizeList(input.categories),
     tags: normalizeList(input.tags),
     series: normalizeList(input.series),
@@ -241,6 +245,7 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     sourceType: formText(formData, 'sourceType') as ContentSourceType,
     sourceUrl: formText(formData, 'sourceUrl'),
     coverAssetId: formText(formData, 'coverAssetId'),
+    visibility: formText(formData, 'visibility') as ContentVisibility,
     bodyMarkdown: formText(formData, 'bodyMarkdown'),
     categories: splitList(formText(formData, 'categories')),
     tags: splitList(formText(formData, 'tags')),
@@ -437,6 +442,8 @@ function appendAdminContentFilters(url: string, filters: AdminContentSearchParam
 }
 
 function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentPayload): AdminContentRequest {
+  const { visibility: _visibility, ...body } = normalizeContentPayload(input);
+
   return {
     url,
     init: {
@@ -445,7 +452,7 @@ function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentP
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify(normalizeContentPayload(input)),
+      body: JSON.stringify(body),
     },
   };
 }
@@ -560,6 +567,22 @@ export function buildDeleteContentRequest(id: string): AdminContentRequest {
     init: {
       method: 'DELETE',
       credentials: 'include',
+    },
+  };
+}
+
+export function buildSetContentVisibilityRequest(id: string, visibility: ContentVisibility): AdminContentRequest {
+  return {
+    url: `/api/admin/content/${id}/visibility`,
+    init: {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        visibility: validContentVisibility.has(visibility) ? visibility : 'public',
+      }),
     },
   };
 }
@@ -742,6 +765,7 @@ export function parseContentDraftSnapshot(value: string | null): ContentDraftSna
       typeof parsed.title !== 'string' ||
       typeof parsed.slug !== 'string' ||
       typeof parsed.summary !== 'string' ||
+      !validContentVisibility.has(parsed.visibility as ContentVisibility) ||
       typeof parsed.bodyMarkdown !== 'string' ||
       typeof parsed.savedAt !== 'string'
     ) {
@@ -752,6 +776,7 @@ export function parseContentDraftSnapshot(value: string | null): ContentDraftSna
       title: parsed.title,
       slug: parsed.slug,
       summary: parsed.summary,
+      visibility: parsed.visibility as ContentVisibility,
       bodyMarkdown: parsed.bodyMarkdown,
       savedAt: parsed.savedAt,
     };
