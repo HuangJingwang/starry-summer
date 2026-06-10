@@ -1,9 +1,12 @@
 import { LoginForm } from '@/components/LoginForm';
+import { getSafeAdminRedirectPath } from '@/lib/auth-client';
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const redirectTo = getSafeAdminRedirectPath((await searchParams).next);
+
   return (
     <main className="admin-main">
-      <LoginForm />
+      <LoginForm redirectTo={redirectTo} />
     </main>
   );
 }

@@ -6,7 +6,7 @@ import { buildLoginRequest } from '@/lib/auth-client';
 
 type LoginState = 'idle' | 'submitting' | 'success' | 'error';
 
-export function LoginForm() {
+export function LoginForm({ redirectTo = '/admin' }: { redirectTo?: string }) {
   const [state, setState] = useState<LoginState>('idle');
   const [message, setMessage] = useState('');
 
@@ -28,6 +28,7 @@ export function LoginForm() {
 
       setState('success');
       setMessage('登录成功，可以进入后台管理。');
+      window.location.assign(redirectTo);
     } catch {
       setState('error');
       setMessage('邮箱或密码不正确，或 API 服务暂不可用。');
