@@ -31,10 +31,12 @@ Required production changes:
 
 ## 3. First Boot
 
-Build and start services:
+Build the images and run migrations first:
 
 ```bash
-docker compose up -d --build
+docker compose build
+docker compose run --rm migrate
+docker compose up -d
 ```
 
 Check service status:
@@ -50,13 +52,13 @@ Verify:
 - `https://$DOMAIN/admin/login` opens the admin login screen.
 - `https://$DOMAIN/api/health` returns API health through Caddy.
 
-Run database migrations before enabling persistent API repositories:
+For later schema changes, rerun migrations before restarting the API:
 
 ```bash
-DATABASE_URL="postgresql://starry:change-me@localhost:5432/starry_summer" npm run db:migrate
+docker compose run --rm migrate
 ```
 
-Production Docker Compose defaults `CONTENT_REPOSITORY_DRIVER` to `postgres`. Local development can keep `CONTENT_REPOSITORY_DRIVER=memory` until PostgreSQL is running.
+Production Docker Compose uses `CONTENT_REPOSITORY_DRIVER=postgres`. Local development can set `CONTENT_REPOSITORY_DRIVER=memory` until PostgreSQL is running.
 
 ## 4. Backup
 
@@ -95,7 +97,9 @@ Pull the latest code, rebuild, and restart:
 
 ```bash
 git pull
-docker compose up -d --build
+docker compose build
+docker compose run --rm migrate
+docker compose up -d
 ```
 
 Check logs after deployment:
