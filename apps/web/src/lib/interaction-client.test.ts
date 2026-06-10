@@ -4,6 +4,8 @@ import {
   buildAdminModerationListRequest,
   buildCommentRequest,
   buildGuestbookRequest,
+  buildDedupedLikeRequest,
+  buildDedupedViewRequest,
   buildLikeRequest,
   buildModerationActionRequest,
   buildModerationDeleteRequest,
@@ -35,6 +37,22 @@ describe('interaction client helpers', () => {
         },
       },
     });
+  });
+
+  test('builds view requests only once per local target', () => {
+    const seen = new Set<string>();
+
+    expect(buildDedupedViewRequest('post', 'post-1', seen)).toEqual(buildViewRequest('post', 'post-1'));
+    expect(buildDedupedViewRequest('post', 'post-1', seen)).toBeNull();
+    expect(buildDedupedViewRequest('note', 'note-1', seen)).toEqual(buildViewRequest('note', 'note-1'));
+  });
+
+  test('builds like requests only once per local target', () => {
+    const seen = new Set<string>();
+
+    expect(buildDedupedLikeRequest('post', 'post-1', seen)).toEqual(buildLikeRequest('post', 'post-1'));
+    expect(buildDedupedLikeRequest('post', 'post-1', seen)).toBeNull();
+    expect(buildDedupedLikeRequest('post', 'post-2', seen)).toEqual(buildLikeRequest('post', 'post-2'));
   });
 
   test('builds comment request', () => {

@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import type { ContentType } from '@starry-summer/shared';
 
-import { buildLikeRequest } from '@/lib/interaction-client';
+import { buildDedupedLikeRequest } from '@/lib/interaction-client';
+
+const seenLikes = new Set<string>();
 
 export function LikeButton({
   targetType,
@@ -18,8 +20,13 @@ export function LikeButton({
   const [pending, setPending] = useState(false);
 
   async function like() {
+    const request = buildDedupedLikeRequest(targetType, targetId, seenLikes);
+
+    if (!request) {
+      return;
+    }
+
     setPending(true);
-    const request = buildLikeRequest(targetType, targetId);
 
     try {
       const response = await fetch(request.url, request.init);

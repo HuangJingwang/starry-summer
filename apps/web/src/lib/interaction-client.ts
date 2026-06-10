@@ -19,6 +19,8 @@ export interface InteractionRequest {
   init: RequestInit;
 }
 
+export type InteractionSeenStore = Pick<Set<string>, 'add' | 'has'>;
+
 export interface AdminInteractionRequestOptions {
   apiBaseUrl?: string;
   cookieHeader?: string;
@@ -64,6 +66,22 @@ export function buildViewRequest(targetType: ContentType, targetId: string): Int
   };
 }
 
+export function buildDedupedViewRequest(
+  targetType: ContentType,
+  targetId: string,
+  seen: InteractionSeenStore,
+): InteractionRequest | null {
+  return buildDedupedInteractionRequest('view', targetType, targetId, seen, () => buildViewRequest(targetType, targetId));
+}
+
+export function buildDedupedLikeRequest(
+  targetType: ContentType,
+  targetId: string,
+  seen: InteractionSeenStore,
+): InteractionRequest | null {
+  return buildDedupedInteractionRequest('like', targetType, targetId, seen, () => buildLikeRequest(targetType, targetId));
+}
+
 export function buildCommentRequest(input: CommentInput): InteractionRequest {
   return {
     url: '/api/comments',
@@ -78,6 +96,24 @@ export function buildCommentRequest(input: CommentInput): InteractionRequest {
       }),
     },
   };
+}
+
+function buildDedupedInteractionRequest(
+  kind: 'like' | 'view',
+  targetType: ContentType,
+  targetId: string,
+  seen: InteractionSeenStore,
+  build: () => InteractionRequest,
+): InteractionRequest | null {
+  const key = `${kind}:${targetType}:${targetId}`;
+
+  if (seen.has(key)) {
+    return null;
+  }
+
+  seen.add(key);
+
+  return build();
 }
 
 export function buildGuestbookRequest(input: GuestbookInput): InteractionRequest {
