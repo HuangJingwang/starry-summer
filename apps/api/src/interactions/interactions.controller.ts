@@ -1,4 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { createHash } from 'node:crypto';
+
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -10,6 +12,13 @@ import {
 } from './interactions.service.js';
 
 type CreateCommentRequest = Omit<CreateCommentInput, 'targetType'> & { targetType: string };
+type PublicInteractionRequest = {
+  headers?: Record<string, string | string[] | undefined>;
+  ip?: string;
+  socket?: {
+    remoteAddress?: string;
+  };
+};
 
 @Controller()
 export class InteractionsController {
@@ -49,14 +58,22 @@ export class InteractionsController {
 
   @Post('likes/:targetType/:targetId')
   @UseGuards(PublicInteractionRateLimitGuard)
-  likeContent(@Param('targetType') targetType: string, @Param('targetId') targetId: string) {
-    return this.interactionsService.likeContent(parseContentType(targetType), targetId);
+  likeContent(
+    @Param('targetType') targetType: string,
+    @Param('targetId') targetId: string,
+    @Req() request: PublicInteractionRequest,
+  ) {
+    return this.interactionsService.likeContent(parseContentType(targetType), targetId, createPublicActorHash(request));
   }
 
   @Post('views/:targetType/:targetId')
   @UseGuards(PublicInteractionRateLimitGuard)
-  recordView(@Param('targetType') targetType: string, @Param('targetId') targetId: string) {
-    return this.interactionsService.recordView(parseContentType(targetType), targetId);
+  recordView(
+    @Param('targetType') targetType: string,
+    @Param('targetId') targetId: string,
+    @Req() request: PublicInteractionRequest,
+  ) {
+    return this.interactionsService.recordView(parseContentType(targetType), targetId, createPublicActorHash(request));
   }
 
   @Post('guestbook')
@@ -123,4 +140,18 @@ function parseOptionalModerationStatus(value: string | undefined): ModerationSta
   }
 
   return parseModerationStatus(value);
+}
+
+function createPublicActorHash(request: PublicInteractionRequest): string {
+  const forwardedFor = firstHeaderValue(request.headers?.['x-forwarded-for'])?.split(',')[0]?.trim() ?? '';
+  const realIp = firstHeaderValue(request.headers?.['x-real-ip'])?.trim() ?? '';
+  const ip = forwardedFor || realIp || request.ip || request.socket?.remoteAddress || 'unknown-ip';
+  const userAgent = firstHeaderValue(request.headers?.['user-agent'])?.trim() || 'unknown-agent';
+  const secret = process.env.INTERACTION_HASH_SECRET ?? process.env.SESSION_SECRET ?? 'development-interaction-secret';
+
+  return createHash('sha256').update(`${secret}\n${ip}\n${userAgent}`).digest('hex');
+}
+
+function firstHeaderValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }

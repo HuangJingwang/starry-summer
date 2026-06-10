@@ -95,16 +95,16 @@ export class InteractionsService {
     return this.repository.listApprovedComments(targetType, targetId);
   }
 
-  async likeContent(targetType: ContentType, targetId: string): Promise<number> {
-    return this.repository.likeContent(targetType, targetId);
+  async likeContent(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
+    return this.repository.likeContent(targetType, targetId, actorHash);
   }
 
   async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
     return this.repository.getLikeCount(targetType, targetId);
   }
 
-  async recordView(targetType: ContentType, targetId: string): Promise<number> {
-    return this.repository.recordView(targetType, targetId);
+  async recordView(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
+    return this.repository.recordView(targetType, targetId, actorHash);
   }
 
   async getViewCount(targetType: ContentType, targetId: string): Promise<number> {

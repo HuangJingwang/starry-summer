@@ -135,6 +135,7 @@ describe('deployment configuration', () => {
       'ADMIN_EMAIL=owner@example.com',
       'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
       'SESSION_SECRET=12345678901234567890123456789012',
+      'INTERACTION_HASH_SECRET=abcdefabcdefabcdefabcdefabcdef12',
       'POSTGRES_PASSWORD=replace-me-with-a-real-password',
       'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
       'S3_ACCESS_KEY=starry-prod-access',
@@ -147,6 +148,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
     expect(doctorScript).toContain('ACME_EMAIL must be a valid email for HTTPS certificates.');
     expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
+    expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(deployment).toContain('npm run ops:doctor');
 

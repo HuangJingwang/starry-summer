@@ -41,6 +41,7 @@ services:
       S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-http://localhost:9000/starry-summer}
       S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}
       SESSION_SECRET: ${SESSION_SECRET:-change-me-before-production}
+      INTERACTION_HASH_SECRET: ${INTERACTION_HASH_SECRET:-change-me-before-production}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-owner@example.com}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-replace-with-scrypt-hash}
     volumes:

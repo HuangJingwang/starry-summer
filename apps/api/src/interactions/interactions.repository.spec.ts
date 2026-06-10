@@ -69,6 +69,15 @@ describe('InMemoryInteractionsRepository', () => {
     await expect(repository.getLikeCount('note', 'note-1')).resolves.toBe(0);
   });
 
+  test('deduplicates likes per actor and content target', async () => {
+    const repository = new InMemoryInteractionsRepository();
+
+    await expect(repository.likeContent('post', 'post-1', 'actor-1')).resolves.toBe(1);
+    await expect(repository.likeContent('post', 'post-1', 'actor-1')).resolves.toBe(1);
+    await expect(repository.likeContent('post', 'post-1', 'actor-2')).resolves.toBe(2);
+    await expect(repository.likeContent('note', 'note-1', 'actor-1')).resolves.toBe(1);
+  });
+
   test('counts views per content target', async () => {
     const repository = new InMemoryInteractionsRepository();
 
@@ -76,5 +85,14 @@ describe('InMemoryInteractionsRepository', () => {
     await expect(repository.recordView('post', 'post-1')).resolves.toBe(2);
     await expect(repository.getViewCount('post', 'post-1')).resolves.toBe(2);
     await expect(repository.getViewCount('note', 'note-1')).resolves.toBe(0);
+  });
+
+  test('deduplicates views per actor and content target', async () => {
+    const repository = new InMemoryInteractionsRepository();
+
+    await expect(repository.recordView('post', 'post-1', 'viewer-1')).resolves.toBe(1);
+    await expect(repository.recordView('post', 'post-1', 'viewer-1')).resolves.toBe(1);
+    await expect(repository.recordView('post', 'post-1', 'viewer-2')).resolves.toBe(2);
+    await expect(repository.recordView('project', 'project-1', 'viewer-1')).resolves.toBe(1);
   });
 });

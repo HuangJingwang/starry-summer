@@ -109,10 +109,11 @@ describe('PostgresInteractionsRepository mapping', () => {
   });
 
   test('builds like insert SQL with a generated actor hash', () => {
-    const insert = buildLikeInsert('post', '11111111-1111-4111-8111-111111111111', () => 'actor-1');
+    const insert = buildLikeInsert('post', '11111111-1111-4111-8111-111111111111', 'actor-1');
 
     expect(insert.sql).toContain('insert into content_likes');
     expect(insert.sql).toContain('actor_hash');
+    expect(insert.sql).toContain('on conflict do nothing');
     expect(insert.values).toEqual(['post', '11111111-1111-4111-8111-111111111111', 'actor-1']);
   });
 
@@ -129,10 +130,11 @@ describe('PostgresInteractionsRepository mapping', () => {
   });
 
   test('builds view insert SQL with a generated actor hash', () => {
-    const insert = buildViewInsert('post', '11111111-1111-4111-8111-111111111111', () => 'viewer-1');
+    const insert = buildViewInsert('post', '11111111-1111-4111-8111-111111111111', 'viewer-1');
 
     expect(insert.sql).toContain('insert into view_events');
     expect(insert.sql).toContain('actor_hash');
+    expect(insert.sql).toContain('on conflict do nothing');
     expect(insert.values).toEqual(['post', '11111111-1111-4111-8111-111111111111', 'viewer-1']);
   });
 

@@ -15,9 +15,9 @@ export interface InteractionsRepository {
   deleteComment(id: string): Promise<boolean>;
   listAdminComments(filter?: ModerationListFilter): Promise<CommentRecord[]>;
   listApprovedComments(targetType: CommentRecord['targetType'], targetId: string): Promise<CommentRecord[]>;
-  likeContent(targetType: ContentType, targetId: string): Promise<number>;
+  likeContent(targetType: ContentType, targetId: string, actorHash?: string): Promise<number>;
   getLikeCount(targetType: ContentType, targetId: string): Promise<number>;
-  recordView(targetType: ContentType, targetId: string): Promise<number>;
+  recordView(targetType: ContentType, targetId: string, actorHash?: string): Promise<number>;
   getViewCount(targetType: ContentType, targetId: string): Promise<number>;
   createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord>;
   moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord | null>;
@@ -31,8 +31,10 @@ export const INTERACTIONS_REPOSITORY = Symbol('INTERACTIONS_REPOSITORY');
 export class InMemoryInteractionsRepository implements InteractionsRepository {
   private readonly comments = new Map<string, CommentRecord>();
   private readonly guestbookEntries = new Map<string, GuestbookEntryRecord>();
-  private readonly likes = new Map<string, number>();
-  private readonly views = new Map<string, number>();
+  private readonly anonymousLikes = new Map<string, number>();
+  private readonly anonymousViews = new Map<string, number>();
+  private readonly actorLikes = new Map<string, Set<string>>();
+  private readonly actorViews = new Map<string, Set<string>>();
   private nextCommentId = 1;
   private nextGuestbookId = 1;
 
@@ -85,28 +87,48 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
     );
   }
 
-  async likeContent(targetType: ContentType, targetId: string): Promise<number> {
+  async likeContent(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
     const key = this.targetKey(targetType, targetId);
-    const count = (this.likes.get(key) ?? 0) + 1;
-    this.likes.set(key, count);
 
-    return count;
+    if (actorHash) {
+      const actors = this.actorLikes.get(key) ?? new Set<string>();
+      actors.add(actorHash);
+      this.actorLikes.set(key, actors);
+
+      return this.getLikeCount(targetType, targetId);
+    }
+
+    this.anonymousLikes.set(key, (this.anonymousLikes.get(key) ?? 0) + 1);
+
+    return this.getLikeCount(targetType, targetId);
   }
 
   async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
-    return this.likes.get(this.targetKey(targetType, targetId)) ?? 0;
+    const key = this.targetKey(targetType, targetId);
+
+    return (this.anonymousLikes.get(key) ?? 0) + (this.actorLikes.get(key)?.size ?? 0);
   }
 
-  async recordView(targetType: ContentType, targetId: string): Promise<number> {
+  async recordView(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
     const key = this.targetKey(targetType, targetId);
-    const count = (this.views.get(key) ?? 0) + 1;
-    this.views.set(key, count);
 
-    return count;
+    if (actorHash) {
+      const actors = this.actorViews.get(key) ?? new Set<string>();
+      actors.add(actorHash);
+      this.actorViews.set(key, actors);
+
+      return this.getViewCount(targetType, targetId);
+    }
+
+    this.anonymousViews.set(key, (this.anonymousViews.get(key) ?? 0) + 1);
+
+    return this.getViewCount(targetType, targetId);
   }
 
   async getViewCount(targetType: ContentType, targetId: string): Promise<number> {
-    return this.views.get(this.targetKey(targetType, targetId)) ?? 0;
+    const key = this.targetKey(targetType, targetId);
+
+    return (this.anonymousViews.get(key) ?? 0) + (this.actorViews.get(key)?.size ?? 0);
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {

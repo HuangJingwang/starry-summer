@@ -116,7 +116,7 @@ export function buildModerationDelete(table: ModerationTable, id: string): SqlSt
 export function buildLikeInsert(
   targetType: ContentType,
   targetId: string,
-  createActorHash: () => string = randomUUID,
+  actorHashOrCreate: string | (() => string) = randomUUID,
 ): SqlStatement {
   return {
     sql: `
@@ -126,8 +126,9 @@ export function buildLikeInsert(
         actor_hash
       )
       values ($1, $2, $3)
+      on conflict do nothing
     `,
-    values: [targetType, targetId, createActorHash()],
+    values: [targetType, targetId, resolveActorHash(actorHashOrCreate)],
   };
 }
 
@@ -146,7 +147,7 @@ export function buildLikeCountSelect(targetType: ContentType, targetId: string):
 export function buildViewInsert(
   targetType: ContentType,
   targetId: string,
-  createActorHash: () => string = randomUUID,
+  actorHashOrCreate: string | (() => string) = randomUUID,
 ): SqlStatement {
   return {
     sql: `
@@ -156,8 +157,9 @@ export function buildViewInsert(
         actor_hash
       )
       values ($1, $2, $3)
+      on conflict do nothing
     `,
-    values: [targetType, targetId, createActorHash()],
+    values: [targetType, targetId, resolveActorHash(actorHashOrCreate)],
   };
 }
 
@@ -243,8 +245,8 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
     return result.rows.map(mapCommentRow);
   }
 
-  async likeContent(targetType: ContentType, targetId: string): Promise<number> {
-    const statement = buildLikeInsert(targetType, targetId);
+  async likeContent(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
+    const statement = buildLikeInsert(targetType, targetId, actorHash ?? randomUUID);
 
     await this.pool.query(statement.sql, statement.values);
 
@@ -258,8 +260,8 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
     return result.rows[0]?.count ?? 0;
   }
 
-  async recordView(targetType: ContentType, targetId: string): Promise<number> {
-    const statement = buildViewInsert(targetType, targetId);
+  async recordView(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
+    const statement = buildViewInsert(targetType, targetId, actorHash ?? randomUUID);
 
     await this.pool.query(statement.sql, statement.values);
 
@@ -332,4 +334,8 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
 
     return result.rows.map(mapGuestbookRow);
   }
+}
+
+function resolveActorHash(actorHashOrCreate: string | (() => string)): string {
+  return typeof actorHashOrCreate === 'function' ? actorHashOrCreate() : actorHashOrCreate;
 }

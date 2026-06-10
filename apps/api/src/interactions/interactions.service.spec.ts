@@ -150,9 +150,25 @@ describe('InteractionsService', () => {
     expect(await service.getLikeCount('post', 'post-1')).toBe(2);
   });
 
+  test('likes are deduplicated when actor hash is provided', async () => {
+    await service.likeContent('post', 'post-1', 'actor-1');
+    await service.likeContent('post', 'post-1', 'actor-1');
+    await service.likeContent('post', 'post-1', 'actor-2');
+
+    expect(await service.getLikeCount('post', 'post-1')).toBe(2);
+  });
+
   test('views increment per content target', async () => {
     await service.recordView('post', 'post-1');
     await service.recordView('post', 'post-1');
+
+    expect(await service.getViewCount('post', 'post-1')).toBe(2);
+  });
+
+  test('views are deduplicated when actor hash is provided', async () => {
+    await service.recordView('post', 'post-1', 'viewer-1');
+    await service.recordView('post', 'post-1', 'viewer-1');
+    await service.recordView('post', 'post-1', 'viewer-2');
 
     expect(await service.getViewCount('post', 'post-1')).toBe(2);
   });

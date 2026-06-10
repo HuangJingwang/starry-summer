@@ -81,14 +81,25 @@ describe('InteractionsController', () => {
 
   test('validates engagement content targets', () => {
     const controller = new InteractionsController(interactionsService as never);
+    const request = {
+      headers: {
+        'user-agent': 'Mozilla/5.0',
+        'x-forwarded-for': '203.0.113.10, 10.0.0.1',
+      },
+      ip: '127.0.0.1',
+    };
 
-    controller.likeContent('project', 'project-1');
-    controller.recordView('post', 'post-1');
+    controller.likeContent('project', 'project-1', request);
+    controller.recordView('post', 'post-1', request);
 
-    expect(interactionsService.likeContent).toHaveBeenCalledWith('project', 'project-1');
-    expect(interactionsService.recordView).toHaveBeenCalledWith('post', 'post-1');
-    expect(() => controller.likeContent('essay', 'essay-1')).toThrow('Unsupported content type: essay');
-    expect(() => controller.recordView('essay', 'essay-1')).toThrow('Unsupported content type: essay');
+    const likeActorHash = interactionsService.likeContent.mock.calls[0]?.[2];
+    const viewActorHash = interactionsService.recordView.mock.calls[0]?.[2];
+
+    expect(interactionsService.likeContent).toHaveBeenCalledWith('project', 'project-1', expect.stringMatching(/^[a-f0-9]{64}$/));
+    expect(interactionsService.recordView).toHaveBeenCalledWith('post', 'post-1', expect.stringMatching(/^[a-f0-9]{64}$/));
+    expect(likeActorHash).toBe(viewActorHash);
+    expect(() => controller.likeContent('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
+    expect(() => controller.recordView('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
   });
 
   test('deletes moderated submissions from admin routes', () => {

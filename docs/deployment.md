@@ -23,6 +23,7 @@ Required production changes:
 - `PUBLIC_SITE_URL`: `https://example.com`. This value is used by `robots.txt`, `sitemap.xml`, RSS, canonical links, and Open Graph metadata.
 - `ACME_EMAIL`: email used by Caddy for HTTPS certificates.
 - `SESSION_SECRET`: a long random string.
+- `INTERACTION_HASH_SECRET`: a long random string used to anonymize and deduplicate public likes/views.
 - `ADMIN_EMAIL`: owner login email.
 - `ADMIN_PASSWORD_HASH`: a strong password hash generated before first real login.
 - `POSTGRES_PASSWORD`: a strong database password.
