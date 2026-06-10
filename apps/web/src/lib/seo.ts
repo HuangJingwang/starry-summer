@@ -93,6 +93,7 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
 
 export function buildRssXml(settings: SiteSettings, siteUrl: string, content: SiteContentItem[]): string {
   const url = normalizePublicSiteUrl(siteUrl);
+  const lastBuildDate = getLatestContentTimestamp(content);
   const items = content
     .map((item) => {
       const href = `${url}${getContentHref(item)}`;
@@ -111,15 +112,24 @@ export function buildRssXml(settings: SiteSettings, siteUrl: string, content: Si
 
   return [
     '<?xml version="1.0" encoding="UTF-8" ?>',
-    '<rss version="2.0">',
+    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
     '<channel>',
     `<title><![CDATA[${escapeCdata(settings.profile.title)}]]></title>`,
     `<link>${escapeXml(url)}</link>`,
     `<description><![CDATA[${escapeCdata(settings.profile.description)}]]></description>`,
+    `<atom:link href="${escapeXml(`${url}/rss.xml`)}" rel="self" type="application/rss+xml" />`,
+    lastBuildDate ? `<lastBuildDate>${new Date(lastBuildDate).toUTCString()}</lastBuildDate>` : '',
     items,
     '</channel>',
     '</rss>',
   ].join('');
+}
+
+function getLatestContentTimestamp(content: SiteContentItem[]): string {
+  return content
+    .map((item) => item.updatedAt || item.publishedAt)
+    .filter(Boolean)
+    .sort((a, b) => b.localeCompare(a))[0] ?? '';
 }
 
 export function buildSitemapXml(siteUrl: string, content: SiteContentItem[]): string {
