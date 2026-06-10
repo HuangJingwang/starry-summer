@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest';
 import {
   buildCommentInsert,
   buildGuestbookInsert,
+  buildLikeCountSelect,
+  buildLikeInsert,
   buildModerationUpdate,
   mapCommentRow,
   mapGuestbookRow,
@@ -89,6 +91,26 @@ describe('PostgresInteractionsRepository mapping', () => {
     expect(buildModerationUpdate('guestbook_entries', 'entry-1', 'rejected')).toEqual({
       sql: 'update guestbook_entries set status = $2, moderated_at = now() where id = $1 returning *',
       values: ['entry-1', 'rejected'],
+    });
+  });
+
+  test('builds like insert SQL with a generated actor hash', () => {
+    const insert = buildLikeInsert('post', '11111111-1111-4111-8111-111111111111', () => 'actor-1');
+
+    expect(insert.sql).toContain('insert into content_likes');
+    expect(insert.sql).toContain('actor_hash');
+    expect(insert.values).toEqual(['post', '11111111-1111-4111-8111-111111111111', 'actor-1']);
+  });
+
+  test('builds like count SQL and values', () => {
+    expect(buildLikeCountSelect('post', '11111111-1111-4111-8111-111111111111')).toEqual({
+      sql: `
+      select count(*)::int as count
+      from content_likes
+      where target_type = $1
+        and target_id = $2
+    `,
+      values: ['post', '11111111-1111-4111-8111-111111111111'],
     });
   });
 });

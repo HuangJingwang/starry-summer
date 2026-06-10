@@ -37,4 +37,13 @@ describe('InMemoryInteractionsRepository', () => {
     await expect(repository.moderateComment('missing', 'approved')).resolves.toBeNull();
     await expect(repository.moderateGuestbookEntry('missing', 'approved')).resolves.toBeNull();
   });
+
+  test('counts likes per content target', async () => {
+    const repository = new InMemoryInteractionsRepository();
+
+    await expect(repository.likeContent('post', 'post-1')).resolves.toBe(1);
+    await expect(repository.likeContent('post', 'post-1')).resolves.toBe(2);
+    await expect(repository.getLikeCount('post', 'post-1')).resolves.toBe(2);
+    await expect(repository.getLikeCount('note', 'note-1')).resolves.toBe(0);
+  });
 });

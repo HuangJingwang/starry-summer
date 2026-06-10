@@ -1,6 +1,7 @@
 import pg from 'pg';
+import { randomUUID } from 'node:crypto';
 
-import type { ModerationStatus } from '@starry-summer/shared';
+import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import type { InteractionsRepository } from './interactions.repository';
 import type {
@@ -34,6 +35,10 @@ export interface GuestbookEntryRow {
 export interface SqlStatement {
   sql: string;
   values: unknown[];
+}
+
+interface LikeCountRow {
+  count: number;
 }
 
 type ModerationTable = 'comments' | 'guestbook_entries';
@@ -101,6 +106,36 @@ export function buildModerationUpdate(
   };
 }
 
+export function buildLikeInsert(
+  targetType: ContentType,
+  targetId: string,
+  createActorHash: () => string = randomUUID,
+): SqlStatement {
+  return {
+    sql: `
+      insert into content_likes (
+        target_type,
+        target_id,
+        actor_hash
+      )
+      values ($1, $2, $3)
+    `,
+    values: [targetType, targetId, createActorHash()],
+  };
+}
+
+export function buildLikeCountSelect(targetType: ContentType, targetId: string): SqlStatement {
+  return {
+    sql: `
+      select count(*)::int as count
+      from content_likes
+      where target_type = $1
+        and target_id = $2
+    `,
+    values: [targetType, targetId],
+  };
+}
+
 export class PostgresInteractionsRepository implements InteractionsRepository {
   private readonly pool: pg.Pool;
 
@@ -162,6 +197,21 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
     );
 
     return result.rows.map(mapCommentRow);
+  }
+
+  async likeContent(targetType: ContentType, targetId: string): Promise<number> {
+    const statement = buildLikeInsert(targetType, targetId);
+
+    await this.pool.query(statement.sql, statement.values);
+
+    return this.getLikeCount(targetType, targetId);
+  }
+
+  async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
+    const statement = buildLikeCountSelect(targetType, targetId);
+    const result = await this.pool.query<LikeCountRow>(statement.sql, statement.values);
+
+    return result.rows[0]?.count ?? 0;
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {

@@ -39,8 +39,6 @@ export interface ModerationListFilter {
 
 @Injectable()
 export class InteractionsService {
-  private readonly likes = new Map<string, number>();
-
   constructor(
     @Inject(INTERACTIONS_REPOSITORY)
     private readonly repository: InteractionsRepository,
@@ -72,15 +70,11 @@ export class InteractionsService {
   }
 
   async likeContent(targetType: ContentType, targetId: string): Promise<number> {
-    const key = this.likeKey(targetType, targetId);
-    const count = (this.likes.get(key) ?? 0) + 1;
-    this.likes.set(key, count);
-
-    return count;
+    return this.repository.likeContent(targetType, targetId);
   }
 
   async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
-    return this.likes.get(this.likeKey(targetType, targetId)) ?? 0;
+    return this.repository.getLikeCount(targetType, targetId);
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
@@ -103,9 +97,5 @@ export class InteractionsService {
 
   async listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]> {
     return this.repository.listApprovedGuestbookEntries();
-  }
-
-  private likeKey(targetType: ContentType, targetId: string): string {
-    return `${targetType}:${targetId}`;
   }
 }

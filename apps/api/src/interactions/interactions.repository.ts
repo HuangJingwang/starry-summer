@@ -1,4 +1,4 @@
-import type { ModerationStatus } from '@starry-summer/shared';
+import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 import { isVisibleSubmission } from '@starry-summer/shared';
 
 import type {
@@ -14,6 +14,8 @@ export interface InteractionsRepository {
   moderateComment(id: string, status: ModerationStatus): Promise<CommentRecord | null>;
   listAdminComments(filter?: ModerationListFilter): Promise<CommentRecord[]>;
   listApprovedComments(targetType: CommentRecord['targetType'], targetId: string): Promise<CommentRecord[]>;
+  likeContent(targetType: ContentType, targetId: string): Promise<number>;
+  getLikeCount(targetType: ContentType, targetId: string): Promise<number>;
   createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord>;
   moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord | null>;
   listAdminGuestbookEntries(filter?: ModerationListFilter): Promise<GuestbookEntryRecord[]>;
@@ -25,6 +27,7 @@ export const INTERACTIONS_REPOSITORY = Symbol('INTERACTIONS_REPOSITORY');
 export class InMemoryInteractionsRepository implements InteractionsRepository {
   private readonly comments = new Map<string, CommentRecord>();
   private readonly guestbookEntries = new Map<string, GuestbookEntryRecord>();
+  private readonly likes = new Map<string, number>();
   private nextCommentId = 1;
   private nextGuestbookId = 1;
 
@@ -73,6 +76,18 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
     );
   }
 
+  async likeContent(targetType: ContentType, targetId: string): Promise<number> {
+    const key = this.likeKey(targetType, targetId);
+    const count = (this.likes.get(key) ?? 0) + 1;
+    this.likes.set(key, count);
+
+    return count;
+  }
+
+  async getLikeCount(targetType: ContentType, targetId: string): Promise<number> {
+    return this.likes.get(this.likeKey(targetType, targetId)) ?? 0;
+  }
+
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
     const entry: GuestbookEntryRecord = {
       id: String(this.nextGuestbookId++),
@@ -107,6 +122,10 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
 
   async listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]> {
     return [...this.guestbookEntries.values()].filter(isVisibleSubmission);
+  }
+
+  private likeKey(targetType: ContentType, targetId: string): string {
+    return `${targetType}:${targetId}`;
   }
 }
 
