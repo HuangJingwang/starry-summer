@@ -18,6 +18,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const bodyHtml = await renderMarkdown(markdown);
   const tableOfContents = buildContentTableOfContents(markdown);
   const readingTime = estimateReadingTime(markdown);
+  const updatedAt = item.updatedAt && item.updatedAt !== item.publishedAt ? item.updatedAt : undefined;
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="Comments">
       <h2>评论</h2>
@@ -39,6 +40,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       ) : null}
       <div className="detail__meta">
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
+        {updatedAt ? <time dateTime={updatedAt}>Updated {updatedAt}</time> : null}
         <span>{readingTime}</span>
         <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>
         {item.sourceType === 'repost' && item.sourceUrl ? (

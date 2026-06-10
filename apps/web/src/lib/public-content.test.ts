@@ -106,6 +106,7 @@ describe('public content API helpers', () => {
       allowComments: false,
       viewCount: 12,
       likeCount: 3,
+      updatedAt: '2026-06-10',
       project: {
         status: 'completed',
         links: {

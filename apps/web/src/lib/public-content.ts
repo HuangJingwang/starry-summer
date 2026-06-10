@@ -97,6 +97,7 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     status: record.status,
     visibility: record.visibility ?? 'public',
     publishedAt: dateOnly(record.publishedAt) || dateOnly(record.updatedAt) || dateOnly(record.createdAt),
+    updatedAt: dateOnly(record.updatedAt),
     summary: record.summary ?? '',
     slug: record.slug,
     featured: record.featured ?? false,

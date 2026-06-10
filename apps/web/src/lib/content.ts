@@ -7,6 +7,7 @@ export interface SiteContentItem {
   status: ContentStatus;
   visibility: ContentVisibility;
   publishedAt: string;
+  updatedAt?: string;
   summary?: string;
   bodyMarkdown?: string;
   sourceType?: ContentSourceType;
@@ -324,6 +325,7 @@ export const seedContent: SiteContentItem[] = [
     status: 'published',
     visibility: 'public',
     publishedAt: '2026-06-10',
+    updatedAt: '2026-06-11',
     summary: '从博客、笔记、日常和项目四条线开始，把写作和作品沉淀成一个可部署的平台。',
     bodyMarkdown: [
       '## 为什么要做成系统',
