@@ -24,6 +24,8 @@ services:
       CONTENT_REPOSITORY_DRIVER: ${CONTENT_REPOSITORY_DRIVER:-postgres}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       STORAGE_DRIVER: ${STORAGE_DRIVER:-local}
+      LOCAL_UPLOAD_DIR: ${LOCAL_UPLOAD_DIR:-/app/uploads}
+      LOCAL_UPLOAD_PUBLIC_URL: ${LOCAL_UPLOAD_PUBLIC_URL:-/uploads}
       S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
       S3_REGION: ${S3_REGION:-us-east-1}
       S3_BUCKET: ${S3_BUCKET:-starry-summer}
@@ -31,7 +33,9 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
       SESSION_SECRET: ${SESSION_SECRET:-change-me-before-production}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-owner@example.com}
-      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-replace-with-argon2id-hash}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-replace-with-scrypt-hash}
+    volumes:
+      - api-uploads:/app/uploads
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -109,3 +113,4 @@ volumes:
   minio-data:
   caddy-data:
   caddy-config:
+  api-uploads:

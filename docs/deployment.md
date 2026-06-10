@@ -85,6 +85,7 @@ MinIO data:
 
 - For self-hosted MinIO, back up the `minio-data` Docker volume or configure object replication.
 - For cloud S3/OSS, enable provider lifecycle and backup policies.
+- Back up the `api-uploads` Docker volume when `STORAGE_DRIVER=local`.
 
 Markdown export:
 

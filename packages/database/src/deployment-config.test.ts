@@ -36,4 +36,20 @@ describe('deployment configuration', () => {
     expect(deployment).toContain('npm run auth:hash-password -- "your strong password"');
     expect(deployment).toContain('npm run auth:secret');
   });
+
+  test('persists and exposes local uploads in Docker Compose', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
+    const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
+    const caddy = await readFile(join(repoRoot, 'infra/caddy/Caddyfile'), 'utf8');
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(compose).toContain('LOCAL_UPLOAD_DIR: ${LOCAL_UPLOAD_DIR:-/app/uploads}');
+    expect(compose).toContain('LOCAL_UPLOAD_PUBLIC_URL: ${LOCAL_UPLOAD_PUBLIC_URL:-/uploads}');
+    expect(compose).toContain('- api-uploads:/app/uploads');
+    expect(compose).toContain('api-uploads:');
+    expect(caddy).toContain('handle /uploads/*');
+    expect(env).toContain('LOCAL_UPLOAD_DIR=/app/uploads');
+    expect(env).toContain('LOCAL_UPLOAD_PUBLIC_URL=/uploads');
+    expect(deployment).toContain('Back up the `api-uploads` Docker volume when `STORAGE_DRIVER=local`.');
+  });
 });
