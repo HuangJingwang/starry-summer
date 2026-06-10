@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { INTERACTIONS_REPOSITORY, type InteractionsRepository } from './interactions.repository.js';
@@ -37,6 +37,9 @@ export interface ModerationListFilter {
   status?: ModerationStatus;
 }
 
+const MAX_AUTHOR_NAME_LENGTH = 80;
+const MAX_SUBMISSION_BODY_LENGTH = 2000;
+
 @Injectable()
 export class InteractionsService {
   constructor(
@@ -45,7 +48,10 @@ export class InteractionsService {
   ) {}
 
   async createComment(input: CreateCommentInput): Promise<CommentRecord> {
-    return this.repository.createComment(input);
+    return this.repository.createComment({
+      ...input,
+      ...normalizePublicSubmission(input),
+    });
   }
 
   async moderateComment(id: string, status: ModerationStatus): Promise<CommentRecord> {
@@ -86,7 +92,7 @@ export class InteractionsService {
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
-    return this.repository.createGuestbookEntry(input);
+    return this.repository.createGuestbookEntry(normalizePublicSubmission(input));
   }
 
   async moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord> {
@@ -106,4 +112,27 @@ export class InteractionsService {
   async listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]> {
     return this.repository.listApprovedGuestbookEntries();
   }
+}
+
+function normalizePublicSubmission<T extends { authorName: string; body: string }>(input: T): Pick<T, 'authorName' | 'body'> {
+  const authorName = input.authorName.trim();
+  const body = input.body.trim();
+
+  if (!authorName) {
+    throw new BadRequestException('Author name is required');
+  }
+
+  if (!body) {
+    throw new BadRequestException('Submission body is required');
+  }
+
+  if (authorName.length > MAX_AUTHOR_NAME_LENGTH) {
+    throw new BadRequestException(`Author name must be at most ${MAX_AUTHOR_NAME_LENGTH} characters`);
+  }
+
+  if (body.length > MAX_SUBMISSION_BODY_LENGTH) {
+    throw new BadRequestException(`Submission body must be at most ${MAX_SUBMISSION_BODY_LENGTH} characters`);
+  }
+
+  return { authorName, body };
 }

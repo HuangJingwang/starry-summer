@@ -16,12 +16,54 @@ describe('InteractionsService', () => {
     const comment = await service.createComment({
       targetType: 'post',
       targetId: 'post-1',
-      authorName: 'Reader',
-      body: 'Nice writing.',
+      authorName: ' Reader ',
+      body: ' Nice writing. ',
     });
 
     expect(comment.status).toBe('pending');
+    expect(comment.authorName).toBe('Reader');
+    expect(comment.body).toBe('Nice writing.');
     expect(await service.listApprovedComments('post', 'post-1')).toEqual([]);
+  });
+
+  test('rejects empty comments before moderation', async () => {
+    await expect(
+      service.createComment({
+        targetType: 'post',
+        targetId: 'post-1',
+        authorName: ' ',
+        body: 'Nice writing.',
+      }),
+    ).rejects.toThrow('Author name is required');
+
+    await expect(
+      service.createComment({
+        targetType: 'post',
+        targetId: 'post-1',
+        authorName: 'Reader',
+        body: ' ',
+      }),
+    ).rejects.toThrow('Submission body is required');
+  });
+
+  test('rejects overly long comments', async () => {
+    await expect(
+      service.createComment({
+        targetType: 'post',
+        targetId: 'post-1',
+        authorName: 'A'.repeat(81),
+        body: 'Nice writing.',
+      }),
+    ).rejects.toThrow('Author name must be at most 80 characters');
+
+    await expect(
+      service.createComment({
+        targetType: 'post',
+        targetId: 'post-1',
+        authorName: 'Reader',
+        body: 'B'.repeat(2001),
+      }),
+    ).rejects.toThrow('Submission body must be at most 2000 characters');
   });
 
   test('approved comments become visible', async () => {
@@ -74,12 +116,30 @@ describe('InteractionsService', () => {
 
   test('guestbook entries are pending by default', async () => {
     const entry = await service.createGuestbookEntry({
-      authorName: 'Visitor',
-      body: 'Hello from the guestbook.',
+      authorName: ' Visitor ',
+      body: ' Hello from the guestbook. ',
     });
 
     expect(entry.status).toBe('pending');
+    expect(entry.authorName).toBe('Visitor');
+    expect(entry.body).toBe('Hello from the guestbook.');
     expect(await service.listApprovedGuestbookEntries()).toEqual([]);
+  });
+
+  test('rejects invalid guestbook entries before moderation', async () => {
+    await expect(
+      service.createGuestbookEntry({
+        authorName: '',
+        body: 'Hello from the guestbook.',
+      }),
+    ).rejects.toThrow('Author name is required');
+
+    await expect(
+      service.createGuestbookEntry({
+        authorName: 'Visitor',
+        body: 'B'.repeat(2001),
+      }),
+    ).rejects.toThrow('Submission body must be at most 2000 characters');
   });
 
   test('moderates and lists guestbook entries for admin review', async () => {
