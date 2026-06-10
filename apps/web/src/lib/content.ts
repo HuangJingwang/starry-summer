@@ -8,6 +8,7 @@ export interface SiteContentItem {
   visibility: ContentVisibility;
   publishedAt: string;
   summary?: string;
+  bodyMarkdown?: string;
   slug?: string;
   featured?: boolean;
   categories?: string[];
@@ -171,6 +172,17 @@ export const seedContent: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-10',
     summary: '从博客、笔记、日常和项目四条线开始，把写作和作品沉淀成一个可部署的平台。',
+    bodyMarkdown: [
+      '## 为什么要做成系统',
+      '',
+      '个人博客不只是几篇文章的展示页。它应该能持续收纳文章、笔记、日常和项目，让内容随着时间自然生长。',
+      '',
+      '- 文章负责沉淀完整思考',
+      '- 笔记负责记录过程和片段',
+      '- 项目负责展示作品和技术路线',
+      '',
+      '这个站点会优先保证内容所有权、部署稳定性和后台写作效率。',
+    ].join('\n'),
     slug: 'personal-content-platform',
     featured: true,
     categories: ['Writing', 'Platform'],
@@ -186,6 +198,13 @@ export const seedContent: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-09',
     summary: '数据库负责运行时体验，Markdown 导入导出负责长期所有权。',
+    bodyMarkdown: [
+      '## 内容要能带走',
+      '',
+      '数据库适合检索、权限和互动，但长期内容不能只锁在数据库里。',
+      '',
+      'Markdown 是内容的逃生门：它足够朴素，也足够稳定。后续导入导出会围绕 frontmatter 和正文双向转换展开。',
+    ].join('\n'),
     slug: 'markdown-ownership',
     categories: ['Notes', 'Writing'],
     tags: ['Markdown', 'Archive'],
@@ -200,6 +219,13 @@ export const seedContent: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-08',
     summary: '个人内容平台：文章、笔记、日常、项目、评论、留言和云服务器部署。',
+    bodyMarkdown: [
+      '## 平台目标',
+      '',
+      'Starry Summer 面向单人长期使用：公网展示内容，后台维护文章、笔记、项目和互动。',
+      '',
+      '当前技术栈选择 Next.js、NestJS、PostgreSQL 和 Docker Compose，方便先在一台云服务器上稳定运行，再按规模逐步拆分。',
+    ].join('\n'),
     slug: 'starry-summer',
     featured: true,
     categories: ['Projects', 'Platform'],
@@ -215,6 +241,7 @@ export const seedContent: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-07',
     summary: '一个能长期长大的个人平台，第一天最重要的是边界清楚。',
+    bodyMarkdown: '今天先把可部署的边界打清楚：公开页面、后台入口、API、数据库和部署流程各自独立，后面扩展才不会乱。',
     slug: 'first-foundation',
     categories: ['Daily'],
     tags: ['Daily'],
@@ -229,6 +256,7 @@ export const seedContent: SiteContentItem[] = [
     visibility: 'public',
     publishedAt: '2026-06-06',
     summary: '一个用于沉淀写作、项目和日常记录的个人内容平台。',
+    bodyMarkdown: 'Starry Summer 是一个个人内容系统，用来记录文章、笔记、日常和项目，也保留评论、留言和导出能力。',
     slug: 'about',
     categories: ['Site'],
     tags: ['About'],

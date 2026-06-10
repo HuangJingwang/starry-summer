@@ -13,6 +13,7 @@ export interface PublicContentApiRecord {
   featured?: boolean;
   categories?: string[];
   tags?: string[];
+  bodyMarkdown?: string;
   viewCount?: number;
   likeCount?: number;
   createdAt?: string;
@@ -75,6 +76,7 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     featured: record.featured ?? false,
     categories: record.categories ?? [],
     tags: record.tags ?? [],
+    bodyMarkdown: record.bodyMarkdown ?? '',
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
   };

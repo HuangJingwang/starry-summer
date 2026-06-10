@@ -350,6 +350,66 @@ textarea {
   padding: 22px;
 }
 
+.detail__body > :first-child {
+  margin-top: 0;
+}
+
+.detail__body > :last-child {
+  margin-bottom: 0;
+}
+
+.detail__body h2,
+.detail__body h3 {
+  line-height: 1.25;
+  margin-top: 1.4em;
+}
+
+.detail-comments {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.detail-comments h2 {
+  margin: 0;
+}
+
+.detail-comments__list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.detail-comments__list li,
+.detail-comments__empty {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 0;
+  padding: 16px;
+}
+
+.detail-comments__list li div {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.detail-comments__list strong {
+  color: var(--ink);
+}
+
+.detail-comments__list p {
+  line-height: 1.7;
+  margin: 10px 0 0;
+}
+
 .adjacent-content {
   display: grid;
   gap: 14px;

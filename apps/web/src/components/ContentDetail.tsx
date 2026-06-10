@@ -1,5 +1,8 @@
+import { renderMarkdown } from '@starry-summer/markdown';
+
 import { getContentHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import type { CommentTargetType } from '@/lib/interaction-client';
+import { loadApprovedComments } from '@/lib/public-comments';
 import { CommentForm } from './CommentForm';
 import { LikeButton } from './LikeButton';
 
@@ -7,9 +10,29 @@ function isCommentTargetType(type: SiteContentItem['type']): type is CommentTarg
   return type === 'post' || type === 'note' || type === 'project';
 }
 
-export function ContentDetail({ item, adjacent }: { item: SiteContentItem; adjacent?: AdjacentContent }) {
-  const commentForm = isCommentTargetType(item.type) ? (
-    <CommentForm targetType={item.type} targetId={item.id} />
+export async function ContentDetail({ item, adjacent }: { item: SiteContentItem; adjacent?: AdjacentContent }) {
+  const bodyHtml = await renderMarkdown(item.bodyMarkdown || item.summary || '');
+  const comments = isCommentTargetType(item.type) ? await loadApprovedComments(item.type, item.id) : [];
+  const commentSection = isCommentTargetType(item.type) ? (
+    <section className="detail-comments" aria-label="Comments">
+      <h2>评论</h2>
+      {comments.length > 0 ? (
+        <ol className="detail-comments__list">
+          {comments.map((comment) => (
+            <li key={comment.id}>
+              <div>
+                <strong>{comment.authorName || '匿名读者'}</strong>
+                {comment.createdAt ? <time dateTime={comment.createdAt}>{comment.createdAt.slice(0, 10)}</time> : null}
+              </div>
+              <p>{comment.body}</p>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="detail-comments__empty">暂无公开评论。</p>
+      )}
+      <CommentForm targetType={item.type} targetId={item.id} />
+    </section>
   ) : null;
 
   return (
@@ -22,11 +45,7 @@ export function ContentDetail({ item, adjacent }: { item: SiteContentItem; adjac
         <span>{item.viewCount ?? 0} views</span>
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>
-      <div className="detail__body">
-        <p>
-          这是当前内容详情页的基础形态。后续会接入 API 中的 Markdown 渲染结果，并展示目录、代码高亮、评论和点赞。
-        </p>
-      </div>
+      <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
       {adjacent ? (
         <nav className="adjacent-content" aria-label="Adjacent content">
           {adjacent.previous ? (
@@ -47,7 +66,7 @@ export function ContentDetail({ item, adjacent }: { item: SiteContentItem; adjac
           )}
         </nav>
       ) : null}
-      {commentForm}
+      {commentSection}
     </article>
   );
 }

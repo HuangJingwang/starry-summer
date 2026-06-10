@@ -11,6 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@starry-summer/markdown": "file:../../packages/markdown",
     "@starry-summer/shared": "file:../../packages/shared",
     "next": "^16.0.8",
     "react": "^19.2.1",

@@ -2,6 +2,7 @@ FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/package.json
+COPY packages/markdown/package.json packages/markdown/package.json
 COPY packages/shared/package.json packages/shared/package.json
 RUN npm ci
 

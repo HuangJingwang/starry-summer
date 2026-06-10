@@ -240,19 +240,25 @@ const taxonomyConfig: Record<TaxonomyKind, { table: string; joinTable: string; j
   },
 };
 
-function buildContentSelect(whereClause: string, orderClause = ''): string {
+export function buildContentSelect(whereClause: string, orderClause = ''): string {
   return `
     select
       ci.*,
+      ci.like_count + coalesce(like_counts.count, 0) as like_count,
       coalesce(array_remove(array_agg(distinct c.name), null), '{}') as categories,
       coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags
     from content_items ci
+    left join (
+      select target_type, target_id, count(*)::int as count
+      from content_likes
+      group by target_type, target_id
+    ) like_counts on like_counts.target_type = ci.type and like_counts.target_id = ci.id
     left join content_categories cc on cc.content_id = ci.id
     left join categories c on c.id = cc.category_id
     left join content_tags ct on ct.content_id = ci.id
     left join tags t on t.id = ct.tag_id
     ${whereClause}
-    group by ci.id
+    group by ci.id, like_counts.count
     ${orderClause}
   `;
 }

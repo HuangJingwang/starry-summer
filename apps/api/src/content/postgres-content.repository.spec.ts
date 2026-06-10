@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import {
   buildContentInsert,
+  buildContentSelect,
   buildContentUpdate,
   mapContentRow,
   type ContentItemRow,
@@ -114,5 +115,16 @@ describe('PostgresContentRepository mapping', () => {
       'archived',
       '2026-06-10T02:00:00.000Z',
     ]);
+  });
+
+  test('builds content selects with persisted like counts', () => {
+    const select = buildContentSelect('where ci.status = $1', 'order by ci.published_at desc');
+
+    expect(select).toContain('left join');
+    expect(select).toContain('content_likes');
+    expect(select).toContain('ci.like_count + coalesce(like_counts.count, 0) as like_count');
+    expect(select).toContain('group by ci.id, like_counts.count');
+    expect(select).toContain('where ci.status = $1');
+    expect(select).toContain('order by ci.published_at desc');
   });
 });
