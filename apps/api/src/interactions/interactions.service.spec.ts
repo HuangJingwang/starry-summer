@@ -130,6 +130,19 @@ describe('InteractionsService', () => {
     expect((await service.listAdminComments()).map((comment) => comment.id)).toEqual([approved.id, pending.id]);
   });
 
+  test('deletes comments from admin moderation', async () => {
+    const comment = await service.createComment({
+      targetType: 'post',
+      targetId: 'post-1',
+      authorName: 'Reader',
+      body: 'Delete me.',
+    });
+
+    await expect(service.deleteComment(comment.id)).resolves.toBeUndefined();
+    expect(await service.listAdminComments()).toEqual([]);
+    await expect(service.deleteComment(comment.id)).rejects.toThrow(`Comment ${comment.id} was not found`);
+  });
+
   test('likes increment per content target', async () => {
     await service.likeContent('post', 'post-1');
     await service.likeContent('post', 'post-1');
@@ -187,5 +200,16 @@ describe('InteractionsService', () => {
     expect(await service.listApprovedGuestbookEntries()).toEqual([expect.objectContaining({ id: approved.id })]);
     expect((await service.listAdminGuestbookEntries({ status: 'pending' })).map((entry) => entry.id)).toEqual([pending.id]);
     expect((await service.listAdminGuestbookEntries()).map((entry) => entry.id)).toEqual([approved.id, pending.id]);
+  });
+
+  test('deletes guestbook entries from admin moderation', async () => {
+    const entry = await service.createGuestbookEntry({
+      authorName: 'Visitor',
+      body: 'Delete this.',
+    });
+
+    await expect(service.deleteGuestbookEntry(entry.id)).resolves.toBeUndefined();
+    expect(await service.listAdminGuestbookEntries()).toEqual([]);
+    await expect(service.deleteGuestbookEntry(entry.id)).rejects.toThrow(`Guestbook entry ${entry.id} was not found`);
   });
 });

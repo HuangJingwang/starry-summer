@@ -6,6 +6,7 @@ import type { ModerationStatus } from '@starry-summer/shared';
 import {
   buildAdminModerationListRequest,
   buildModerationActionRequest,
+  buildModerationDeleteRequest,
   normalizeModerationRecord,
   type ModerationRecord,
   type ModerationResource,
@@ -79,6 +80,23 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
     }
   }
 
+  async function deleteRecord(id: string) {
+    if (!window.confirm('Permanently delete this submission?')) {
+      return;
+    }
+
+    setState('submitting');
+    setMessage('');
+
+    try {
+      await send(buildModerationDeleteRequest(resource, id));
+      await load(status);
+    } catch {
+      setState('error');
+      setMessage('删除失败，请确认已登录且 API 服务可用。');
+    }
+  }
+
   return (
     <div className="moderation-manager">
       <div className="moderation-toolbar" role="tablist" aria-label="Moderation status">
@@ -117,6 +135,9 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
                   {action.label}
                 </button>
               ))}
+              <button type="button" disabled={state === 'submitting'} onClick={() => deleteRecord(record.id)}>
+                Delete
+              </button>
             </div>
           </article>
         ))}

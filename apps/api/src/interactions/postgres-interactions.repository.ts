@@ -106,6 +106,13 @@ export function buildModerationUpdate(
   };
 }
 
+export function buildModerationDelete(table: ModerationTable, id: string): SqlStatement {
+  return {
+    sql: `delete from ${table} where id = $1 returning id`,
+    values: [id],
+  };
+}
+
 export function buildLikeInsert(
   targetType: ContentType,
   targetId: string,
@@ -192,6 +199,13 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
     return result.rows[0] ? mapCommentRow(result.rows[0]) : null;
   }
 
+  async deleteComment(id: string): Promise<boolean> {
+    const statement = buildModerationDelete('comments', id);
+    const result = await this.pool.query(statement.sql, statement.values);
+
+    return (result.rowCount ?? 0) > 0;
+  }
+
   async listAdminComments(filter: ModerationListFilter = {}): Promise<CommentRecord[]> {
     const values: unknown[] = [];
     const statusClause = filter.status ? 'where status = $1' : '';
@@ -276,6 +290,13 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
     const result = await this.pool.query<GuestbookEntryRow>(statement.sql, statement.values);
 
     return result.rows[0] ? mapGuestbookRow(result.rows[0]) : null;
+  }
+
+  async deleteGuestbookEntry(id: string): Promise<boolean> {
+    const statement = buildModerationDelete('guestbook_entries', id);
+    const result = await this.pool.query(statement.sql, statement.values);
+
+    return (result.rowCount ?? 0) > 0;
   }
 
   async listAdminGuestbookEntries(filter: ModerationListFilter = {}): Promise<GuestbookEntryRecord[]> {

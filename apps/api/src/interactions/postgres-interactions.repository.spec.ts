@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import {
   buildCommentInsert,
+  buildModerationDelete,
   buildGuestbookInsert,
   buildLikeCountSelect,
   buildLikeInsert,
@@ -93,6 +94,17 @@ describe('PostgresInteractionsRepository mapping', () => {
     expect(buildModerationUpdate('guestbook_entries', 'entry-1', 'rejected')).toEqual({
       sql: 'update guestbook_entries set status = $2, moderated_at = now() where id = $1 returning *',
       values: ['entry-1', 'rejected'],
+    });
+  });
+
+  test('builds moderation deletes for known interaction tables', () => {
+    expect(buildModerationDelete('comments', 'comment-1')).toEqual({
+      sql: 'delete from comments where id = $1 returning id',
+      values: ['comment-1'],
+    });
+    expect(buildModerationDelete('guestbook_entries', 'entry-1')).toEqual({
+      sql: 'delete from guestbook_entries where id = $1 returning id',
+      values: ['entry-1'],
     });
   });
 

@@ -14,6 +14,8 @@ describe('InteractionsController', () => {
     listApprovedGuestbookEntries: vi.fn(),
     listAdminGuestbookEntries: vi.fn(),
     moderateGuestbookEntry: vi.fn(),
+    deleteComment: vi.fn(),
+    deleteGuestbookEntry: vi.fn(),
   };
 
   beforeEach(() => {
@@ -87,5 +89,15 @@ describe('InteractionsController', () => {
     expect(interactionsService.recordView).toHaveBeenCalledWith('post', 'post-1');
     expect(() => controller.likeContent('essay', 'essay-1')).toThrow('Unsupported content type: essay');
     expect(() => controller.recordView('essay', 'essay-1')).toThrow('Unsupported content type: essay');
+  });
+
+  test('deletes moderated submissions from admin routes', () => {
+    const controller = new InteractionsController(interactionsService as never);
+
+    controller.deleteComment('comment-1');
+    controller.deleteGuestbookEntry('entry-1');
+
+    expect(interactionsService.deleteComment).toHaveBeenCalledWith('comment-1');
+    expect(interactionsService.deleteGuestbookEntry).toHaveBeenCalledWith('entry-1');
   });
 });

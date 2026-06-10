@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
@@ -33,6 +33,12 @@ export class InteractionsController {
   @UseGuards(AdminAuthGuard)
   moderateComment(@Param('id') id: string, @Body('status') status: string) {
     return this.interactionsService.moderateComment(id, parseModerationStatus(status));
+  }
+
+  @Delete('admin/comments/:id')
+  @UseGuards(AdminAuthGuard)
+  deleteComment(@Param('id') id: string) {
+    return this.interactionsService.deleteComment(id);
   }
 
   @Get('admin/comments')
@@ -74,6 +80,12 @@ export class InteractionsController {
   @UseGuards(AdminAuthGuard)
   moderateGuestbookEntry(@Param('id') id: string, @Body('status') status: string) {
     return this.interactionsService.moderateGuestbookEntry(id, parseModerationStatus(status));
+  }
+
+  @Delete('admin/guestbook/:id')
+  @UseGuards(AdminAuthGuard)
+  deleteGuestbookEntry(@Param('id') id: string) {
+    return this.interactionsService.deleteGuestbookEntry(id);
   }
 }
 

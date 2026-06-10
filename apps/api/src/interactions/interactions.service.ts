@@ -76,6 +76,14 @@ export class InteractionsService {
     return comment;
   }
 
+  async deleteComment(id: string): Promise<void> {
+    const deleted = await this.repository.deleteComment(id);
+
+    if (!deleted) {
+      throw new NotFoundException(`Comment ${id} was not found`);
+    }
+  }
+
   async listAdminComments(filter: ModerationListFilter = {}): Promise<CommentRecord[]> {
     return this.repository.listAdminComments(filter);
   }
@@ -115,6 +123,14 @@ export class InteractionsService {
     }
 
     return entry;
+  }
+
+  async deleteGuestbookEntry(id: string): Promise<void> {
+    const deleted = await this.repository.deleteGuestbookEntry(id);
+
+    if (!deleted) {
+      throw new NotFoundException(`Guestbook entry ${id} was not found`);
+    }
   }
 
   async listAdminGuestbookEntries(filter: ModerationListFilter = {}): Promise<GuestbookEntryRecord[]> {

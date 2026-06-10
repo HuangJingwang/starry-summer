@@ -38,6 +38,28 @@ describe('InMemoryInteractionsRepository', () => {
     await expect(repository.moderateGuestbookEntry('missing', 'approved')).resolves.toBeNull();
   });
 
+  test('deletes moderated submissions permanently', async () => {
+    const repository = new InMemoryInteractionsRepository();
+    const comment = await repository.createComment({
+      targetType: 'post',
+      targetId: 'post-1',
+      authorName: 'Reader',
+      body: 'Remove me.',
+    });
+    const entry = await repository.createGuestbookEntry({
+      authorName: 'Visitor',
+      body: 'Remove this entry.',
+    });
+
+    await expect(repository.deleteComment(comment.id)).resolves.toBe(true);
+    await expect(repository.deleteGuestbookEntry(entry.id)).resolves.toBe(true);
+
+    expect(await repository.listAdminComments()).toEqual([]);
+    expect(await repository.listAdminGuestbookEntries()).toEqual([]);
+    await expect(repository.deleteComment(comment.id)).resolves.toBe(false);
+    await expect(repository.deleteGuestbookEntry(entry.id)).resolves.toBe(false);
+  });
+
   test('counts likes per content target', async () => {
     const repository = new InMemoryInteractionsRepository();
 

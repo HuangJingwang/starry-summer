@@ -12,6 +12,7 @@ import type {
 export interface InteractionsRepository {
   createComment(input: CreateCommentInput): Promise<CommentRecord>;
   moderateComment(id: string, status: ModerationStatus): Promise<CommentRecord | null>;
+  deleteComment(id: string): Promise<boolean>;
   listAdminComments(filter?: ModerationListFilter): Promise<CommentRecord[]>;
   listApprovedComments(targetType: CommentRecord['targetType'], targetId: string): Promise<CommentRecord[]>;
   likeContent(targetType: ContentType, targetId: string): Promise<number>;
@@ -20,6 +21,7 @@ export interface InteractionsRepository {
   getViewCount(targetType: ContentType, targetId: string): Promise<number>;
   createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord>;
   moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord | null>;
+  deleteGuestbookEntry(id: string): Promise<boolean>;
   listAdminGuestbookEntries(filter?: ModerationListFilter): Promise<GuestbookEntryRecord[]>;
   listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]>;
 }
@@ -62,6 +64,10 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
     this.comments.set(id, updated);
 
     return updated;
+  }
+
+  async deleteComment(id: string): Promise<boolean> {
+    return this.comments.delete(id);
   }
 
   async listAdminComments(filter: ModerationListFilter = {}): Promise<CommentRecord[]> {
@@ -127,6 +133,10 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
     this.guestbookEntries.set(id, updated);
 
     return updated;
+  }
+
+  async deleteGuestbookEntry(id: string): Promise<boolean> {
+    return this.guestbookEntries.delete(id);
   }
 
   async listAdminGuestbookEntries(filter: ModerationListFilter = {}): Promise<GuestbookEntryRecord[]> {

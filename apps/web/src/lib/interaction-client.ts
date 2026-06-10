@@ -155,6 +155,16 @@ export function buildModerationActionRequest(
   };
 }
 
+export function buildModerationDeleteRequest(resource: ModerationResource, id: string): InteractionRequest {
+  return {
+    url: `/api/admin/${resource}/${id}`,
+    init: {
+      method: 'DELETE',
+      credentials: 'include',
+    },
+  };
+}
+
 export function normalizeModerationRecord(input: Partial<ModerationRecord> & { id: string }): ModerationRecord {
   return {
     id: input.id,

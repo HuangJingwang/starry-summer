@@ -6,6 +6,7 @@ import {
   buildGuestbookRequest,
   buildLikeRequest,
   buildModerationActionRequest,
+  buildModerationDeleteRequest,
   buildViewRequest,
   loadAdminModerationCount,
   normalizeModerationRecord,
@@ -129,6 +130,17 @@ describe('interaction client helpers', () => {
       },
     });
     expect(buildModerationActionRequest('guestbook', 'entry-1', 'rejected').url).toBe('/api/admin/guestbook/entry-1/moderate');
+  });
+
+  test('builds moderation delete requests', () => {
+    expect(buildModerationDeleteRequest('comments', 'comment-1')).toEqual({
+      url: '/api/admin/comments/comment-1',
+      init: {
+        method: 'DELETE',
+        credentials: 'include',
+      },
+    });
+    expect(buildModerationDeleteRequest('guestbook', 'entry-1').url).toBe('/api/admin/guestbook/entry-1');
   });
 
   test('normalizes moderation records', () => {
