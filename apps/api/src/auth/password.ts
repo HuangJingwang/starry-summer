@@ -22,6 +22,16 @@ export function createPasswordHash(password: string, salt = randomBytes(16).toSt
   ].join(':');
 }
 
+export function createPasswordHashCliOutput(password: string, salt?: string): string {
+  const trimmed = password.trim();
+
+  if (!trimmed) {
+    throw new Error('Password is required');
+  }
+
+  return `ADMIN_PASSWORD_HASH=${createPasswordHash(trimmed, salt)}`;
+}
+
 export function verifyPassword(password: string, storedHash: string): boolean {
   const [algorithm, cost, blockSize, parallelization, salt, expected] = storedHash.split(':');
 

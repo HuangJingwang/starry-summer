@@ -22,4 +22,16 @@ describe('deployment configuration', () => {
     expect(env).toContain('CONTENT_REPOSITORY_DRIVER=postgres');
     expect(env).toContain('REDIS_URL=redis://redis:6379');
   });
+
+  test('documents the password hash command consistently with the auth implementation', async () => {
+    const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(env).toContain('ADMIN_PASSWORD_HASH=replace-with-scrypt-hash');
+    expect(packageJson.scripts?.['auth:hash-password']).toBe('npm run hash-password --workspace @starry-summer/api');
+    expect(deployment).toContain('npm run auth:hash-password -- "your strong password"');
+  });
 });

@@ -30,6 +30,12 @@ Required production changes:
 - `STORAGE_DRIVER`: use `local` for single-server disk uploads or `s3` for MinIO/S3-compatible object storage.
 - `S3_PUBLIC_BASE_URL`: public asset base URL when `STORAGE_DRIVER=s3`, for example `https://assets.example.com/starry-summer` or a CDN URL.
 
+Generate the admin password hash locally, then paste the printed value into `.env`:
+
+```bash
+npm run auth:hash-password -- "your strong password"
+```
+
 ## 3. First Boot
 
 Build the images and run migrations first:
