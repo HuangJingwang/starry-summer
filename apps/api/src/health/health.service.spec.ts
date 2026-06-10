@@ -82,4 +82,55 @@ describe('HealthService', () => {
       },
     });
   });
+
+  test('reports degraded when Redis ping fails', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      redisUrl: 'redis://localhost:6379',
+      pingRedis: async () => {
+        throw new Error('redis unavailable');
+      },
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'degraded',
+      service: 'starry-summer-api',
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'skipped',
+          driver: 'memory',
+        },
+        redis: {
+          status: 'error',
+          driver: 'redis',
+          message: 'redis unavailable',
+        },
+      },
+    });
+  });
+
+  test('reports ok when Redis ping succeeds', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      redisUrl: 'redis://localhost:6379',
+      pingRedis: async () => undefined,
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'ok',
+      service: 'starry-summer-api',
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'skipped',
+          driver: 'memory',
+        },
+        redis: {
+          status: 'ok',
+          driver: 'redis',
+        },
+      },
+    });
+  });
 });

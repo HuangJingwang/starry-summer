@@ -5,6 +5,7 @@ const { Pool } = pg;
 
 export type HealthStatus = 'ok' | 'degraded';
 export type DatabaseHealthStatus = 'ok' | 'skipped' | 'missing' | 'error';
+export type RedisHealthStatus = 'ok' | 'error';
 
 export interface ComponentHealth {
   status: string;
@@ -18,6 +19,7 @@ export interface HealthReport {
   components: {
     api: ComponentHealth;
     database: ComponentHealth & { status: DatabaseHealthStatus };
+    redis?: ComponentHealth & { status: RedisHealthStatus };
   };
 }
 
@@ -25,6 +27,8 @@ export interface HealthServiceOptions {
   repositoryDriver?: string;
   databaseUrl?: string;
   pingDatabase?: (databaseUrl: string) => Promise<void>;
+  redisUrl?: string;
+  pingRedis?: (redisUrl: string) => Promise<void>;
 }
 
 @Injectable()
@@ -32,16 +36,24 @@ export class HealthService {
   private readonly repositoryDriver: string;
   private readonly databaseUrl?: string;
   private readonly pingDatabase: (databaseUrl: string) => Promise<void>;
+  private readonly redisUrl?: string;
+  private readonly pingRedis: (redisUrl: string) => Promise<void>;
 
   constructor(options: HealthServiceOptions = {}) {
     this.repositoryDriver = options.repositoryDriver ?? process.env.CONTENT_REPOSITORY_DRIVER ?? 'memory';
     this.databaseUrl = options.databaseUrl ?? process.env.DATABASE_URL;
     this.pingDatabase = options.pingDatabase ?? pingPostgres;
+    this.redisUrl = options.redisUrl ?? process.env.REDIS_URL;
+    this.pingRedis = options.pingRedis ?? pingRedis;
   }
 
   async check(): Promise<HealthReport> {
     const database = await this.checkDatabase();
-    const status: HealthStatus = database.status === 'ok' || database.status === 'skipped' ? 'ok' : 'degraded';
+    const redis = await this.checkRedis();
+    const status: HealthStatus =
+      (database.status === 'ok' || database.status === 'skipped') && (!redis || redis.status === 'ok')
+        ? 'ok'
+        : 'degraded';
 
     return {
       status,
@@ -49,6 +61,7 @@ export class HealthService {
       components: {
         api: { status: 'ok' },
         database,
+        ...(redis ? { redis } : {}),
       },
     };
   }
@@ -84,6 +97,27 @@ export class HealthService {
       };
     }
   }
+
+  private async checkRedis(): Promise<HealthReport['components']['redis'] | undefined> {
+    if (!this.redisUrl) {
+      return undefined;
+    }
+
+    try {
+      await this.pingRedis(this.redisUrl);
+
+      return {
+        status: 'ok',
+        driver: 'redis',
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        driver: 'redis',
+        message: error instanceof Error ? error.message : 'Unknown Redis error',
+      };
+    }
+  }
 }
 
 async function pingPostgres(databaseUrl: string): Promise<void> {
@@ -93,5 +127,23 @@ async function pingPostgres(databaseUrl: string): Promise<void> {
     await pool.query('select 1');
   } finally {
     await pool.end();
+  }
+}
+
+async function pingRedis(redisUrl: string): Promise<void> {
+  const { createClient } = await import('redis');
+  const client = createClient({ url: redisUrl });
+
+  client.on('error', () => {
+    // The awaited ping/connect call reports the failure to the health check.
+  });
+
+  try {
+    await client.connect();
+    await client.ping();
+  } finally {
+    if (client.isOpen) {
+      await client.quit();
+    }
   }
 }

@@ -74,6 +74,8 @@ Verify:
 - `https://$DOMAIN/admin/login` opens the admin login screen.
 - `https://$DOMAIN/api/health` returns API health through Caddy.
 
+API health also verifies PostgreSQL and Redis when production drivers are configured.
+
 Run the public smoke check after DNS and HTTPS are ready:
 
 ```bash

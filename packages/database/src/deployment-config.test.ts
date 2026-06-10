@@ -43,6 +43,7 @@ describe('deployment configuration', () => {
     expect(compose).toContain('web:\n        condition: service_healthy');
     expect(compose).toContain('api:\n        condition: service_healthy');
     expect(deployment).toContain('`https://$DOMAIN/health` returns Web health through Caddy.');
+    expect(deployment).toContain('API health also verifies PostgreSQL and Redis when production drivers are configured.');
   });
 
   test('shares the admin session secret with web and API containers', async () => {
