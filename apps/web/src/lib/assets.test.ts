@@ -19,6 +19,8 @@ describe('asset client helpers', () => {
         filename: 'cover.png',
         mimeType: 'image/png',
         base64: 'aGVsbG8=',
+        usage: 'cover',
+        altText: 'Cover image',
       }),
     ).toEqual({
       url: '/api/admin/assets',
@@ -32,9 +34,18 @@ describe('asset client helpers', () => {
           filename: 'cover.png',
           mimeType: 'image/png',
           base64: 'aGVsbG8=',
+          usage: 'cover',
+          altText: 'Cover image',
         }),
       },
     });
+  });
+
+  test('builds gallery list and random image requests', async () => {
+    const { buildAssetListRequest, buildRandomAssetRequest } = await import('./assets');
+
+    expect(buildAssetListRequest({ usage: 'background' }).url).toBe('/api/assets?usage=background');
+    expect(buildRandomAssetRequest({ usage: 'background' }).url).toBe('/api/assets/random?usage=background');
   });
 
   test('normalizes stored asset API data', () => {
@@ -44,12 +55,19 @@ describe('asset client helpers', () => {
         publicUrl: '/uploads/2026/06/10/cover.png',
         mimeType: 'image/png',
         byteSize: 5,
+        usage: 'cover',
+        altText: 'Cover image',
+        createdAt: '2026-06-10T00:00:00.000Z',
       }),
     ).toEqual({
+      id: '',
       storageKey: '2026/06/10/cover.png',
       publicUrl: '/uploads/2026/06/10/cover.png',
       mimeType: 'image/png',
       byteSize: 5,
+      usage: 'cover',
+      altText: 'Cover image',
+      createdAt: '2026-06-10T00:00:00.000Z',
     });
   });
 });

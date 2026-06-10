@@ -81,6 +81,7 @@ create table if not exists assets (
   public_url text not null,
   mime_type text not null,
   byte_size integer not null check (byte_size >= 0),
+  usage text not null default 'content' check (usage in ('content', 'cover', 'background', 'attachment')),
   alt_text text not null default '',
   created_at timestamptz not null default now()
 );

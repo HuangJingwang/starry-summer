@@ -2,13 +2,21 @@ export interface AssetUploadPayload {
   filename: string;
   mimeType: string;
   base64: string;
+  usage?: AssetUsage;
+  altText?: string;
 }
 
+export type AssetUsage = 'content' | 'cover' | 'background' | 'attachment';
+
 export interface StoredAsset {
+  id: string;
   storageKey: string;
   publicUrl: string;
   mimeType: string;
   byteSize: number;
+  usage: AssetUsage;
+  altText: string;
+  createdAt: string;
 }
 
 export interface AssetRequest {
@@ -38,13 +46,55 @@ export function buildAssetUploadRequest(payload: AssetUploadPayload): AssetReque
   };
 }
 
+export function buildAssetListRequest(options: { usage?: AssetUsage } = {}): AssetRequest {
+  return {
+    url: buildAssetUrl('/api/assets', options.usage),
+    init: {
+      method: 'GET',
+    },
+  };
+}
+
+export function buildAdminAssetListRequest(options: { usage?: AssetUsage } = {}): AssetRequest {
+  return {
+    url: buildAssetUrl('/api/admin/assets', options.usage),
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
+export function buildRandomAssetRequest(options: { usage?: AssetUsage } = {}): AssetRequest {
+  return {
+    url: buildAssetUrl('/api/assets/random', options.usage),
+    init: {
+      method: 'GET',
+    },
+  };
+}
+
 export function normalizeStoredAsset(input: Partial<StoredAsset>): StoredAsset {
   return {
+    id: input.id ?? '',
     storageKey: input.storageKey ?? '',
     publicUrl: input.publicUrl ?? '',
     mimeType: input.mimeType ?? 'application/octet-stream',
     byteSize: input.byteSize ?? 0,
+    usage: input.usage ?? 'content',
+    altText: input.altText ?? '',
+    createdAt: input.createdAt ?? '',
   };
+}
+
+function buildAssetUrl(path: string, usage: AssetUsage | undefined): string {
+  if (!usage) {
+    return path;
+  }
+
+  const params = new URLSearchParams({ usage });
+
+  return `${path}?${params.toString()}`;
 }
 
 function bytesToBase64(bytes: Uint8Array): string {

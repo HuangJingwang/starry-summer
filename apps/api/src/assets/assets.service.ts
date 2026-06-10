@@ -2,6 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { AssetStorage, StoredAsset } from './storage.service.js';
 import { LocalAssetStorage } from './storage.service.js';
+import {
+  ASSET_REPOSITORY,
+  InMemoryAssetRepository,
+  normalizeAssetUsage,
+  type AssetListFilter,
+  type AssetRecord,
+  type AssetRepository,
+  type AssetUsage,
+} from './assets.repository.js';
+import { PostgresAssetsRepository } from './postgres-assets.repository.js';
 
 export const ASSET_STORAGE = Symbol('ASSET_STORAGE');
 
@@ -9,6 +19,8 @@ export interface UploadAssetInput {
   filename: string;
   mimeType: string;
   base64: string;
+  usage?: AssetUsage;
+  altText?: string;
 }
 
 @Injectable()
@@ -16,14 +28,43 @@ export class AssetsService {
   constructor(
     @Inject(ASSET_STORAGE)
     private readonly storage: AssetStorage,
+    @Inject(ASSET_REPOSITORY)
+    private readonly repository: AssetRepository,
+    private readonly randomNumber: () => number = Math.random,
   ) {}
 
-  upload(input: UploadAssetInput): Promise<StoredAsset> {
-    return this.storage.save({
+  async upload(input: UploadAssetInput): Promise<AssetRecord> {
+    const stored = await this.storage.save({
       filename: input.filename,
       mimeType: input.mimeType,
       bytes: Buffer.from(input.base64, 'base64'),
     });
+
+    return this.repository.create({
+      ...stored,
+      usage: normalizeAssetUsage(input.usage),
+      altText: input.altText?.trim() ?? '',
+    });
+  }
+
+  list(filter: AssetListFilter = {}): Promise<AssetRecord[]> {
+    return this.repository.list(filter);
+  }
+
+  async randomAsset(filter: AssetListFilter = {}): Promise<AssetRecord | null> {
+    const assets = await this.repository.list(filter);
+
+    if (assets.length === 0) {
+      return null;
+    }
+
+    const index = Math.min(assets.length - 1, Math.floor(this.randomNumber() * assets.length));
+
+    return assets[index] ?? null;
+  }
+
+  random(filter: AssetListFilter = {}): Promise<AssetRecord | null> {
+    return this.randomAsset(filter);
   }
 }
 
@@ -38,4 +79,20 @@ export function createAssetStorage(): AssetStorage {
     uploadDir: process.env.LOCAL_UPLOAD_DIR ?? './uploads',
     publicBaseUrl: process.env.LOCAL_UPLOAD_PUBLIC_URL ?? '/uploads',
   });
+}
+
+export function createAssetRepository(): AssetRepository {
+  const driver = process.env.CONTENT_REPOSITORY_DRIVER ?? 'memory';
+
+  if (driver === 'postgres') {
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL is required when CONTENT_REPOSITORY_DRIVER=postgres');
+    }
+
+    return new PostgresAssetsRepository(databaseUrl);
+  }
+
+  return new InMemoryAssetRepository();
 }
