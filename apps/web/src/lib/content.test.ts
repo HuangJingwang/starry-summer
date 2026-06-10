@@ -7,6 +7,7 @@ import {
   canShowComments,
   getCategoryHref,
   getContentByCategorySlug,
+  getContentTaxonomyLinkGroups,
   getContentTaxonomyGroups,
   groupContentByMonth,
   getFeaturedContent,
@@ -92,6 +93,26 @@ describe('web content helpers', () => {
     ).toEqual([
       { label: '分类', ariaLabel: 'Categories', items: ['Writing'] },
       { label: '标签', ariaLabel: 'Tags', items: ['Next.js', 'Platform'] },
+    ]);
+  });
+
+  test('builds detail taxonomy link groups for categories and tags', () => {
+    expect(
+      getContentTaxonomyLinkGroups({
+        categories: ['Writing'],
+        tags: ['Next.js'],
+      }),
+    ).toEqual([
+      {
+        label: '分类',
+        ariaLabel: 'Categories',
+        items: [{ label: 'Writing', href: '/categories/writing' }],
+      },
+      {
+        label: '标签',
+        ariaLabel: 'Tags',
+        items: [{ label: 'Next.js', href: '/tags/next-js' }],
+      },
     ]);
   });
 

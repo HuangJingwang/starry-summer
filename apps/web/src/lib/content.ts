@@ -62,6 +62,15 @@ export interface ContentTaxonomyGroup {
   items: string[];
 }
 
+export interface ContentTaxonomyLinkGroup {
+  label: string;
+  ariaLabel: string;
+  items: Array<{
+    label: string;
+    href: string;
+  }>;
+}
+
 export interface SiteStats {
   publicCount: number;
   totalViews: number;
@@ -112,6 +121,27 @@ export function getContentTaxonomyGroups(item: Pick<SiteContentItem, 'categories
   return [
     { label: '分类', ariaLabel: 'Categories', items: normalizeTaxonomyItems(item.categories) },
     { label: '标签', ariaLabel: 'Tags', items: normalizeTaxonomyItems(item.tags) },
+  ].filter((group) => group.items.length > 0);
+}
+
+export function getContentTaxonomyLinkGroups(item: Pick<SiteContentItem, 'categories' | 'tags'>): ContentTaxonomyLinkGroup[] {
+  return [
+    {
+      label: '分类',
+      ariaLabel: 'Categories',
+      items: normalizeTaxonomyItems(item.categories).map((category) => ({
+        label: category,
+        href: getCategoryHref(category),
+      })),
+    },
+    {
+      label: '标签',
+      ariaLabel: 'Tags',
+      items: normalizeTaxonomyItems(item.tags).map((tag) => ({
+        label: tag,
+        href: getTagHref(tag),
+      })),
+    },
   ].filter((group) => group.items.length > 0);
 }
 

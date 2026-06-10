@@ -1,7 +1,7 @@
 import { renderMarkdown } from '@starry-summer/markdown';
 import Link from 'next/link';
 
-import { canShowComments, estimateReadingTime, getContentHref, getContentTaxonomyGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { canShowComments, estimateReadingTime, getContentHref, getContentTaxonomyLinkGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments } from '@/lib/public-comments';
@@ -20,7 +20,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const tableOfContents = buildContentTableOfContents(markdown);
   const readingTime = estimateReadingTime(markdown);
   const updatedAt = item.updatedAt && item.updatedAt !== item.publishedAt ? item.updatedAt : undefined;
-  const taxonomyGroups = getContentTaxonomyGroups(item);
+  const taxonomyGroups = getContentTaxonomyLinkGroups(item);
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="Comments">
       <h2>评论</h2>
@@ -67,7 +67,9 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         <div key={group.ariaLabel} className="detail-taxonomy" aria-label={group.ariaLabel}>
           <span>{group.label}</span>
           {group.items.map((item) => (
-            <span key={item}>{item}</span>
+            <Link key={item.href} href={item.href}>
+              {item.label}
+            </Link>
           ))}
         </div>
       ))}
