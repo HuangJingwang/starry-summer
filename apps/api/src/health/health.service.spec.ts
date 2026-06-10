@@ -1,0 +1,85 @@
+import { describe, expect, test } from 'vitest';
+
+import { HealthService } from './health.service';
+
+describe('HealthService', () => {
+  test('reports ok when the API uses in-memory repositories', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'ok',
+      service: 'starry-summer-api',
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'skipped',
+          driver: 'memory',
+        },
+      },
+    });
+  });
+
+  test('reports degraded when PostgreSQL is selected without a database URL', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'postgres',
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'degraded',
+      service: 'starry-summer-api',
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'missing',
+          driver: 'postgres',
+          message: 'DATABASE_URL is required when CONTENT_REPOSITORY_DRIVER=postgres',
+        },
+      },
+    });
+  });
+
+  test('pings PostgreSQL when database configuration is present', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'postgres',
+      databaseUrl: 'postgresql://user:pass@localhost:5432/starry',
+      pingDatabase: async () => undefined,
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'ok',
+      service: 'starry-summer-api',
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'ok',
+          driver: 'postgres',
+        },
+      },
+    });
+  });
+
+  test('reports degraded when PostgreSQL ping fails', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'postgres',
+      databaseUrl: 'postgresql://user:pass@localhost:5432/starry',
+      pingDatabase: async () => {
+        throw new Error('connection refused');
+      },
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'degraded',
+      service: 'starry-summer-api',
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'error',
+          driver: 'postgres',
+          message: 'connection refused',
+        },
+      },
+    });
+  });
+});
