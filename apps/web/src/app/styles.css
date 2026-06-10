@@ -189,10 +189,32 @@ textarea {
   padding: clamp(42px, 8vw, 96px) clamp(16px, 5vw, 72px);
 }
 
+.content-section--subtle {
+  border-top: 1px solid var(--line);
+  padding-top: clamp(36px, 6vw, 72px);
+}
+
 .section-heading,
 .page-title {
   margin-bottom: 24px;
   max-width: 720px;
+}
+
+.section-heading--row {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  max-width: none;
+}
+
+.section-heading--row a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 10px 16px;
 }
 
 .page-title-row {
@@ -1061,6 +1083,11 @@ textarea {
   .sort-tabs {
     justify-self: start;
     margin-top: 0;
+  }
+
+  .section-heading--row {
+    align-items: start;
+    display: grid;
   }
 
   .stats-band,

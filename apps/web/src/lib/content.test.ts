@@ -6,6 +6,7 @@ import {
   getAdjacentContent,
   groupContentByMonth,
   getFeaturedContent,
+  getPopularContent,
   getPublicContent,
   getSiteStats,
   groupContentByCategory,
@@ -53,6 +54,57 @@ describe('web content helpers', () => {
     ]);
 
     expect(featured[0]?.id).toBe('2');
+  });
+
+  test('returns popular public content while excluding already featured records', () => {
+    const popular = getPopularContent(
+      [
+        {
+          id: 'featured',
+          title: 'Featured Popular',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-01',
+          featured: true,
+          viewCount: 500,
+          likeCount: 50,
+        },
+        {
+          id: 'popular',
+          title: 'Popular',
+          type: 'note',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-02',
+          viewCount: 120,
+          likeCount: 12,
+        },
+        {
+          id: 'quiet',
+          title: 'Quiet',
+          type: 'project',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-03',
+          viewCount: 5,
+          likeCount: 1,
+        },
+        {
+          id: 'draft',
+          title: 'Draft',
+          type: 'post',
+          status: 'draft',
+          visibility: 'public',
+          publishedAt: '2026-06-04',
+          viewCount: 999,
+          likeCount: 999,
+        },
+      ],
+      { excludeIds: ['featured'], limit: 1 },
+    );
+
+    expect(popular.map((item) => item.id)).toEqual(['popular']);
   });
 
   test('groups counts by content type', () => {

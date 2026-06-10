@@ -43,6 +43,11 @@ export interface SiteStats {
   lastPublishedAt: string;
 }
 
+export interface PopularContentOptions {
+  excludeIds?: string[];
+  limit?: number;
+}
+
 export type ContentSort = 'latest' | 'popular';
 
 const contentTypes: ContentType[] = ['moment', 'note', 'page', 'post', 'project'];
@@ -82,8 +87,15 @@ export function getFeaturedContent(items: SiteContentItem[]): SiteContentItem[] 
       return b.publishedAt.localeCompare(a.publishedAt);
     }
 
-    return a.featured ? -1 : 1;
+  return a.featured ? -1 : 1;
   });
+}
+
+export function getPopularContent(items: SiteContentItem[], options: PopularContentOptions = {}): SiteContentItem[] {
+  const excludeIds = new Set(options.excludeIds ?? []);
+  const popular = getPublicContent(items, undefined, 'popular').filter((item) => !excludeIds.has(item.id));
+
+  return typeof options.limit === 'number' ? popular.slice(0, options.limit) : popular;
 }
 
 export function groupContentCounts(items: SiteContentItem[]): Record<ContentType, number> {

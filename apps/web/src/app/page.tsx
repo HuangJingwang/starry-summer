@@ -1,13 +1,18 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { getFeaturedContent, getSiteStats } from '@/lib/content';
+import { getFeaturedContent, getPopularContent, getSiteStats } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
 
 export default async function HomePage() {
   const content = await loadSiteContent();
   const featured = getFeaturedContent(content).slice(0, 3);
+  const popular = getPopularContent(content, {
+    excludeIds: featured.map((item) => item.id),
+    limit: 3,
+  });
   const stats = getSiteStats(content);
 
   return (
@@ -66,6 +71,23 @@ export default async function HomePage() {
             ))}
           </div>
         </section>
+
+        {popular.length > 0 ? (
+          <section className="content-section content-section--subtle">
+            <div className="section-heading section-heading--row">
+              <div>
+                <p className="eyebrow">Popular</p>
+                <h2>热门内容</h2>
+              </div>
+              <Link href="/posts?sort=popular">查看热门文章</Link>
+            </div>
+            <div className="content-grid">
+              {popular.map((item) => (
+                <ContentCard key={item.id} item={item} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </main>
     </SiteShell>
   );
