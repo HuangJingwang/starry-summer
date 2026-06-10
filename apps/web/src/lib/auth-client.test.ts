@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { buildLoginRequest, buildLogoutRequest, buildSessionRequest, getSafeAdminRedirectPath, normalizeLoginInput } from './auth-client';
+import { buildAdminLoginRedirectPath, buildLoginRequest, buildLogoutRequest, buildSessionRequest, getSafeAdminRedirectPath, normalizeLoginInput } from './auth-client';
 
 describe('auth client helpers', () => {
   test('normalizes owner login input', () => {
@@ -51,5 +51,11 @@ describe('auth client helpers', () => {
     expect(getSafeAdminRedirectPath('https://evil.example/admin')).toBe('/admin');
     expect(getSafeAdminRedirectPath('')).toBe('/admin');
     expect(getSafeAdminRedirectPath(undefined)).toBe('/admin');
+  });
+
+  test('builds safe admin login redirect paths', () => {
+    expect(buildAdminLoginRedirectPath('/admin/projects?status=published')).toBe('/admin/login?next=%2Fadmin%2Fprojects%3Fstatus%3Dpublished');
+    expect(buildAdminLoginRedirectPath('/posts')).toBe('/admin/login?next=%2Fadmin');
+    expect(buildAdminLoginRedirectPath('https://evil.example/admin')).toBe('/admin/login?next=%2Fadmin');
   });
 });

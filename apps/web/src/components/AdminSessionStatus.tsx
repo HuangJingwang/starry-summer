@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { buildLogoutRequest, buildSessionRequest } from '@/lib/auth-client';
+import { buildAdminLoginRedirectPath, buildLogoutRequest, buildSessionRequest } from '@/lib/auth-client';
 
 interface AdminSession {
   email: string;
@@ -46,6 +46,12 @@ export function AdminSessionStatus() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!loading && !session) {
+      window.location.assign(buildAdminLoginRedirectPath(`${window.location.pathname}${window.location.search}`));
+    }
+  }, [loading, session]);
 
   async function logout() {
     const request = buildLogoutRequest();

@@ -33,6 +33,10 @@ export function getSafeAdminRedirectPath(value: string | undefined): string {
   }
 }
 
+export function buildAdminLoginRedirectPath(value: string | undefined): string {
+  return `/admin/login?next=${encodeURIComponent(getSafeAdminRedirectPath(value))}`;
+}
+
 export function buildLoginRequest(input: LoginInput): LoginRequest {
   const normalized = normalizeLoginInput(input);
 
