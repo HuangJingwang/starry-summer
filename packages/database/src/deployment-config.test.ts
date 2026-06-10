@@ -64,4 +64,14 @@ describe('deployment configuration', () => {
     expect(compose).toContain('S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}');
     expect(deployment).toContain('S3_FORCE_PATH_STYLE');
   });
+
+  test('sets baseline security headers at the reverse proxy', async () => {
+    const caddy = await readFile(join(repoRoot, 'infra/caddy/Caddyfile'), 'utf8');
+
+    expect(caddy).toContain('Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"');
+    expect(caddy).toContain('X-Content-Type-Options "nosniff"');
+    expect(caddy).toContain('X-Frame-Options "DENY"');
+    expect(caddy).toContain('Referrer-Policy "strict-origin-when-cross-origin"');
+    expect(caddy).toContain('Permissions-Policy "camera=(), microphone=(), geolocation=()"');
+  });
 });
