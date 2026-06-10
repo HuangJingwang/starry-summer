@@ -62,15 +62,6 @@ export function buildAssetUploadRequest(payload: AssetUploadPayload): AssetReque
   };
 }
 
-export function buildAssetListRequest(options: AssetRequestOptions = {}): AssetRequest {
-  return {
-    url: buildAssetUrl('/api/assets', options),
-    init: {
-      method: 'GET',
-    },
-  };
-}
-
 export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): AssetRequest {
   return {
     url: buildAssetUrl('/api/admin/assets', options),

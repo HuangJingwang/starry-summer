@@ -13,4 +13,19 @@ describe('Assets controllers', () => {
       { index: 0, param: AssetsService },
     ]);
   });
+
+  test('public controller does not expose a gallery listing', () => {
+    expect('list' in PublicAssetsController.prototype).toBe(false);
+  });
+
+  test('public random asset only returns background assets', async () => {
+    const service = {
+      random: async (filter: unknown) => ({ filter }),
+    };
+    const controller = new PublicAssetsController(service as unknown as AssetsService);
+
+    await expect(controller.random()).resolves.toEqual({
+      filter: { usage: 'background' },
+    });
+  });
 });

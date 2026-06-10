@@ -50,9 +50,9 @@ describe('asset client helpers', () => {
   });
 
   test('builds gallery list and random image requests', async () => {
-    const { buildAssetListRequest, buildRandomAssetRequest } = await import('./assets');
+    const { buildAdminAssetListRequest, buildRandomAssetRequest } = await import('./assets');
 
-    expect(buildAssetListRequest({ usage: 'background' }).url).toBe('/api/assets?usage=background');
+    expect(buildAdminAssetListRequest({ usage: 'background' }).url).toBe('/api/admin/assets?usage=background');
     expect(buildRandomAssetRequest({ usage: 'background' }).url).toBe('/api/assets/random?usage=background');
     expect(buildAssetDeleteRequest('asset-1')).toEqual({
       url: '/api/admin/assets/asset-1',
