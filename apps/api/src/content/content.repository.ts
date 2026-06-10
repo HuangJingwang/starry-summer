@@ -55,6 +55,7 @@ export class InMemoryContentRepository implements ContentRepository {
     return [...this.records.values()]
       .filter((record) => record.status === 'published' && record.visibility === 'public')
       .filter((record) => (filter.type ? record.type === filter.type : true))
+      .filter((record) => matchesPublicContentQuery(record, filter.query))
       .sort((a, b) => sortPublicContent(a, b, filter.sort ?? 'latest'));
   }
 
@@ -146,6 +147,34 @@ function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFi
 function includesTaxonomyLabel(labels: string[], filter: string): boolean {
   const normalized = filter.trim().toLowerCase();
   return normalized ? labels.some((label) => label.trim().toLowerCase() === normalized) : true;
+}
+
+function matchesPublicContentQuery(record: ContentRecord, query: string | undefined): boolean {
+  const terms = query
+    ?.trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (!terms || terms.length === 0) {
+    return true;
+  }
+
+  const searchable = [
+    record.title,
+    record.slug,
+    record.summary,
+    record.seoTitle ?? '',
+    record.seoDescription ?? '',
+    record.bodyMarkdown,
+    ...record.categories,
+    ...record.tags,
+    ...record.series,
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return terms.every((term) => searchable.includes(term));
 }
 
 function sortPublicContent(a: ContentRecord, b: ContentRecord, sort: NonNullable<PublicContentFilter['sort']>): number {

@@ -223,12 +223,22 @@ export class PostgresContentRepository implements ContentRepository {
       values.push(filter.type);
     }
 
+    const queryTerms = normalizeSearchTerms(filter.query);
+    const searchClause = queryTerms.length > 0
+      ? buildPublicContentSearchClause(queryTerms.map((_, index) => `$${values.length + index + 1}`))
+      : '';
+
+    if (queryTerms.length > 0) {
+      values.push(...queryTerms.map((term) => `%${term}%`));
+    }
+
     const result = await this.pool.query<ContentItemRow>(
       buildContentSelect(
         `
           where ci.status = 'published'
             and ci.visibility = 'public'
             ${typeClause}
+            ${searchClause}
         `,
         buildPublicContentOrderClause(filter.sort),
       ),
@@ -463,6 +473,52 @@ export function buildPublicContentOrderClause(sort: PublicContentFilter['sort'] 
   }
 
   return 'order by ci.pinned desc, ci.published_at desc';
+}
+
+export function buildPublicContentSearchClause(placeholders: string | string[]): string {
+  const terms = Array.isArray(placeholders) ? placeholders : [placeholders];
+
+  return terms
+    .map((placeholder) => `
+      and (
+      lower(ci.title) like ${placeholder}
+      or lower(ci.slug) like ${placeholder}
+      or lower(ci.summary) like ${placeholder}
+      or lower(ci.seo_title) like ${placeholder}
+      or lower(ci.seo_description) like ${placeholder}
+      or lower(ci.body_markdown) like ${placeholder}
+      or exists (
+        select 1
+        from content_categories cc_filter
+        join categories c_filter on c_filter.id = cc_filter.category_id
+        where cc_filter.content_id = ci.id
+          and lower(c_filter.name) like ${placeholder}
+      )
+      or exists (
+        select 1
+        from content_tags ct_filter
+        join tags t_filter on t_filter.id = ct_filter.tag_id
+        where ct_filter.content_id = ci.id
+          and lower(t_filter.name) like ${placeholder}
+      )
+      or exists (
+        select 1
+        from content_series cs_filter
+        join series s_filter on s_filter.id = cs_filter.series_id
+        where cs_filter.content_id = ci.id
+          and lower(s_filter.name) like ${placeholder}
+      )
+    )
+    `)
+    .join('\n');
+}
+
+function normalizeSearchTerms(query: string | undefined): string[] {
+  return query
+    ?.trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean) ?? [];
 }
 
 async function syncTaxonomyLabels(client: Queryable, contentId: string, kind: TaxonomyKind, labels: string[]): Promise<void> {

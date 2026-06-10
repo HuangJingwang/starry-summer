@@ -1,6 +1,6 @@
 import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
-import { getPublicContent, seedContent, type ContentSort, type SiteContentItem } from './content';
+import { getPublicContent, searchContent, seedContent, type ContentSort, type SiteContentItem } from './content';
 
 export interface PublicContentApiRecord {
   id: string;
@@ -36,6 +36,7 @@ export interface PublicContentListRequestOptions {
   apiBaseUrl?: string;
   type?: ContentType;
   sort?: ContentSort;
+  query?: string;
 }
 
 export interface PublicContentRequest {
@@ -73,6 +74,12 @@ export function buildPublicContentListRequest(options: PublicContentListRequestO
 
   if (options.sort && options.sort !== 'latest') {
     params.set('sort', options.sort);
+  }
+
+  const queryText = options.query?.trim();
+
+  if (queryText) {
+    params.set('q', queryText);
   }
 
   const query = params.size > 0 ? `?${params.toString()}` : '';
@@ -193,13 +200,13 @@ export async function loadPublicContentItems(
     const response = await fetcher(request.url, request.init);
 
     if (!response.ok) {
-      return { source: 'fallback', items: getPublicContent(fallbackItems, options.type, options.sort) };
+      return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
     }
 
     const data: unknown = await response.json();
 
     if (!Array.isArray(data)) {
-      return { source: 'fallback', items: getPublicContent(fallbackItems, options.type, options.sort) };
+      return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
     }
 
     return {
@@ -207,10 +214,17 @@ export async function loadPublicContentItems(
       items: data.map((item) => normalizePublicContentItem(item as PublicContentApiRecord)),
     };
   } catch {
-    return { source: 'fallback', items: getPublicContent(fallbackItems, options.type, options.sort) };
+    return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
   }
 }
 
-export async function loadSiteContent(type?: ContentType, sort?: ContentSort): Promise<SiteContentItem[]> {
-  return (await loadPublicContentItems(seedContent, { type, sort })).items;
+function getFallbackPublicContent(items: SiteContentItem[], options: PublicContentListRequestOptions): SiteContentItem[] {
+  const publicItems = getPublicContent(items, options.type, options.sort);
+  const query = options.query?.trim();
+
+  return query ? searchContent(publicItems, query) : publicItems;
+}
+
+export async function loadSiteContent(type?: ContentType, sort?: ContentSort, query?: string): Promise<SiteContentItem[]> {
+  return (await loadPublicContentItems(seedContent, { type, sort, query })).items;
 }

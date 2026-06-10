@@ -277,4 +277,51 @@ describe('InMemoryContentRepository', () => {
       recent.id,
     ]);
   });
+
+  test('filters public records by search text', async () => {
+    const repository = new InMemoryContentRepository(() => '2026-06-10T00:00:00.000Z');
+    const matching = await repository.create({
+      type: 'post',
+      title: 'Cloud Backup Plan',
+      slug: 'cloud-backup-plan',
+      summary: 'PostgreSQL restore notes',
+      bodyMarkdown: '# Cloud Backup',
+      sourceType: 'original',
+      sourceUrl: '',
+      status: 'published',
+      visibility: 'public',
+      allowComments: true,
+      pinned: false,
+      featured: false,
+      categories: ['Operations'],
+      tags: ['Backup'],
+      series: ['Platform Journal'],
+      viewCount: 0,
+      likeCount: 0,
+      publishedAt: '2026-06-10T00:00:00.000Z',
+    });
+    await repository.create({
+      type: 'post',
+      title: 'Private Cloud Notes',
+      slug: 'private-cloud-notes',
+      summary: 'Hidden',
+      bodyMarkdown: '# Private',
+      sourceType: 'original',
+      sourceUrl: '',
+      status: 'draft',
+      visibility: 'public',
+      allowComments: true,
+      pinned: false,
+      featured: false,
+      categories: [],
+      tags: [],
+      series: [],
+      viewCount: 0,
+      likeCount: 0,
+      publishedAt: null,
+    });
+
+    expect((await repository.listPublic({ query: 'postgresql backup' })).map((item) => item.id)).toEqual([matching.id]);
+    expect((await repository.listPublic({ query: 'platform journal' })).map((item) => item.id)).toEqual([matching.id]);
+  });
 });

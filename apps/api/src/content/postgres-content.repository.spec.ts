@@ -4,6 +4,7 @@ import {
   buildAdminContentSelect,
   buildContentDelete,
   buildContentInsert,
+  buildPublicContentSearchClause,
   buildPublicContentOrderClause,
   buildContentSelect,
   buildContentUpdate,
@@ -281,5 +282,19 @@ describe('PostgresContentRepository mapping', () => {
 
   test('builds latest order clauses with pinned content first', () => {
     expect(buildPublicContentOrderClause('latest')).toContain('order by ci.pinned desc, ci.published_at desc');
+  });
+
+  test('builds public content search clauses across text and taxonomy fields', () => {
+    const clause = buildPublicContentSearchClause('$2');
+
+    expect(clause).toContain('lower(ci.title) like $2');
+    expect(clause).toContain('lower(ci.slug) like $2');
+    expect(clause).toContain('lower(ci.summary) like $2');
+    expect(clause).toContain('lower(ci.seo_title) like $2');
+    expect(clause).toContain('lower(ci.seo_description) like $2');
+    expect(clause).toContain('lower(ci.body_markdown) like $2');
+    expect(clause).toContain('content_categories');
+    expect(clause).toContain('content_tags');
+    expect(clause).toContain('content_series');
   });
 });

@@ -84,6 +84,7 @@ export interface AdminContentFilter {
 export interface PublicContentFilter {
   type?: ContentType;
   sort?: PublicContentSort;
+  query?: string;
 }
 
 export type PublicContentSort = 'latest' | 'popular';

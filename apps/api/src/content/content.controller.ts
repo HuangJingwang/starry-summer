@@ -8,10 +8,11 @@ export class ContentController {
   constructor(@Inject(ContentService) private readonly contentService: ContentService) {}
 
   @Get()
-  listPublic(@Query('type') type?: string, @Query('sort') sort?: string) {
+  listPublic(@Query('type') type?: string, @Query('sort') sort?: string, @Query('q') query?: string) {
     return this.contentService.listPublic({
       type: parseOptionalContentType(type),
       sort: parseOptionalPublicSort(sort),
+      query: normalizeOptionalQuery(query),
     });
   }
 }
@@ -41,4 +42,10 @@ function parseOptionalPublicSort(value: string | undefined): PublicContentSort |
   }
 
   return value as PublicContentSort;
+}
+
+function normalizeOptionalQuery(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+
+  return normalized || undefined;
 }
