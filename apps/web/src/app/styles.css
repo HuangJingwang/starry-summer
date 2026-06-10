@@ -483,7 +483,8 @@ textarea {
   margin: 0;
 }
 
-.detail-comments__list {
+.detail-comments__list,
+.guestbook-list {
   display: grid;
   gap: 12px;
   list-style: none;
@@ -492,6 +493,7 @@ textarea {
 }
 
 .detail-comments__list li,
+.guestbook-list li,
 .detail-comments__empty {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -500,7 +502,8 @@ textarea {
   padding: 16px;
 }
 
-.detail-comments__list li div {
+.detail-comments__list li div,
+.guestbook-list li div {
   align-items: center;
   color: var(--muted);
   display: flex;
@@ -510,11 +513,13 @@ textarea {
   justify-content: space-between;
 }
 
-.detail-comments__list strong {
+.detail-comments__list strong,
+.guestbook-list strong {
   color: var(--ink);
 }
 
-.detail-comments__list p {
+.detail-comments__list p,
+.guestbook-list p {
   line-height: 1.7;
   margin: 10px 0 0;
 }
