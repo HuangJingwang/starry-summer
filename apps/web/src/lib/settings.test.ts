@@ -5,8 +5,10 @@ import {
   buildGetPublicSettingsRequest,
   buildSettingsFormKey,
   buildUpdateSettingsRequest,
+  formatHeroQuotesText,
   loadPublicSettings,
   normalizeSiteSettings,
+  parseHeroQuotesText,
 } from './settings';
 
 describe('settings client helpers', () => {
@@ -26,6 +28,7 @@ describe('settings client helpers', () => {
           tagline: 'Keep a public trail of quiet work.',
           backgroundImageUrl: 'https://cdn.example.com/background.jpg',
           motto: 'Stay curious, keep shipping.',
+          quotes: [' Stay curious, keep shipping. ', '', 'Small notes compound.'],
         },
         navigation: ['posts', 'notes'],
         updatedAt: '2026-06-10T00:00:00.000Z',
@@ -41,6 +44,7 @@ describe('settings client helpers', () => {
         tagline: 'Keep a public trail of quiet work.',
         backgroundImageUrl: 'https://cdn.example.com/background.jpg',
         motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
       },
       navigation: ['posts', 'notes'],
       updatedAt: '2026-06-10T00:00:00.000Z',
@@ -51,6 +55,10 @@ describe('settings client helpers', () => {
       tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
       backgroundImageUrl: '/hero-workspace.png',
       motto: 'Build a public trail of private work.',
+      quotes: [
+        'Build a public trail of private work.',
+        'Small notes compound into a life you can revisit.',
+      ],
     });
     expect(normalizeSiteSettings({}).navigation).toContain('series');
   });
@@ -96,6 +104,7 @@ describe('settings client helpers', () => {
           tagline: 'A personal operating base.',
           backgroundImageUrl: '/cover.jpg',
           motto: 'Stay curious, keep shipping.',
+          quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
         },
       }),
     ).toEqual({
@@ -117,6 +126,7 @@ describe('settings client helpers', () => {
             tagline: 'A personal operating base.',
             backgroundImageUrl: '/cover.jpg',
             motto: 'Stay curious, keep shipping.',
+            quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
           },
         }),
       },
@@ -136,6 +146,7 @@ describe('settings client helpers', () => {
         tagline: 'Loaded tagline',
         backgroundImageUrl: '/loaded-cover.jpg',
         motto: 'Loaded motto',
+        quotes: ['Loaded motto', 'Loaded quote'],
       },
       navigation: ['posts', 'about'],
       updatedAt: '2026-06-11T00:00:00.000Z',
@@ -159,6 +170,7 @@ describe('settings client helpers', () => {
               tagline: 'A public note to the future.',
               backgroundImageUrl: '/public-cover.jpg',
               motto: 'Small notes compound.',
+              quotes: ['Small notes compound.', 'Keep a record.'],
             },
             navigation: ['posts'],
             updatedAt: '2026-06-10T00:00:00.000Z',
@@ -176,6 +188,7 @@ describe('settings client helpers', () => {
         tagline: 'A public note to the future.',
         backgroundImageUrl: '/public-cover.jpg',
         motto: 'Small notes compound.',
+        quotes: ['Small notes compound.', 'Keep a record.'],
       },
       navigation: ['posts'],
       updatedAt: '2026-06-10T00:00:00.000Z',
@@ -202,5 +215,15 @@ describe('settings client helpers', () => {
         title: 'Starry Summer',
       },
     });
+  });
+
+  test('parses and formats homepage quote lists', () => {
+    expect(parseHeroQuotesText(' Small notes compound.\n\nKeep a record. ')).toEqual([
+      'Small notes compound.',
+      'Keep a record.',
+    ]);
+    expect(formatHeroQuotesText(['Small notes compound.', 'Keep a record.'])).toBe(
+      'Small notes compound.\nKeep a record.',
+    );
   });
 });

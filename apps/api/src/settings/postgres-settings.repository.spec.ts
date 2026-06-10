@@ -26,6 +26,7 @@ describe('PostgresSettingsRepository', () => {
           tagline: 'A public trail of private work.',
           backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
           motto: 'Stay curious, keep shipping.',
+          quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
         },
         updated_at: new Date('2026-06-10T02:00:00.000Z'),
       },
@@ -47,6 +48,7 @@ describe('PostgresSettingsRepository', () => {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
         motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
       },
       navigation: ['posts', 'notes'],
       updatedAt: '2026-06-10T02:00:00.000Z',
@@ -90,6 +92,10 @@ describe('PostgresSettingsRepository', () => {
       tagline: 'A public trail of private work.',
       backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
       motto: 'Build a public trail of private work.',
+      quotes: [
+        'Build a public trail of private work.',
+        'Small notes compound into a life you can revisit.',
+      ],
     });
   });
 
@@ -126,6 +132,7 @@ describe('PostgresSettingsRepository', () => {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: '/hero.jpg',
         motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.'],
       }).values,
     ).toEqual([
       'hero',
@@ -133,6 +140,7 @@ describe('PostgresSettingsRepository', () => {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: '/hero.jpg',
         motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.'],
       }),
     ]);
   });

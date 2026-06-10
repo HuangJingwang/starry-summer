@@ -133,6 +133,7 @@ function normalizeHeroSettings(value: unknown): SiteHeroSettings {
     tagline: hero.tagline,
     backgroundImageUrl: hero.backgroundImageUrl,
     motto: typeof hero.motto === 'string' ? hero.motto : defaultSiteSettings.hero.motto,
+    quotes: normalizeQuotes(hero.quotes),
   };
 }
 
@@ -151,4 +152,14 @@ function normalizeSocialLinks(value: unknown): SiteSocialLink[] {
       href: typeof item?.href === 'string' ? item.href.trim() : '',
     }))
     .filter((item) => item.label && item.href);
+}
+
+function normalizeQuotes(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [...defaultSiteSettings.hero.quotes];
+  }
+
+  const quotes = value.map((item) => (typeof item === 'string' ? item.trim() : '')).filter(Boolean);
+
+  return quotes.length > 0 ? quotes : [...defaultSiteSettings.hero.quotes];
 }

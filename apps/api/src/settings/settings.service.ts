@@ -31,11 +31,19 @@ export class SettingsService {
 }
 
 function normalizeProfile(input: Partial<SiteProfileSettings>): Partial<SiteProfileSettings> {
-  const profile: Partial<SiteProfileSettings> = {
-    title: input.title?.trim(),
-    ownerName: input.ownerName?.trim(),
-    description: input.description?.trim(),
-  };
+  const profile: Partial<SiteProfileSettings> = {};
+
+  if (input.title !== undefined) {
+    profile.title = input.title.trim();
+  }
+
+  if (input.ownerName !== undefined) {
+    profile.ownerName = input.ownerName.trim();
+  }
+
+  if (input.description !== undefined) {
+    profile.description = input.description.trim();
+  }
 
   if (input.socialLinks) {
     profile.socialLinks = normalizeSocialLinks(input.socialLinks);
@@ -45,11 +53,25 @@ function normalizeProfile(input: Partial<SiteProfileSettings>): Partial<SiteProf
 }
 
 function normalizeHero(input: Partial<SiteHeroSettings>): Partial<SiteHeroSettings> {
-  return {
-    tagline: input.tagline?.trim(),
-    backgroundImageUrl: input.backgroundImageUrl?.trim(),
-    motto: input.motto?.trim(),
-  };
+  const hero: Partial<SiteHeroSettings> = {};
+
+  if (input.tagline !== undefined) {
+    hero.tagline = input.tagline.trim();
+  }
+
+  if (input.backgroundImageUrl !== undefined) {
+    hero.backgroundImageUrl = input.backgroundImageUrl.trim();
+  }
+
+  if (input.motto !== undefined) {
+    hero.motto = input.motto.trim();
+  }
+
+  if (input.quotes) {
+    hero.quotes = normalizeQuotes(input.quotes);
+  }
+
+  return hero;
 }
 
 function normalizeSocialLinks(links: SiteSocialLink[]): SiteSocialLink[] {
@@ -59,4 +81,8 @@ function normalizeSocialLinks(links: SiteSocialLink[]): SiteSocialLink[] {
       href: link.href.trim(),
     }))
     .filter((link) => link.label && link.href);
+}
+
+function normalizeQuotes(quotes: string[]): string[] {
+  return quotes.map((quote) => quote.trim()).filter(Boolean);
 }

@@ -17,6 +17,10 @@ describe('InMemorySettingsRepository', () => {
         tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
         backgroundImageUrl: '/hero-workspace.png',
         motto: 'Build a public trail of private work.',
+        quotes: [
+          'Build a public trail of private work.',
+          'Small notes compound into a life you can revisit.',
+        ],
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
       updatedAt: '2026-06-10T00:00:00.000Z',
@@ -56,6 +60,10 @@ describe('InMemorySettingsRepository', () => {
         tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
         backgroundImageUrl: '/hero-workspace.png',
         motto: 'Build a public trail of private work.',
+        quotes: [
+          'Build a public trail of private work.',
+          'Small notes compound into a life you can revisit.',
+        ],
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
     });
@@ -69,6 +77,7 @@ describe('InMemorySettingsRepository', () => {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
         motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
       },
     });
 
@@ -80,6 +89,7 @@ describe('InMemorySettingsRepository', () => {
         tagline: 'A public trail of private work.',
         backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
         motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
       },
       navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
     });
@@ -100,6 +110,22 @@ describe('InMemorySettingsRepository', () => {
     await expect(repository.get()).resolves.toMatchObject({
       profile: {
         socialLinks: [{ label: 'GitHub', href: 'https://github.com/hjw' }],
+      },
+    });
+  });
+
+  test('returns cloned homepage quotes', async () => {
+    const repository = new InMemorySettingsRepository(() => '2026-06-10T00:00:00.000Z');
+
+    const settings = await repository.get();
+    settings.hero.quotes.push('This should not leak back into the repository.');
+
+    await expect(repository.get()).resolves.toMatchObject({
+      hero: {
+        quotes: [
+          'Build a public trail of private work.',
+          'Small notes compound into a life you can revisit.',
+        ],
       },
     });
   });

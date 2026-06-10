@@ -19,6 +19,7 @@ const settings: SiteSettings = {
     tagline: 'A long-lived home.',
     backgroundImageUrl: '/hero.png',
     motto: 'Keep shipping.',
+    quotes: ['Keep shipping.'],
   },
   navigation: ['posts', 'notes'],
   updatedAt: '2026-06-11T00:00:00.000Z',

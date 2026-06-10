@@ -14,6 +14,7 @@ export interface SiteHeroSettings {
   tagline: string;
   backgroundImageUrl: string;
   motto: string;
+  quotes: string[];
 }
 
 export interface SiteSettings {
@@ -47,6 +48,10 @@ export const defaultSiteSettings: SiteSettings = {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
     backgroundImageUrl: '/hero-workspace.png',
     motto: 'Build a public trail of private work.',
+    quotes: [
+      'Build a public trail of private work.',
+      'Small notes compound into a life you can revisit.',
+    ],
   },
   navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
   updatedAt: '2026-06-10T00:00:00.000Z',
@@ -94,7 +99,10 @@ export function cloneSettings(settings: SiteSettings): SiteSettings {
       ...settings.profile,
       socialLinks: settings.profile.socialLinks.map((link) => ({ ...link })),
     },
-    hero: { ...settings.hero },
+    hero: {
+      ...settings.hero,
+      quotes: [...settings.hero.quotes],
+    },
     navigation: [...settings.navigation],
   };
 }

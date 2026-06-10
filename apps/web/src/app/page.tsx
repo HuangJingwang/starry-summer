@@ -39,7 +39,7 @@ export default async function HomePage() {
             <p className="eyebrow">Personal content platform</p>
             <h1>Starry Summer</h1>
             <p>{settings.hero.tagline}</p>
-            <p className="hero__motto">{settings.hero.motto}</p>
+            <p className="hero__motto">{profile.motto}</p>
             <div className="hero__actions" aria-label="Primary actions">
               <a href="/posts">Read writing</a>
               <a href="/projects">View projects</a>

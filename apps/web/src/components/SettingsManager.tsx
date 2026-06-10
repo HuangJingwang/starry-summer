@@ -6,8 +6,10 @@ import {
   buildGetAdminSettingsRequest,
   buildSettingsFormKey,
   buildUpdateSettingsRequest,
+  formatHeroQuotesText,
   formatSocialLinksText,
   normalizeSiteSettings,
+  parseHeroQuotesText,
   parseSocialLinksText,
   type SiteSettings,
 } from '@/lib/settings';
@@ -66,6 +68,7 @@ export function SettingsManager() {
         tagline: String(formData.get('tagline') ?? ''),
         backgroundImageUrl: String(formData.get('backgroundImageUrl') ?? ''),
         motto: String(formData.get('motto') ?? ''),
+        quotes: parseHeroQuotesText(String(formData.get('quotes') ?? '')),
       },
       navigation: String(formData.get('navigation') ?? '').split(','),
     });
@@ -118,6 +121,15 @@ export function SettingsManager() {
       <label>
         首页箴言
         <input name="motto" defaultValue={settings.hero.motto} />
+      </label>
+      <label>
+        箴言列表
+        <textarea
+          name="quotes"
+          rows={5}
+          defaultValue={formatHeroQuotesText(settings.hero.quotes)}
+          placeholder="每行一句，会在首页随机展示"
+        />
       </label>
       <label>
         备用首页背景

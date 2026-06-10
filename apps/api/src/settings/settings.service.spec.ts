@@ -46,6 +46,7 @@ describe('SettingsService', () => {
         tagline: '  A public trail of private work.  ',
         backgroundImageUrl: '  https://cdn.example.com/hero.jpg  ',
         motto: '  Stay curious, keep shipping.  ',
+        quotes: ['  Small notes compound.  ', '', ' Keep a record. '],
       },
     });
 
@@ -53,6 +54,31 @@ describe('SettingsService', () => {
       tagline: 'A public trail of private work.',
       backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
       motto: 'Stay curious, keep shipping.',
+      quotes: ['Small notes compound.', 'Keep a record.'],
+    });
+  });
+
+  test('updates homepage quotes without clearing existing hero fields', async () => {
+    await service.updateSettings({
+      hero: {
+        tagline: 'A public trail of private work.',
+        backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+        motto: 'Stay curious, keep shipping.',
+        quotes: ['Stay curious, keep shipping.'],
+      },
+    });
+
+    const updated = await service.updateSettings({
+      hero: {
+        quotes: ['  Small notes compound.  '],
+      },
+    });
+
+    expect(updated.hero).toEqual({
+      tagline: 'A public trail of private work.',
+      backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
+      motto: 'Stay curious, keep shipping.',
+      quotes: ['Small notes compound.'],
     });
   });
 });

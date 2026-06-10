@@ -14,6 +14,7 @@ export interface SiteHeroSettings {
   tagline: string;
   backgroundImageUrl: string;
   motto: string;
+  quotes: string[];
 }
 
 export interface SiteSettings {
@@ -53,6 +54,10 @@ export const defaultSettings: SiteSettings = {
     tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
     backgroundImageUrl: '/hero-workspace.png',
     motto: 'Build a public trail of private work.',
+    quotes: [
+      'Build a public trail of private work.',
+      'Small notes compound into a life you can revisit.',
+    ],
   },
   navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
   updatedAt: '',
@@ -70,6 +75,7 @@ export function normalizeSiteSettings(input: Partial<SiteSettings>): SiteSetting
       tagline: input.hero?.tagline ?? defaultSettings.hero.tagline,
       backgroundImageUrl: input.hero?.backgroundImageUrl ?? defaultSettings.hero.backgroundImageUrl,
       motto: input.hero?.motto ?? defaultSettings.hero.motto,
+      quotes: normalizeHeroQuotes(input.hero?.quotes),
     },
     navigation: Array.isArray(input.navigation) ? input.navigation : defaultSettings.navigation,
     updatedAt: input.updatedAt ?? '',
@@ -93,6 +99,14 @@ export function formatSocialLinksText(links: SiteSocialLink[]): string {
   return links.map((link) => `${link.label} | ${link.href}`).join('\n');
 }
 
+export function parseHeroQuotesText(value: string): string[] {
+  return normalizeHeroQuotes(value.split('\n'));
+}
+
+export function formatHeroQuotesText(quotes: string[]): string {
+  return normalizeHeroQuotes(quotes).join('\n');
+}
+
 export function buildSettingsFormKey(settings: SiteSettings): string {
   return JSON.stringify({
     profile: settings.profile,
@@ -109,6 +123,14 @@ function normalizeSocialLinks(links: SiteSocialLink[] | undefined): SiteSocialLi
       href: link.href.trim(),
     }))
     .filter((link) => link.label && link.href);
+}
+
+function normalizeHeroQuotes(quotes: string[] | undefined): string[] {
+  const normalized = (Array.isArray(quotes) ? quotes : defaultSettings.hero.quotes)
+    .map((quote) => quote.trim())
+    .filter(Boolean);
+
+  return normalized.length > 0 ? normalized : [defaultSettings.hero.motto];
 }
 
 export function buildGetPublicSettingsRequest(options: PublicSettingsRequestOptions = {}): SettingsRequest {
