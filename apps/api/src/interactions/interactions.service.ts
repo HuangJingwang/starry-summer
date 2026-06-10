@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
-import { isVisibleSubmission } from '@starry-summer/shared';
+
+import { INTERACTIONS_REPOSITORY, type InteractionsRepository } from './interactions.repository.js';
 
 export interface CommentRecord {
   id: string;
@@ -38,56 +39,36 @@ export interface ModerationListFilter {
 
 @Injectable()
 export class InteractionsService {
-  private readonly comments = new Map<string, CommentRecord>();
-  private readonly guestbookEntries = new Map<string, GuestbookEntryRecord>();
   private readonly likes = new Map<string, number>();
-  private nextCommentId = 1;
-  private nextGuestbookId = 1;
+
+  constructor(
+    @Inject(INTERACTIONS_REPOSITORY)
+    private readonly repository: InteractionsRepository,
+  ) {}
 
   async createComment(input: CreateCommentInput): Promise<CommentRecord> {
-    const comment: CommentRecord = {
-      id: String(this.nextCommentId++),
-      targetType: input.targetType,
-      targetId: input.targetId,
-      authorName: input.authorName,
-      body: input.body,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    this.comments.set(comment.id, comment);
-    return comment;
+    return this.repository.createComment(input);
   }
 
   async moderateComment(id: string, status: ModerationStatus): Promise<CommentRecord> {
-    const comment = this.comments.get(id);
+    const comment = await this.repository.moderateComment(id, status);
 
     if (!comment) {
       throw new NotFoundException(`Comment ${id} was not found`);
     }
 
-    const updated = { ...comment, status };
-    this.comments.set(id, updated);
-
-    return updated;
+    return comment;
   }
 
   async listAdminComments(filter: ModerationListFilter = {}): Promise<CommentRecord[]> {
-    return [...this.comments.values()]
-      .filter((comment) => (filter.status ? comment.status === filter.status : true))
-      .sort(sortNewestModerationFirst);
+    return this.repository.listAdminComments(filter);
   }
 
   async listApprovedComments(
     targetType: CommentRecord['targetType'],
     targetId: string,
   ): Promise<CommentRecord[]> {
-    return [...this.comments.values()].filter(
-      (comment) =>
-        comment.targetType === targetType &&
-        comment.targetId === targetId &&
-        isVisibleSubmission(comment),
-    );
+    return this.repository.listApprovedComments(targetType, targetId);
   }
 
   async likeContent(targetType: ContentType, targetId: string): Promise<number> {
@@ -103,55 +84,28 @@ export class InteractionsService {
   }
 
   async createGuestbookEntry(input: CreateGuestbookEntryInput): Promise<GuestbookEntryRecord> {
-    const entry: GuestbookEntryRecord = {
-      id: String(this.nextGuestbookId++),
-      authorName: input.authorName,
-      body: input.body,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    this.guestbookEntries.set(entry.id, entry);
-    return entry;
+    return this.repository.createGuestbookEntry(input);
   }
 
   async moderateGuestbookEntry(id: string, status: ModerationStatus): Promise<GuestbookEntryRecord> {
-    const entry = this.guestbookEntries.get(id);
+    const entry = await this.repository.moderateGuestbookEntry(id, status);
 
     if (!entry) {
       throw new NotFoundException(`Guestbook entry ${id} was not found`);
     }
 
-    const updated = { ...entry, status };
-    this.guestbookEntries.set(id, updated);
-
-    return updated;
+    return entry;
   }
 
   async listAdminGuestbookEntries(filter: ModerationListFilter = {}): Promise<GuestbookEntryRecord[]> {
-    return [...this.guestbookEntries.values()]
-      .filter((entry) => (filter.status ? entry.status === filter.status : true))
-      .sort(sortNewestModerationFirst);
+    return this.repository.listAdminGuestbookEntries(filter);
   }
 
   async listApprovedGuestbookEntries(): Promise<GuestbookEntryRecord[]> {
-    return [...this.guestbookEntries.values()].filter(isVisibleSubmission);
+    return this.repository.listApprovedGuestbookEntries();
   }
 
   private likeKey(targetType: ContentType, targetId: string): string {
     return `${targetType}:${targetId}`;
   }
-}
-
-function sortNewestModerationFirst(
-  a: Pick<CommentRecord, 'id' | 'createdAt'>,
-  b: Pick<CommentRecord, 'id' | 'createdAt'>,
-): number {
-  const dateOrder = b.createdAt.localeCompare(a.createdAt);
-
-  if (dateOrder !== 0) {
-    return dateOrder;
-  }
-
-  return Number(b.id) - Number(a.id);
 }

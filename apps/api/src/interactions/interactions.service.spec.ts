@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import { InMemoryInteractionsRepository } from './interactions.repository';
 import { InteractionsService } from './interactions.service';
 
 describe('InteractionsService', () => {
   let service: InteractionsService;
 
   beforeEach(() => {
-    service = new InteractionsService();
+    service = new InteractionsService(
+      new InMemoryInteractionsRepository(() => '2026-06-10T00:00:00.000Z'),
+    );
   });
 
   test('creates pending comments by default', async () => {
