@@ -1,6 +1,6 @@
 import pg from 'pg';
 
-import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 
 import type { ContentRecord, PublicContentFilter } from './content.service';
 import type { ContentRepository, CreateContentRecordInput } from './content.repository';
@@ -14,6 +14,8 @@ export interface ContentItemRow {
   slug: string;
   summary: string;
   body_markdown: string;
+  source_type: ContentSourceType;
+  source_url: string;
   status: ContentStatus;
   visibility: ContentVisibility;
   allow_comments: boolean;
@@ -41,6 +43,8 @@ export function mapContentRow(row: ContentItemRow): ContentRecord {
     slug: row.slug,
     summary: row.summary,
     bodyMarkdown: row.body_markdown,
+    sourceType: row.source_type,
+    sourceUrl: row.source_url,
     status: row.status,
     visibility: row.visibility,
     allowComments: row.allow_comments,
@@ -65,6 +69,8 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         slug,
         summary,
         body_markdown,
+        source_type,
+        source_url,
         status,
         visibility,
         allow_comments,
@@ -74,7 +80,7 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
         like_count,
         published_at
       )
-      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       returning *
     `,
     values: [
@@ -83,6 +89,8 @@ export function buildContentInsert(input: CreateContentRecordInput): SqlStatemen
       input.slug,
       input.summary,
       input.bodyMarkdown,
+      input.sourceType,
+      input.sourceUrl,
       input.status,
       input.visibility,
       input.allowComments,
@@ -335,6 +343,8 @@ function toDatabasePatch(patch: Partial<ContentRecord>): Record<string, unknown>
     ['slug', 'slug'],
     ['summary', 'summary'],
     ['bodyMarkdown', 'body_markdown'],
+    ['sourceType', 'source_type'],
+    ['sourceUrl', 'source_url'],
     ['status', 'status'],
     ['visibility', 'visibility'],
     ['allowComments', 'allow_comments'],

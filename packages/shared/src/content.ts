@@ -4,6 +4,8 @@ export type ContentVisibility = 'public' | 'private';
 
 export type ContentType = 'post' | 'note' | 'moment' | 'page' | 'project';
 
+export type ContentSourceType = 'original' | 'repost';
+
 export interface ContentVisibilityInput {
   status: ContentStatus;
   visibility: ContentVisibility;

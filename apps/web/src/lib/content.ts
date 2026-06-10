@@ -1,4 +1,4 @@
-import { isPublicContent, type ContentStatus, type ContentType, type ContentVisibility } from '@starry-summer/shared';
+import { isPublicContent, type ContentSourceType, type ContentStatus, type ContentType, type ContentVisibility } from '@starry-summer/shared';
 
 export interface SiteContentItem {
   id: string;
@@ -9,6 +9,8 @@ export interface SiteContentItem {
   publishedAt: string;
   summary?: string;
   bodyMarkdown?: string;
+  sourceType?: ContentSourceType;
+  sourceUrl?: string;
   slug?: string;
   featured?: boolean;
   categories?: string[];

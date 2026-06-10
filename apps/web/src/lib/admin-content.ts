@@ -1,4 +1,4 @@
-import type { ContentStatus, ContentType } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType } from '@starry-summer/shared';
 
 import type { SiteContentItem } from './content';
 
@@ -43,6 +43,8 @@ export interface AdminContentApiRecord {
   visibility?: SiteContentItem['visibility'];
   featured?: boolean;
   bodyMarkdown?: string;
+  sourceType?: ContentSourceType;
+  sourceUrl?: string;
   allowComments?: boolean;
   pinned?: boolean;
   viewCount?: number;
@@ -60,6 +62,8 @@ export interface AdminContentPayload {
   slug?: string;
   summary?: string;
   bodyMarkdown?: string;
+  sourceType?: ContentSourceType;
+  sourceUrl?: string;
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
@@ -110,6 +114,8 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     slug: record.slug,
     featured: record.featured ?? false,
     bodyMarkdown: record.bodyMarkdown ?? '',
+    sourceType: record.sourceType ?? 'original',
+    sourceUrl: record.sourceUrl ?? '',
     allowComments: record.allowComments ?? true,
     pinned: record.pinned ?? false,
     categories: record.categories ?? [],
@@ -133,6 +139,8 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     title: input.title?.trim(),
     slug: input.slug ? normalizeSlug(input.slug) : undefined,
     summary: input.summary?.trim(),
+    sourceType: input.sourceType === 'repost' ? 'repost' : 'original',
+    sourceUrl: input.sourceUrl?.trim() ?? '',
     categories: normalizeList(input.categories),
     tags: normalizeList(input.tags),
   };
@@ -148,6 +156,8 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     slug: formText(formData, 'slug'),
     type: formText(formData, 'type') as ContentType,
     summary: formText(formData, 'summary'),
+    sourceType: formText(formData, 'sourceType') as ContentSourceType,
+    sourceUrl: formText(formData, 'sourceUrl'),
     bodyMarkdown: formText(formData, 'bodyMarkdown'),
     categories: splitList(formText(formData, 'categories')),
     tags: splitList(formText(formData, 'tags')),

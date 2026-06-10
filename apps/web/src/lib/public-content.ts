@@ -1,4 +1,4 @@
-import type { ContentStatus, ContentType } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType } from '@starry-summer/shared';
 
 import { getPublicContent, seedContent, type ContentSort, type SiteContentItem } from './content';
 
@@ -11,6 +11,8 @@ export interface PublicContentApiRecord {
   status: ContentStatus;
   visibility?: SiteContentItem['visibility'];
   featured?: boolean;
+  sourceType?: ContentSourceType;
+  sourceUrl?: string;
   categories?: string[];
   tags?: string[];
   bodyMarkdown?: string;
@@ -85,6 +87,8 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     summary: record.summary ?? '',
     slug: record.slug,
     featured: record.featured ?? false,
+    sourceType: record.sourceType ?? 'original',
+    sourceUrl: record.sourceUrl ?? '',
     categories: record.categories ?? [],
     tags: record.tags ?? [],
     bodyMarkdown: record.bodyMarkdown ?? '',

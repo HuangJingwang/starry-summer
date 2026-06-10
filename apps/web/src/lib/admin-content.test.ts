@@ -125,6 +125,8 @@ describe('admin content helpers', () => {
           featured: true,
           categories: ['Writing', 'Platform'],
           tags: ['Next.js', 'Architecture'],
+          sourceType: 'original',
+          sourceUrl: '',
         }),
       },
     });
@@ -211,6 +213,8 @@ describe('admin content helpers', () => {
         status: 'draft',
         visibility: 'public',
         featured: true,
+        sourceType: 'repost',
+        sourceUrl: 'https://example.com/original',
         allowComments: false,
         pinned: true,
         viewCount: 10,
@@ -231,6 +235,8 @@ describe('admin content helpers', () => {
       status: 'draft',
       visibility: 'public',
       featured: true,
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/original',
       allowComments: false,
       pinned: true,
       viewCount: 10,
@@ -275,6 +281,8 @@ describe('admin content helpers', () => {
           allowComments: true,
           pinned: false,
           featured: false,
+          sourceType: 'original',
+          sourceUrl: '',
           viewCount: 0,
           likeCount: 0,
           publishedAt: '2026-06-10',
@@ -346,6 +354,8 @@ describe('admin content helpers', () => {
         allowComments: false,
         pinned: true,
         featured: true,
+        sourceType: 'original',
+        sourceUrl: '',
         viewCount: 0,
         likeCount: 0,
         publishedAt: '2026-06-10',
@@ -379,6 +389,8 @@ describe('admin content helpers', () => {
     formData.set('slug', 'Form Title');
     formData.set('type', 'project');
     formData.set('summary', ' Form summary ');
+    formData.set('sourceType', 'repost');
+    formData.set('sourceUrl', ' https://example.com/source ');
     formData.set('bodyMarkdown', '# Form Title');
     formData.set('categories', 'Projects, Platform, Projects');
     formData.set('tags', 'Next.js, Launch');
@@ -390,6 +402,8 @@ describe('admin content helpers', () => {
       slug: 'form-title',
       type: 'project',
       summary: 'Form summary',
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/source',
       bodyMarkdown: '# Form Title',
       allowComments: true,
       pinned: false,

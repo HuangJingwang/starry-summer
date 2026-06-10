@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { parseMarkdownDocument, serializeMarkdownDocument } from '@starry-summer/markdown';
-import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 import { canPublishContent } from '@starry-summer/shared';
 
 import { CONTENT_REPOSITORY, type ContentRepository } from './content.repository.js';
@@ -12,6 +12,8 @@ export interface ContentRecord {
   slug: string;
   summary: string;
   bodyMarkdown: string;
+  sourceType: ContentSourceType;
+  sourceUrl: string;
   status: ContentStatus;
   visibility: ContentVisibility;
   allowComments: boolean;
@@ -32,6 +34,8 @@ export interface CreateDraftInput {
   slug: string;
   summary: string;
   bodyMarkdown: string;
+  sourceType?: ContentSourceType;
+  sourceUrl?: string;
   categories?: string[];
   tags?: string[];
 }
@@ -42,6 +46,8 @@ export type UpdateContentInput = Partial<{
   slug: string;
   summary: string;
   bodyMarkdown: string;
+  sourceType: ContentSourceType;
+  sourceUrl: string;
   allowComments: boolean;
   pinned: boolean;
   featured: boolean;
@@ -70,6 +76,8 @@ export class ContentService {
       slug: input.slug,
       summary: input.summary,
       bodyMarkdown: input.bodyMarkdown,
+      sourceType: input.sourceType ?? 'original',
+      sourceUrl: normalizeSourceUrl(input.sourceUrl),
       status: 'draft',
       visibility: 'public',
       allowComments: true,
@@ -161,6 +169,8 @@ export class ContentService {
     const slug = String(document.frontmatter.slug ?? this.slugify(title));
     const summary = String(document.frontmatter.summary ?? '');
     const visibility = document.frontmatter.visibility === 'private' ? 'private' : 'public';
+    const sourceType = document.frontmatter.sourceType === 'repost' ? 'repost' : 'original';
+    const sourceUrl = normalizeSourceUrl(String(document.frontmatter.sourceUrl ?? ''));
     const categories = normalizeTaxonomyLabels(toStringArray(document.frontmatter.categories));
     const tags = normalizeTaxonomyLabels(toStringArray(document.frontmatter.tags));
 
@@ -170,6 +180,8 @@ export class ContentService {
       slug,
       summary,
       bodyMarkdown: document.body,
+      sourceType,
+      sourceUrl,
       categories,
       tags,
     });
@@ -185,6 +197,8 @@ export class ContentService {
         title: record.title,
         slug: record.slug,
         summary: record.summary,
+        sourceType: record.sourceType,
+        sourceUrl: record.sourceUrl,
         type: record.type,
         status: record.status,
         visibility: record.visibility,
@@ -245,4 +259,8 @@ function normalizeTaxonomyLabels(labels: string[] | undefined): string[] {
   }
 
   return normalized;
+}
+
+function normalizeSourceUrl(value: string | undefined): string {
+  return value?.trim() ?? '';
 }

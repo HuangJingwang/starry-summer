@@ -47,6 +47,12 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       <p className="detail__summary">{item.summary}</p>
       <div className="detail__meta">
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
+        <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>
+        {item.sourceType === 'repost' && item.sourceUrl ? (
+          <a href={item.sourceUrl} target="_blank" rel="nofollow noopener noreferrer">
+            原文
+          </a>
+        ) : null}
         <span>{item.viewCount ?? 0} views</span>
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>

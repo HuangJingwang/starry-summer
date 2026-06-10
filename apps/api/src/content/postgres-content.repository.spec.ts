@@ -18,6 +18,8 @@ describe('PostgresContentRepository mapping', () => {
       slug: 'hello',
       summary: 'Intro',
       body_markdown: '# Hello',
+      source_type: 'repost',
+      source_url: 'https://example.com/original',
       status: 'published',
       visibility: 'public',
       allow_comments: true,
@@ -39,6 +41,8 @@ describe('PostgresContentRepository mapping', () => {
       slug: 'hello',
       summary: 'Intro',
       bodyMarkdown: '# Hello',
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/original',
       status: 'published',
       visibility: 'public',
       allowComments: true,
@@ -61,6 +65,8 @@ describe('PostgresContentRepository mapping', () => {
       slug: 'note',
       summary: 'Short note',
       bodyMarkdown: '# Note',
+      sourceType: 'original',
+      sourceUrl: '',
       status: 'draft',
       visibility: 'public',
       allowComments: true,
@@ -75,12 +81,16 @@ describe('PostgresContentRepository mapping', () => {
 
     expect(insert.sql).toContain('insert into content_items');
     expect(insert.sql).toContain('body_markdown');
+    expect(insert.sql).toContain('source_type');
+    expect(insert.sql).toContain('source_url');
     expect(insert.values).toEqual([
       'note',
       'Note',
       'note',
       'Short note',
       '# Note',
+      'original',
+      '',
       'draft',
       'public',
       true,
@@ -97,6 +107,8 @@ describe('PostgresContentRepository mapping', () => {
       type: 'note',
       title: 'Updated',
       bodyMarkdown: '# Updated',
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/updated',
       status: 'archived',
       categories: ['Notes'],
       tags: ['Markdown'],
@@ -107,12 +119,16 @@ describe('PostgresContentRepository mapping', () => {
     expect(update?.sql).toContain('type = $2');
     expect(update?.sql).toContain('title = $3');
     expect(update?.sql).toContain('body_markdown = $4');
-    expect(update?.sql).toContain('status = $5');
+    expect(update?.sql).toContain('source_type = $5');
+    expect(update?.sql).toContain('source_url = $6');
+    expect(update?.sql).toContain('status = $7');
     expect(update?.values).toEqual([
       'content-1',
       'note',
       'Updated',
       '# Updated',
+      'repost',
+      'https://example.com/updated',
       'archived',
       '2026-06-10T02:00:00.000Z',
     ]);

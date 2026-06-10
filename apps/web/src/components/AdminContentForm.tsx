@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { ContentStatus, ContentType } from '@starry-summer/shared';
+import type { ContentSourceType, ContentStatus, ContentType } from '@starry-summer/shared';
 
 import {
   buildAdminContentActionRequest,
@@ -19,6 +19,8 @@ interface AdminContentFormInitialValue {
   status?: ContentStatus;
   summary?: string;
   bodyMarkdown?: string;
+  sourceType?: ContentSourceType;
+  sourceUrl?: string;
   categories?: string[];
   tags?: string[];
   allowComments?: boolean;
@@ -111,6 +113,19 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         摘要
         <textarea name="summary" rows={3} defaultValue={initialValue?.summary ?? ''} placeholder="用于列表页、SEO 和 RSS 的短摘要" />
       </label>
+      <div className="form-grid">
+        <label>
+          来源
+          <select name="sourceType" defaultValue={initialValue?.sourceType ?? 'original'}>
+            <option value="original">原创</option>
+            <option value="repost">转载</option>
+          </select>
+        </label>
+        <label>
+          原文链接
+          <input name="sourceUrl" defaultValue={initialValue?.sourceUrl ?? ''} placeholder="https://example.com/original" />
+        </label>
+      </div>
       <div className="form-grid">
         <label>
           分类

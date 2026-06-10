@@ -25,6 +25,8 @@ describe('ContentService', () => {
 
     expect(draft.status).toBe('draft');
     expect(draft.visibility).toBe('public');
+    expect(draft.sourceType).toBe('original');
+    expect(draft.sourceUrl).toBe('');
     expect(draft.title).toBe('Hello Platform');
     expect(draft.categories).toEqual(['Platform', 'Writing']);
     expect(draft.tags).toEqual(['Next.js', 'Architecture']);
@@ -118,6 +120,8 @@ describe('ContentService', () => {
       allowComments: false,
       featured: true,
       pinned: true,
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/original-post',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
     });
@@ -132,6 +136,8 @@ describe('ContentService', () => {
       allowComments: false,
       featured: true,
       pinned: true,
+      sourceType: 'repost',
+      sourceUrl: 'https://example.com/original-post',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
     });
@@ -180,6 +186,8 @@ describe('ContentService', () => {
         'title: Imported Note',
         'slug: imported-note',
         'summary: Imported from a Markdown archive',
+        'sourceType: repost',
+        'sourceUrl: https://example.com/source',
         'status: published',
         'visibility: private',
         '---',
@@ -191,6 +199,8 @@ describe('ContentService', () => {
     expect(imported.title).toBe('Imported Note');
     expect(imported.slug).toBe('imported-note');
     expect(imported.summary).toBe('Imported from a Markdown archive');
+    expect(imported.sourceType).toBe('repost');
+    expect(imported.sourceUrl).toBe('https://example.com/source');
     expect(imported.status).toBe('draft');
     expect(imported.visibility).toBe('private');
     expect(imported.bodyMarkdown).toBe('# Imported Note');
@@ -210,6 +220,8 @@ describe('ContentService', () => {
     expect(exported).toContain('title: Export Me');
     expect(exported).toContain('slug: export-me');
     expect(exported).toContain('summary: Portable content');
+    expect(exported).toContain('sourceType: original');
+    expect(exported).toContain("sourceUrl: ''");
     expect(exported).toContain('categories: []');
     expect(exported).toContain('tags: []');
     expect(exported).toContain('# Export Me');

@@ -8,6 +8,8 @@ create table if not exists content_items (
   summary text not null default '',
   body_markdown text not null default '',
   body_html text not null default '',
+  source_type text not null default 'original' check (source_type in ('original', 'repost')),
+  source_url text not null default '',
   status text not null default 'draft' check (status in ('draft', 'published', 'private', 'archived')),
   visibility text not null default 'public' check (visibility in ('public', 'private')),
   cover_asset_id uuid,
