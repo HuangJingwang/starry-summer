@@ -268,6 +268,34 @@ describe('web content helpers', () => {
     expect(results.map((item) => item.id)).toEqual(['3']);
   });
 
+  test('searches public content by SEO title and description', () => {
+    const results = searchContent(
+      [
+        {
+          id: 'seo-match',
+          title: 'Launch Notes',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-10',
+          seoTitle: 'Search Console Checklist',
+          seoDescription: 'Canonical deployment checklist',
+        },
+        {
+          id: 'miss',
+          title: 'Unrelated',
+          type: 'note',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-09',
+        },
+      ],
+      'canonical deployment',
+    );
+
+    expect(results.map((item) => item.id)).toEqual(['seo-match']);
+  });
+
   test('searches public content by series labels', () => {
     const results = searchContent(
       [

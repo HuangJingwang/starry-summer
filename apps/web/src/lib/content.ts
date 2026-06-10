@@ -342,9 +342,10 @@ function normalizeSearchTerms(query: string): string[] {
 function scoreSearchResult(item: SiteContentItem, terms: string[]): number {
   const title = item.title.toLowerCase();
   const summary = (item.summary ?? '').toLowerCase();
+  const seo = [item.seoTitle ?? '', item.seoDescription ?? ''].join(' ').toLowerCase();
   const taxonomy = [...(item.categories ?? []), ...(item.tags ?? []), ...(item.series ?? [])].join(' ').toLowerCase();
   const body = (item.bodyMarkdown ?? '').toLowerCase();
-  const combined = [title, summary, taxonomy, body].join(' ');
+  const combined = [title, summary, seo, taxonomy, body].join(' ');
 
   if (!terms.every((term) => combined.includes(term))) {
     return 0;
@@ -357,6 +358,10 @@ function scoreSearchResult(item: SiteContentItem, terms: string[]): number {
 
     if (summary.includes(term)) {
       return score + 5;
+    }
+
+    if (seo.includes(term)) {
+      return score + 4;
     }
 
     if (taxonomy.includes(term)) {
