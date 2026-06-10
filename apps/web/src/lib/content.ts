@@ -10,12 +10,19 @@ export interface SiteContentItem {
   summary?: string;
   slug?: string;
   featured?: boolean;
+  categories?: string[];
   tags?: string[];
   viewCount?: number;
   likeCount?: number;
 }
 
 export interface ContentArchiveGroup {
+  key: string;
+  label: string;
+  items: SiteContentItem[];
+}
+
+export interface ContentCategoryGroup {
   key: string;
   label: string;
   items: SiteContentItem[];
@@ -76,6 +83,23 @@ export function groupContentByMonth(items: SiteContentItem[]): ContentArchiveGro
   });
 }
 
+export function groupContentByCategory(items: SiteContentItem[]): ContentCategoryGroup[] {
+  const groups = new Map<string, ContentCategoryGroup>();
+
+  for (const item of getPublicContent(items)) {
+    const categories = new Set(item.categories?.map((category) => category.trim()).filter(Boolean) ?? []);
+
+    for (const category of categories) {
+      const key = slugifyTaxonomyLabel(category);
+      const group = groups.get(key) ?? { key, label: category, items: [] };
+      group.items.push(item);
+      groups.set(key, group);
+    }
+  }
+
+  return [...groups.values()].sort((a, b) => b.items.length - a.items.length || a.label.localeCompare(b.label));
+}
+
 export function getAdjacentContent(items: SiteContentItem[], currentId: string): AdjacentContent {
   const timeline = [...getPublicContent(items)].reverse();
   const index = timeline.findIndex((item) => item.id === currentId);
@@ -130,6 +154,14 @@ export function getContentBySlug(
   return getPublicContent(items, type).find((item) => (item.slug ?? item.id) === slug) ?? null;
 }
 
+function slugifyTaxonomyLabel(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export const seedContent: SiteContentItem[] = [
   {
     id: 'intro-post',
@@ -141,6 +173,7 @@ export const seedContent: SiteContentItem[] = [
     summary: '从博客、笔记、日常和项目四条线开始，把写作和作品沉淀成一个可部署的平台。',
     slug: 'personal-content-platform',
     featured: true,
+    categories: ['Writing', 'Platform'],
     tags: ['Platform', 'Writing', 'System'],
     viewCount: 128,
     likeCount: 18,
@@ -154,6 +187,7 @@ export const seedContent: SiteContentItem[] = [
     publishedAt: '2026-06-09',
     summary: '数据库负责运行时体验，Markdown 导入导出负责长期所有权。',
     slug: 'markdown-ownership',
+    categories: ['Notes', 'Writing'],
     tags: ['Markdown', 'Archive'],
     viewCount: 76,
     likeCount: 9,
@@ -168,6 +202,7 @@ export const seedContent: SiteContentItem[] = [
     summary: '个人内容平台：文章、笔记、日常、项目、评论、留言和云服务器部署。',
     slug: 'starry-summer',
     featured: true,
+    categories: ['Projects', 'Platform'],
     tags: ['Next.js', 'NestJS', 'PostgreSQL'],
     viewCount: 214,
     likeCount: 31,
@@ -181,6 +216,7 @@ export const seedContent: SiteContentItem[] = [
     publishedAt: '2026-06-07',
     summary: '一个能长期长大的个人平台，第一天最重要的是边界清楚。',
     slug: 'first-foundation',
+    categories: ['Daily'],
     tags: ['Daily'],
     viewCount: 44,
     likeCount: 6,
@@ -194,6 +230,7 @@ export const seedContent: SiteContentItem[] = [
     publishedAt: '2026-06-06',
     summary: '一个用于沉淀写作、项目和日常记录的个人内容平台。',
     slug: 'about',
+    categories: ['Site'],
     tags: ['About'],
     viewCount: 31,
     likeCount: 2,

@@ -438,6 +438,34 @@ textarea {
   text-align: right;
 }
 
+.category-stack {
+  display: grid;
+  gap: 34px;
+}
+
+.category-section {
+  display: grid;
+  gap: 16px;
+}
+
+.category-section__heading {
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+.category-section__heading h2 {
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  margin: 0;
+}
+
+.category-section__heading span {
+  color: var(--muted);
+}
+
 .admin-main {
   background: #eff3f1;
   display: grid;

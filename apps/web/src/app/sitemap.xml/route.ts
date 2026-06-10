@@ -2,7 +2,7 @@ import { getContentHref, getPublicContent, seedContent } from '@/lib/content';
 
 export function GET() {
   const siteUrl = process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000';
-  const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'archives', 'guestbook', 'about', 'search'];
+  const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'categories', 'archives', 'guestbook', 'about', 'search'];
   const contentRoutes = getPublicContent(seedContent).map((item) => getContentHref(item).slice(1));
   const urls = [...staticRoutes, ...contentRoutes]
     .map((route) => {

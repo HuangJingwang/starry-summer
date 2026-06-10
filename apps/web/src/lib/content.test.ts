@@ -7,6 +7,7 @@ import {
   groupContentByMonth,
   getFeaturedContent,
   getPublicContent,
+  groupContentByCategory,
   groupContentCounts,
   searchContent,
 } from './content';
@@ -129,6 +130,60 @@ describe('web content helpers', () => {
     expect(groups).toEqual([
       { key: '2026-06', label: '2026 年 06 月', items: expect.arrayContaining([expect.objectContaining({ id: '1' }), expect.objectContaining({ id: '2' })]) },
       { key: '2026-05', label: '2026 年 05 月', items: [expect.objectContaining({ id: '3' })] },
+    ]);
+  });
+
+  test('groups public content by category newest first', () => {
+    const groups = groupContentByCategory([
+      {
+        id: 'old',
+        title: 'Old',
+        type: 'post',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-01-01',
+        categories: ['Writing', 'System'],
+      },
+      {
+        id: 'new',
+        title: 'New',
+        type: 'note',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-02-01',
+        categories: ['Writing'],
+      },
+      {
+        id: 'draft',
+        title: 'Draft',
+        type: 'post',
+        status: 'draft',
+        visibility: 'public',
+        publishedAt: '2026-03-01',
+        categories: ['Writing'],
+      },
+      {
+        id: 'private',
+        title: 'Private',
+        type: 'project',
+        status: 'published',
+        visibility: 'private',
+        publishedAt: '2026-04-01',
+        categories: ['Lab'],
+      },
+    ]);
+
+    expect(groups).toEqual([
+      {
+        key: 'writing',
+        label: 'Writing',
+        items: [expect.objectContaining({ id: 'new' }), expect.objectContaining({ id: 'old' })],
+      },
+      {
+        key: 'system',
+        label: 'System',
+        items: [expect.objectContaining({ id: 'old' })],
+      },
     ]);
   });
 
