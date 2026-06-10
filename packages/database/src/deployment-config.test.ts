@@ -7,6 +7,21 @@ import { describe, expect, test } from 'vitest';
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 describe('deployment configuration', () => {
+  test('documents every Docker Compose environment variable in the env example', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
+    const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
+    const composeVariables = [...compose.matchAll(/\$\{([A-Z0-9_]+)(?::-[^}]*)?\}/g)].map((match) => match[1]);
+    const documentedVariables = new Set(
+      env
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#'))
+        .map((line) => line.split('=')[0]),
+    );
+
+    expect([...new Set(composeVariables)].filter((variable) => !documentedVariables.has(variable))).toEqual([]);
+  });
+
   test('runs database migrations before the API starts in Docker Compose', async () => {
     const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
 
