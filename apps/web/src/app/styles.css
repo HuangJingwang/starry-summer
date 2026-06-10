@@ -1414,6 +1414,36 @@ textarea {
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
 }
 
+.editor-toolbar {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(140px, 1fr) minmax(260px, auto);
+}
+
+.asset-insert-controls {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(170px, 1fr) auto;
+}
+
+.asset-insert-controls button {
+  border-radius: 8px;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.asset-insert-message {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin: -2px 0 0;
+}
+
+.asset-insert-message--error {
+  color: #9b342d;
+}
+
 .editor-pane textarea {
   font-family: "SFMono-Regular", Consolas, monospace;
   line-height: 1.6;
@@ -1604,6 +1634,8 @@ textarea {
   .project-meta,
   .moderation-toolbar,
   .editor-grid,
+  .editor-toolbar,
+  .asset-insert-controls,
   .adjacent-content,
   .archive-item,
   .split-panels,

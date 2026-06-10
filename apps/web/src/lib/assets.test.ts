@@ -1,6 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import { buildAssetDeleteRequest, buildAssetUploadPayload, buildAssetUploadRequest, loadRandomAsset, normalizeStoredAsset } from './assets';
+import {
+  buildAssetDeleteRequest,
+  buildAssetUploadPayload,
+  buildAssetUploadRequest,
+  buildMarkdownAssetEmbed,
+  insertMarkdownAsset,
+  loadRandomAsset,
+  normalizeStoredAsset,
+} from './assets';
 
 describe('asset client helpers', () => {
   test('builds an upload payload from a browser file', async () => {
@@ -107,5 +115,52 @@ describe('asset client helpers', () => {
     });
 
     await expect(loadRandomAsset({ usage: 'background' }, async () => new Response('Not found', { status: 404 }))).resolves.toBeNull();
+  });
+
+  test('builds markdown embeds for images and attachments', () => {
+    expect(
+      buildMarkdownAssetEmbed(normalizeStoredAsset({
+        id: 'asset-image',
+        storageKey: '2026/06/cover.png',
+        publicUrl: '/uploads/cover.png',
+        mimeType: 'image/png',
+        byteSize: 10,
+        usage: 'content',
+        altText: 'Cover image',
+        createdAt: '',
+      })),
+    ).toBe('![Cover image](/uploads/cover.png)');
+
+    expect(
+      buildMarkdownAssetEmbed(normalizeStoredAsset({
+        id: 'asset-doc',
+        storageKey: 'docs/platform-plan.pdf',
+        publicUrl: '/uploads/platform-plan.pdf',
+        mimeType: 'application/pdf',
+        byteSize: 10,
+        usage: 'attachment',
+        altText: '',
+        createdAt: '',
+      })),
+    ).toBe('[platform-plan.pdf](/uploads/platform-plan.pdf)');
+  });
+
+  test('inserts markdown asset embeds at the selected range', () => {
+    const asset = normalizeStoredAsset({
+      id: 'asset-image',
+      storageKey: '2026/06/diagram.png',
+      publicUrl: '/uploads/diagram.png',
+      mimeType: 'image/png',
+      byteSize: 10,
+      usage: 'content',
+      altText: 'System diagram',
+      createdAt: '',
+    });
+
+    expect(insertMarkdownAsset('Hello world', asset, { start: 6, end: 11 })).toEqual({
+      markdown: 'Hello ![System diagram](/uploads/diagram.png)',
+      selectionStart: 45,
+      selectionEnd: 45,
+    });
   });
 });

@@ -4,6 +4,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectMetadata } from '@starry-summer/shared';
 
 import {
+  buildAdminAssetListRequest,
+  insertMarkdownAsset,
+  normalizeStoredAsset,
+  type AssetUsage,
+  type StoredAsset,
+} from '@/lib/assets';
+import {
   buildAdminContentActionRequest,
   buildContentPayloadFromFormData,
   buildCreateDraftRequest,
@@ -47,11 +54,14 @@ interface AdminContentFormProps {
 }
 
 type SaveState = 'idle' | 'submitting' | 'success' | 'error';
+type AssetLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 const fallbackMarkdown = '# 新内容标题\n\n这里写正文。';
+const authoringAssetUsages: AssetUsage[] = ['content', 'attachment'];
 
 export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const markdownTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [state, setState] = useState<SaveState>('idle');
   const [message, setMessage] = useState('');
   const [markdown, setMarkdown] = useState(initialValue?.bodyMarkdown ?? fallbackMarkdown);
@@ -59,6 +69,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   const [isDirty, setIsDirty] = useState(false);
   const [localDraft, setLocalDraft] = useState<ContentDraftSnapshot | null>(null);
   const [localDraftMessage, setLocalDraftMessage] = useState('');
+  const [assetState, setAssetState] = useState<AssetLoadState>('idle');
+  const [assetMessage, setAssetMessage] = useState('');
+  const [authoringAssets, setAuthoringAssets] = useState<StoredAsset[]>([]);
+  const [selectedAssetId, setSelectedAssetId] = useState('');
   const preview = useMemo(() => createMarkdownPreview(markdown), [markdown]);
   const draftStorageKey = useMemo(() => getContentDraftStorageKey(initialValue?.id), [initialValue?.id]);
 
@@ -89,7 +103,54 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     }
   }, [draftStorageKey]);
 
-  function readDraftSnapshot(): ContentDraftSnapshot | null {
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAuthoringAssets() {
+      setAssetState('loading');
+      setAssetMessage('');
+
+      try {
+        const responses = await Promise.all(
+          authoringAssetUsages.map((usage) => {
+            const request = buildAdminAssetListRequest({ usage });
+
+            return fetch(request.url, request.init);
+          }),
+        );
+
+        if (responses.some((response) => !response.ok)) {
+          throw new Error('Asset list request failed');
+        }
+
+        const lists = await Promise.all(responses.map((response) => response.json()));
+        const assets = dedupeAssets(
+          lists.flatMap((list) => (Array.isArray(list) ? list.map((item) => normalizeStoredAsset(item as Partial<StoredAsset>)) : [])),
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        setAuthoringAssets(assets);
+        setSelectedAssetId((current) => current || assets[0]?.id || '');
+        setAssetState('ready');
+      } catch {
+        if (!cancelled) {
+          setAssetState('error');
+          setAssetMessage('素材列表加载失败，可先到 Assets 页面上传或稍后重试。');
+        }
+      }
+    }
+
+    void loadAuthoringAssets();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function readDraftSnapshot(bodyMarkdownOverride?: string): ContentDraftSnapshot | null {
     if (!formRef.current) {
       return null;
     }
@@ -102,13 +163,13 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       slug: String(formData.get('slug') ?? ''),
       summary: String(formData.get('summary') ?? ''),
       visibility,
-      bodyMarkdown: String(formData.get('bodyMarkdown') ?? markdown),
+      bodyMarkdown: bodyMarkdownOverride ?? String(formData.get('bodyMarkdown') ?? markdown),
       savedAt: new Date().toISOString(),
     };
   }
 
-  function saveLocalDraft() {
-    const snapshot = readDraftSnapshot();
+  function saveLocalDraft(bodyMarkdownOverride?: string) {
+    const snapshot = readDraftSnapshot(bodyMarkdownOverride);
 
     if (!snapshot) {
       return;
@@ -126,6 +187,11 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   function markDirtyAndSaveLocalDraft() {
     setIsDirty(true);
     saveLocalDraft();
+  }
+
+  function markDirtyAndSaveMarkdownDraft(nextMarkdown: string) {
+    setIsDirty(true);
+    saveLocalDraft(nextMarkdown);
   }
 
   function recoverLocalDraft() {
@@ -246,6 +312,30 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       setState('error');
       setMessage('删除失败，请先确认内容已归档且 API 服务可用。');
     }
+  }
+
+  function insertSelectedAsset() {
+    const selectedAsset = authoringAssets.find((asset) => asset.id === selectedAssetId);
+
+    if (!selectedAsset) {
+      setAssetMessage('请选择一个素材。');
+      return;
+    }
+
+    const textarea = markdownTextareaRef.current;
+    const insertion = insertMarkdownAsset(markdown, selectedAsset, {
+      start: textarea?.selectionStart ?? markdown.length,
+      end: textarea?.selectionEnd ?? markdown.length,
+    });
+
+    setMarkdown(insertion.markdown);
+    markDirtyAndSaveMarkdownDraft(insertion.markdown);
+    setAssetMessage('素材已插入 Markdown。');
+
+    window.requestAnimationFrame(() => {
+      markdownTextareaRef.current?.focus();
+      markdownTextareaRef.current?.setSelectionRange(insertion.selectionStart, insertion.selectionEnd);
+    });
   }
 
   return (
@@ -410,8 +500,33 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       </div>
       <div className="editor-grid">
         <section className="editor-pane">
-          <label htmlFor="markdown-body">Markdown</label>
+          <div className="editor-toolbar">
+            <label htmlFor="markdown-body">Markdown</label>
+            <div className="asset-insert-controls">
+              <select
+                value={selectedAssetId}
+                onChange={(event) => setSelectedAssetId(event.target.value)}
+                aria-label="选择要插入的素材"
+                disabled={assetState === 'loading' || authoringAssets.length === 0}
+              >
+                {authoringAssets.length > 0 ? (
+                  authoringAssets.map((asset) => (
+                    <option key={asset.id || asset.storageKey} value={asset.id}>
+                      {formatAssetOptionLabel(asset)}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">{assetState === 'loading' ? '加载素材中' : '暂无可插入素材'}</option>
+                )}
+              </select>
+              <button type="button" onClick={insertSelectedAsset} disabled={assetState === 'loading' || authoringAssets.length === 0}>
+                插入素材
+              </button>
+            </div>
+          </div>
+          {assetMessage ? <p className={`asset-insert-message asset-insert-message--${assetState}`}>{assetMessage}</p> : null}
           <textarea
+            ref={markdownTextareaRef}
             id="markdown-body"
             name="bodyMarkdown"
             value={markdown}
@@ -455,4 +570,28 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
     </form>
   );
+}
+
+function dedupeAssets(assets: StoredAsset[]): StoredAsset[] {
+  const seen = new Set<string>();
+  const result: StoredAsset[] = [];
+
+  for (const asset of assets) {
+    const key = asset.id || asset.storageKey;
+
+    if (!key || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    result.push(asset);
+  }
+
+  return result;
+}
+
+function formatAssetOptionLabel(asset: StoredAsset): string {
+  const label = asset.altText || asset.storageKey.split('/').filter(Boolean).at(-1) || asset.publicUrl;
+
+  return `${label} · ${asset.usage}`;
 }

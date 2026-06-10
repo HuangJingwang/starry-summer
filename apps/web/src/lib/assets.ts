@@ -29,6 +29,17 @@ export interface AssetRequestOptions {
   apiBaseUrl?: string;
 }
 
+export interface MarkdownSelectionRange {
+  start: number;
+  end: number;
+}
+
+export interface MarkdownAssetInsertion {
+  markdown: string;
+  selectionStart: number;
+  selectionEnd: number;
+}
+
 export async function buildAssetUploadPayload(file: File): Promise<AssetUploadPayload> {
   return {
     filename: file.name,
@@ -105,6 +116,36 @@ export function normalizeStoredAsset(input: Partial<StoredAsset>): StoredAsset {
   };
 }
 
+export function buildMarkdownAssetEmbed(asset: Pick<StoredAsset, 'altText' | 'mimeType' | 'publicUrl' | 'storageKey'>): string {
+  const label = asset.altText.trim() || filenameFromStorageKey(asset.storageKey) || asset.publicUrl;
+
+  if (asset.mimeType.startsWith('image/')) {
+    return `![${escapeMarkdownLabel(label)}](${asset.publicUrl})`;
+  }
+
+  return `[${escapeMarkdownLabel(label)}](${asset.publicUrl})`;
+}
+
+export function insertMarkdownAsset(
+  markdown: string,
+  asset: Pick<StoredAsset, 'altText' | 'mimeType' | 'publicUrl' | 'storageKey'>,
+  selection: MarkdownSelectionRange,
+): MarkdownAssetInsertion {
+  const start = clampSelectionIndex(selection.start, markdown.length);
+  const end = clampSelectionIndex(selection.end, markdown.length);
+  const from = Math.min(start, end);
+  const to = Math.max(start, end);
+  const embed = buildMarkdownAssetEmbed(asset);
+  const nextMarkdown = `${markdown.slice(0, from)}${embed}${markdown.slice(to)}`;
+  const cursor = from + embed.length;
+
+  return {
+    markdown: nextMarkdown,
+    selectionStart: cursor,
+    selectionEnd: cursor,
+  };
+}
+
 export async function loadRandomAsset(
   options: AssetRequestOptions = {},
   fetcher: (url: string, init: RequestInit) => Promise<Response> = (url, init) => fetch(url, init),
@@ -141,6 +182,22 @@ function buildAssetUrl(path: string, options: AssetRequestOptions): string {
   const params = new URLSearchParams({ usage: options.usage });
 
   return `${baseUrl}${apiPath}?${params.toString()}`;
+}
+
+function filenameFromStorageKey(storageKey: string): string {
+  return storageKey.split('/').filter(Boolean).at(-1) ?? '';
+}
+
+function escapeMarkdownLabel(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/\]/g, '\\]');
+}
+
+function clampSelectionIndex(value: number, max: number): number {
+  if (!Number.isFinite(value)) {
+    return max;
+  }
+
+  return Math.max(0, Math.min(max, Math.trunc(value)));
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
