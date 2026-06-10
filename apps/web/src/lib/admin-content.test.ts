@@ -4,10 +4,14 @@ import {
   buildAdminContentActionRequest,
   buildCreateDraftRequest,
   buildContentPayloadFromFormData,
+  buildListAdminContentRequest,
   buildUpdateContentRequest,
   createMarkdownPreview,
   filterAdminContent,
   getAdminContentStats,
+  loadAdminContentItems,
+  normalizeAdminContentItem,
+  normalizeAdminContentSearchParams,
 } from './admin-content';
 import type { SiteContentItem } from './content';
 
@@ -59,6 +63,17 @@ describe('admin content helpers', () => {
     expect(filterAdminContent(items, { type: 'note' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { status: 'draft' }).map((item) => item.id)).toEqual(['draft-post']);
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
+  });
+
+  test('normalizes URL search params into valid admin content filters', () => {
+    expect(normalizeAdminContentSearchParams({ q: ' api ', status: 'draft', type: 'post' })).toEqual({
+      query: 'api',
+      status: 'draft',
+      type: 'post',
+    });
+    expect(normalizeAdminContentSearchParams({ q: 'x', status: 'deleted', type: 'article' })).toEqual({
+      query: 'x',
+    });
   });
 
   test('creates a readable Markdown preview model', () => {
@@ -117,6 +132,96 @@ describe('admin content helpers', () => {
         method: 'PATCH',
         credentials: 'include',
       },
+    });
+  });
+
+  test('builds admin content list request', () => {
+    expect(buildListAdminContentRequest()).toEqual({
+      url: '/api/admin/content',
+      init: {
+        method: 'GET',
+        credentials: 'include',
+      },
+    });
+  });
+
+  test('normalizes API content records for admin lists', () => {
+    expect(
+      normalizeAdminContentItem({
+        id: 'content-1',
+        type: 'post',
+        title: 'Draft from API',
+        slug: 'draft-from-api',
+        summary: 'API summary',
+        status: 'draft',
+        visibility: 'public',
+        featured: true,
+        viewCount: 10,
+        likeCount: 2,
+        createdAt: '2026-06-09T00:00:00.000Z',
+        updatedAt: '2026-06-10T00:00:00.000Z',
+        publishedAt: null,
+      }),
+    ).toEqual({
+      id: 'content-1',
+      type: 'post',
+      title: 'Draft from API',
+      slug: 'draft-from-api',
+      summary: 'API summary',
+      status: 'draft',
+      visibility: 'public',
+      featured: true,
+      viewCount: 10,
+      likeCount: 2,
+      publishedAt: '2026-06-10',
+      tags: [],
+    });
+  });
+
+  test('loads admin content records from the API', async () => {
+    const result = await loadAdminContentItems(items, async () => {
+      return new Response(
+        JSON.stringify([
+          {
+            id: 'api-note',
+            type: 'note',
+            title: 'API Note',
+            slug: 'api-note',
+            status: 'published',
+            visibility: 'public',
+            updatedAt: '2026-06-10T00:00:00.000Z',
+          },
+        ]),
+      );
+    });
+
+    expect(result).toEqual({
+      source: 'api',
+      items: [
+        {
+          id: 'api-note',
+          type: 'note',
+          title: 'API Note',
+          slug: 'api-note',
+          summary: '',
+          status: 'published',
+          visibility: 'public',
+          featured: false,
+          viewCount: 0,
+          likeCount: 0,
+          publishedAt: '2026-06-10',
+          tags: [],
+        },
+      ],
+    });
+  });
+
+  test('falls back to provided content when admin content API is unavailable', async () => {
+    const result = await loadAdminContentItems(items, async () => new Response('Unauthorized', { status: 401 }));
+
+    expect(result).toEqual({
+      source: 'fallback',
+      items,
     });
   });
 

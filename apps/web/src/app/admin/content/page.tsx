@@ -1,7 +1,8 @@
 import Link from 'next/link';
 
-import { AdminContentTable } from '@/components/AdminContentTable';
+import { AdminContentManager } from '@/components/AdminContentManager';
 import { AdminShell } from '@/components/AdminShell';
+import { normalizeAdminContentSearchParams } from '@/lib/admin-content';
 import { seedContent } from '@/lib/content';
 
 export default async function AdminContentPage({
@@ -10,6 +11,7 @@ export default async function AdminContentPage({
   searchParams: Promise<{ q?: string; status?: string; type?: string }>;
 }) {
   const { q = '', status, type } = await searchParams;
+  const filters = normalizeAdminContentSearchParams({ q, status, type });
 
   return (
     <AdminShell>
@@ -23,7 +25,7 @@ export default async function AdminContentPage({
         </div>
         <form className="admin-filter" action="/admin/content">
           <input name="q" defaultValue={q} placeholder="搜索标题、摘要、标签" />
-          <select name="type" defaultValue={type ?? ''} aria-label="Content type">
+          <select name="type" defaultValue={filters.type ?? ''} aria-label="Content type">
             <option value="">All types</option>
             <option value="post">Post</option>
             <option value="note">Note</option>
@@ -31,7 +33,7 @@ export default async function AdminContentPage({
             <option value="project">Project</option>
             <option value="page">Page</option>
           </select>
-          <select name="status" defaultValue={status ?? ''} aria-label="Content status">
+          <select name="status" defaultValue={filters.status ?? ''} aria-label="Content status">
             <option value="">All status</option>
             <option value="draft">Draft</option>
             <option value="published">Published</option>
@@ -39,11 +41,11 @@ export default async function AdminContentPage({
           </select>
           <button type="submit">Filter</button>
         </form>
-        <AdminContentTable
-          items={seedContent}
-          query={q}
-          status={status as Parameters<typeof AdminContentTable>[0]['status']}
-          type={type as Parameters<typeof AdminContentTable>[0]['type']}
+        <AdminContentManager
+          fallbackItems={seedContent}
+          query={filters.query}
+          status={filters.status}
+          type={filters.type}
         />
       </section>
     </AdminShell>

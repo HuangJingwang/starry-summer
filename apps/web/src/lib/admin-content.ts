@@ -8,6 +8,12 @@ export interface AdminContentFilters {
   query?: string;
 }
 
+export interface AdminContentSearchParams {
+  q?: string;
+  status?: string;
+  type?: string;
+}
+
 export interface AdminContentStats {
   total: number;
   draft: number;
@@ -20,6 +26,23 @@ export interface MarkdownPreviewModel {
   title: string;
   excerpt: string;
   wordCount: number;
+}
+
+export interface AdminContentApiRecord {
+  id: string;
+  type: ContentType;
+  title: string;
+  slug: string;
+  summary?: string;
+  status: ContentStatus;
+  visibility?: SiteContentItem['visibility'];
+  featured?: boolean;
+  viewCount?: number;
+  likeCount?: number;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string | null;
 }
 
 export interface AdminContentPayload {
@@ -38,7 +61,38 @@ export interface AdminContentRequest {
   init: RequestInit;
 }
 
+export interface AdminContentLoadResult {
+  source: 'api' | 'fallback';
+  items: SiteContentItem[];
+}
+
+export type AdminContentFetcher = (url: string, init: RequestInit) => Promise<Response>;
+
 export type AdminContentAction = 'publish' | 'archive' | 'restore-draft';
+
+const validContentStatuses = new Set<ContentStatus>(['draft', 'published', 'private', 'archived']);
+const validContentTypes = new Set<ContentType>(['post', 'note', 'moment', 'page', 'project']);
+
+function dateOnly(value: string | null | undefined): string {
+  return value?.slice(0, 10) || '';
+}
+
+export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteContentItem {
+  return {
+    id: record.id,
+    title: record.title,
+    type: record.type,
+    status: record.status,
+    visibility: record.visibility ?? 'public',
+    publishedAt: dateOnly(record.publishedAt) || dateOnly(record.updatedAt) || dateOnly(record.createdAt),
+    summary: record.summary ?? '',
+    slug: record.slug,
+    featured: record.featured ?? false,
+    tags: record.tags ?? [],
+    viewCount: record.viewCount ?? 0,
+    likeCount: record.likeCount ?? 0,
+  };
+}
 
 function normalizeSlug(value: string): string {
   return value
@@ -74,6 +128,25 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
   });
 }
 
+export function normalizeAdminContentSearchParams(params: AdminContentSearchParams): AdminContentFilters {
+  const query = params.q?.trim();
+  const filters: AdminContentFilters = {};
+
+  if (query) {
+    filters.query = query;
+  }
+
+  if (params.status && validContentStatuses.has(params.status as ContentStatus)) {
+    filters.status = params.status as ContentStatus;
+  }
+
+  if (params.type && validContentTypes.has(params.type as ContentType)) {
+    filters.type = params.type as ContentType;
+  }
+
+  return filters;
+}
+
 function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentPayload): AdminContentRequest {
   return {
     url,
@@ -90,6 +163,44 @@ function jsonRequest(url: string, method: 'POST' | 'PATCH', input: AdminContentP
 
 export function buildCreateDraftRequest(input: AdminContentPayload): AdminContentRequest {
   return jsonRequest('/api/admin/content', 'POST', input);
+}
+
+export function buildListAdminContentRequest(): AdminContentRequest {
+  return {
+    url: '/api/admin/content',
+    init: {
+      method: 'GET',
+      credentials: 'include',
+    },
+  };
+}
+
+export async function loadAdminContentItems(
+  fallbackItems: SiteContentItem[],
+  fetcher: AdminContentFetcher = (url, init) => fetch(url, init),
+): Promise<AdminContentLoadResult> {
+  const request = buildListAdminContentRequest();
+
+  try {
+    const response = await fetcher(request.url, request.init);
+
+    if (!response.ok) {
+      return { source: 'fallback', items: fallbackItems };
+    }
+
+    const data: unknown = await response.json();
+
+    if (!Array.isArray(data)) {
+      return { source: 'fallback', items: fallbackItems };
+    }
+
+    return {
+      source: 'api',
+      items: data.map((item) => normalizeAdminContentItem(item as AdminContentApiRecord)),
+    };
+  } catch {
+    return { source: 'fallback', items: fallbackItems };
+  }
 }
 
 export function buildUpdateContentRequest(id: string, input: AdminContentPayload): AdminContentRequest {
