@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { getContentHref, groupContentBySeries, groupContentByTag, type SiteContentItem } from './content';
+import { getContentHref, groupContentByCategory, groupContentBySeries, groupContentByTag, type SiteContentItem } from './content';
 import type { SiteSettings } from './settings';
 
 const defaultSiteUrl = 'http://localhost:3000';
@@ -123,9 +123,10 @@ export function buildSitemapXml(siteUrl: string, content: SiteContentItem[]): st
   const url = normalizePublicSiteUrl(siteUrl);
   const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'series', 'categories', 'tags', 'archives', 'guestbook', 'about', 'search'];
   const contentRoutes = content.map((item) => getContentHref(item).slice(1));
+  const categoryRoutes = groupContentByCategory(content).map((group) => `categories/${group.key}`);
   const seriesRoutes = groupContentBySeries(content).map((group) => `series/${group.key}`);
   const tagRoutes = groupContentByTag(content).map((group) => `tags/${group.key}`);
-  const routes = [...new Set([...staticRoutes, ...contentRoutes, ...seriesRoutes, ...tagRoutes])];
+  const routes = [...new Set([...staticRoutes, ...contentRoutes, ...categoryRoutes, ...seriesRoutes, ...tagRoutes])];
   const urls = routes
     .map((route) => {
       const loc = route ? `${url}/${route}` : url;

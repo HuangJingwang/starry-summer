@@ -213,6 +213,14 @@ export function groupContentByCategory(items: SiteContentItem[]): ContentCategor
   return [...groups.values()].sort((a, b) => b.items.length - a.items.length || a.label.localeCompare(b.label));
 }
 
+export function getContentByCategorySlug(items: SiteContentItem[], slug: string): ContentCategoryGroup | null {
+  return groupContentByCategory(items).find((group) => group.key === slug) ?? null;
+}
+
+export function getCategoryHref(category: string): string {
+  return `/categories/${slugifyTaxonomyLabel(category)}`;
+}
+
 export function groupContentBySeries(items: SiteContentItem[]): ContentSeriesGroup[] {
   const groups = new Map<string, ContentSeriesGroup>();
 

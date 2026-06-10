@@ -116,10 +116,11 @@ describe('SEO helpers', () => {
     expect(xml).toContain('<description><![CDATA[A public post summary.]]></description>');
   });
 
-  test('builds sitemap XML with static content series and tag URLs', () => {
+  test('builds sitemap XML with static content category series and tag URLs', () => {
     const xml = buildSitemapXml('https://example.com', [
       {
         ...content,
+        categories: ['Writing Notes'],
         series: ['Platform Journal'],
         tags: ['Next.js'],
       },
@@ -127,6 +128,7 @@ describe('SEO helpers', () => {
 
     expect(xml).toContain('<loc>https://example.com</loc>');
     expect(xml).toContain('<loc>https://example.com/series</loc>');
+    expect(xml).toContain('<loc>https://example.com/categories/writing-notes</loc>');
     expect(xml).toContain('<loc>https://example.com/tags</loc>');
     expect(xml).toContain('<loc>https://example.com/posts/public-post</loc>');
     expect(xml).toContain('<loc>https://example.com/series/platform-journal</loc>');

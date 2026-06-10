@@ -5,6 +5,8 @@ import {
   getContentHref,
   getAdjacentContent,
   canShowComments,
+  getCategoryHref,
+  getContentByCategorySlug,
   getContentTaxonomyGroups,
   groupContentByMonth,
   getFeaturedContent,
@@ -405,6 +407,24 @@ describe('web content helpers', () => {
         items: [expect.objectContaining({ id: 'old' })],
       },
     ]);
+  });
+
+  test('finds public content by category slug', () => {
+    const items = [
+      {
+        id: 'one',
+        title: 'One',
+        type: 'post' as const,
+        status: 'published' as const,
+        visibility: 'public' as const,
+        publishedAt: '2026-01-01',
+        categories: ['Writing Notes'],
+      },
+    ];
+
+    expect(getContentByCategorySlug(items, 'writing-notes')?.items.map((item) => item.id)).toEqual(['one']);
+    expect(getContentByCategorySlug(items, 'missing')).toBeNull();
+    expect(getCategoryHref('Writing Notes')).toBe('/categories/writing-notes');
   });
 
   test('groups public content by series newest first', () => {
