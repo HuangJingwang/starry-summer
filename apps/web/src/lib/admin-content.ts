@@ -76,6 +76,10 @@ export interface AdminMarkdownImportPayload {
   markdown: string;
 }
 
+export interface AdminMarkdownArchiveImportPayload {
+  markdown: string;
+}
+
 export interface AdminContentRequest {
   url: string;
   init: RequestInit;
@@ -374,6 +378,22 @@ export function buildImportMarkdownRequest(input: AdminMarkdownImportPayload): A
       },
       body: JSON.stringify({
         type: input.type,
+        markdown: input.markdown,
+      }),
+    },
+  };
+}
+
+export function buildImportMarkdownArchiveRequest(input: AdminMarkdownArchiveImportPayload): AdminContentRequest {
+  return {
+    url: '/api/admin/content/import/archive',
+    init: {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
         markdown: input.markdown,
       }),
     },

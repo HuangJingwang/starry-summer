@@ -62,6 +62,8 @@ export interface PublicContentFilter {
 
 export type PublicContentSort = 'latest' | 'popular';
 
+const contentTypes = new Set<ContentType>(['post', 'note', 'moment', 'page', 'project']);
+
 @Injectable()
 export class ContentService {
   constructor(
@@ -189,6 +191,17 @@ export class ContentService {
     return this.setVisibility(record.id, visibility);
   }
 
+  async importMarkdownArchive(markdown: string): Promise<ContentRecord[]> {
+    const sections = parseMarkdownArchiveSections(markdown);
+    const imported: ContentRecord[] = [];
+
+    for (const section of sections) {
+      imported.push(await this.importMarkdown(section.markdown, section.type));
+    }
+
+    return imported;
+  }
+
   async exportMarkdown(id: string): Promise<string> {
     const record = await this.getRecord(id);
 
@@ -277,4 +290,32 @@ function normalizeTaxonomyLabels(labels: string[] | undefined): string[] {
 
 function normalizeSourceUrl(value: string | undefined): string {
   return value?.trim() ?? '';
+}
+
+function parseMarkdownArchiveSections(markdown: string): Array<{ type: ContentType; markdown: string }> {
+  const markerPattern = /^<!--\s*starry-summer:content\s+([a-z]+)\/[^\s]+(?:\s+id=[^\s]+)?\s*-->\s*$/gm;
+  const matches = [...markdown.matchAll(markerPattern)];
+
+  if (matches.length === 0) {
+    throw new UnprocessableEntityException('Markdown archive does not contain any content sections');
+  }
+
+  return matches.map((match, index) => {
+    const type = parseContentType(match[1]);
+    const start = (match.index ?? 0) + match[0].length;
+    const end = matches[index + 1]?.index ?? markdown.length;
+
+    return {
+      type,
+      markdown: markdown.slice(start, end).trim(),
+    };
+  });
+}
+
+function parseContentType(value: string | undefined): ContentType {
+  if (contentTypes.has(value as ContentType)) {
+    return value as ContentType;
+  }
+
+  return 'post';
 }

@@ -257,4 +257,57 @@ describe('ContentService', () => {
     expect(archive).toContain('# First Export');
     expect(archive).toContain('# Second Export');
   });
+
+  test('imports every Markdown archive section as draft content', async () => {
+    const imported = await service.importMarkdownArchive(
+      [
+        '# Starry Summer Markdown Export',
+        '',
+        '<!-- starry-summer:content post/restored-post id=old-1 -->',
+        '---',
+        'title: Restored Post',
+        'slug: restored-post',
+        'summary: Restored from a full archive',
+        'type: post',
+        'status: published',
+        'visibility: public',
+        'categories:',
+        '  - Writing',
+        'tags:',
+        '  - Backup',
+        '---',
+        '# Restored Post',
+        '',
+        '<!-- starry-summer:content note/restored-note id=old-2 -->',
+        '---',
+        'title: Restored Note',
+        'slug: restored-note',
+        'summary: Private restored note',
+        'type: note',
+        'status: archived',
+        'visibility: private',
+        '---',
+        '# Restored Note',
+      ].join('\n'),
+    );
+
+    expect(imported).toHaveLength(2);
+    expect(imported.map((item) => item.type)).toEqual(['post', 'note']);
+    expect(imported.map((item) => item.status)).toEqual(['draft', 'draft']);
+    expect(imported.map((item) => item.visibility)).toEqual(['public', 'private']);
+    expect(imported[0]).toMatchObject({
+      title: 'Restored Post',
+      slug: 'restored-post',
+      summary: 'Restored from a full archive',
+      categories: ['Writing'],
+      tags: ['Backup'],
+      bodyMarkdown: '# Restored Post',
+    });
+    expect(imported[1]).toMatchObject({
+      title: 'Restored Note',
+      slug: 'restored-note',
+      summary: 'Private restored note',
+      bodyMarkdown: '# Restored Note',
+    });
+  });
 });

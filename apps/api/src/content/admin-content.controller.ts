@@ -61,6 +61,11 @@ export class AdminContentController {
     return this.contentService.importMarkdown(markdown, type);
   }
 
+  @Post('import/archive')
+  importMarkdownArchive(@Body('markdown') markdown: string) {
+    return this.contentService.importMarkdownArchive(markdown);
+  }
+
   @Get(':id/export')
   @Header('Content-Type', 'text/markdown; charset=utf-8')
   @Header('Content-Disposition', 'attachment; filename="starry-summer-export.md"')

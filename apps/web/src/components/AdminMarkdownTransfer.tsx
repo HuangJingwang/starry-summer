@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import type { ContentType } from '@starry-summer/shared';
 
-import { buildExportAllMarkdownRequest, buildExportMarkdownRequest, buildImportMarkdownRequest } from '@/lib/admin-content';
+import {
+  buildExportAllMarkdownRequest,
+  buildExportMarkdownRequest,
+  buildImportMarkdownArchiveRequest,
+  buildImportMarkdownRequest,
+} from '@/lib/admin-content';
 
 type TransferState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -86,6 +91,29 @@ export function AdminMarkdownTransfer() {
     }
   }
 
+  async function importMarkdownArchive(formData: FormData) {
+    setState('submitting');
+    setMessage('');
+
+    try {
+      const request = buildImportMarkdownArchiveRequest({
+        markdown: String(formData.get('markdown') ?? ''),
+      });
+      const response = await fetch(request.url, request.init);
+
+      if (!response.ok) {
+        throw new Error(`Archive import failed with ${response.status}`);
+      }
+
+      const result = (await response.json()) as Array<{ id?: string }>;
+      setState('success');
+      setMessage(`已从归档导入 ${Array.isArray(result) ? result.length : 0} 篇草稿。`);
+    } catch {
+      setState('error');
+      setMessage('归档导入失败，请确认这是 Starry Summer 全量导出的 Markdown 文件。');
+    }
+  }
+
   function downloadExport() {
     const blob = new Blob([exportedMarkdown], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -130,6 +158,9 @@ export function AdminMarkdownTransfer() {
         <textarea name="markdown" rows={12} defaultValue={exampleMarkdown} />
         <button type="submit" disabled={state === 'submitting'}>
           Import Markdown
+        </button>
+        <button type="submit" formAction={importMarkdownArchive} disabled={state === 'submitting'}>
+          Import archive
         </button>
       </form>
       {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}

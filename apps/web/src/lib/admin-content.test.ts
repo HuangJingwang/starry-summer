@@ -6,6 +6,7 @@ import {
   buildExportAllMarkdownRequest,
   buildGetAdminContentRequest,
   buildExportMarkdownRequest,
+  buildImportMarkdownArchiveRequest,
   buildImportMarkdownRequest,
   buildContentPayloadFromFormData,
   buildListAdminContentRequest,
@@ -176,6 +177,19 @@ describe('admin content helpers', () => {
         body: JSON.stringify({
           type: 'post',
           markdown: '# Imported',
+        }),
+      },
+    });
+    expect(buildImportMarkdownArchiveRequest({ markdown: '# Starry Summer Markdown Export' })).toEqual({
+      url: '/api/admin/content/import/archive',
+      init: {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          markdown: '# Starry Summer Markdown Export',
         }),
       },
     });

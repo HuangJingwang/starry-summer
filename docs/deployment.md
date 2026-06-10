@@ -92,6 +92,7 @@ Markdown export:
 
 - Use `/admin/export` to export all content as a portable Markdown archive.
 - Keep exports outside the server as a portable content archive.
+- Use the same `/admin/export` screen to import a Starry Summer Markdown archive back into the platform. Imported content is restored as drafts first, while public/private visibility from the archive is preserved.
 
 ## 5. Restore
 
@@ -105,6 +106,12 @@ Restore assets:
 
 - Restore the MinIO volume or copy objects back to the configured bucket.
 - Confirm uploaded images load from public pages.
+
+Restore from Markdown when you do not want to restore the whole database:
+
+- Log in to `/admin/export`.
+- Paste the full archive exported by `Export all`.
+- Use `Import archive` to recreate every content item as a draft, then review and publish from `/admin/content`.
 
 ## 6. Updates
 
