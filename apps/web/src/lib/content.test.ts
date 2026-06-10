@@ -1,0 +1,35 @@
+import { describe, expect, test } from 'vitest';
+
+import { getFeaturedContent, getPublicContent, groupContentCounts } from './content';
+
+describe('web content helpers', () => {
+  test('filters public content and sorts newest first', () => {
+    const visible = getPublicContent([
+      { id: '1', title: 'Old', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01' },
+      { id: '2', title: 'Draft', type: 'post', status: 'draft', visibility: 'public', publishedAt: '2026-06-01' },
+      { id: '3', title: 'New', type: 'note', status: 'published', visibility: 'public', publishedAt: '2026-05-01' },
+      { id: '4', title: 'Private', type: 'post', status: 'published', visibility: 'private', publishedAt: '2026-04-01' },
+    ]);
+
+    expect(visible.map((item) => item.id)).toEqual(['3', '1']);
+  });
+
+  test('returns featured content before regular content', () => {
+    const featured = getFeaturedContent([
+      { id: '1', title: 'Regular', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-01' },
+      { id: '2', title: 'Featured', type: 'project', status: 'published', visibility: 'public', publishedAt: '2026-01-01', featured: true },
+    ]);
+
+    expect(featured[0]?.id).toBe('2');
+  });
+
+  test('groups counts by content type', () => {
+    expect(
+      groupContentCounts([
+        { id: '1', title: 'A', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01' },
+        { id: '2', title: 'B', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-02' },
+        { id: '3', title: 'C', type: 'moment', status: 'published', visibility: 'public', publishedAt: '2026-01-03' },
+      ]),
+    ).toEqual({ moment: 1, note: 0, page: 0, post: 2, project: 0 });
+  });
+});
