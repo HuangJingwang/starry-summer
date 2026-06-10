@@ -1,4 +1,5 @@
 import { AdminShell } from '@/components/AdminShell';
+import { TaxonomyManager } from '@/components/TaxonomyManager';
 
 export default function AdminTaxonomyPage() {
   return (
@@ -6,20 +7,7 @@ export default function AdminTaxonomyPage() {
       <section className="admin-panel wide">
         <p className="eyebrow">Taxonomy</p>
         <h1>分类、标签与系列</h1>
-        <div className="split-panels">
-          <section>
-            <h2>Categories</h2>
-            <input placeholder="New category" />
-          </section>
-          <section>
-            <h2>Tags</h2>
-            <input placeholder="New tag" />
-          </section>
-          <section>
-            <h2>Series</h2>
-            <input placeholder="New series" />
-          </section>
-        </div>
+        <TaxonomyManager />
       </section>
     </AdminShell>
   );
