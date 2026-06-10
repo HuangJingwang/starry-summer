@@ -153,6 +153,8 @@ function createPublicActorHash(request: PublicInteractionRequest): string {
   const userAgent = firstHeaderValue(request.headers?.['user-agent'])?.trim() || 'unknown-agent';
   const secret = process.env.INTERACTION_HASH_SECRET ?? process.env.SESSION_SECRET ?? 'development-interaction-secret';
 
+  assertProductionInteractionHashSecret(secret);
+
   return createHash('sha256').update(`${secret}\n${ip}\n${userAgent}`).digest('hex');
 }
 
@@ -169,4 +171,20 @@ function firstHeaderValue(value: string | string[] | undefined): string | undefi
 
 function normalizeUserAgent(value: string | undefined): string {
   return (value?.trim() || 'unknown-agent').slice(0, 500);
+}
+
+function assertProductionInteractionHashSecret(secret: string): void {
+  if (process.env.NODE_ENV !== 'production') {
+    return;
+  }
+
+  if (
+    secret.length < 32 ||
+    secret.startsWith('replace-') ||
+    secret.startsWith('change-') ||
+    secret === 'development-interaction-secret' ||
+    secret === 'development-session-secret'
+  ) {
+    throw new Error('INTERACTION_HASH_SECRET must be at least 32 characters and not a placeholder in production');
+  }
 }

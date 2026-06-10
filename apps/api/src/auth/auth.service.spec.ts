@@ -99,4 +99,17 @@ describe('AuthService', () => {
         }),
     ).toThrow('SESSION_SECRET must be at least 32 characters and not a placeholder in production');
   });
+
+  test('rejects placeholder password hashes in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+
+    expect(
+      () =>
+        new AuthService({
+          adminEmail: 'owner@example.com',
+          adminPasswordHash: 'replace-with-scrypt-hash',
+          sessionSecret: '12345678901234567890123456789012',
+        }),
+    ).toThrow('ADMIN_PASSWORD_HASH must be configured with a scrypt hash in production');
+  });
 });

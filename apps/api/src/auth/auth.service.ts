@@ -38,6 +38,7 @@ export class AuthService {
       adminPasswordHash: config?.adminPasswordHash ?? process.env.ADMIN_PASSWORD_HASH ?? '',
       sessionSecret: config?.sessionSecret ?? process.env.SESSION_SECRET ?? 'development-session-secret',
     };
+    assertProductionPasswordHash(this.config.adminPasswordHash);
     assertProductionSessionSecret(this.config.sessionSecret);
   }
 
@@ -103,6 +104,16 @@ export class AuthService {
 
   private sign(value: string): string {
     return createHmac('sha256', this.config.sessionSecret).update(value).digest('base64url');
+  }
+}
+
+function assertProductionPasswordHash(adminPasswordHash: string): void {
+  if (process.env.NODE_ENV !== 'production') {
+    return;
+  }
+
+  if (!adminPasswordHash.startsWith('scrypt:')) {
+    throw new Error('ADMIN_PASSWORD_HASH must be configured with a scrypt hash in production');
   }
 }
 

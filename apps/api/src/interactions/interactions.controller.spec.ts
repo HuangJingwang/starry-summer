@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { InteractionsController } from './interactions.controller';
 
@@ -20,6 +20,10 @@ describe('InteractionsController', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   test('accepts supported comment targets', () => {
@@ -109,6 +113,17 @@ describe('InteractionsController', () => {
     expect(likeActorHash).toBe(viewActorHash);
     expect(() => controller.likeContent('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
     expect(() => controller.recordView('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
+  });
+
+  test('rejects weak interaction hash secrets in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('INTERACTION_HASH_SECRET', 'change-me-before-production');
+    const controller = new InteractionsController(interactionsService as never);
+
+    expect(() => controller.likeContent('post', 'post-1', { headers: {} })).toThrow(
+      'INTERACTION_HASH_SECRET must be at least 32 characters and not a placeholder in production',
+    );
+    expect(interactionsService.likeContent).not.toHaveBeenCalled();
   });
 
   test('adds moderation metadata to guestbook entries', () => {
