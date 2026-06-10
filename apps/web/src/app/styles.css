@@ -195,6 +195,18 @@ textarea {
   max-width: 720px;
 }
 
+.page-title-row {
+  align-items: start;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title-row .page-title {
+  margin-bottom: 0;
+}
+
 .section-heading h2,
 .page-title h1 {
   font-size: clamp(2rem, 4vw, 4rem);
@@ -211,6 +223,29 @@ textarea {
   display: grid;
   gap: 18px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sort-tabs {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.sort-tabs a {
+  color: var(--muted);
+  min-height: 38px;
+  min-width: 64px;
+  padding: 10px 16px;
+  text-align: center;
+}
+
+.sort-tabs a[aria-current='page'] {
+  background: var(--ink);
+  color: var(--panel);
 }
 
 .content-card {
@@ -1011,6 +1046,16 @@ textarea {
 
   .admin-link {
     justify-self: start;
+  }
+
+  .page-title-row {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .sort-tabs {
+    justify-self: start;
+    margin-top: 0;
   }
 
   .stats-band,

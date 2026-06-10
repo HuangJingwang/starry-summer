@@ -36,13 +36,37 @@ export interface AdjacentContent {
   next: SiteContentItem | null;
 }
 
+export type ContentSort = 'latest' | 'popular';
+
 const contentTypes: ContentType[] = ['moment', 'note', 'page', 'post', 'project'];
 
-export function getPublicContent(items: SiteContentItem[], type?: ContentType): SiteContentItem[] {
+export function getPublicContent(items: SiteContentItem[], type?: ContentType, sort: ContentSort = 'latest'): SiteContentItem[] {
   return items
     .filter((item) => isPublicContent(item))
     .filter((item) => (type ? item.type === type : true))
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+    .sort((a, b) => sortPublicContent(a, b, sort));
+}
+
+export function normalizeContentSort(value: unknown): ContentSort {
+  return value === 'popular' ? 'popular' : 'latest';
+}
+
+function sortPublicContent(a: SiteContentItem, b: SiteContentItem, sort: ContentSort): number {
+  if (sort === 'popular') {
+    const viewOrder = (b.viewCount ?? 0) - (a.viewCount ?? 0);
+
+    if (viewOrder !== 0) {
+      return viewOrder;
+    }
+
+    const likeOrder = (b.likeCount ?? 0) - (a.likeCount ?? 0);
+
+    if (likeOrder !== 0) {
+      return likeOrder;
+    }
+  }
+
+  return b.publishedAt.localeCompare(a.publishedAt);
 }
 
 export function getFeaturedContent(items: SiteContentItem[]): SiteContentItem[] {

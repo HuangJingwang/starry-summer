@@ -9,6 +9,7 @@ import {
   getPublicContent,
   groupContentByCategory,
   groupContentCounts,
+  normalizeContentSort,
   searchContent,
 } from './content';
 
@@ -22,6 +23,26 @@ describe('web content helpers', () => {
     ]);
 
     expect(visible.map((item) => item.id)).toEqual(['3', '1']);
+  });
+
+  test('filters public content and sorts popular first', () => {
+    const visible = getPublicContent(
+      [
+        { id: 'newer', title: 'Newer', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-10', viewCount: 5, likeCount: 1 },
+        { id: 'popular', title: 'Popular', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-09', viewCount: 200, likeCount: 10 },
+        { id: 'draft', title: 'Draft', type: 'post', status: 'draft', visibility: 'public', publishedAt: '2026-06-11', viewCount: 999, likeCount: 999 },
+      ],
+      'post',
+      'popular',
+    );
+
+    expect(visible.map((item) => item.id)).toEqual(['popular', 'newer']);
+  });
+
+  test('normalizes content sort values for public pages', () => {
+    expect(normalizeContentSort('popular')).toBe('popular');
+    expect(normalizeContentSort('latest')).toBe('latest');
+    expect(normalizeContentSort('unknown')).toBe('latest');
   });
 
   test('returns featured content before regular content', () => {

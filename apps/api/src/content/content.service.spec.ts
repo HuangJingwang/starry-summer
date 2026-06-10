@@ -5,9 +5,11 @@ import { ContentService } from './content.service';
 
 describe('ContentService', () => {
   let service: ContentService;
+  let repository: InMemoryContentRepository;
 
   beforeEach(() => {
-    service = new ContentService(new InMemoryContentRepository());
+    repository = new InMemoryContentRepository();
+    service = new ContentService(repository);
   });
 
   test('creates drafts for admin authoring', async () => {
@@ -60,6 +62,30 @@ describe('ContentService', () => {
     expect(publicPosts.map((post) => post.id)).toEqual([published.id]);
     expect(publicPosts).not.toContainEqual(draft);
     expect(publicPosts).not.toContainEqual(privatePost);
+  });
+
+  test('public listings can be sorted by popularity', async () => {
+    const older = await service.createDraft({
+      type: 'post',
+      title: 'Older',
+      slug: 'older',
+      summary: 'Older',
+      bodyMarkdown: '# Older',
+    });
+    const newer = await service.createDraft({
+      type: 'post',
+      title: 'Newer',
+      slug: 'newer',
+      summary: 'Newer',
+      bodyMarkdown: '# Newer',
+    });
+
+    await service.publish(older.id);
+    await service.publish(newer.id);
+    await repository.update(older.id, { viewCount: 200, likeCount: 10 });
+    await repository.update(newer.id, { viewCount: 10, likeCount: 1 });
+
+    expect((await service.listPublic({ type: 'post', sort: 'popular' })).map((item) => item.id)).toEqual([older.id, newer.id]);
   });
 
   test('publishing rejects invalid slugs', async () => {

@@ -106,4 +106,48 @@ describe('InMemoryContentRepository', () => {
 
     expect((await repository.listAdmin())[0]?.id).toBe(newest.id);
   });
+
+  test('lists public records by popularity when requested', async () => {
+    const repository = new InMemoryContentRepository(() => '2026-06-10T00:00:00.000Z');
+    const recent = await repository.create({
+      type: 'post',
+      title: 'Recent',
+      slug: 'recent',
+      summary: 'Recent',
+      bodyMarkdown: '# Recent',
+      status: 'published',
+      visibility: 'public',
+      allowComments: true,
+      pinned: false,
+      featured: false,
+      categories: [],
+      tags: [],
+      viewCount: 10,
+      likeCount: 1,
+      publishedAt: '2026-06-12T00:00:00.000Z',
+    });
+    const popular = await repository.create({
+      type: 'post',
+      title: 'Popular',
+      slug: 'popular',
+      summary: 'Popular',
+      bodyMarkdown: '# Popular',
+      status: 'published',
+      visibility: 'public',
+      allowComments: true,
+      pinned: false,
+      featured: false,
+      categories: [],
+      tags: [],
+      viewCount: 20,
+      likeCount: 5,
+      publishedAt: '2026-06-11T00:00:00.000Z',
+    });
+
+    expect((await repository.listPublic({ type: 'post' })).map((item) => item.id)).toEqual([recent.id, popular.id]);
+    expect((await repository.listPublic({ type: 'post', sort: 'popular' })).map((item) => item.id)).toEqual([
+      popular.id,
+      recent.id,
+    ]);
+  });
 });

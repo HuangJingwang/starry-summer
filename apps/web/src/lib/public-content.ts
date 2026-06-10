@@ -1,6 +1,6 @@
 import type { ContentStatus, ContentType } from '@starry-summer/shared';
 
-import { getPublicContent, seedContent, type SiteContentItem } from './content';
+import { getPublicContent, seedContent, type ContentSort, type SiteContentItem } from './content';
 
 export interface PublicContentApiRecord {
   id: string;
@@ -24,6 +24,7 @@ export interface PublicContentApiRecord {
 export interface PublicContentListRequestOptions {
   apiBaseUrl?: string;
   type?: ContentType;
+  sort?: ContentSort;
 }
 
 export interface PublicContentRequest {
@@ -50,7 +51,17 @@ function getDefaultApiBaseUrl(): string {
 
 export function buildPublicContentListRequest(options: PublicContentListRequestOptions = {}): PublicContentRequest {
   const baseUrl = (options.apiBaseUrl ?? getDefaultApiBaseUrl()).replace(/\/$/, '');
-  const query = options.type ? `?type=${encodeURIComponent(options.type)}` : '';
+  const params = new URLSearchParams();
+
+  if (options.type) {
+    params.set('type', options.type);
+  }
+
+  if (options.sort && options.sort !== 'latest') {
+    params.set('sort', options.sort);
+  }
+
+  const query = params.size > 0 ? `?${params.toString()}` : '';
 
   return {
     url: `${baseUrl}/content${query}`,
@@ -93,13 +104,13 @@ export async function loadPublicContentItems(
     const response = await fetcher(request.url, request.init);
 
     if (!response.ok) {
-      return { source: 'fallback', items: getPublicContent(fallbackItems, options.type) };
+      return { source: 'fallback', items: getPublicContent(fallbackItems, options.type, options.sort) };
     }
 
     const data: unknown = await response.json();
 
     if (!Array.isArray(data)) {
-      return { source: 'fallback', items: getPublicContent(fallbackItems, options.type) };
+      return { source: 'fallback', items: getPublicContent(fallbackItems, options.type, options.sort) };
     }
 
     return {
@@ -107,10 +118,10 @@ export async function loadPublicContentItems(
       items: data.map((item) => normalizePublicContentItem(item as PublicContentApiRecord)),
     };
   } catch {
-    return { source: 'fallback', items: getPublicContent(fallbackItems, options.type) };
+    return { source: 'fallback', items: getPublicContent(fallbackItems, options.type, options.sort) };
   }
 }
 
-export async function loadSiteContent(type?: ContentType): Promise<SiteContentItem[]> {
-  return (await loadPublicContentItems(seedContent, { type })).items;
+export async function loadSiteContent(type?: ContentType, sort?: ContentSort): Promise<SiteContentItem[]> {
+  return (await loadPublicContentItems(seedContent, { type, sort })).items;
 }

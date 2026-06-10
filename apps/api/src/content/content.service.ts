@@ -51,7 +51,10 @@ export type UpdateContentInput = Partial<{
 
 export interface PublicContentFilter {
   type?: ContentType;
+  sort?: PublicContentSort;
 }
+
+export type PublicContentSort = 'latest' | 'popular';
 
 @Injectable()
 export class ContentService {

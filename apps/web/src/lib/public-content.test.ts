@@ -42,6 +42,9 @@ describe('public content API helpers', () => {
     expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post' }).url).toBe(
       'https://api.example.com/content?type=post',
     );
+    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post', sort: 'popular' }).url).toBe(
+      'https://api.example.com/content?type=post&sort=popular',
+    );
   });
 
   test('normalizes API content records for public pages', () => {
@@ -114,5 +117,31 @@ describe('public content API helpers', () => {
       source: 'fallback',
       items: [fallbackItems[0]],
     });
+  });
+
+  test('falls back with the requested public content sort order', async () => {
+    const basePost: SiteContentItem = {
+      id: 'base',
+      title: 'Base Post',
+      type: 'post',
+      status: 'published',
+      visibility: 'public',
+      publishedAt: '2026-06-01',
+      slug: 'base-post',
+    };
+
+    const result = await loadPublicContentItems(
+      [
+        { ...basePost, id: 'newer', publishedAt: '2026-06-10', viewCount: 1, likeCount: 1 },
+        { ...basePost, id: 'popular', publishedAt: '2026-06-09', viewCount: 100, likeCount: 10 },
+      ],
+      {
+        type: 'post',
+        sort: 'popular',
+        fetcher: async () => new Response('Unavailable', { status: 503 }),
+      },
+    );
+
+    expect(result.items.map((item) => item.id)).toEqual(['popular', 'newer']);
   });
 });

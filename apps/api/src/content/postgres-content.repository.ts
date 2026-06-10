@@ -2,7 +2,7 @@ import pg from 'pg';
 
 import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 
-import type { ContentRecord } from './content.service';
+import type { ContentRecord, PublicContentFilter } from './content.service';
 import type { ContentRepository, CreateContentRecordInput } from './content.repository';
 
 const { Pool } = pg;
@@ -160,7 +160,7 @@ export class PostgresContentRepository implements ContentRepository {
     return result.rows.map(mapContentRow);
   }
 
-  async listPublic(filter: { type?: ContentType } = {}): Promise<ContentRecord[]> {
+  async listPublic(filter: PublicContentFilter = {}): Promise<ContentRecord[]> {
     const values: unknown[] = [];
     const typeClause = filter.type ? 'and ci.type = $1' : '';
 
@@ -175,7 +175,7 @@ export class PostgresContentRepository implements ContentRepository {
             and ci.visibility = 'public'
             ${typeClause}
         `,
-        'order by ci.published_at desc',
+        buildPublicContentOrderClause(filter.sort),
       ),
       values,
     );
@@ -267,6 +267,19 @@ export function buildContentSelect(whereClause: string, orderClause = ''): strin
     group by ci.id, like_counts.count, view_counts.count
     ${orderClause}
   `;
+}
+
+export function buildPublicContentOrderClause(sort: PublicContentFilter['sort'] = 'latest'): string {
+  if (sort === 'popular') {
+    return `
+      order by
+        (ci.view_count + coalesce(view_counts.count, 0)) desc,
+        (ci.like_count + coalesce(like_counts.count, 0)) desc,
+        ci.published_at desc
+    `;
+  }
+
+  return 'order by ci.published_at desc';
 }
 
 async function syncTaxonomyLabels(client: Queryable, contentId: string, kind: TaxonomyKind, labels: string[]): Promise<void> {

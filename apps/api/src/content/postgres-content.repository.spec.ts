@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import {
   buildContentInsert,
+  buildPublicContentOrderClause,
   buildContentSelect,
   buildContentUpdate,
   mapContentRow,
@@ -128,5 +129,13 @@ describe('PostgresContentRepository mapping', () => {
     expect(select).toContain('group by ci.id, like_counts.count, view_counts.count');
     expect(select).toContain('where ci.status = $1');
     expect(select).toContain('order by ci.published_at desc');
+  });
+
+  test('builds popular order clauses from persisted interaction counts', () => {
+    const select = buildContentSelect('where ci.status = $1', buildPublicContentOrderClause('popular'));
+
+    expect(select).toContain('(ci.view_count + coalesce(view_counts.count, 0)) desc');
+    expect(select).toContain('(ci.like_count + coalesce(like_counts.count, 0)) desc');
+    expect(select).toContain('ci.published_at desc');
   });
 });

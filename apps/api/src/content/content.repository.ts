@@ -45,7 +45,7 @@ export class InMemoryContentRepository implements ContentRepository {
     return [...this.records.values()]
       .filter((record) => record.status === 'published' && record.visibility === 'public')
       .filter((record) => (filter.type ? record.type === filter.type : true))
-      .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''));
+      .sort((a, b) => sortPublicContent(a, b, filter.sort ?? 'latest'));
   }
 
   async update(id: string, patch: Partial<ContentRecord>): Promise<ContentRecord | null> {
@@ -67,4 +67,22 @@ export class InMemoryContentRepository implements ContentRepository {
 
     return updated;
   }
+}
+
+function sortPublicContent(a: ContentRecord, b: ContentRecord, sort: NonNullable<PublicContentFilter['sort']>): number {
+  if (sort === 'popular') {
+    const viewOrder = b.viewCount - a.viewCount;
+
+    if (viewOrder !== 0) {
+      return viewOrder;
+    }
+
+    const likeOrder = b.likeCount - a.likeCount;
+
+    if (likeOrder !== 0) {
+      return likeOrder;
+    }
+  }
+
+  return (b.publishedAt ?? '').localeCompare(a.publishedAt ?? '');
 }
