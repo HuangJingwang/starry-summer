@@ -62,7 +62,7 @@ describe('SEO helpers', () => {
   });
 
   test('builds canonical metadata for content detail pages', () => {
-    expect(buildContentMetadata(content, defaultSettings, 'https://example.com')).toMatchObject({
+    expect(buildContentMetadata({ ...content, updatedAt: '2026-06-11' }, defaultSettings, 'https://example.com')).toMatchObject({
       title: `Public Post | ${defaultSettings.profile.title}`,
       description: 'A public post summary.',
       alternates: {
@@ -75,6 +75,7 @@ describe('SEO helpers', () => {
         siteName: defaultSettings.profile.title,
         type: 'article',
         publishedTime: '2026-06-10',
+        modifiedTime: '2026-06-11',
       },
     });
   });

@@ -69,6 +69,7 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
       siteName: settings.profile.title,
       type: 'article',
       publishedTime: item.publishedAt,
+      ...(item.updatedAt ? { modifiedTime: item.updatedAt } : {}),
       tags: item.tags,
       ...(coverImageUrl
         ? {
