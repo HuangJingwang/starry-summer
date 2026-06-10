@@ -45,6 +45,14 @@ describe('deployment configuration', () => {
     expect(deployment).toContain('`https://$DOMAIN/health` returns Web health through Caddy.');
   });
 
+  test('shares the admin session secret with web and API containers', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
+
+    expect(compose).toContain('web:\n    build:');
+    expect(compose).toContain('api:\n    build:');
+    expect(compose.match(/SESSION_SECRET: \$\{SESSION_SECRET:-change-me-before-production\}/g)).toHaveLength(2);
+  });
+
   test('uses container network hosts in the production env example', async () => {
     const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
 
