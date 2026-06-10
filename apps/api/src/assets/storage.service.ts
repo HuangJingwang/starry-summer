@@ -51,6 +51,15 @@ const allowedMimeTypes = new Set([
   'text/plain',
   'text/markdown',
 ]);
+const safeExtensionsByMimeType = new Map<string, string>([
+  ['image/jpeg', '.jpg'],
+  ['image/png', '.png'],
+  ['image/webp', '.webp'],
+  ['image/gif', '.gif'],
+  ['application/pdf', '.pdf'],
+  ['text/plain', '.txt'],
+  ['text/markdown', '.md'],
+]);
 
 export function assertAllowedUpload(input: UploadValidationInput): void {
   if (!allowedMimeTypes.has(input.mimeType)) {
@@ -87,7 +96,12 @@ export class LocalAssetStorage implements AssetStorage {
       bytes: input.bytes,
     });
 
-    const storageKey = this.createStorageKey(input.filename);
+    const storageKey = createStorageKey(
+      input.filename,
+      this.options.now?.() ?? new Date(),
+      this.options.randomId,
+      safeExtensionForMimeType(input.mimeType),
+    );
     const destination = join(this.options.uploadDir, storageKey);
 
     await mkdir(dirname(destination), { recursive: true });
@@ -110,10 +124,6 @@ export class LocalAssetStorage implements AssetStorage {
     }
 
     await rm(target, { force: true });
-  }
-
-  private createStorageKey(filename: string): string {
-    return createStorageKey(filename, this.options.now?.() ?? new Date(), this.options.randomId);
   }
 }
 
@@ -149,7 +159,12 @@ export class S3AssetStorage implements AssetStorage {
       bytes: input.bytes,
     });
 
-    const storageKey = createStorageKey(input.filename, this.options.now?.() ?? new Date(), this.options.randomId);
+    const storageKey = createStorageKey(
+      input.filename,
+      this.options.now?.() ?? new Date(),
+      this.options.randomId,
+      safeExtensionForMimeType(input.mimeType),
+    );
 
     await this.sendCommand(
       new PutObjectCommand({
@@ -178,9 +193,8 @@ export class S3AssetStorage implements AssetStorage {
   }
 }
 
-function createStorageKey(filename: string, now: Date, randomId: (() => string) | undefined): string {
+function createStorageKey(filename: string, now: Date, randomId: (() => string) | undefined, ext: string): string {
   const originalExt = extname(filename);
-  const ext = originalExt.toLowerCase();
   const name = basename(filename, originalExt)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -200,6 +214,10 @@ function normalizeStorageKeySuffix(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '')
     .slice(0, 16) || randomUUID().replace(/-/g, '').slice(0, 8);
+}
+
+function safeExtensionForMimeType(mimeType: string): string {
+  return safeExtensionsByMimeType.get(mimeType) ?? '.bin';
 }
 
 function contentMatchesDeclaredType(mimeType: string, bytes: Buffer): boolean {

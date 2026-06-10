@@ -69,6 +69,31 @@ describe('asset storage', () => {
     await expect(readFile(join(dir, result.storageKey))).resolves.toEqual(pngBytes);
   });
 
+  test('uses the declared content type to choose the stored file extension', async () => {
+    const storage = new LocalAssetStorage({
+      uploadDir: dir,
+      publicBaseUrl: '/uploads',
+      now: () => new Date('2026-06-10T00:00:00.000Z'),
+      randomId: () => 'fixed',
+    });
+
+    const textResult = await storage.save({
+      filename: 'evil.html',
+      mimeType: 'text/plain',
+      bytes: Buffer.from('plain text'),
+    });
+    const imageResult = await storage.save({
+      filename: 'hero.txt',
+      mimeType: 'image/png',
+      bytes: pngBytes,
+    });
+
+    expect(textResult.storageKey).toBe('2026/06/10/evil-fixed.txt');
+    expect(textResult.publicUrl).toBe('/uploads/2026/06/10/evil-fixed.txt');
+    expect(imageResult.storageKey).toBe('2026/06/10/hero-fixed.png');
+    expect(imageResult.publicUrl).toBe('/uploads/2026/06/10/hero-fixed.png');
+  });
+
   test('stores repeated filenames under distinct keys', async () => {
     const suffixes = ['first', 'second'];
     const storage = new LocalAssetStorage({
