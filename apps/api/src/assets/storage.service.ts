@@ -55,6 +55,10 @@ export function assertAllowedUpload(input: UploadValidationInput): void {
     throw new Error(`Unsupported upload type: ${input.mimeType}`);
   }
 
+  if (input.byteSize <= 0) {
+    throw new Error('Upload is empty');
+  }
+
   if (input.byteSize > MAX_UPLOAD_BYTES) {
     throw new Error(`Upload exceeds ${MAX_UPLOAD_BYTES} bytes`);
   }

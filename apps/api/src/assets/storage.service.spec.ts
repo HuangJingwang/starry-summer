@@ -29,6 +29,10 @@ describe('asset storage', () => {
     );
   });
 
+  test('rejects empty uploads', () => {
+    expect(() => assertAllowedUpload({ mimeType: 'image/png', byteSize: 0 })).toThrow('Upload is empty');
+  });
+
   test('stores files with safe keys and public urls', async () => {
     const storage = new LocalAssetStorage({
       uploadDir: dir,
