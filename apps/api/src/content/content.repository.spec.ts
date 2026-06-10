@@ -21,12 +21,14 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: ['Writing'],
       tags: ['Platform'],
+      series: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
     });
 
     expect(await repository.findById(record.id)).toEqual(record);
+    expect(record.series).toEqual([]);
     expect(await repository.findBySlug('hello')).toEqual(record);
     expect(await repository.findBySlug('missing')).toBeNull();
   });
@@ -48,6 +50,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -88,6 +91,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -116,6 +120,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -136,6 +141,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -162,6 +168,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: ['Drafts'],
       tags: ['Writing'],
+      series: [],
       viewCount: 0,
       likeCount: 0,
       publishedAt: null,
@@ -182,6 +189,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: ['Lab'],
       tags: ['Roadmap'],
+      series: ['Platform Journal'],
       viewCount: 0,
       likeCount: 0,
       publishedAt: '2026-06-11T00:00:00.000Z',
@@ -192,8 +200,10 @@ describe('InMemoryContentRepository', () => {
     expect((await repository.listAdmin({ status: 'private' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ category: 'lab' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ tag: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ series: 'platform journal' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ tag: 'writing' })).map((item) => item.id)).toEqual([draft.id]);
     expect((await repository.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await repository.listAdmin({ query: 'platform journal' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await repository.listAdmin({ query: 'draft-post' })).map((item) => item.id)).toEqual([draft.id]);
   });
 
@@ -214,6 +224,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 10,
       likeCount: 1,
       publishedAt: '2026-06-12T00:00:00.000Z',
@@ -233,6 +244,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 20,
       likeCount: 5,
       publishedAt: '2026-06-11T00:00:00.000Z',
@@ -252,6 +264,7 @@ describe('InMemoryContentRepository', () => {
       featured: false,
       categories: [],
       tags: [],
+      series: [],
       viewCount: 1,
       likeCount: 0,
       publishedAt: '2026-06-10T00:00:00.000Z',

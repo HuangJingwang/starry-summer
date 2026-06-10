@@ -22,6 +22,7 @@ describe('ContentService', () => {
       coverAssetId: ' cover-asset-1 ',
       categories: [' Platform ', 'Writing', 'Platform'],
       tags: ['Next.js', '  Architecture ', 'Next.js'],
+      series: [' Build Log ', 'Platform Journal', 'build log'],
     });
 
     expect(draft.status).toBe('draft');
@@ -32,6 +33,7 @@ describe('ContentService', () => {
     expect(draft.title).toBe('Hello Platform');
     expect(draft.categories).toEqual(['Platform', 'Writing']);
     expect(draft.tags).toEqual(['Next.js', 'Architecture']);
+    expect(draft.series).toEqual(['Build Log', 'Platform Journal']);
   });
 
   test('normalizes project metadata when creating project drafts', async () => {
@@ -143,6 +145,7 @@ describe('ContentService', () => {
       bodyMarkdown: '# Project',
       categories: ['Lab'],
       tags: ['Roadmap'],
+      series: ['Platform Journal'],
     });
     await service.publish(privateProject.id);
     await service.setVisibility(privateProject.id, 'private');
@@ -152,7 +155,9 @@ describe('ContentService', () => {
     expect((await service.listAdmin({ status: 'private' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await service.listAdmin({ category: 'lab' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await service.listAdmin({ tag: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await service.listAdmin({ series: 'platform journal' })).map((item) => item.id)).toEqual([privateProject.id]);
     expect((await service.listAdmin({ query: 'roadmap' })).map((item) => item.id)).toEqual([privateProject.id]);
+    expect((await service.listAdmin({ query: 'platform journal' })).map((item) => item.id)).toEqual([privateProject.id]);
   });
 
   test('allows comments only on published public content with comments enabled', async () => {
@@ -219,6 +224,7 @@ describe('ContentService', () => {
       coverAssetId: ' cover-asset-2 ',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
+      series: ['Build Log', 'Platform Journal', 'build log'],
       project: {
         status: 'completed',
         links: {
@@ -246,6 +252,7 @@ describe('ContentService', () => {
       coverAssetId: 'cover-asset-2',
       categories: ['Notes', 'Writing'],
       tags: ['Markdown', 'Draft'],
+      series: ['Build Log', 'Platform Journal'],
       project: {
         status: 'completed',
         links: {
@@ -358,6 +365,8 @@ describe('ContentService', () => {
         'allowComments: false',
         'featured: true',
         'pinned: true',
+        'series:',
+        '  - Platform Journal',
         '---',
         '# Imported Note',
       ].join('\n'),
@@ -374,6 +383,7 @@ describe('ContentService', () => {
     expect(imported.allowComments).toBe(false);
     expect(imported.featured).toBe(true);
     expect(imported.pinned).toBe(true);
+    expect(imported.series).toEqual(['Platform Journal']);
     expect(imported.bodyMarkdown).toBe('# Imported Note');
   });
 
@@ -384,6 +394,7 @@ describe('ContentService', () => {
       slug: 'export-me',
       summary: 'Portable content',
       bodyMarkdown: '# Export Me',
+      series: ['Platform Journal'],
     });
     await service.updateContent(draft.id, { allowComments: false, featured: true, pinned: true });
 
@@ -399,6 +410,8 @@ describe('ContentService', () => {
     expect(exported).toContain('pinned: true');
     expect(exported).toContain('categories: []');
     expect(exported).toContain('tags: []');
+    expect(exported).toContain('series:');
+    expect(exported).toContain('  - Platform Journal');
     expect(exported).toContain('# Export Me');
   });
 
@@ -450,6 +463,8 @@ describe('ContentService', () => {
         '  - Writing',
         'tags:',
         '  - Backup',
+        'series:',
+        '  - Platform Journal',
         '---',
         '# Restored Post',
         '',
@@ -476,6 +491,7 @@ describe('ContentService', () => {
       summary: 'Restored from a full archive',
       categories: ['Writing'],
       tags: ['Backup'],
+      series: ['Platform Journal'],
       bodyMarkdown: '# Restored Post',
     });
     expect(imported[1]).toMatchObject({

@@ -8,10 +8,10 @@ import { seedContent } from '@/lib/content';
 export default async function AdminContentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; type?: string; category?: string; tag?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; type?: string; category?: string; tag?: string; series?: string }>;
 }) {
-  const { q = '', status, type, category, tag } = await searchParams;
-  const filters = normalizeAdminContentSearchParams({ q, status, type, category, tag });
+  const { q = '', status, type, category, tag, series } = await searchParams;
+  const filters = normalizeAdminContentSearchParams({ q, status, type, category, tag, series });
 
   return (
     <AdminShell>
@@ -42,6 +42,7 @@ export default async function AdminContentPage({
           </select>
           <input name="category" defaultValue={filters.category ?? ''} placeholder="分类" />
           <input name="tag" defaultValue={filters.tag ?? ''} placeholder="标签" />
+          <input name="series" defaultValue={filters.series ?? ''} placeholder="系列" />
           <button type="submit">Filter</button>
         </form>
         <AdminContentManager
@@ -51,6 +52,7 @@ export default async function AdminContentPage({
           type={filters.type}
           category={filters.category}
           tag={filters.tag}
+          series={filters.series}
         />
       </section>
     </AdminShell>

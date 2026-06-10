@@ -24,8 +24,9 @@ export class InMemoryContentRepository implements ContentRepository {
     const now = this.now();
     const record: ContentRecord = {
       ...input,
-      categories: [...input.categories],
-      tags: [...input.tags],
+      categories: [...(input.categories ?? [])],
+      tags: [...(input.tags ?? [])],
+      series: [...(input.series ?? [])],
       project: cloneProjectMetadata(input.project),
       id: String(this.nextId++),
       createdAt: now,
@@ -69,6 +70,7 @@ export class InMemoryContentRepository implements ContentRepository {
       ...patch,
       categories: patch.categories ? [...patch.categories] : record.categories,
       tags: patch.tags ? [...patch.tags] : record.tags,
+      series: patch.series ? [...patch.series] : record.series,
       project: patch.project !== undefined ? cloneProjectMetadata(patch.project) : record.project,
       id: record.id,
       updatedAt: patch.updatedAt ?? this.now(),
@@ -116,6 +118,10 @@ function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFi
     return false;
   }
 
+  if (filter.series && !includesTaxonomyLabel(record.series, filter.series)) {
+    return false;
+  }
+
   const query = filter.query?.trim().toLowerCase();
 
   if (!query) {
@@ -129,6 +135,7 @@ function matchesAdminContentFilter(record: ContentRecord, filter: AdminContentFi
     record.bodyMarkdown,
     ...record.categories,
     ...record.tags,
+    ...record.series,
   ]
     .join(' ')
     .toLowerCase();

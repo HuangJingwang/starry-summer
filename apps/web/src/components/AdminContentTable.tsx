@@ -10,6 +10,7 @@ export function AdminContentTable({
   type,
   category,
   tag,
+  series,
 }: {
   items: SiteContentItem[];
   query?: string;
@@ -17,8 +18,9 @@ export function AdminContentTable({
   type?: SiteContentItem['type'];
   category?: string;
   tag?: string;
+  series?: string;
 }) {
-  const filtered = filterAdminContent(items, { query, status, type, category, tag });
+  const filtered = filterAdminContent(items, { query, status, type, category, tag, series });
 
   return (
     <div className="admin-table" role="table" aria-label="Content list">

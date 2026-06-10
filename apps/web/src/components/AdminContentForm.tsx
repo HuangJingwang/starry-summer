@@ -27,6 +27,7 @@ interface AdminContentFormInitialValue {
   coverAltText?: string;
   categories?: string[];
   tags?: string[];
+  series?: string[];
   allowComments?: boolean;
   pinned?: boolean;
   featured?: boolean;
@@ -168,6 +169,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         <label>
           标签
           <input name="tags" defaultValue={(initialValue?.tags ?? []).join(', ')} placeholder="Markdown, Next.js" />
+        </label>
+        <label>
+          系列
+          <input name="series" defaultValue={(initialValue?.series ?? []).join(', ')} placeholder="Platform Journal" />
         </label>
       </div>
       {contentType === 'project' ? (

@@ -33,6 +33,7 @@ const items: SiteContentItem[] = [
     summary: 'A draft',
     categories: ['Drafts'],
     tags: ['Writing'],
+    series: ['Build Log'],
   },
   {
     id: 'published-note',
@@ -44,6 +45,7 @@ const items: SiteContentItem[] = [
     summary: 'A note',
     categories: ['Knowledge Base'],
     tags: ['Archive'],
+    series: ['Research Notes'],
   },
   {
     id: 'private-project',
@@ -55,6 +57,7 @@ const items: SiteContentItem[] = [
     summary: 'Private work',
     categories: ['Lab'],
     tags: ['Lab'],
+    series: ['Platform Journal'],
   },
 ];
 
@@ -75,8 +78,10 @@ describe('admin content helpers', () => {
     expect(filterAdminContent(items, { status: 'private' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { category: 'knowledge base' }).map((item) => item.id)).toEqual(['published-note']);
     expect(filterAdminContent(items, { tag: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
+    expect(filterAdminContent(items, { series: 'platform journal' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'lab' }).map((item) => item.id)).toEqual(['private-project']);
     expect(filterAdminContent(items, { query: 'knowledge' }).map((item) => item.id)).toEqual(['published-note']);
+    expect(filterAdminContent(items, { query: 'research notes' }).map((item) => item.id)).toEqual(['published-note']);
   });
 
   test('normalizes URL search params into valid admin content filters', () => {
@@ -86,12 +91,14 @@ describe('admin content helpers', () => {
       type: 'post',
       category: ' Lab ',
       tag: ' Roadmap ',
+      series: ' Platform Journal ',
     })).toEqual({
       query: 'api',
       status: 'draft',
       type: 'post',
       category: 'Lab',
       tag: 'Roadmap',
+      series: 'Platform Journal',
     });
     expect(normalizeAdminContentSearchParams({ q: 'x', status: 'deleted', type: 'article' })).toEqual({
       query: 'x',
@@ -119,6 +126,7 @@ describe('admin content helpers', () => {
         featured: true,
         categories: ['Writing', 'Platform'],
         tags: ['Next.js', 'Architecture'],
+        series: ['Build Log'],
       }),
     ).toEqual({
       url: '/api/admin/content',
@@ -139,6 +147,7 @@ describe('admin content helpers', () => {
           featured: true,
           categories: ['Writing', 'Platform'],
           tags: ['Next.js', 'Architecture'],
+          series: ['Build Log'],
           sourceType: 'original',
           sourceUrl: '',
         }),
@@ -223,9 +232,9 @@ describe('admin content helpers', () => {
       },
     });
     expect(buildListAdminContentRequest({
-      filters: { q: ' lab ', status: 'private', type: 'project', category: 'Lab', tag: 'Roadmap' },
+      filters: { q: ' lab ', status: 'private', type: 'project', category: 'Lab', tag: 'Roadmap', series: 'Build Log' },
     }).url).toBe(
-      '/api/admin/content?q=lab&status=private&type=project&category=Lab&tag=Roadmap',
+      '/api/admin/content?q=lab&status=private&type=project&category=Lab&tag=Roadmap&series=Build+Log',
     );
   });
 
@@ -234,10 +243,10 @@ describe('admin content helpers', () => {
       buildListAdminContentRequest({
         apiBaseUrl: 'https://api.example.com/',
         cookieHeader: 'ss_session=session-token',
-        filters: { q: 'draft', status: 'draft', type: 'post', category: 'Drafts', tag: 'Writing' },
+        filters: { q: 'draft', status: 'draft', type: 'post', category: 'Drafts', tag: 'Writing', series: 'Build Log' },
       }),
     ).toEqual({
-      url: 'https://api.example.com/admin/content?q=draft&status=draft&type=post&category=Drafts&tag=Writing',
+      url: 'https://api.example.com/admin/content?q=draft&status=draft&type=post&category=Drafts&tag=Writing&series=Build+Log',
       init: {
         method: 'GET',
         credentials: 'include',
@@ -271,6 +280,7 @@ describe('admin content helpers', () => {
         likeCount: 2,
         categories: ['Writing'],
         tags: ['Platform'],
+        series: ['Build Log'],
         project: {
           status: 'active',
           links: {
@@ -306,6 +316,7 @@ describe('admin content helpers', () => {
       publishedAt: '2026-06-10',
       categories: ['Writing'],
       tags: ['Platform'],
+      series: ['Build Log'],
       project: {
         status: 'active',
         links: {
@@ -333,13 +344,14 @@ describe('admin content helpers', () => {
             visibility: 'public',
             categories: ['Notes'],
             tags: ['API'],
+            series: ['Build Log'],
             updatedAt: '2026-06-10T00:00:00.000Z',
           },
         ]),
       );
-    }, { filters: { status: 'private', type: 'project', category: 'Lab', tag: 'API' } });
+    }, { filters: { status: 'private', type: 'project', category: 'Lab', tag: 'API', series: 'Build Log' } });
 
-    expect(seenUrls).toEqual(['/api/admin/content?status=private&type=project&category=Lab&tag=API']);
+    expect(seenUrls).toEqual(['/api/admin/content?status=private&type=project&category=Lab&tag=API&series=Build+Log']);
 
     expect(result).toEqual({
       source: 'api',
@@ -363,6 +375,7 @@ describe('admin content helpers', () => {
           publishedAt: '2026-06-10',
           categories: ['Notes'],
           tags: ['API'],
+          series: ['Build Log'],
         },
       ],
     });
@@ -410,6 +423,7 @@ describe('admin content helpers', () => {
           featured: true,
           categories: ['Writing'],
           tags: ['API'],
+          series: ['Build Log'],
           updatedAt: '2026-06-10T00:00:00.000Z',
         }),
       );
@@ -436,6 +450,7 @@ describe('admin content helpers', () => {
         publishedAt: '2026-06-10',
         categories: ['Writing'],
         tags: ['API'],
+        series: ['Build Log'],
       },
     });
   });
@@ -470,6 +485,7 @@ describe('admin content helpers', () => {
     formData.set('bodyMarkdown', '# Form Title');
     formData.set('categories', 'Projects, Platform, Projects');
     formData.set('tags', 'Next.js, Launch');
+    formData.set('series', 'Build Log, Platform Journal, build log');
     formData.set('projectStatus', 'active');
     formData.set('projectWebsiteUrl', ' https://example.com ');
     formData.set('projectRepositoryUrl', ' https://github.com/me/project ');
@@ -495,6 +511,7 @@ describe('admin content helpers', () => {
       featured: true,
       categories: ['Projects', 'Platform'],
       tags: ['Next.js', 'Launch'],
+      series: ['Build Log', 'Platform Journal'],
       project: {
         status: 'active',
         links: {

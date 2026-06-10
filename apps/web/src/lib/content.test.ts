@@ -209,6 +209,7 @@ describe('web content helpers', () => {
           publishedAt: '2026-01-03',
           summary: 'Built with Next.js',
           categories: ['Platform'],
+          series: ['Cloud Journal'],
           bodyMarkdown: 'Deployment notes for a personal cloud server.',
         },
       ],
@@ -216,6 +217,25 @@ describe('web content helpers', () => {
     );
 
     expect(results.map((item) => item.id)).toEqual(['3']);
+  });
+
+  test('searches public content by series labels', () => {
+    const results = searchContent(
+      [
+        {
+          id: 'series-post',
+          title: 'Entry 1',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-10',
+          series: ['Platform Journal'],
+        },
+      ],
+      'platform journal',
+    );
+
+    expect(results.map((item) => item.id)).toEqual(['series-post']);
   });
 
   test('ranks title matches before taxonomy and body matches', () => {

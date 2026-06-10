@@ -18,6 +18,7 @@ export interface SiteContentItem {
   featured?: boolean;
   categories?: string[];
   tags?: string[];
+  series?: string[];
   viewCount?: number;
   likeCount?: number;
   allowComments?: boolean;
@@ -210,7 +211,7 @@ function normalizeSearchTerms(query: string): string[] {
 function scoreSearchResult(item: SiteContentItem, terms: string[]): number {
   const title = item.title.toLowerCase();
   const summary = (item.summary ?? '').toLowerCase();
-  const taxonomy = [...(item.categories ?? []), ...(item.tags ?? [])].join(' ').toLowerCase();
+  const taxonomy = [...(item.categories ?? []), ...(item.tags ?? []), ...(item.series ?? [])].join(' ').toLowerCase();
   const body = (item.bodyMarkdown ?? '').toLowerCase();
   const combined = [title, summary, taxonomy, body].join(' ');
 
@@ -299,6 +300,7 @@ export const seedContent: SiteContentItem[] = [
     featured: true,
     categories: ['Writing', 'Platform'],
     tags: ['Platform', 'Writing', 'System'],
+    series: ['Platform Journal'],
     viewCount: 128,
     likeCount: 18,
   },
@@ -320,6 +322,7 @@ export const seedContent: SiteContentItem[] = [
     slug: 'markdown-ownership',
     categories: ['Notes', 'Writing'],
     tags: ['Markdown', 'Archive'],
+    series: ['Platform Journal'],
     viewCount: 76,
     likeCount: 9,
   },
@@ -344,6 +347,7 @@ export const seedContent: SiteContentItem[] = [
     featured: true,
     categories: ['Projects', 'Platform'],
     tags: ['Next.js', 'NestJS', 'PostgreSQL'],
+    series: ['Platform Journal'],
     project: {
       status: 'active',
       stack: ['Next.js', 'NestJS', 'PostgreSQL', 'Redis', 'Docker'],

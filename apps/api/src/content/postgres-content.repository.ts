@@ -26,6 +26,7 @@ export interface ContentItemRow {
   featured: boolean;
   categories?: string[] | null;
   tags?: string[] | null;
+  series?: string[] | null;
   view_count: number;
   like_count: number;
   project_status?: ProjectStatus | null;
@@ -63,6 +64,7 @@ export function mapContentRow(row: ContentItemRow): ContentRecord {
     featured: row.featured,
     categories: row.categories ?? [],
     tags: row.tags ?? [],
+    series: row.series ?? [],
     viewCount: row.view_count,
     likeCount: row.like_count,
     project: mapProjectMetadata(row),
@@ -171,6 +173,7 @@ export class PostgresContentRepository implements ContentRepository {
 
       await syncTaxonomyLabels(client, row.id, 'category', input.categories);
       await syncTaxonomyLabels(client, row.id, 'tag', input.tags);
+      await syncTaxonomyLabels(client, row.id, 'series', input.series);
       const created = await this.findByIdWithClient(client, row.id);
       await client.query('commit');
 
@@ -246,6 +249,10 @@ export class PostgresContentRepository implements ContentRepository {
         await syncTaxonomyLabels(client, id, 'tag', patch.tags);
       }
 
+      if (patch.series) {
+        await syncTaxonomyLabels(client, id, 'series', patch.series);
+      }
+
       const updated = await this.findByIdWithClient(client, id);
       await client.query('commit');
 
@@ -276,7 +283,7 @@ interface Queryable {
   query<T extends pg.QueryResultRow>(sql: string, values?: unknown[]): Promise<pg.QueryResult<T>>;
 }
 
-type TaxonomyKind = 'category' | 'tag';
+type TaxonomyKind = 'category' | 'tag' | 'series';
 
 const taxonomyConfig: Record<TaxonomyKind, { table: string; joinTable: string; joinColumn: string }> = {
   category: {
@@ -289,6 +296,11 @@ const taxonomyConfig: Record<TaxonomyKind, { table: string; joinTable: string; j
     joinTable: 'content_tags',
     joinColumn: 'tag_id',
   },
+  series: {
+    table: 'series',
+    joinTable: 'content_series',
+    joinColumn: 'series_id',
+  },
 };
 
 export function buildContentSelect(whereClause: string, orderClause = ''): string {
@@ -300,7 +312,8 @@ export function buildContentSelect(whereClause: string, orderClause = ''): strin
       ci.view_count + coalesce(view_counts.count, 0) as view_count,
       ci.like_count + coalesce(like_counts.count, 0) as like_count,
       coalesce(array_remove(array_agg(distinct c.name), null), '{}') as categories,
-      coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags
+      coalesce(array_remove(array_agg(distinct t.name), null), '{}') as tags,
+      coalesce(array_remove(array_agg(distinct s.name), null), '{}') as series
     from content_items ci
     left join assets cover_assets on cover_assets.id = ci.cover_asset_id
     left join (
@@ -317,6 +330,8 @@ export function buildContentSelect(whereClause: string, orderClause = ''): strin
     left join categories c on c.id = cc.category_id
     left join content_tags ct on ct.content_id = ci.id
     left join tags t on t.id = ct.tag_id
+    left join content_series cs on cs.content_id = ci.id
+    left join series s on s.id = cs.series_id
     ${whereClause}
     group by ci.id, cover_assets.public_url, cover_assets.alt_text, like_counts.count, view_counts.count
     ${orderClause}
@@ -371,6 +386,21 @@ export function buildAdminContentSelect(filter: AdminContentFilter = {}): SqlSta
     `);
   }
 
+  const series = filter.series?.trim().toLowerCase();
+
+  if (series) {
+    values.push(series);
+    clauses.push(`
+      and exists (
+        select 1
+        from content_series cs_exact
+        join series s_exact on s_exact.id = cs_exact.series_id
+        where cs_exact.content_id = ci.id
+          and lower(s_exact.name) = $${values.length}
+      )
+    `);
+  }
+
   const query = filter.query?.trim().toLowerCase();
 
   if (query) {
@@ -395,6 +425,13 @@ export function buildAdminContentSelect(filter: AdminContentFilter = {}): SqlSta
           join tags t_filter on t_filter.id = ct_filter.tag_id
           where ct_filter.content_id = ci.id
             and lower(t_filter.name) like ${placeholder}
+        )
+        or exists (
+          select 1
+          from content_series cs_filter
+          join series s_filter on s_filter.id = cs_filter.series_id
+          where cs_filter.content_id = ci.id
+            and lower(s_filter.name) like ${placeholder}
         )
       )
     `);

@@ -32,6 +32,7 @@ describe('PostgresContentRepository mapping', () => {
       featured: true,
       categories: ['Writing', 'Platform'],
       tags: ['Next.js', 'Architecture'],
+      series: ['Build Log', 'Platform Journal'],
       view_count: 10,
       like_count: 2,
       project_status: 'active',
@@ -66,6 +67,7 @@ describe('PostgresContentRepository mapping', () => {
       featured: true,
       categories: ['Writing', 'Platform'],
       tags: ['Next.js', 'Architecture'],
+      series: ['Build Log', 'Platform Journal'],
       viewCount: 10,
       likeCount: 2,
       project: {
@@ -100,6 +102,7 @@ describe('PostgresContentRepository mapping', () => {
       featured: false,
       categories: ['Notes'],
       tags: ['Markdown'],
+      series: ['Build Log'],
       viewCount: 0,
       likeCount: 0,
       project: {
@@ -157,6 +160,7 @@ describe('PostgresContentRepository mapping', () => {
       status: 'archived',
       categories: ['Notes'],
       tags: ['Markdown'],
+      series: ['Build Log'],
       project: {
         status: 'completed',
         links: { repository: 'https://github.com/me/updated' },
@@ -210,6 +214,8 @@ describe('PostgresContentRepository mapping', () => {
     expect(select).toContain('left join');
     expect(select).toContain('cover_assets.public_url as cover_asset_url');
     expect(select).toContain('left join assets cover_assets');
+    expect(select).toContain('content_series');
+    expect(select).toContain('series');
     expect(select).toContain('content_likes');
     expect(select).toContain('view_events');
     expect(select).toContain('ci.view_count + coalesce(view_counts.count, 0) as view_count');
@@ -226,6 +232,7 @@ describe('PostgresContentRepository mapping', () => {
       query: 'roadmap',
       category: 'Lab',
       tag: 'Roadmap',
+      series: 'Build Log',
     });
 
     expect(statement.sql).toContain('where true');
@@ -233,12 +240,14 @@ describe('PostgresContentRepository mapping', () => {
     expect(statement.sql).toContain("ci.visibility = 'private'");
     expect(statement.sql).toContain('lower(c_exact.name) = $2');
     expect(statement.sql).toContain('lower(t_exact.name) = $3');
-    expect(statement.sql).toContain('lower(ci.title) like $4');
+    expect(statement.sql).toContain('lower(s_exact.name) = $4');
+    expect(statement.sql).toContain('lower(ci.title) like $5');
     expect(statement.sql).toContain('exists');
     expect(statement.sql).toContain('categories');
     expect(statement.sql).toContain('tags');
+    expect(statement.sql).toContain('series');
     expect(statement.sql).toContain('order by ci.updated_at desc');
-    expect(statement.values).toEqual(['project', 'lab', 'roadmap', '%roadmap%']);
+    expect(statement.values).toEqual(['project', 'lab', 'roadmap', 'build log', '%roadmap%']);
   });
 
   test('builds slug lookup selects', () => {

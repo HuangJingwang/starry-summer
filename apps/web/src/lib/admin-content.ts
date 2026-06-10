@@ -8,6 +8,7 @@ export interface AdminContentFilters {
   query?: string;
   category?: string;
   tag?: string;
+  series?: string;
 }
 
 export interface AdminContentSearchParams {
@@ -16,6 +17,7 @@ export interface AdminContentSearchParams {
   type?: string;
   category?: string;
   tag?: string;
+  series?: string;
 }
 
 export interface AdminContentRequestOptions {
@@ -59,6 +61,7 @@ export interface AdminContentApiRecord {
   likeCount?: number;
   categories?: string[];
   tags?: string[];
+  series?: string[];
   project?: ProjectMetadata;
   createdAt?: string;
   updatedAt?: string;
@@ -79,6 +82,7 @@ export interface AdminContentPayload {
   featured?: boolean;
   categories?: string[];
   tags?: string[];
+  series?: string[];
   project?: ProjectMetadata;
 }
 
@@ -141,6 +145,7 @@ export function normalizeAdminContentItem(record: AdminContentApiRecord): SiteCo
     pinned: record.pinned ?? false,
     categories: record.categories ?? [],
     tags: record.tags ?? [],
+    series: record.series ?? [],
     viewCount: record.viewCount ?? 0,
     likeCount: record.likeCount ?? 0,
     ...cover,
@@ -182,6 +187,7 @@ function normalizeContentPayload(input: AdminContentPayload): AdminContentPayloa
     coverAssetId: normalizeOptionalText(input.coverAssetId),
     categories: normalizeList(input.categories),
     tags: normalizeList(input.tags),
+    series: normalizeList(input.series),
     ...(project ? { project } : {}),
   };
 }
@@ -208,6 +214,7 @@ export function buildContentPayloadFromFormData(formData: FormData): AdminConten
     bodyMarkdown: formText(formData, 'bodyMarkdown'),
     categories: splitList(formText(formData, 'categories')),
     tags: splitList(formText(formData, 'tags')),
+    series: splitList(formText(formData, 'series')),
     allowComments: formData.has('allowComments'),
     pinned: formData.has('pinned'),
     featured: formData.has('featured'),
@@ -327,6 +334,7 @@ export function normalizeAdminContentSearchParams(params: AdminContentSearchPara
 
   const category = params.category?.trim();
   const tag = params.tag?.trim();
+  const series = params.series?.trim();
 
   if (category) {
     filters.category = category;
@@ -334,6 +342,10 @@ export function normalizeAdminContentSearchParams(params: AdminContentSearchPara
 
   if (tag) {
     filters.tag = tag;
+  }
+
+  if (series) {
+    filters.series = series;
   }
 
   return filters;
@@ -375,6 +387,7 @@ function appendAdminContentFilters(url: string, filters: AdminContentSearchParam
 
   const category = filters?.category?.trim();
   const tag = filters?.tag?.trim();
+  const series = filters?.series?.trim();
 
   if (category) {
     params.set('category', category);
@@ -382,6 +395,10 @@ function appendAdminContentFilters(url: string, filters: AdminContentSearchParam
 
   if (tag) {
     params.set('tag', tag);
+  }
+
+  if (series) {
+    params.set('series', series);
   }
 
   const queryString = params.toString();
@@ -584,6 +601,7 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
   const normalizedQuery = filters.query?.trim().toLowerCase() ?? '';
   const normalizedCategory = filters.category?.trim().toLowerCase() ?? '';
   const normalizedTag = filters.tag?.trim().toLowerCase() ?? '';
+  const normalizedSeries = filters.series?.trim().toLowerCase() ?? '';
 
   return items
     .filter((item) => (filters.type ? item.type === filters.type : true))
@@ -596,12 +614,13 @@ export function filterAdminContent(items: SiteContentItem[], filters: AdminConte
     })
     .filter((item) => (normalizedCategory ? includesTaxonomyLabel(item.categories, normalizedCategory) : true))
     .filter((item) => (normalizedTag ? includesTaxonomyLabel(item.tags, normalizedTag) : true))
+    .filter((item) => (normalizedSeries ? includesTaxonomyLabel(item.series, normalizedSeries) : true))
     .filter((item) => {
       if (!normalizedQuery) {
         return true;
       }
 
-      const searchable = [item.title, item.summary ?? '', ...(item.categories ?? []), ...(item.tags ?? [])]
+      const searchable = [item.title, item.summary ?? '', ...(item.categories ?? []), ...(item.tags ?? []), ...(item.series ?? [])]
         .join(' ')
         .toLowerCase();
 

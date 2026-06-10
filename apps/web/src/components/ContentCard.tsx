@@ -22,6 +22,13 @@ export function ContentCard({ item }: { item: SiteContentItem }) {
         <Link href={getContentHref(item)}>{item.title}</Link>
       </h3>
       <p>{item.summary}</p>
+      {item.series && item.series.length > 0 ? (
+        <div className="content-card__series" aria-label="Series">
+          {item.series.slice(0, 2).map((series) => (
+            <span key={series}>{series}</span>
+          ))}
+        </div>
+      ) : null}
       <div className="content-card__footer">
         <span>{item.viewCount ?? 0} views</span>
         <span>{item.likeCount ?? 0} likes</span>

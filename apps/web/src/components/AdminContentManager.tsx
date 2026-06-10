@@ -14,6 +14,7 @@ interface AdminContentManagerProps {
   type?: SiteContentItem['type'];
   category?: string;
   tag?: string;
+  series?: string;
 }
 
 export function AdminContentManager({
@@ -23,6 +24,7 @@ export function AdminContentManager({
   type,
   category,
   tag,
+  series,
 }: AdminContentManagerProps) {
   const [result, setResult] = useState<AdminContentLoadResult>({
     source: 'fallback',
@@ -42,6 +44,7 @@ export function AdminContentManager({
           type,
           category,
           tag,
+          series,
         },
       });
 
@@ -56,7 +59,7 @@ export function AdminContentManager({
     return () => {
       active = false;
     };
-  }, [fallbackItems, query, status, type, category, tag]);
+  }, [fallbackItems, query, status, type, category, tag, series]);
 
   return (
     <div className="admin-content-manager">
@@ -67,7 +70,7 @@ export function AdminContentManager({
             ? `已加载 ${result.items.length} 条后台内容。`
             : '当前显示本地样例内容。'}
       </p>
-      <AdminContentTable items={result.items} query={query} status={status} type={type} category={category} tag={tag} />
+      <AdminContentTable items={result.items} query={query} status={status} type={type} category={category} tag={tag} series={series} />
     </div>
   );
 }

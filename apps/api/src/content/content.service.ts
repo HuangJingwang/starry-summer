@@ -26,6 +26,7 @@ export interface ContentRecord {
   likeCount: number;
   categories: string[];
   tags: string[];
+  series: string[];
   project?: ProjectMetadata;
   createdAt: string;
   updatedAt: string;
@@ -43,6 +44,7 @@ export interface CreateDraftInput {
   coverAssetId?: string;
   categories?: string[];
   tags?: string[];
+  series?: string[];
   project?: ProjectMetadata;
 }
 
@@ -60,6 +62,7 @@ export type UpdateContentInput = Partial<{
   featured: boolean;
   categories: string[];
   tags: string[];
+  series: string[];
   project: ProjectMetadata;
 }>;
 
@@ -69,6 +72,7 @@ export interface AdminContentFilter {
   query?: string;
   category?: string;
   tag?: string;
+  series?: string;
 }
 
 export interface PublicContentFilter {
@@ -106,6 +110,7 @@ export class ContentService {
       featured: false,
       categories: normalizeTaxonomyLabels(input.categories),
       tags: normalizeTaxonomyLabels(input.tags),
+      series: normalizeTaxonomyLabels(input.series),
       project: normalizeProjectMetadata(input.project),
       viewCount: 0,
       likeCount: 0,
@@ -153,6 +158,7 @@ export class ContentService {
       ...input,
       categories: input.categories ? normalizeTaxonomyLabels(input.categories) : undefined,
       tags: input.tags ? normalizeTaxonomyLabels(input.tags) : undefined,
+      series: input.series ? normalizeTaxonomyLabels(input.series) : undefined,
       coverAssetId: input.coverAssetId !== undefined ? normalizeOptionalText(input.coverAssetId) : undefined,
       project: input.project !== undefined ? normalizeProjectMetadata(input.project) ?? {} : undefined,
       updatedAt: new Date().toISOString(),
@@ -234,6 +240,7 @@ export class ContentService {
     const coverAssetId = normalizeOptionalText(String(document.frontmatter.coverAssetId ?? ''));
     const categories = normalizeTaxonomyLabels(toStringArray(document.frontmatter.categories));
     const tags = normalizeTaxonomyLabels(toStringArray(document.frontmatter.tags));
+    const series = normalizeTaxonomyLabels(toStringArray(document.frontmatter.series));
     const allowComments = document.frontmatter.allowComments === false ? false : true;
     const featured = document.frontmatter.featured === true;
     const pinned = document.frontmatter.pinned === true;
@@ -250,6 +257,7 @@ export class ContentService {
       coverAssetId,
       categories,
       tags,
+      series,
       project,
     });
 
@@ -306,6 +314,7 @@ export class ContentService {
         pinned: record.pinned,
         categories: record.categories,
         tags: record.tags,
+        series: record.series,
         ...(record.project ? { project: projectToFrontmatter(record.project) } : {}),
         publishedAt: record.publishedAt,
         updatedAt: record.updatedAt,

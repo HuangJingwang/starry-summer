@@ -19,6 +19,7 @@ export interface PublicContentApiRecord {
   coverAltText?: string;
   categories?: string[];
   tags?: string[];
+  series?: string[];
   bodyMarkdown?: string;
   allowComments?: boolean;
   viewCount?: number;
@@ -105,6 +106,7 @@ export function normalizePublicContentItem(record: PublicContentApiRecord): Site
     ...cover,
     categories: record.categories ?? [],
     tags: record.tags ?? [],
+    series: record.series ?? [],
     bodyMarkdown: record.bodyMarkdown ?? '',
     allowComments: record.allowComments ?? true,
     viewCount: record.viewCount ?? 0,

@@ -16,6 +16,7 @@ export class AdminContentController {
     @Query('q') query?: string,
     @Query('category') category?: string,
     @Query('tag') tag?: string,
+    @Query('series') series?: string,
   ) {
     return this.contentService.listAdmin({
       type: parseOptionalContentType(type),
@@ -23,6 +24,7 @@ export class AdminContentController {
       query: normalizeOptionalQuery(query),
       category: normalizeOptionalQuery(category),
       tag: normalizeOptionalQuery(tag),
+      series: normalizeOptionalQuery(series),
     });
   }
 

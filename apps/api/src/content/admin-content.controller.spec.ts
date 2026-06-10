@@ -27,7 +27,7 @@ describe('AdminContentController', () => {
   test('normalizes admin content list query filters', () => {
     const controller = new AdminContentController(contentService as never);
 
-    controller.listAdmin('post', 'private', ' lab ', ' Lab ', ' Roadmap ');
+    controller.listAdmin('post', 'private', ' lab ', ' Lab ', ' Roadmap ', ' Platform Journal ');
 
     expect(contentService.listAdmin).toHaveBeenCalledWith({
       type: 'post',
@@ -35,6 +35,7 @@ describe('AdminContentController', () => {
       query: 'lab',
       category: 'Lab',
       tag: 'Roadmap',
+      series: 'Platform Journal',
     });
   });
 

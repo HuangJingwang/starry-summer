@@ -46,6 +46,14 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         <span>{item.viewCount ?? 0} views</span>
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>
+      {item.series && item.series.length > 0 ? (
+        <div className="detail-taxonomy" aria-label="Series">
+          <span>系列</span>
+          {item.series.map((series) => (
+            <strong key={series}>{series}</strong>
+          ))}
+        </div>
+      ) : null}
       {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
       {tableOfContents.length > 0 ? (
         <nav className="detail-toc" aria-label="文章目录">
