@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import { createHmac } from 'node:crypto';
 
 import { AuthService } from './auth.service';
 import { createPasswordHash } from './password';
@@ -48,5 +49,18 @@ describe('AuthService', () => {
         password: 'wrong-password',
       }),
     ).rejects.toThrow('Invalid email or password');
+  });
+
+  test('returns null for malformed signed session payloads', () => {
+    const sessionSecret = 'test-session-secret';
+    const service = new AuthService({
+      adminEmail: 'owner@example.com',
+      adminPasswordHash: createPasswordHash('secret-password', 'auth-service-salt'),
+      sessionSecret,
+    });
+    const encodedPayload = Buffer.from('not-json', 'utf8').toString('base64url');
+    const signature = createHmac('sha256', sessionSecret).update(encodedPayload).digest('base64url');
+
+    expect(service.verifySession(`${encodedPayload}.${signature}`)).toBeNull();
   });
 });

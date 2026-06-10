@@ -74,9 +74,15 @@ export class AuthService {
       return null;
     }
 
-    const payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8')) as SessionPayload;
+    let payload: SessionPayload;
 
-    if (Date.parse(payload.expiresAt) <= Date.now()) {
+    try {
+      payload = JSON.parse(Buffer.from(encodedPayload, 'base64url').toString('utf8')) as SessionPayload;
+    } catch {
+      return null;
+    }
+
+    if (!payload.email || !payload.expiresAt || Date.parse(payload.expiresAt) <= Date.now()) {
       return null;
     }
 
