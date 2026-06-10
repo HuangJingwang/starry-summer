@@ -16,6 +16,7 @@
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "auth:hash-password": "npm run hash-password --workspace @starry-summer/api",
+    "auth:secret": "npm run session-secret --workspace @starry-summer/api",
     "db:migrate": "npm run migrate --workspace @starry-summer/database"
   },
   "engines": {

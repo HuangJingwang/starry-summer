@@ -36,6 +36,12 @@ Generate the admin password hash locally, then paste the printed value into `.en
 npm run auth:hash-password -- "your strong password"
 ```
 
+Generate a session secret the same way:
+
+```bash
+npm run auth:secret
+```
+
 ## 3. First Boot
 
 Build the images and run migrations first:

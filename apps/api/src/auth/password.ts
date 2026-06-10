@@ -32,6 +32,12 @@ export function createPasswordHashCliOutput(password: string, salt?: string): st
   return `ADMIN_PASSWORD_HASH=${createPasswordHash(trimmed, salt)}`;
 }
 
+export function createSessionSecretCliOutput(secret: Buffer | string = randomBytes(32)): string {
+  const bytes = typeof secret === 'string' ? Buffer.from(secret, 'utf8') : secret;
+
+  return `SESSION_SECRET=${bytes.toString('base64url')}`;
+}
+
 export function verifyPassword(password: string, storedHash: string): boolean {
   const [algorithm, cost, blockSize, parallelization, salt, expected] = storedHash.split(':');
 
