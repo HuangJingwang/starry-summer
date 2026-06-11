@@ -64,17 +64,24 @@ mv "$postgres_dump_tmp" "$backup_dir/postgres.sql"
 backup_volume() {
   local volume_name="$1"
   local archive_name="$2"
+  local archive_tmp="$archive_name.tmp"
 
   if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
     echo "Skipping missing volume $volume_name"
     return
   fi
 
-  docker run --rm \
+  if ! docker run --rm \
     -v "$volume_name:/from:ro" \
     -v "$absolute_backup_dir:/backup" \
     alpine:3.20 \
-    sh -lc "cd /from && tar czf /backup/$archive_name ."
+    sh -lc "cd /from && tar czf /backup/$archive_tmp ."; then
+    rm -f "$backup_dir/$archive_tmp" "$backup_dir/$archive_name"
+    echo "Backup volume failed: $volume_name"
+    exit 1
+  fi
+
+  mv "$backup_dir/$archive_tmp" "$backup_dir/$archive_name"
 }
 
 backup_volume "${compose_project_name}_api-uploads" "api-uploads.tar.gz"

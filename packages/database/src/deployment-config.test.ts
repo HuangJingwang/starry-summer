@@ -141,6 +141,8 @@ describe('deployment configuration', () => {
     expect(backupScript).toContain('docker compose exec -T postgres pg_dump');
     expect(backupScript).toContain('PostgreSQL backup failed.');
     expect(backupScript).toContain('PostgreSQL backup produced an empty dump.');
+    expect(backupScript).toContain('Backup volume failed:');
+    expect(backupScript).toContain('archive_tmp');
     expect(backupScript).toContain('postgres_sha256=');
     expect(backupScript).toContain('docker run --rm');
     expect(backupScript).toContain('api-uploads');

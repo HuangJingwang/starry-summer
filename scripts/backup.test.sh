@@ -30,7 +30,40 @@ if [[ "$1" == "compose" && "$2" == "exec" && "$5" == "pg_dump" ]]; then
 fi
 
 if [[ "$1" == "volume" && "$2" == "inspect" ]]; then
+  if [[ "${BACKUP_TEST_VOLUME_EXISTS:-}" == "YES" ]]; then
+    exit 0
+  fi
+
   exit 1
+fi
+
+if [[ "$1" == "run" ]]; then
+  backup_mount=""
+  archive_name=""
+
+  for arg in "$@"; do
+    case "$arg" in
+      *:/backup)
+        backup_mount="${arg%:/backup}"
+        ;;
+      *"/backup/"*".tar.gz"*)
+        archive_name="$(printf '%s\n' "$arg" | sed -n 's#.* /backup/\([^ ]*\.tar\.gz[^ ]*\).*#\1#p')"
+        ;;
+    esac
+  done
+
+  if [[ -z "$backup_mount" || -z "$archive_name" ]]; then
+    printf 'missing backup mount or archive name: %s\n' "$*" >&2
+    exit 1
+  fi
+
+  printf '%s\n' 'partial archive' >"$backup_mount/$archive_name"
+
+  if [[ "${BACKUP_TEST_FAIL_VOLUME_BACKUP:-}" == "YES" ]]; then
+    exit 1
+  fi
+
+  exit 0
 fi
 
 printf 'unexpected docker invocation: %s\n' "$*" >&2
@@ -42,6 +75,7 @@ backup_dir="$tmp_dir/backup"
 existing_backup_dir="$tmp_dir/existing-backup"
 failed_backup_dir="$tmp_dir/failed-backup"
 empty_backup_dir="$tmp_dir/empty-backup"
+failed_volume_backup_dir="$tmp_dir/failed-volume-backup"
 export BACKUP_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
 echo "Running backup script tests"
@@ -94,6 +128,24 @@ fi
 if [[ -d "$empty_backup_dir" && -n "$(find "$empty_backup_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
   echo "Backup script left a partial backup after empty PostgreSQL dump."
   find "$empty_backup_dir" -maxdepth 1 -type f -print 2>/dev/null || true
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" BACKUP_TEST_VOLUME_EXISTS=YES BACKUP_TEST_FAIL_VOLUME_BACKUP=YES bash "$repo_root/scripts/backup.sh" "$failed_volume_backup_dir" >"$tmp_dir/failed-volume-backup.log" 2>&1; then
+  echo "Backup script accepted a failed volume archive."
+  cat "$tmp_dir/failed-volume-backup.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup volume failed: starry-summer_api-uploads' "$tmp_dir/failed-volume-backup.log"; then
+  echo "Backup script did not explain volume archive failure."
+  cat "$tmp_dir/failed-volume-backup.log"
+  exit 1
+fi
+
+if [[ -e "$failed_volume_backup_dir/api-uploads.tar.gz" || -e "$failed_volume_backup_dir/manifest.txt" ]]; then
+  echo "Backup script left a final archive or manifest after volume backup failure."
+  find "$failed_volume_backup_dir" -maxdepth 1 -type f -print 2>/dev/null || true
   exit 1
 fi
 
