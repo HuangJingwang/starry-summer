@@ -138,6 +138,31 @@ check_api_health() {
   check_api_health_json
 }
 
+check_settings_api() {
+  check_path "/api/settings" "settings API"
+
+  node - "$response_file" <<'NODE'
+const { readFileSync } = require('node:fs');
+
+const responsePath = process.argv[2];
+let data;
+
+try {
+  data = JSON.parse(readFileSync(responsePath, 'utf8'));
+} catch {
+  console.error('Settings API endpoint did not return JSON.');
+  console.error(readFileSync(responsePath, 'utf8'));
+  process.exit(1);
+}
+
+if (!data || typeof data !== 'object' || Array.isArray(data)) {
+  console.error('Settings API endpoint did not return a JSON object.');
+  console.error(JSON.stringify(data));
+  process.exit(1);
+}
+NODE
+}
+
 check_rss() {
   check_path "/rss.xml" "RSS feed"
 
@@ -208,6 +233,7 @@ check_path "/" "home page"
 check_path "/admin/login" "admin login"
 check_admin_protected_redirect
 check_admin_api_protected
+check_settings_api
 check_rss
 check_sitemap
 
