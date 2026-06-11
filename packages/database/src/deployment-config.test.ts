@@ -153,8 +153,8 @@ describe('deployment configuration', () => {
     };
     const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
     const safeEnv = [
-      'DOMAIN=blog.example.com',
-      'PUBLIC_SITE_URL=https://blog.example.com',
+      'DOMAIN=blog.starry-summer.dev',
+      'PUBLIC_SITE_URL=https://blog.starry-summer.dev',
       'ACME_EMAIL=ops@starry-summer.dev',
       'ADMIN_EMAIL=owner@starry-summer.dev',
       'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
@@ -165,7 +165,7 @@ describe('deployment configuration', () => {
       'CONTENT_REPOSITORY_DRIVER=postgres',
       'S3_ACCESS_KEY=starry-prod-access',
       'S3_SECRET_KEY=starry-prod-secret',
-      'S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer',
+      'S3_PUBLIC_BASE_URL=https://assets.starry-summer.dev/starry-summer',
     ].join('\n');
     const tempDirectory = await mkdtemp(join(tmpdir(), 'starry-summer-env-'));
     const safeEnvPath = join(tempDirectory, '.env');
@@ -174,6 +174,7 @@ describe('deployment configuration', () => {
     const unsafeS3EnvPath = join(tempDirectory, '.env.unsafe-s3');
     const unsafeS3PublicUrlPath = join(tempDirectory, '.env.unsafe-s3-public-url');
     const invalidS3PublicUrlPath = join(tempDirectory, '.env.invalid-s3-public-url');
+    const placeholderS3PublicUrlPath = join(tempDirectory, '.env.placeholder-s3-public-url');
     const unsafeS3EndpointPath = join(tempDirectory, '.env.unsafe-s3-endpoint');
     const invalidS3EndpointPath = join(tempDirectory, '.env.invalid-s3-endpoint');
     const mismatchedDatabasePasswordPath = join(tempDirectory, '.env.mismatched-database-password');
@@ -182,7 +183,9 @@ describe('deployment configuration', () => {
     const encodedDatabasePasswordPath = join(tempDirectory, '.env.encoded-database-password');
     const unsafeContentRepositoryPath = join(tempDirectory, '.env.unsafe-content-repository');
     const invalidDomainPath = join(tempDirectory, '.env.invalid-domain');
+    const placeholderDomainPath = join(tempDirectory, '.env.placeholder-domain');
     const invalidSiteUrlPath = join(tempDirectory, '.env.invalid-site-url');
+    const placeholderSiteUrlPath = join(tempDirectory, '.env.placeholder-site-url');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
     const sharedSecretPath = join(tempDirectory, '.env.shared-secret');
@@ -193,8 +196,10 @@ describe('deployment configuration', () => {
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('DOMAIN must be a hostname without a scheme or path.');
+    expect(doctorScript).toContain('DOMAIN must not use an example.com placeholder.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must be a valid URL.');
+    expect(doctorScript).toContain('PUBLIC_SITE_URL must not use an example.com placeholder.');
     expect(doctorScript).toContain('ACME_EMAIL must be a valid email for HTTPS certificates.');
     expect(doctorScript).toContain('ACME_EMAIL must not use an example.com placeholder.');
     expect(doctorScript).toContain('ADMIN_EMAIL must not use an example.com placeholder.');
@@ -212,6 +217,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.');
     expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3.');
     expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must be a valid URL when STORAGE_DRIVER=s3.');
+    expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must not use an example.com placeholder when STORAGE_DRIVER=s3.');
     expect(doctorScript).toContain('S3_ENDPOINT must be a valid URL when STORAGE_DRIVER=s3.');
     expect(doctorScript).toContain('S3_ENDPOINT must not point at localhost when STORAGE_DRIVER=s3.');
     expect(deployment).toContain('npm run ops:doctor');
@@ -263,7 +269,7 @@ describe('deployment configuration', () => {
     await writeFile(
       unsafeS3PublicUrlPath,
       [
-        safeEnv.replace('S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer', 'S3_PUBLIC_BASE_URL=http://localhost:9000/starry-summer'),
+        safeEnv.replace('S3_PUBLIC_BASE_URL=https://assets.starry-summer.dev/starry-summer', 'S3_PUBLIC_BASE_URL=http://localhost:9000/starry-summer'),
         'STORAGE_DRIVER=s3',
       ].join('\n'),
     );
@@ -274,7 +280,7 @@ describe('deployment configuration', () => {
     await writeFile(
       invalidS3PublicUrlPath,
       [
-        safeEnv.replace('S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer', 'S3_PUBLIC_BASE_URL=https://'),
+        safeEnv.replace('S3_PUBLIC_BASE_URL=https://assets.starry-summer.dev/starry-summer', 'S3_PUBLIC_BASE_URL=https://'),
         'STORAGE_DRIVER=s3',
       ].join('\n'),
     );
@@ -359,17 +365,27 @@ describe('deployment configuration', () => {
       code: 1,
       stdout: expect.stringContaining('CONTENT_REPOSITORY_DRIVER must be postgres for production.'),
     });
-    await writeFile(invalidDomainPath, safeEnv.replace('DOMAIN=blog.example.com', 'DOMAIN=https://blog.example.com'));
+    await writeFile(invalidDomainPath, safeEnv.replace('DOMAIN=blog.starry-summer.dev', 'DOMAIN=https://blog.starry-summer.dev'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', invalidDomainPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('DOMAIN must be a hostname without a scheme or path.'),
     });
-    await writeFile(invalidSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://'));
+    await writeFile(placeholderDomainPath, safeEnv.replace('DOMAIN=blog.starry-summer.dev', 'DOMAIN=blog.example.com'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderDomainPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('DOMAIN must not use an example.com placeholder.'),
+    });
+    await writeFile(invalidSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.starry-summer.dev', 'PUBLIC_SITE_URL=https://'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', invalidSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('PUBLIC_SITE_URL must be a valid URL.'),
     });
-    await writeFile(mismatchedSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://wrong.example.com'));
+    await writeFile(placeholderSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.starry-summer.dev', 'PUBLIC_SITE_URL=https://blog.example.com'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('PUBLIC_SITE_URL must not use an example.com placeholder.'),
+    });
+    await writeFile(mismatchedSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.starry-summer.dev', 'PUBLIC_SITE_URL=https://wrong.starry-summer.dev'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('PUBLIC_SITE_URL host must match DOMAIN.'),
@@ -406,6 +422,17 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderAdminEmailPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('ADMIN_EMAIL must not use an example.com placeholder.'),
+    });
+    await writeFile(
+      placeholderS3PublicUrlPath,
+      [
+        safeEnv.replace('S3_PUBLIC_BASE_URL=https://assets.starry-summer.dev/starry-summer', 'S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer'),
+        'STORAGE_DRIVER=s3',
+      ].join('\n'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderS3PublicUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('S3_PUBLIC_BASE_URL must not use an example.com placeholder when STORAGE_DRIVER=s3.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
   }, 10000);

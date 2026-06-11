@@ -30,6 +30,12 @@ is_unset_or_placeholder() {
   [[ -z "$value" || "$value" == replace-* || "$value" == change-* ]]
 }
 
+is_example_com_hostname() {
+  local value="${1:-}"
+
+  [[ "$value" == "example.com" || "$value" == *.example.com ]]
+}
+
 case "${DOMAIN:-}" in
   "" | localhost | 127.0.0.1)
     fail "DOMAIN must be your public domain, not localhost."
@@ -38,6 +44,10 @@ case "${DOMAIN:-}" in
     fail "DOMAIN must be a hostname without a scheme or path."
     ;;
 esac
+
+if is_example_com_hostname "${DOMAIN:-}"; then
+  fail "DOMAIN must not use an example.com placeholder."
+fi
 
 if [[ "${PUBLIC_SITE_URL:-}" != https://* ]]; then
   fail "PUBLIC_SITE_URL must start with https:// for production."
@@ -49,6 +59,10 @@ public_site_host="$(
 
 if [[ -z "$public_site_host" ]]; then
   fail "PUBLIC_SITE_URL must be a valid URL."
+fi
+
+if is_example_com_hostname "$public_site_host"; then
+  fail "PUBLIC_SITE_URL must not use an example.com placeholder."
 fi
 
 if [[ -n "${DOMAIN:-}" && -n "$public_site_host" && "$public_site_host" != "$DOMAIN" ]]; then
@@ -171,6 +185,10 @@ if [[ "${STORAGE_DRIVER:-local}" == "s3" ]]; then
 
   if [[ -z "$s3_public_base_url_host" ]]; then
     fail "S3_PUBLIC_BASE_URL must be a valid URL when STORAGE_DRIVER=s3."
+  fi
+
+  if is_example_com_hostname "$s3_public_base_url_host"; then
+    fail "S3_PUBLIC_BASE_URL must not use an example.com placeholder when STORAGE_DRIVER=s3."
   fi
 
   if [[ -n "${S3_ENDPOINT:-}" ]]; then
