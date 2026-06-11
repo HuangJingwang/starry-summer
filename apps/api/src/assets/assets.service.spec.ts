@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import sharp from 'sharp';
 
 import { LocalAssetStorage, S3AssetStorage } from './storage.service.js';
 import { InMemoryAssetRepository } from './assets.repository.js';
-import { AssetsService, createAssetStorage } from './assets.service.js';
+import { AssetsService, createAssetStorage, optimizeAssetUpload } from './assets.service.js';
 
 describe('createAssetStorage', () => {
   afterEach(() => {
@@ -32,6 +33,93 @@ describe('createAssetStorage', () => {
 });
 
 describe('AssetsService', () => {
+  test('optimizes large web images before storage', async () => {
+    const original = await sharp({
+      create: {
+        width: 2600,
+        height: 1800,
+        channels: 3,
+        background: '#d8c7a3',
+      },
+    })
+      .jpeg({ quality: 100 })
+      .toBuffer();
+
+    const optimized = await optimizeAssetUpload({
+      filename: 'Large Cover.JPG',
+      mimeType: 'image/jpeg',
+      bytes: original,
+    });
+    const metadata = await sharp(optimized.bytes).metadata();
+
+    expect(optimized.filename).toBe('Large Cover.webp');
+    expect(optimized.mimeType).toBe('image/webp');
+    expect(optimized.bytes.byteLength).toBeLessThan(original.byteLength);
+    expect(metadata.width).toBeLessThanOrEqual(1920);
+    expect(metadata.height).toBeLessThanOrEqual(1920);
+  });
+
+  test('leaves non-image asset uploads unchanged', async () => {
+    const original = Buffer.from('# Portable note');
+
+    await expect(
+      optimizeAssetUpload({
+        filename: 'note.md',
+        mimeType: 'text/markdown',
+        bytes: original,
+      }),
+    ).resolves.toEqual({
+      filename: 'note.md',
+      mimeType: 'text/markdown',
+      bytes: original,
+    });
+  });
+
+  test('stores optimized upload bytes and metadata', async () => {
+    const savedInputs: Array<{ filename: string; mimeType: string; bytes: Buffer }> = [];
+    const service = new AssetsService(
+      {
+        save: async (input) => {
+          savedInputs.push(input);
+
+          return {
+            storageKey: 'optimized-cover.webp',
+            publicUrl: '/uploads/optimized-cover.webp',
+            mimeType: input.mimeType,
+            byteSize: input.bytes.byteLength,
+          };
+        },
+        delete: async () => undefined,
+      },
+      new InMemoryAssetRepository(),
+      () => 0,
+      async () => ({
+        filename: 'cover.webp',
+        mimeType: 'image/webp',
+        bytes: Buffer.from('optimized-webp'),
+      }),
+    );
+
+    const uploaded = await service.upload({
+      filename: 'cover.jpg',
+      mimeType: 'image/jpeg',
+      base64: Buffer.from('original-jpeg').toString('base64'),
+      usage: 'cover',
+    });
+
+    expect(savedInputs).toEqual([
+      {
+        filename: 'cover.webp',
+        mimeType: 'image/webp',
+        bytes: Buffer.from('optimized-webp'),
+      },
+    ]);
+    expect(uploaded).toMatchObject({
+      mimeType: 'image/webp',
+      byteSize: 'optimized-webp'.length,
+    });
+  });
+
   test('rejects malformed base64 upload payloads before storage writes', async () => {
     let saveCalls = 0;
     const service = new AssetsService(

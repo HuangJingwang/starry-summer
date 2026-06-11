@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import sharp from 'sharp';
 
 import type { AssetStorage, StoredAsset } from './storage.service.js';
 import { LocalAssetStorage, S3AssetStorage } from './storage.service.js';
@@ -23,6 +24,14 @@ export interface UploadAssetInput {
   altText?: string;
 }
 
+export interface OptimizableAssetUpload {
+  filename: string;
+  mimeType: string;
+  bytes: Buffer;
+}
+
+export type AssetUploadOptimizer = (input: OptimizableAssetUpload) => Promise<OptimizableAssetUpload>;
+
 @Injectable()
 export class AssetsService {
   constructor(
@@ -31,16 +40,18 @@ export class AssetsService {
     @Inject(ASSET_REPOSITORY)
     private readonly repository: AssetRepository,
     private readonly randomNumber: () => number = Math.random,
+    private readonly optimizeUpload: AssetUploadOptimizer = optimizeAssetUpload,
   ) {}
 
   async upload(input: UploadAssetInput): Promise<AssetRecord> {
     assertUploadInput(input);
     const bytes = decodeBase64Payload(input.base64);
-    const stored = await this.storage.save({
+    const optimized = await this.optimizeUpload({
       filename: input.filename,
       mimeType: input.mimeType,
       bytes,
     });
+    const stored = await this.storage.save(optimized);
 
     return this.repository.create({
       ...stored,
@@ -86,6 +97,46 @@ export class AssetsService {
   }
 }
 
+const optimizedImageMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_OPTIMIZED_IMAGE_DIMENSION = 1920;
+const WEBP_QUALITY = 82;
+
+export async function optimizeAssetUpload(input: OptimizableAssetUpload): Promise<OptimizableAssetUpload> {
+  if (!optimizedImageMimeTypes.has(input.mimeType)) {
+    return input;
+  }
+
+  let output: Buffer;
+
+  try {
+    output = await sharp(input.bytes, { failOn: 'error' })
+      .rotate()
+      .resize({
+        width: MAX_OPTIMIZED_IMAGE_DIMENSION,
+        height: MAX_OPTIMIZED_IMAGE_DIMENSION,
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+      .webp({
+        quality: WEBP_QUALITY,
+        effort: 4,
+      })
+      .toBuffer();
+  } catch {
+    return input;
+  }
+
+  if (output.byteLength >= input.bytes.byteLength) {
+    return input;
+  }
+
+  return {
+    filename: replaceFilenameExtension(input.filename, '.webp'),
+    mimeType: 'image/webp',
+    bytes: output,
+  };
+}
+
 function assertUploadInput(input: UploadAssetInput): void {
   if (
     typeof input?.filename !== 'string' ||
@@ -104,6 +155,12 @@ function decodeBase64Payload(value: string): Buffer {
   }
 
   return Buffer.from(normalized, 'base64');
+}
+
+function replaceFilenameExtension(filename: string, extension: string): string {
+  const index = filename.lastIndexOf('.');
+
+  return `${index > 0 ? filename.slice(0, index) : filename}${extension}`;
 }
 
 export function createAssetStorage(): AssetStorage {
