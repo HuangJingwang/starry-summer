@@ -16,6 +16,7 @@ set -euo pipefail
 
 header_file=""
 write_out=""
+output_file=""
 url=""
 
 while [[ "$#" -gt 0 ]]; do
@@ -28,7 +29,11 @@ while [[ "$#" -gt 0 ]]; do
       write_out="$2"
       shift 2
       ;;
-    --output | --max-time)
+    --output)
+      output_file="$2"
+      shift 2
+      ;;
+    --max-time)
       shift 2
       ;;
     --fail | --silent | --show-error | --location)
@@ -41,28 +46,40 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
+if [[ -n "$header_file" && "$url" != */admin/content ]]; then
+  printf '%b' "${FAKE_SECURITY_HEADERS:-HTTP/1.1 200 OK\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains; preload\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nReferrer-Policy: strict-origin-when-cross-origin\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\n\r\n}" >"$header_file"
+fi
+
+emit_body() {
+  if [[ "$output_file" == "/dev/null" ]]; then
+    return
+  fi
+
+  printf '%s' "$1"
+}
+
 case "$url" in
   */admin/content)
     printf 'HTTP/1.1 307 Temporary Redirect\r\nLocation: https://example.com/admin/login?next=%%2Fadmin%%2Fcontent\r\n\r\n' >"$header_file"
     printf '307'
     ;;
   */api/health)
-    printf '%s' "${FAKE_API_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-api\"}}"
+    emit_body "${FAKE_API_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-api\"}}"
     ;;
   */health)
-    printf '{"status":"ok"}'
+    emit_body '{"status":"ok"}'
     ;;
   */)
-    printf '<html>home</html>'
+    emit_body '<html>home</html>'
     ;;
   */admin/login)
-    printf '<html>login</html>'
+    emit_body '<html>login</html>'
     ;;
   */rss.xml)
-    printf '%s' "${FAKE_RSS_BODY:-<rss version=\"2.0\"><channel><title>Starry Summer</title></channel></rss>}"
+    emit_body "${FAKE_RSS_BODY:-<rss version=\"2.0\"><channel><title>Starry Summer</title></channel></rss>}"
     ;;
   */sitemap.xml)
-    printf '%s' "${FAKE_SITEMAP_BODY:-<urlset><url><loc>https://example.com</loc></url></urlset>}"
+    emit_body "${FAKE_SITEMAP_BODY:-<urlset><url><loc>https://example.com</loc></url></urlset>}"
     ;;
   *)
     printf 'unexpected URL: %s\n' "$url" >&2
@@ -100,6 +117,12 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_SITEMAP_BODY='<html>not sitemap</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unexpected-sitemap.log" 2>&1; then
   echo "Smoke script accepted a non-sitemap response."
   cat "$tmp_dir/unexpected-sitemap.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_SECURITY_HEADERS=$'HTTP/1.1 200 OK\r\nX-Frame-Options: DENY\r\n\r\n' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-security-headers.log" 2>&1; then
+  echo "Smoke script accepted missing security headers."
+  cat "$tmp_dir/missing-security-headers.log"
   exit 1
 fi
 

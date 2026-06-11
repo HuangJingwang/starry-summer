@@ -83,10 +83,52 @@ check_sitemap() {
   fi
 }
 
+require_header() {
+  local header_file="$1"
+  local header_name="$2"
+  local expected_value="$3"
+
+  if ! awk -v name="$header_name" -v expected="$expected_value" '
+    BEGIN { found = 0 }
+    {
+      line = $0
+      sub(/\r$/, "", line)
+      split(line, parts, ":")
+      header = tolower(parts[1])
+      value = line
+      sub(/^[^:]+:[[:space:]]*/, "", value)
+      if (header == tolower(name) && index(value, expected) > 0) {
+        found = 1
+      }
+    }
+    END { exit found ? 0 : 1 }
+  ' "$header_file"; then
+    echo "Missing or invalid security header: $header_name"
+    cat "$header_file"
+    exit 1
+  fi
+}
+
+check_security_headers() {
+  local header_file="/tmp/starry-summer-smoke-security-headers"
+
+  echo "Checking security headers: $SITE_URL/"
+  curl --fail --silent --show-error --dump-header "$header_file" --output /dev/null --max-time 10 "$SITE_URL/"
+
+  require_header "$header_file" "Strict-Transport-Security" "max-age=31536000"
+  require_header "$header_file" "X-Content-Type-Options" "nosniff"
+  require_header "$header_file" "X-Frame-Options" "DENY"
+  require_header "$header_file" "Referrer-Policy" "strict-origin-when-cross-origin"
+  require_header "$header_file" "Permissions-Policy" "camera=(), microphone=(), geolocation=()"
+
+  rm -f "$header_file"
+}
+
 check_health
 if [[ "${CHECK_API_HEALTH:-true}" == "true" ]]; then
   check_api_health
 fi
+check_security_headers
 check_path "/" "home page"
 check_path "/admin/login" "admin login"
 check_admin_protected_redirect

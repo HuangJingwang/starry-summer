@@ -275,6 +275,10 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('/sitemap.xml');
     expect(smokeScript).toContain('RSS endpoint did not return an RSS channel.');
     expect(smokeScript).toContain('Sitemap endpoint did not return URL entries.');
+    expect(smokeScript).toContain('Checking security headers');
+    expect(smokeScript).toContain('Strict-Transport-Security');
+    expect(smokeScript).toContain('X-Frame-Options');
+    expect(smokeScript).toContain('Missing or invalid security header');
     expect(deployment).toContain('npm run ops:smoke -- https://example.com');
   });
 
