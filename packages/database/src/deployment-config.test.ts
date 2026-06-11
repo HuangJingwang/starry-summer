@@ -175,6 +175,7 @@ describe('deployment configuration', () => {
     const unsafeS3PublicUrlPath = join(tempDirectory, '.env.unsafe-s3-public-url');
     const invalidS3PublicUrlPath = join(tempDirectory, '.env.invalid-s3-public-url');
     const unsafeS3EndpointPath = join(tempDirectory, '.env.unsafe-s3-endpoint');
+    const invalidS3EndpointPath = join(tempDirectory, '.env.invalid-s3-endpoint');
     const mismatchedDatabasePasswordPath = join(tempDirectory, '.env.mismatched-database-password');
     const unsafeDatabaseHostPath = join(tempDirectory, '.env.unsafe-database-host');
     const unsafeDatabaseProtocolPath = join(tempDirectory, '.env.unsafe-database-protocol');
@@ -205,6 +206,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.');
     expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3.');
     expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must be a valid URL when STORAGE_DRIVER=s3.');
+    expect(doctorScript).toContain('S3_ENDPOINT must be a valid URL when STORAGE_DRIVER=s3.');
     expect(doctorScript).toContain('S3_ENDPOINT must not point at localhost when STORAGE_DRIVER=s3.');
     expect(deployment).toContain('npm run ops:doctor');
 
@@ -285,6 +287,18 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeS3EndpointPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('S3_ENDPOINT must not point at localhost when STORAGE_DRIVER=s3.'),
+    });
+    await writeFile(
+      invalidS3EndpointPath,
+      [
+        safeEnv,
+        'STORAGE_DRIVER=s3',
+        'S3_ENDPOINT=https://',
+      ].join('\n'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', invalidS3EndpointPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('S3_ENDPOINT must be a valid URL when STORAGE_DRIVER=s3.'),
     });
     await writeFile(
       mismatchedDatabasePasswordPath,

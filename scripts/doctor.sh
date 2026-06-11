@@ -171,6 +171,10 @@ if [[ "${STORAGE_DRIVER:-local}" == "s3" ]]; then
       node -e "try { process.stdout.write(new URL(process.argv[1]).hostname) } catch { process.exit(1) }" "${S3_ENDPOINT:-}" 2>/dev/null || true
     )"
 
+    if [[ -z "$s3_endpoint_host" ]]; then
+      fail "S3_ENDPOINT must be a valid URL when STORAGE_DRIVER=s3."
+    fi
+
     case "$s3_endpoint_host" in
       localhost | 127.0.0.1 | ::1)
         fail "S3_ENDPOINT must not point at localhost when STORAGE_DRIVER=s3."
