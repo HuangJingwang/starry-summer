@@ -83,6 +83,9 @@ case "$url" in
   */api/content\?q=starry)
     emit_body "${FAKE_CONTENT_SEARCH_BODY:-[]}"
     ;;
+  */api/guestbook)
+    emit_body "${FAKE_GUESTBOOK_BODY:-[]}"
+    ;;
   */health)
     emit_body "${FAKE_WEB_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-web\",\"release\":{\"version\":\"20260611091500\",\"revision\":\"abc1234\"}}}"
     ;;
@@ -169,6 +172,12 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_CONTENT_SEARCH_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-content-search.log" 2>&1; then
   echo "Smoke script accepted a non-JSON content search response."
   cat "$tmp_dir/non-json-content-search.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_GUESTBOOK_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-guestbook.log" 2>&1; then
+  echo "Smoke script accepted a non-JSON guestbook response."
+  cat "$tmp_dir/non-json-guestbook.log"
   exit 1
 fi
 
