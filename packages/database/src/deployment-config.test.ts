@@ -489,7 +489,8 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('Strict-Transport-Security');
     expect(smokeScript).toContain('X-Frame-Options');
     expect(smokeScript).toContain('Missing or invalid security header');
-    expect(deployment).toContain('npm run ops:smoke -- https://example.com');
+    expect(deployment).toContain('npm run ops:smoke -- https://blog.your-domain.com');
+    expect(deployment).not.toContain('npm run ops:smoke -- https://example.com');
   });
 
   test('provides a repeatable production deployment script', async () => {
@@ -514,8 +515,20 @@ describe('deployment configuration', () => {
     expect(deployScript).toContain('Deploy site URL must start with https://.');
     expect(deployScript).toContain('Deploy site URL must match PUBLIC_SITE_URL in the environment file.');
     expect(deployScript).toContain('Refusing to deploy with uncommitted changes.');
-    expect(deployment).toContain('npm run ops:deploy -- https://example.com');
+    expect(deployment).toContain('npm run ops:deploy -- https://blog.your-domain.com');
+    expect(deployment).not.toContain('npm run ops:deploy -- https://example.com');
     expect(deployment).toContain('ALLOW_DIRTY_DEPLOY=true npm run ops:deploy');
+  });
+
+  test('keeps deployment docs aligned with production domain placeholder checks', async () => {
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(deployment).toContain('`DOMAIN`: your public domain, for example `blog.your-domain.com`.');
+    expect(deployment).toContain('`PUBLIC_SITE_URL`: `https://blog.your-domain.com`.');
+    expect(deployment).toContain('`https://assets.your-domain.com/starry-summer`');
+    expect(deployment).not.toContain('`example.com`');
+    expect(deployment).not.toContain('https://example.com');
+    expect(deployment).not.toContain('assets.example.com');
   });
 
   test('sets baseline security headers at the reverse proxy', async () => {

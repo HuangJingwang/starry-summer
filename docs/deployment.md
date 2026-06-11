@@ -19,8 +19,8 @@ cp .env.example .env
 
 Required production changes:
 
-- `DOMAIN`: your public domain, for example `example.com`.
-- `PUBLIC_SITE_URL`: `https://example.com`. This value is used by `robots.txt`, `sitemap.xml`, RSS, canonical links, and Open Graph metadata.
+- `DOMAIN`: your public domain, for example `blog.your-domain.com`.
+- `PUBLIC_SITE_URL`: `https://blog.your-domain.com`. This value is used by `robots.txt`, `sitemap.xml`, RSS, canonical links, and Open Graph metadata.
 - `ACME_EMAIL`: email used by Caddy for HTTPS certificates.
 - `SESSION_SECRET`: a long random string.
 - `INTERACTION_HASH_SECRET`: a long random string used to anonymize and deduplicate public likes/views.
@@ -29,7 +29,7 @@ Required production changes:
 - `POSTGRES_PASSWORD`: a strong database password.
 - `S3_ACCESS_KEY` and `S3_SECRET_KEY`: strong MinIO credentials when self-hosting MinIO.
 - `STORAGE_DRIVER`: use `local` for single-server disk uploads or `s3` for MinIO/S3-compatible object storage.
-- `S3_PUBLIC_BASE_URL`: public asset base URL when `STORAGE_DRIVER=s3`, for example `https://assets.example.com/starry-summer` or a CDN URL.
+- `S3_PUBLIC_BASE_URL`: public asset base URL when `STORAGE_DRIVER=s3`, for example `https://assets.your-domain.com/starry-summer` or a CDN URL.
 - `S3_FORCE_PATH_STYLE`: keep `true` for self-hosted MinIO and most S3-compatible services; set `false` only for providers that require virtual-hosted bucket URLs.
 - RELEASE_VERSION and GIT_REVISION are returned by `/health` and `/api/health` so you can confirm which release is live after deployment.
 
@@ -80,7 +80,7 @@ API health also verifies PostgreSQL and Redis when production drivers are config
 Run the public smoke check after DNS and HTTPS are ready:
 
 ```bash
-npm run ops:smoke -- https://example.com
+npm run ops:smoke -- https://blog.your-domain.com
 ```
 
 For later schema changes, rerun migrations before restarting the API:
@@ -151,7 +151,7 @@ Pull the latest code, rebuild, migrate, restart, and run smoke checks in one ste
 
 ```bash
 git pull
-npm run ops:deploy -- https://example.com
+npm run ops:deploy -- https://blog.your-domain.com
 ```
 
 The deploy script runs `ops:doctor`, exports release metadata for `/health` and `/api/health`, builds images, runs migrations, starts the stack, and then runs `ops:smoke`.
@@ -159,7 +159,7 @@ The deploy script runs `ops:doctor`, exports release metadata for `/health` and 
 By default, the deploy script refuses to run with uncommitted local changes so the live `GIT_REVISION` remains traceable. For an intentional emergency deploy from a dirty worktree, use:
 
 ```bash
-ALLOW_DIRTY_DEPLOY=true npm run ops:deploy -- https://example.com
+ALLOW_DIRTY_DEPLOY=true npm run ops:deploy -- https://blog.your-domain.com
 ```
 
 You can also run the underlying commands manually:
