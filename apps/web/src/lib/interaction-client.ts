@@ -48,6 +48,11 @@ const jsonHeaders = {
   'content-type': 'application/json',
 };
 
+export const PUBLIC_SUBMISSION_LIMITS = {
+  authorName: 80,
+  body: 2000,
+} as const;
+
 export function buildLikeRequest(targetType: ContentType, targetId: string): InteractionRequest {
   return {
     url: `/api/likes/${targetType}/${targetId}`,

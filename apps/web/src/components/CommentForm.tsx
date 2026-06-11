@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { buildCommentRequest, type CommentTargetType } from '@/lib/interaction-client';
+import { buildCommentRequest, PUBLIC_SUBMISSION_LIMITS, type CommentTargetType } from '@/lib/interaction-client';
 
 export function CommentForm({ targetType, targetId }: { targetType: CommentTargetType; targetId: string }) {
   const [message, setMessage] = useState('');
@@ -26,8 +26,8 @@ export function CommentForm({ targetType, targetId }: { targetType: CommentTarge
   return (
     <form className="interaction-form" action={submit}>
       <h2>评论</h2>
-      <input name="authorName" placeholder="你的名字" required />
-      <textarea name="body" placeholder="写下你的想法" rows={4} required />
+      <input name="authorName" placeholder="你的名字" maxLength={PUBLIC_SUBMISSION_LIMITS.authorName} required />
+      <textarea name="body" placeholder="写下你的想法" rows={4} maxLength={PUBLIC_SUBMISSION_LIMITS.body} required />
       <button type="submit">提交评论</button>
       {message ? <p>{message}</p> : null}
     </form>

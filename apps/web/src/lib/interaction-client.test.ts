@@ -12,9 +12,17 @@ import {
   buildViewRequest,
   loadAdminModerationCount,
   normalizeModerationRecord,
+  PUBLIC_SUBMISSION_LIMITS,
 } from './interaction-client';
 
 describe('interaction client helpers', () => {
+  test('exposes public submission field limits that match the API validation contract', () => {
+    expect(PUBLIC_SUBMISSION_LIMITS).toEqual({
+      authorName: 80,
+      body: 2000,
+    });
+  });
+
   test('builds like request', () => {
     expect(buildLikeRequest('post', 'post-1')).toEqual({
       url: '/api/likes/post/post-1',

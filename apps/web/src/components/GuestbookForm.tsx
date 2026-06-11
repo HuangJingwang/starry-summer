@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { buildGuestbookRequest } from '@/lib/interaction-client';
+import { buildGuestbookRequest, PUBLIC_SUBMISSION_LIMITS } from '@/lib/interaction-client';
 
 export function GuestbookForm() {
   const [message, setMessage] = useState('');
@@ -23,8 +23,8 @@ export function GuestbookForm() {
 
   return (
     <form className="guestbook-form" action={submit}>
-      <input name="authorName" aria-label="Name" placeholder="你的名字" required />
-      <textarea name="body" aria-label="Message" placeholder="留下些什么" rows={5} required />
+      <input name="authorName" aria-label="Name" placeholder="你的名字" maxLength={PUBLIC_SUBMISSION_LIMITS.authorName} required />
+      <textarea name="body" aria-label="Message" placeholder="留下些什么" rows={5} maxLength={PUBLIC_SUBMISSION_LIMITS.body} required />
       <button type="submit">提交留言</button>
       {message ? <p>{message}</p> : null}
     </form>
