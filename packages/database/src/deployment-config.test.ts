@@ -378,6 +378,7 @@ describe('deployment configuration', () => {
     expect(deployScript).toContain('npm run ops:doctor -- "$env_file"');
     expect(deployScript).toContain('export RELEASE_VERSION="${RELEASE_VERSION:-$release_version}"');
     expect(deployScript).toContain('export GIT_REVISION="${GIT_REVISION:-$git_revision}"');
+    expect(deployScript).toContain('docker compose --env-file "$env_file" config --quiet');
     expect(deployScript).toContain('docker compose --env-file "$env_file" build');
     expect(deployScript).toContain('docker compose --env-file "$env_file" run --rm migrate');
     expect(deployScript).toContain('docker compose --env-file "$env_file" up -d');

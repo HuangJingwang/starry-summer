@@ -90,6 +90,9 @@ printf '%s\n' "$*" >>"${DEPLOY_TEST_DOCKER_LOG:?}"
 
 if [[ "$1" == "compose" && "$2" == "--env-file" && -n "$3" ]]; then
   case "${4:-}" in
+    config)
+      [[ "${5:-}" == "--quiet" ]] && exit 0
+      ;;
     build)
       exit 0
       ;;
@@ -183,6 +186,21 @@ fi
 
 if ! grep -q 'compose --env-file .env.production build' "$DEPLOY_TEST_DOCKER_LOG"; then
   echo "Deploy script did not build with the configured env file."
+  cat "$DEPLOY_TEST_DOCKER_LOG"
+  exit 1
+fi
+
+if ! grep -q 'compose --env-file .env.production config --quiet' "$DEPLOY_TEST_DOCKER_LOG"; then
+  echo "Deploy script did not validate the Compose config before deployment."
+  cat "$DEPLOY_TEST_DOCKER_LOG"
+  exit 1
+fi
+
+config_line="$(grep -n 'compose --env-file .env.production config --quiet' "$DEPLOY_TEST_DOCKER_LOG" | head -n1 | cut -d: -f1)"
+build_line="$(grep -n 'compose --env-file .env.production build' "$DEPLOY_TEST_DOCKER_LOG" | head -n1 | cut -d: -f1)"
+
+if [[ "$config_line" -ge "$build_line" ]]; then
+  echo "Deploy script validated the Compose config after build had already started."
   cat "$DEPLOY_TEST_DOCKER_LOG"
   exit 1
 fi

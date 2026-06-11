@@ -25,6 +25,8 @@ fi
 
 npm run ops:doctor -- "$env_file"
 
+docker compose --env-file "$env_file" config --quiet
+
 release_version="$(date -u +%Y%m%d%H%M%S)"
 git_revision="$(git rev-parse --short HEAD 2>/dev/null || printf 'unknown')"
 
