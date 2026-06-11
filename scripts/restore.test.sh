@@ -42,17 +42,24 @@ backup_dir="$tmp_dir/backup"
 missing_manifest_dir="$tmp_dir/missing-manifest"
 missing_project_manifest_dir="$tmp_dir/missing-project-manifest"
 wrong_project_dir="$tmp_dir/wrong-project"
+corrupt_archive_dir="$tmp_dir/corrupt-archive"
 mkdir -p "$backup_dir"
 mkdir -p "$missing_manifest_dir"
 mkdir -p "$missing_project_manifest_dir"
 mkdir -p "$wrong_project_dir"
+mkdir -p "$corrupt_archive_dir"
 printf '%s\n' '-- fake postgres dump --' >"$backup_dir/postgres.sql"
-printf '%s\n' 'fake upload archive' >"$backup_dir/api-uploads.tar.gz"
+mkdir -p "$tmp_dir/archive-source"
+printf '%s\n' 'fake upload archive' >"$tmp_dir/archive-source/file.txt"
+LC_ALL=C tar czf "$backup_dir/api-uploads.tar.gz" -C "$tmp_dir/archive-source" .
 printf '%s\n' '-- fake postgres dump --' >"$missing_manifest_dir/postgres.sql"
 printf '%s\n' '-- fake postgres dump --' >"$missing_project_manifest_dir/postgres.sql"
 printf '%s\n' 'created_at=2026-06-11-093300' 'git_revision=abc1234' >"$missing_project_manifest_dir/manifest.txt"
 printf '%s\n' '-- fake postgres dump --' >"$wrong_project_dir/postgres.sql"
 printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=other-site' 'git_revision=abc1234' >"$wrong_project_dir/manifest.txt"
+printf '%s\n' '-- fake postgres dump --' >"$corrupt_archive_dir/postgres.sql"
+printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$corrupt_archive_dir/manifest.txt"
+printf '%s\n' 'not a gzip archive' >"$corrupt_archive_dir/api-uploads.tar.gz"
 
 export RESTORE_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
@@ -91,6 +98,24 @@ fi
 if ! grep -q 'Backup Compose project does not match the current Compose project.' "$tmp_dir/wrong-project.log"; then
   echo "Restore script did not explain Compose project mismatch refusal."
   cat "$tmp_dir/wrong-project.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$corrupt_archive_dir" >"$tmp_dir/corrupt-archive.log" 2>&1; then
+  echo "Restore script accepted a corrupt backup archive."
+  cat "$tmp_dir/corrupt-archive.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup archive is not a valid tar.gz' "$tmp_dir/corrupt-archive.log"; then
+  echo "Restore script did not explain corrupt archive refusal."
+  cat "$tmp_dir/corrupt-archive.log"
+  exit 1
+fi
+
+if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
+  echo "Restore script touched PostgreSQL before rejecting the corrupt archive."
+  cat "$RESTORE_TEST_DOCKER_LOG"
   exit 1
 fi
 

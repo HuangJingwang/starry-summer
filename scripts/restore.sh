@@ -60,6 +60,20 @@ fi
 
 absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
+verify_archive() {
+  local archive_name="$1"
+
+  if [[ ! -f "$backup_dir/$archive_name" ]]; then
+    return
+  fi
+
+  if ! LC_ALL=C tar tzf "$backup_dir/$archive_name" >/dev/null; then
+    echo "Backup archive is not a valid tar.gz: $backup_dir/$archive_name"
+    echo "Refusing to restore before touching PostgreSQL or Docker volumes."
+    exit 1
+  fi
+}
+
 restore_volume() {
   local volume_name="$1"
   local archive_name="$2"
@@ -76,6 +90,9 @@ restore_volume() {
     alpine:3.20 \
     sh -lc "rm -rf /to/* /to/.[!.]* /to/..?* && tar xzf /backup/$archive_name -C /to"
 }
+
+verify_archive "api-uploads.tar.gz"
+verify_archive "minio-data.tar.gz"
 
 docker compose up -d postgres
 docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U "$postgres_user" "$postgres_db" < "$backup_dir/postgres.sql"

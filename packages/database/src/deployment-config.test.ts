@@ -145,6 +145,7 @@ describe('deployment configuration', () => {
     expect(restoreScript).toContain('docker run --rm');
     expect(restoreScript).toContain('Backup manifest not found');
     expect(restoreScript).toContain('Backup manifest does not include compose_project_name.');
+    expect(restoreScript).toContain('Backup archive is not a valid tar.gz');
     expect(restoreScript).toContain('RESTORE_ALLOW_PROJECT_MISMATCH=YES');
     expect(deployment).toContain('npm run ops:backup');
     expect(deployment).toContain('npm run ops:restore -- backups/starry-summer-YYYY-MM-DD');
