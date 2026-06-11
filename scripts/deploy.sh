@@ -15,6 +15,29 @@ fi
 
 site_url="${site_url%/}"
 
+if [[ "$site_url" != https://* ]]; then
+  echo "Deploy site URL must start with https://."
+  exit 1
+fi
+
+if [[ -f "$env_file" ]]; then
+  env_public_site_url="$(
+    set -a
+    # shellcheck disable=SC1090
+    source "$env_file"
+    set +a
+    printf '%s' "${PUBLIC_SITE_URL:-}"
+  )"
+  env_public_site_url="${env_public_site_url%/}"
+
+  if [[ -n "$env_public_site_url" && "$env_public_site_url" != "$site_url" ]]; then
+    echo "Deploy site URL must match PUBLIC_SITE_URL in the environment file."
+    echo "Deploy argument: $site_url"
+    echo "PUBLIC_SITE_URL: $env_public_site_url"
+    exit 1
+  fi
+fi
+
 if [[ "${ALLOW_DIRTY_DEPLOY:-false}" != "true" ]]; then
   if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
     echo "Refusing to deploy with uncommitted changes."

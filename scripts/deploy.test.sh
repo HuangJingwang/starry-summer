@@ -129,7 +129,35 @@ if ! grep -q 'Usage: npm run ops:deploy -- https://example.com' "$tmp_dir/missin
   exit 1
 fi
 
-if PATH="$tmp_dir:$PATH" FAKE_GIT_DIRTY=true bash "$repo_root/scripts/deploy.sh" "https://example.com" >"$tmp_dir/dirty.log" 2>&1; then
+if PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/deploy.sh" "http://example.com" >"$tmp_dir/http-url.log" 2>&1; then
+  echo "Deploy script accepted a non-HTTPS site URL."
+  cat "$tmp_dir/http-url.log"
+  exit 1
+fi
+
+if ! grep -q 'Deploy site URL must start with https://.' "$tmp_dir/http-url.log"; then
+  echo "Deploy script did not explain non-HTTPS site URL refusal."
+  cat "$tmp_dir/http-url.log"
+  exit 1
+fi
+
+printf 'PUBLIC_SITE_URL=https://blog.starry-summer.dev\n' >"$tmp_dir/.env.production"
+
+if PATH="$tmp_dir:$PATH" ENV_FILE="$tmp_dir/.env.production" bash "$repo_root/scripts/deploy.sh" "https://wrong.starry-summer.dev" >"$tmp_dir/mismatched-site-url.log" 2>&1; then
+  echo "Deploy script accepted a site URL that differs from PUBLIC_SITE_URL."
+  cat "$tmp_dir/mismatched-site-url.log"
+  exit 1
+fi
+
+if ! grep -q 'Deploy site URL must match PUBLIC_SITE_URL in the environment file.' "$tmp_dir/mismatched-site-url.log"; then
+  echo "Deploy script did not explain PUBLIC_SITE_URL mismatch."
+  cat "$tmp_dir/mismatched-site-url.log"
+  exit 1
+fi
+
+printf 'PUBLIC_SITE_URL=https://example.com\n' >"$tmp_dir/.env.matching"
+
+if PATH="$tmp_dir:$PATH" ENV_FILE="$tmp_dir/.env.matching" FAKE_GIT_DIRTY=true bash "$repo_root/scripts/deploy.sh" "https://example.com" >"$tmp_dir/dirty.log" 2>&1; then
   echo "Deploy script accepted a dirty worktree."
   cat "$tmp_dir/dirty.log"
   exit 1
@@ -141,7 +169,7 @@ if ! grep -q 'Refusing to deploy with uncommitted changes.' "$tmp_dir/dirty.log"
   exit 1
 fi
 
-if PATH="$tmp_dir:$PATH" FAKE_GIT_UNTRACKED=true bash "$repo_root/scripts/deploy.sh" "https://example.com" >"$tmp_dir/untracked.log" 2>&1; then
+if PATH="$tmp_dir:$PATH" ENV_FILE="$tmp_dir/.env.matching" FAKE_GIT_UNTRACKED=true bash "$repo_root/scripts/deploy.sh" "https://example.com" >"$tmp_dir/untracked.log" 2>&1; then
   echo "Deploy script accepted untracked files."
   cat "$tmp_dir/untracked.log"
   exit 1

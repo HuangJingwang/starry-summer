@@ -497,6 +497,8 @@ describe('deployment configuration', () => {
     expect(deployScript).toContain('npm run ops:smoke -- "$site_url"');
     expect(deployScript).toContain('ALLOW_DIRTY_DEPLOY');
     expect(deployScript).toContain('git status --porcelain --untracked-files=all');
+    expect(deployScript).toContain('Deploy site URL must start with https://.');
+    expect(deployScript).toContain('Deploy site URL must match PUBLIC_SITE_URL in the environment file.');
     expect(deployScript).toContain('Refusing to deploy with uncommitted changes.');
     expect(deployment).toContain('npm run ops:deploy -- https://example.com');
     expect(deployment).toContain('ALLOW_DIRTY_DEPLOY=true npm run ops:deploy');
