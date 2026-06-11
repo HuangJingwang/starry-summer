@@ -6,6 +6,7 @@ export interface TaxonomyTerm {
   name: string;
   slug: string;
   description: string;
+  parentId?: string;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -16,10 +17,13 @@ export interface CreateTaxonomyTermInput {
   name: string;
   slug: string;
   description: string;
+  parentId?: string;
   sortOrder: number;
 }
 
-export type UpdateTaxonomyTermInput = Partial<Omit<CreateTaxonomyTermInput, 'type'>>;
+export type UpdateTaxonomyTermInput = Partial<Omit<CreateTaxonomyTermInput, 'type' | 'parentId'>> & {
+  parentId?: string | null;
+};
 
 export interface TaxonomyRepository {
   create(input: CreateTaxonomyTermInput): Promise<TaxonomyTerm>;
@@ -64,7 +68,7 @@ export class InMemoryTaxonomyRepository implements TaxonomyRepository {
   async list(type: TaxonomyType): Promise<TaxonomyTerm[]> {
     return [...this.records.values()]
       .filter((record) => record.type === type)
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
+      .sort(sortTaxonomyTerms);
   }
 
   async update(type: TaxonomyType, id: string, patch: UpdateTaxonomyTermInput): Promise<TaxonomyTerm | null> {
@@ -74,9 +78,11 @@ export class InMemoryTaxonomyRepository implements TaxonomyRepository {
       return null;
     }
 
+    const normalizedPatch = normalizeTaxonomyPatch(patch);
     const updated = {
       ...record,
-      ...patch,
+      ...normalizedPatch,
+      ...(patch.parentId === null ? { parentId: undefined } : {}),
       updatedAt: this.now(),
     };
     this.records.set(id, updated);
@@ -93,4 +99,28 @@ export class InMemoryTaxonomyRepository implements TaxonomyRepository {
 
     return this.records.delete(id);
   }
+}
+
+function normalizeTaxonomyPatch(patch: UpdateTaxonomyTermInput): Partial<TaxonomyTerm> {
+  const normalized: Partial<TaxonomyTerm> = {};
+
+  for (const [key, value] of Object.entries(patch)) {
+    if (value !== null) {
+      (normalized as Record<string, unknown>)[key] = value;
+    }
+  }
+
+  return normalized;
+}
+
+function sortTaxonomyTerms(a: TaxonomyTerm, b: TaxonomyTerm): number {
+  if (a.id === b.parentId) {
+    return -1;
+  }
+
+  if (b.id === a.parentId) {
+    return 1;
+  }
+
+  return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
 }

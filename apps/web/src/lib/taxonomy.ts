@@ -4,6 +4,7 @@ export interface TaxonomyPayload {
   name: string;
   slug?: string;
   description?: string;
+  parentId?: string;
   sortOrder?: number;
 }
 
@@ -13,6 +14,7 @@ export interface TaxonomyTerm {
   name: string;
   slug: string;
   description: string;
+  parentId?: string;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -24,6 +26,7 @@ export type RawTaxonomyTerm = Partial<Omit<TaxonomyTerm, 'description' | 'sortOr
   id: string;
   type: TaxonomyType;
   description?: string | null;
+  parentId?: string | null;
   sortOrder?: number | null;
 };
 
@@ -47,6 +50,7 @@ function normalizePayload(input: TaxonomyPayload): TaxonomyPayload {
     name: input.name.trim(),
     slug: input.slug ? normalizeSlug(input.slug) : undefined,
     description: input.description?.trim(),
+    parentId: input.parentId?.trim() || undefined,
     sortOrder: input.sortOrder,
   };
 }
@@ -76,6 +80,7 @@ export function buildTaxonomyPayloadFromFormData(formData: FormData): TaxonomyPa
     name: formText(formData, 'name'),
     slug: formText(formData, 'slug'),
     description: formText(formData, 'description'),
+    parentId: formText(formData, 'parentId'),
     sortOrder: sortOrderText ? Number(sortOrderText) : 0,
   });
 }
@@ -87,6 +92,7 @@ export function normalizeTaxonomyTerm(input: RawTaxonomyTerm): TaxonomyTerm {
     name: input.name ?? '',
     slug: input.slug ?? '',
     description: input.description ?? '',
+    ...(input.parentId ? { parentId: input.parentId } : {}),
     sortOrder: input.sortOrder ?? 0,
     createdAt: input.createdAt ?? '',
     updatedAt: input.updatedAt ?? '',

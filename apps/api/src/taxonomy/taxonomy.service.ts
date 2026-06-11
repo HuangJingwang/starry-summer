@@ -11,6 +11,7 @@ export interface CreateTaxonomyInput {
   name: string;
   slug?: string;
   description?: string;
+  parentId?: string;
   sortOrder?: number;
 }
 
@@ -18,6 +19,7 @@ export interface UpdateTaxonomyInput {
   name?: string;
   slug?: string;
   description?: string;
+  parentId?: string | null;
   sortOrder?: number;
 }
 
@@ -35,6 +37,7 @@ export class TaxonomyService {
 
   async createTerm(type: TaxonomyType, input: CreateTaxonomyInput): Promise<TaxonomyTerm> {
     this.assertTaxonomyType(type);
+    await this.assertParentAllowed(type, input.parentId);
     const slug = this.normalizeSlug(input.slug ?? input.name);
     await this.ensureSlugAvailable(type, slug);
 
@@ -43,6 +46,7 @@ export class TaxonomyService {
       name: input.name.trim(),
       slug,
       description: input.description?.trim() ?? '',
+      parentId: normalizeParentId(input.parentId),
       sortOrder: input.sortOrder ?? 0,
     });
   }
@@ -50,6 +54,7 @@ export class TaxonomyService {
   async updateTerm(type: TaxonomyType, id: string, input: UpdateTaxonomyInput): Promise<TaxonomyTerm> {
     this.assertTaxonomyType(type);
     const record = await this.getTerm(type, id);
+    await this.assertParentAllowed(type, input.parentId, id);
     const slug = input.slug ?? input.name ? this.normalizeSlug(input.slug ?? input.name ?? record.slug) : undefined;
 
     if (slug && slug !== record.slug) {
@@ -68,6 +73,10 @@ export class TaxonomyService {
 
     if (input.description !== undefined) {
       patch.description = input.description.trim();
+    }
+
+    if (input.parentId !== undefined) {
+      patch.parentId = input.parentId === null ? null : normalizeParentId(input.parentId);
     }
 
     if (input.sortOrder !== undefined) {
@@ -108,6 +117,32 @@ export class TaxonomyService {
     }
   }
 
+  private async assertParentAllowed(type: TaxonomyType, parentId: string | null | undefined, currentId?: string): Promise<void> {
+    const normalizedParentId = normalizeParentId(parentId);
+
+    if (!normalizedParentId) {
+      return;
+    }
+
+    if (type !== 'category') {
+      throw new BadRequestException('Only categories can have parent terms');
+    }
+
+    if (currentId && normalizedParentId === currentId) {
+      throw new BadRequestException('A category cannot be its own parent');
+    }
+
+    const parent = await this.repository.findById('category', normalizedParentId);
+
+    if (!parent) {
+      throw new NotFoundException(`Parent category ${normalizedParentId} was not found`);
+    }
+
+    if (currentId && parent.parentId === currentId) {
+      throw new BadRequestException('A category cannot use one of its children as parent');
+    }
+  }
+
   private normalizeSlug(value: string): string {
     return value
       .trim()
@@ -121,4 +156,10 @@ export class TaxonomyService {
       throw new BadRequestException(`Unsupported taxonomy type: ${type}`);
     }
   }
+}
+
+function normalizeParentId(value: string | null | undefined): string | undefined {
+  const normalized = value?.trim();
+
+  return normalized || undefined;
 }

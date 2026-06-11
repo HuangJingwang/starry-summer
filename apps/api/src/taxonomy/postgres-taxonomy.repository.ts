@@ -15,6 +15,7 @@ export interface TaxonomyRow {
   name: string;
   slug: string;
   description: string;
+  parent_id?: string | null;
   sort_order: number;
   created_at: Date;
   updated_at: Date;
@@ -38,6 +39,7 @@ export function mapTaxonomyRow(type: TaxonomyType, row: TaxonomyRow): TaxonomyTe
     name: row.name,
     slug: row.slug,
     description: row.description,
+    ...(row.parent_id ? { parentId: row.parent_id } : {}),
     sortOrder: row.sort_order,
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
@@ -46,6 +48,17 @@ export function mapTaxonomyRow(type: TaxonomyType, row: TaxonomyRow): TaxonomyTe
 
 export function buildTaxonomyInsert(input: CreateTaxonomyTermInput): SqlStatement {
   const table = tableByType[input.type];
+
+  if (input.type === 'category') {
+    return {
+      sql: `
+        insert into ${table} (name, slug, description, sort_order, parent_id)
+        values ($1, $2, $3, $4, $5)
+        returning *
+      `,
+      values: [input.name, input.slug, input.description, input.sortOrder, input.parentId ?? null],
+    };
+  }
 
   return {
     sql: `
@@ -72,6 +85,13 @@ export function buildTaxonomyFindBySlug(type: TaxonomyType, slug: string): SqlSt
 }
 
 export function buildTaxonomyList(type: TaxonomyType): SqlStatement {
+  if (type === 'category') {
+    return {
+      sql: 'select * from categories order by parent_id nulls first, sort_order asc, name asc',
+      values: [],
+    };
+  }
+
   return {
     sql: `select * from ${tableByType[type]} order by sort_order asc, name asc`,
     values: [],
@@ -83,7 +103,7 @@ export function buildTaxonomyUpdate(
   id: string,
   patch: UpdateTaxonomyTermInput,
 ): SqlStatement | null {
-  const entries = Object.entries(toDatabasePatch(patch));
+  const entries = Object.entries(toDatabasePatch(type, patch));
 
   if (entries.length === 0) {
     return null;
@@ -164,7 +184,7 @@ export class PostgresTaxonomyRepository implements TaxonomyRepository {
   }
 }
 
-function toDatabasePatch(patch: UpdateTaxonomyTermInput): Record<string, unknown> {
+function toDatabasePatch(type: TaxonomyType, patch: UpdateTaxonomyTermInput): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   if (patch.name !== undefined) {
@@ -181,6 +201,10 @@ function toDatabasePatch(patch: UpdateTaxonomyTermInput): Record<string, unknown
 
   if (patch.sortOrder !== undefined) {
     result.sort_order = patch.sortOrder;
+  }
+
+  if (type === 'category' && patch.parentId !== undefined) {
+    result.parent_id = patch.parentId || null;
   }
 
   return result;

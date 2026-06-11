@@ -16,6 +16,7 @@ describe('Postgres taxonomy repository mapping', () => {
       name: 'Writing',
       slug: 'writing',
       description: 'Long form',
+      parent_id: 'parent-1',
       sort_order: 3,
       created_at: new Date('2026-06-10T00:00:00.000Z'),
       updated_at: new Date('2026-06-10T01:00:00.000Z'),
@@ -27,6 +28,7 @@ describe('Postgres taxonomy repository mapping', () => {
       name: 'Writing',
       slug: 'writing',
       description: 'Long form',
+      parentId: 'parent-1',
       sortOrder: 3,
       createdAt: '2026-06-10T00:00:00.000Z',
       updatedAt: '2026-06-10T01:00:00.000Z',
@@ -35,9 +37,14 @@ describe('Postgres taxonomy repository mapping', () => {
 
   test('builds SQL against the correct taxonomy table', () => {
     expect(buildTaxonomyList('tag').sql).toContain('from tags');
-    expect(buildTaxonomyInsert({ type: 'series', name: 'Build Log', slug: 'build-log', description: '', sortOrder: 1 }).sql).toContain(
-      'insert into series',
-    );
+    expect(buildTaxonomyInsert({ type: 'series', name: 'Build Log', slug: 'build-log', description: '', sortOrder: 1 }).sql).toContain('insert into series');
+    expect(buildTaxonomyInsert({ type: 'category', name: 'Tech', slug: 'tech', description: '', sortOrder: 1, parentId: 'parent-1' }).values).toEqual([
+      'Tech',
+      'tech',
+      '',
+      1,
+      'parent-1',
+    ]);
     expect(buildTaxonomyDelete('category', 'term-1')).toEqual({
       sql: 'delete from categories where id = $1',
       values: ['term-1'],
@@ -45,17 +52,20 @@ describe('Postgres taxonomy repository mapping', () => {
   });
 
   test('builds update SQL for taxonomy fields', () => {
-    const update = buildTaxonomyUpdate('tag', 'term-1', {
+    const update = buildTaxonomyUpdate('category', 'term-1', {
       name: 'Updated',
       slug: 'updated',
       description: 'New description',
       sortOrder: 5,
+      parentId: 'parent-1',
     });
 
     expect(update).not.toBeNull();
-    expect(update?.sql).toContain('update tags');
+    expect(update?.sql).toContain('update categories');
     expect(update?.sql).toContain('name = $2');
     expect(update?.sql).toContain('sort_order = $5');
-    expect(update?.values).toEqual(['term-1', 'Updated', 'updated', 'New description', 5]);
+    expect(update?.values).toEqual(['term-1', 'Updated', 'updated', 'New description', 5, 'parent-1']);
+
+    expect(buildTaxonomyUpdate('category', 'term-1', { parentId: null })?.values).toEqual(['term-1', null]);
   });
 });

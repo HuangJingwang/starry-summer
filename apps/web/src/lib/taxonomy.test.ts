@@ -27,23 +27,28 @@ describe('taxonomy client helpers', () => {
       slug: 'Long Form',
       description: ' Essays ',
       sortOrder: 2,
+      parentId: 'category-parent',
     };
 
-    expect(buildCreateTaxonomyTermRequest('tag', payload)).toEqual({
-      url: '/api/admin/taxonomy/tag',
+    const createRequest = buildCreateTaxonomyTermRequest('category', payload);
+
+    expect(createRequest).toEqual({
+      url: '/api/admin/taxonomy/category',
       init: {
         method: 'POST',
         credentials: 'include',
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify({
-          name: 'Long Form',
-          slug: 'long-form',
-          description: 'Essays',
-          sortOrder: 2,
-        }),
+        body: expect.any(String),
       },
+    });
+    expect(JSON.parse(String(createRequest.init.body))).toEqual({
+      name: 'Long Form',
+      slug: 'long-form',
+      description: 'Essays',
+      sortOrder: 2,
+      parentId: 'category-parent',
     });
     expect(buildUpdateTaxonomyTermRequest('series', 'term-1', payload).url).toBe('/api/admin/taxonomy/series/term-1');
   });
@@ -64,12 +69,14 @@ describe('taxonomy client helpers', () => {
     formData.set('slug', 'Tech Notes');
     formData.set('description', ' Notes about code ');
     formData.set('sortOrder', '7');
+    formData.set('parentId', ' category-parent ');
 
     expect(buildTaxonomyPayloadFromFormData(formData)).toEqual({
       name: 'Tech Notes',
       slug: 'tech-notes',
       description: 'Notes about code',
       sortOrder: 7,
+      parentId: 'category-parent',
     });
   });
 
@@ -81,6 +88,7 @@ describe('taxonomy client helpers', () => {
         name: 'Markdown',
         slug: 'markdown',
         description: null,
+        parentId: 'parent-1',
         sortOrder: undefined,
         createdAt: '2026-06-10T00:00:00.000Z',
         updatedAt: '2026-06-10T00:00:00.000Z',
@@ -91,6 +99,7 @@ describe('taxonomy client helpers', () => {
       name: 'Markdown',
       slug: 'markdown',
       description: '',
+      parentId: 'parent-1',
       sortOrder: 0,
       createdAt: '2026-06-10T00:00:00.000Z',
       updatedAt: '2026-06-10T00:00:00.000Z',

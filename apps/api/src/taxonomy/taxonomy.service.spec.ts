@@ -25,6 +25,50 @@ describe('TaxonomyService', () => {
     });
   });
 
+  test('creates nested categories with parent ids', async () => {
+    const parent = await service.createTerm('category', {
+      name: 'Writing',
+    });
+    const child = await service.createTerm('category', {
+      name: 'Long Form',
+      parentId: parent.id,
+    });
+
+    expect(child).toMatchObject({
+      type: 'category',
+      name: 'Long Form',
+      slug: 'long-form',
+      parentId: parent.id,
+    });
+    expect((await service.listTerms('category')).map((term) => term.id)).toEqual([parent.id, child.id]);
+  });
+
+  test('rejects invalid category parents', async () => {
+    await expect(service.createTerm('category', { name: 'Child', parentId: 'missing-parent' })).rejects.toThrow(
+      'Parent category missing-parent was not found',
+    );
+
+    const category = await service.createTerm('category', { name: 'Writing' });
+    await expect(service.updateTerm('category', category.id, { parentId: category.id })).rejects.toThrow(
+      'A category cannot be its own parent',
+    );
+  });
+
+  test('clears category parents during updates', async () => {
+    const parent = await service.createTerm('category', { name: 'Writing' });
+    const child = await service.createTerm('category', { name: 'Long Form', parentId: parent.id });
+
+    const updated = await service.updateTerm('category', child.id, { parentId: null });
+
+    expect(updated.parentId).toBeUndefined();
+  });
+
+  test('rejects parents on flat taxonomy types', async () => {
+    await expect(service.createTerm('tag', { name: 'Markdown', parentId: 'category-1' })).rejects.toThrow(
+      'Only categories can have parent terms',
+    );
+  });
+
   test('lists terms separated by taxonomy type', async () => {
     await service.createTerm('category', { name: 'Writing' });
     await service.createTerm('tag', { name: 'Next.js' });

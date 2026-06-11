@@ -106,7 +106,7 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
           <article key={term.id} className="taxonomy-term">
             <div>
               <strong>{term.name}</strong>
-              <span>{term.slug}</span>
+              <span>{term.parentId ? `${term.slug} / parent ${parentLabel(terms, term.parentId)}` : term.slug}</span>
             </div>
             <button type="button" onClick={() => deleteTerm(term.id)} disabled={state === 'submitting'}>
               Delete
@@ -127,6 +127,19 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
           Description
           <textarea name="description" rows={3} placeholder="Optional notes for this taxonomy term" />
         </label>
+        {type === 'category' ? (
+          <label>
+            Parent
+            <select name="parentId" defaultValue="">
+              <option value="">None</option>
+              {terms.map((term) => (
+                <option key={term.id} value={term.id}>
+                  {term.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         <label>
           Sort
           <input name="sortOrder" type="number" defaultValue={0} />
@@ -138,6 +151,10 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
       </form>
     </section>
   );
+}
+
+function parentLabel(terms: TaxonomyTerm[], parentId: string): string {
+  return terms.find((term) => term.id === parentId)?.name ?? parentId;
 }
 
 export function TaxonomyManager() {

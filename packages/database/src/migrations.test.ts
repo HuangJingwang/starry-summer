@@ -39,4 +39,17 @@ describe('database migrations', () => {
     expect(migration).toContain('project_started_at');
     expect(migration).toContain('project_ended_at');
   });
+
+  test('includes nested category parent metadata in migrations', () => {
+    const migrationsDirectory = join(fileURLToPath(new URL('..', import.meta.url)), 'migrations');
+    const categoryMigrationName = readdirSync(migrationsDirectory).find((name) => name.includes('category_parent'));
+
+    expect(categoryMigrationName).toBeDefined();
+
+    const migration = readFileSync(join(migrationsDirectory, categoryMigrationName ?? ''), 'utf8');
+
+    expect(migration).toContain('parent_id');
+    expect(migration).toContain('references categories(id)');
+    expect(migration).toContain('categories_parent_not_self');
+  });
 });
