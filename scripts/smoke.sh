@@ -61,6 +61,18 @@ check_api_health() {
     cat "$response_file"
     exit 1
   fi
+
+  if ! grep -q '"database":{"status":"ok","driver":"postgres"}' "$response_file"; then
+    echo "API health endpoint did not report PostgreSQL as healthy."
+    cat "$response_file"
+    exit 1
+  fi
+
+  if ! grep -q '"redis":{"status":"ok","driver":"redis"}' "$response_file"; then
+    echo "API health endpoint did not report Redis as healthy."
+    cat "$response_file"
+    exit 1
+  fi
 }
 
 check_rss() {

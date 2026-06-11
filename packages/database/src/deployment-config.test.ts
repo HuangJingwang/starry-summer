@@ -280,6 +280,8 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('curl --fail');
     expect(smokeScript).toContain('/health');
     expect(smokeScript).toContain('/api/health');
+    expect(smokeScript).toContain('PostgreSQL as healthy');
+    expect(smokeScript).toContain('Redis as healthy');
     expect(smokeScript).toContain('/admin/login');
     expect(smokeScript).toContain('/admin/content');
     expect(smokeScript).toContain('admin protected redirect');

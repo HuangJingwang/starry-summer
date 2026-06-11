@@ -64,7 +64,11 @@ case "$url" in
     printf '307'
     ;;
   */api/health)
-    emit_body "${FAKE_API_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-api\"}}"
+    if [[ -n "${FAKE_API_HEALTH_BODY:-}" ]]; then
+      emit_body "$FAKE_API_HEALTH_BODY"
+    else
+      emit_body '{"status":"ok","service":"starry-summer-api","components":{"api":{"status":"ok"},"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}'
+    fi
     ;;
   */health)
     emit_body '{"status":"ok"}'
@@ -105,6 +109,18 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"degraded","service":"starry-summer-api"}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/degraded-api-health.log" 2>&1; then
   echo "Smoke script accepted a degraded API health response."
   cat "$tmp_dir/degraded-api-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","components":{"database":{"status":"skipped","driver":"memory"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-persistent-api-health.log" 2>&1; then
+  echo "Smoke script accepted a non-persistent API health response."
+  cat "$tmp_dir/non-persistent-api-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","components":{"database":{"status":"ok","driver":"postgres"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-redis-health.log" 2>&1; then
+  echo "Smoke script accepted missing Redis health."
+  cat "$tmp_dir/missing-redis-health.log"
   exit 1
 fi
 
