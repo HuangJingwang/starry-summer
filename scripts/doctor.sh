@@ -89,7 +89,7 @@ elif [[ "${DATABASE_URL}" == *":postgres@"* || "${DATABASE_URL}" == *":password@
 fi
 
 database_url_password="$(
-  node -e "try { process.stdout.write(new URL(process.argv[1]).password) } catch { process.exit(1) }" "${DATABASE_URL:-}" 2>/dev/null || true
+  node -e "try { process.stdout.write(decodeURIComponent(new URL(process.argv[1]).password)) } catch { process.exit(1) }" "${DATABASE_URL:-}" 2>/dev/null || true
 )"
 
 if [[ -n "${DATABASE_URL:-}" && -z "$database_url_password" ]]; then

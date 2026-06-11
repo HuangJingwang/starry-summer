@@ -151,6 +151,7 @@ describe('deployment configuration', () => {
     const unsafeS3EnvPath = join(tempDirectory, '.env.unsafe-s3');
     const unsafeS3PublicUrlPath = join(tempDirectory, '.env.unsafe-s3-public-url');
     const mismatchedDatabasePasswordPath = join(tempDirectory, '.env.mismatched-database-password');
+    const encodedDatabasePasswordPath = join(tempDirectory, '.env.encoded-database-password');
     const unsafeContentRepositoryPath = join(tempDirectory, '.env.unsafe-content-repository');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
@@ -233,6 +234,18 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedDatabasePasswordPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('DATABASE_URL password must match POSTGRES_PASSWORD.'),
+    });
+    await writeFile(
+      encodedDatabasePasswordPath,
+      safeEnv
+        .replace('POSTGRES_PASSWORD=replace-me-with-a-real-password', 'POSTGRES_PASSWORD=replace-me-with-a-real-@-password')
+        .replace(
+          'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
+          'DATABASE_URL=postgresql://starry:replace-me-with-a-real-%40-password@postgres:5432/starry_summer',
+        ),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', encodedDatabasePasswordPath], { cwd: repoRoot })).resolves.toMatchObject({
+      stdout: expect.stringContaining('Deployment environment looks ready.'),
     });
     await writeFile(
       unsafeContentRepositoryPath,
