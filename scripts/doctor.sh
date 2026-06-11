@@ -158,6 +158,14 @@ if [[ "${STORAGE_DRIVER:-local}" == "s3" ]]; then
     fail "S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3."
   fi
 
+  s3_public_base_url_host="$(
+    node -e "try { process.stdout.write(new URL(process.argv[1]).hostname) } catch { process.exit(1) }" "${S3_PUBLIC_BASE_URL:-}" 2>/dev/null || true
+  )"
+
+  if [[ -z "$s3_public_base_url_host" ]]; then
+    fail "S3_PUBLIC_BASE_URL must be a valid URL when STORAGE_DRIVER=s3."
+  fi
+
   if [[ -n "${S3_ENDPOINT:-}" ]]; then
     s3_endpoint_host="$(
       node -e "try { process.stdout.write(new URL(process.argv[1]).hostname) } catch { process.exit(1) }" "${S3_ENDPOINT:-}" 2>/dev/null || true
