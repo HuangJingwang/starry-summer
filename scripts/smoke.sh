@@ -238,6 +238,31 @@ if (!Array.isArray(data)) {
 NODE
 }
 
+check_random_asset_api() {
+  check_path "/api/assets/random?usage=background" "random asset API"
+
+  node - "$response_file" <<'NODE'
+const { readFileSync } = require('node:fs');
+
+const responsePath = process.argv[2];
+let data;
+
+try {
+  data = JSON.parse(readFileSync(responsePath, 'utf8'));
+} catch {
+  console.error('Random asset API endpoint did not return JSON.');
+  console.error(readFileSync(responsePath, 'utf8'));
+  process.exit(1);
+}
+
+if (data !== null && (typeof data !== 'object' || Array.isArray(data))) {
+  console.error('Random asset API endpoint did not return null or a JSON object.');
+  console.error(JSON.stringify(data));
+  process.exit(1);
+}
+NODE
+}
+
 check_rss() {
   check_path "/rss.xml" "RSS feed"
 
@@ -312,6 +337,7 @@ check_settings_api
 check_content_search_api
 check_guestbook_api
 check_comments_api
+check_random_asset_api
 check_rss
 check_sitemap
 

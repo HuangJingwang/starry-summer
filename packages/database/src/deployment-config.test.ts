@@ -424,6 +424,8 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('Guestbook API endpoint did not return JSON.');
     expect(smokeScript).toContain('/api/comments/post/smoke-post');
     expect(smokeScript).toContain('Comments API endpoint did not return JSON.');
+    expect(smokeScript).toContain('/api/assets/random?usage=background');
+    expect(smokeScript).toContain('Random asset API endpoint did not return JSON.');
     expect(smokeScript).toContain('/rss.xml');
     expect(smokeScript).toContain('/sitemap.xml');
     expect(smokeScript).toContain('RSS endpoint did not return an RSS channel.');

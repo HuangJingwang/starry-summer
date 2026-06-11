@@ -89,6 +89,9 @@ case "$url" in
   */api/comments/post/smoke-post)
     emit_body "${FAKE_COMMENTS_BODY:-[]}"
     ;;
+  */api/assets/random\?usage=background)
+    emit_body "${FAKE_RANDOM_ASSET_BODY:-null}"
+    ;;
   */health)
     emit_body "${FAKE_WEB_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-web\",\"release\":{\"version\":\"20260611091500\",\"revision\":\"abc1234\"}}}"
     ;;
@@ -187,6 +190,12 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_COMMENTS_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-comments.log" 2>&1; then
   echo "Smoke script accepted a non-JSON comments response."
   cat "$tmp_dir/non-json-comments.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_RANDOM_ASSET_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-random-asset.log" 2>&1; then
+  echo "Smoke script accepted a non-JSON random asset response."
+  cat "$tmp_dir/non-json-random-asset.log"
   exit 1
 fi
 
