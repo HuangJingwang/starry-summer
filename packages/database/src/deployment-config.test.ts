@@ -139,6 +139,7 @@ describe('deployment configuration', () => {
       'INTERACTION_HASH_SECRET=abcdefabcdefabcdefabcdefabcdef12',
       'POSTGRES_PASSWORD=replace-me-with-a-real-password',
       'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
+      'CONTENT_REPOSITORY_DRIVER=postgres',
       'S3_ACCESS_KEY=starry-prod-access',
       'S3_SECRET_KEY=starry-prod-secret',
       'S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer',
@@ -150,6 +151,7 @@ describe('deployment configuration', () => {
     const unsafeS3EnvPath = join(tempDirectory, '.env.unsafe-s3');
     const unsafeS3PublicUrlPath = join(tempDirectory, '.env.unsafe-s3-public-url');
     const mismatchedDatabasePasswordPath = join(tempDirectory, '.env.mismatched-database-password');
+    const unsafeContentRepositoryPath = join(tempDirectory, '.env.unsafe-content-repository');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
 
@@ -160,6 +162,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');
+    expect(doctorScript).toContain('CONTENT_REPOSITORY_DRIVER must be postgres for production.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
     expect(doctorScript).toContain('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.');
     expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3.');
@@ -230,6 +233,14 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedDatabasePasswordPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('DATABASE_URL password must match POSTGRES_PASSWORD.'),
+    });
+    await writeFile(
+      unsafeContentRepositoryPath,
+      safeEnv.replace('CONTENT_REPOSITORY_DRIVER=postgres', 'CONTENT_REPOSITORY_DRIVER=memory'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeContentRepositoryPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('CONTENT_REPOSITORY_DRIVER must be postgres for production.'),
     });
     await writeFile(mismatchedSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://wrong.example.com'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({

@@ -98,6 +98,10 @@ elif [[ -n "${POSTGRES_PASSWORD:-}" && -n "$database_url_password" && "$database
   fail "DATABASE_URL password must match POSTGRES_PASSWORD."
 fi
 
+if [[ "${CONTENT_REPOSITORY_DRIVER:-}" != "postgres" ]]; then
+  fail "CONTENT_REPOSITORY_DRIVER must be postgres for production."
+fi
+
 case "${STORAGE_DRIVER:-local}" in
   local | s3)
     ;;
