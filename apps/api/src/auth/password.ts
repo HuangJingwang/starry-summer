@@ -33,9 +33,17 @@ export function createPasswordHashCliOutput(password: string, salt?: string): st
 }
 
 export function createSessionSecretCliOutput(secret: Buffer | string = randomBytes(32)): string {
+  return createSecretCliOutput('SESSION_SECRET', secret);
+}
+
+export function createInteractionHashSecretCliOutput(secret: Buffer | string = randomBytes(32)): string {
+  return createSecretCliOutput('INTERACTION_HASH_SECRET', secret);
+}
+
+function createSecretCliOutput(name: string, secret: Buffer | string): string {
   const bytes = typeof secret === 'string' ? Buffer.from(secret, 'utf8') : secret;
 
-  return `SESSION_SECRET=${bytes.toString('base64url')}`;
+  return `${name}=${bytes.toString('base64url')}`;
 }
 
 export function verifyPassword(password: string, storedHash: string): boolean {

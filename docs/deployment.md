@@ -51,6 +51,12 @@ Generate a session secret the same way:
 npm run auth:secret
 ```
 
+Generate the public interaction hash secret separately:
+
+```bash
+npm run auth:interaction-secret
+```
+
 ## 3. First Boot
 
 Build the images and run migrations first:

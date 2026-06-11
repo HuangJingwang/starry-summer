@@ -1,6 +1,18 @@
+import { readFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, test } from 'vitest';
 
-import { createPasswordHash, createPasswordHashCliOutput, createSessionSecretCliOutput, verifyPassword } from './password';
+import {
+  createInteractionHashSecretCliOutput,
+  createPasswordHash,
+  createPasswordHashCliOutput,
+  createSessionSecretCliOutput,
+  verifyPassword,
+} from './password';
+
+const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 describe('password hashing', () => {
   test('verifies the original password against a scrypt hash', () => {
@@ -30,5 +42,21 @@ describe('password hashing', () => {
       'SESSION_SECRET=Zml4ZWQtc2VjcmV0LWJ5dGVz',
     );
     expect(createSessionSecretCliOutput()).toMatch(/^SESSION_SECRET=[A-Za-z0-9_-]{43}$/);
+  });
+
+  test('creates CLI output for INTERACTION_HASH_SECRET', () => {
+    expect(createInteractionHashSecretCliOutput('fixed-interaction-secret')).toBe(
+      'INTERACTION_HASH_SECRET=Zml4ZWQtaW50ZXJhY3Rpb24tc2VjcmV0',
+    );
+    expect(createInteractionHashSecretCliOutput()).toMatch(/^INTERACTION_HASH_SECRET=[A-Za-z0-9_-]{43}$/);
+  });
+
+  test('exposes secret generation CLI scripts', async () => {
+    const packageJson = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+
+    expect(packageJson.scripts?.['session-secret']).toBe('tsx src/auth/session-secret.ts');
+    expect(packageJson.scripts?.['interaction-secret']).toBe('tsx src/auth/interaction-secret.ts');
   });
 });

@@ -94,8 +94,10 @@ describe('deployment configuration', () => {
     expect(env).toContain('ADMIN_PASSWORD_HASH=replace-with-scrypt-hash');
     expect(packageJson.scripts?.['auth:hash-password']).toBe('npm run hash-password --workspace @starry-summer/api');
     expect(packageJson.scripts?.['auth:secret']).toBe('npm run session-secret --workspace @starry-summer/api');
+    expect(packageJson.scripts?.['auth:interaction-secret']).toBe('npm run interaction-secret --workspace @starry-summer/api');
     expect(deployment).toContain('npm run auth:hash-password -- "your strong password"');
     expect(deployment).toContain('npm run auth:secret');
+    expect(deployment).toContain('npm run auth:interaction-secret');
   });
 
   test('persists and exposes local uploads in Docker Compose', async () => {
