@@ -1,4 +1,7 @@
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
+import { PUBLIC_SUBMISSION_LIMITS } from '@starry-summer/shared';
+
+export { PUBLIC_SUBMISSION_LIMITS };
 
 export type CommentTargetType = Extract<ContentType, 'post' | 'note' | 'project'>;
 
@@ -47,11 +50,6 @@ export interface ModerationRecord {
 const jsonHeaders = {
   'content-type': 'application/json',
 };
-
-export const PUBLIC_SUBMISSION_LIMITS = {
-  authorName: 80,
-  body: 2000,
-} as const;
 
 export function buildLikeRequest(targetType: ContentType, targetId: string): InteractionRequest {
   return {
