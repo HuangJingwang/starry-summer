@@ -143,6 +143,7 @@ describe('deployment configuration', () => {
     expect(backupScript).toContain('api-uploads');
     expect(restoreScript).toContain('docker compose exec -T postgres psql');
     expect(restoreScript).toContain('docker run --rm');
+    expect(restoreScript).toContain('PostgreSQL dump is empty');
     expect(restoreScript).toContain('Backup manifest not found');
     expect(restoreScript).toContain('Backup manifest does not include compose_project_name.');
     expect(restoreScript).toContain('Backup archive is not a valid tar.gz');

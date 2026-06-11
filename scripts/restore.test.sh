@@ -40,11 +40,13 @@ chmod +x "$tmp_dir/docker"
 
 backup_dir="$tmp_dir/backup"
 missing_manifest_dir="$tmp_dir/missing-manifest"
+empty_postgres_dir="$tmp_dir/empty-postgres"
 missing_project_manifest_dir="$tmp_dir/missing-project-manifest"
 wrong_project_dir="$tmp_dir/wrong-project"
 corrupt_archive_dir="$tmp_dir/corrupt-archive"
 mkdir -p "$backup_dir"
 mkdir -p "$missing_manifest_dir"
+mkdir -p "$empty_postgres_dir"
 mkdir -p "$missing_project_manifest_dir"
 mkdir -p "$wrong_project_dir"
 mkdir -p "$corrupt_archive_dir"
@@ -53,6 +55,8 @@ mkdir -p "$tmp_dir/archive-source"
 printf '%s\n' 'fake upload archive' >"$tmp_dir/archive-source/file.txt"
 LC_ALL=C tar czf "$backup_dir/api-uploads.tar.gz" -C "$tmp_dir/archive-source" .
 printf '%s\n' '-- fake postgres dump --' >"$missing_manifest_dir/postgres.sql"
+: >"$empty_postgres_dir/postgres.sql"
+printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$empty_postgres_dir/manifest.txt"
 printf '%s\n' '-- fake postgres dump --' >"$missing_project_manifest_dir/postgres.sql"
 printf '%s\n' 'created_at=2026-06-11-093300' 'git_revision=abc1234' >"$missing_project_manifest_dir/manifest.txt"
 printf '%s\n' '-- fake postgres dump --' >"$wrong_project_dir/postgres.sql"
@@ -74,6 +78,24 @@ fi
 if ! grep -q 'Backup manifest not found' "$tmp_dir/missing-manifest.log"; then
   echo "Restore script did not explain missing manifest refusal."
   cat "$tmp_dir/missing-manifest.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$empty_postgres_dir" >"$tmp_dir/empty-postgres.log" 2>&1; then
+  echo "Restore script accepted an empty PostgreSQL dump."
+  cat "$tmp_dir/empty-postgres.log"
+  exit 1
+fi
+
+if ! grep -q 'PostgreSQL dump is empty' "$tmp_dir/empty-postgres.log"; then
+  echo "Restore script did not explain empty PostgreSQL dump refusal."
+  cat "$tmp_dir/empty-postgres.log"
+  exit 1
+fi
+
+if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
+  echo "Restore script touched PostgreSQL before rejecting the empty dump."
+  cat "$RESTORE_TEST_DOCKER_LOG"
   exit 1
 fi
 

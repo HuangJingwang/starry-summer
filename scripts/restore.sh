@@ -36,6 +36,12 @@ if [[ ! -f "$backup_dir/postgres.sql" ]]; then
   exit 1
 fi
 
+if [[ ! -s "$backup_dir/postgres.sql" ]]; then
+  echo "PostgreSQL dump is empty: $backup_dir/postgres.sql"
+  echo "Refusing to restore from an incomplete backup."
+  exit 1
+fi
+
 if [[ ! -f "$backup_dir/manifest.txt" ]]; then
   echo "Backup manifest not found: $backup_dir/manifest.txt"
   echo "Refusing to restore from a directory that does not look like a Starry Summer backup."
