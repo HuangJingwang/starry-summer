@@ -147,7 +147,16 @@ Restore from Markdown when you do not want to restore the whole database:
 
 ## 6. Updates
 
-Pull the latest code, rebuild, and restart:
+Pull the latest code, rebuild, migrate, restart, and run smoke checks in one step:
+
+```bash
+git pull
+npm run ops:deploy -- https://example.com
+```
+
+The deploy script runs `ops:doctor`, exports release metadata for `/health` and `/api/health`, builds images, runs migrations, starts the stack, and then runs `ops:smoke`.
+
+You can also run the underlying commands manually:
 
 ```bash
 git pull

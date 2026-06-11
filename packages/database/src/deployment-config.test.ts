@@ -309,6 +309,24 @@ describe('deployment configuration', () => {
     expect(deployment).toContain('npm run ops:smoke -- https://example.com');
   });
 
+  test('provides a repeatable production deployment script', async () => {
+    const deployScript = await readFile(join(repoRoot, 'scripts/deploy.sh'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(packageJson.scripts?.['ops:deploy']).toBe('bash scripts/deploy.sh');
+    expect(deployScript).toContain('npm run ops:doctor -- "$env_file"');
+    expect(deployScript).toContain('export RELEASE_VERSION="${RELEASE_VERSION:-$release_version}"');
+    expect(deployScript).toContain('export GIT_REVISION="${GIT_REVISION:-$git_revision}"');
+    expect(deployScript).toContain('docker compose --env-file "$env_file" build');
+    expect(deployScript).toContain('docker compose --env-file "$env_file" run --rm migrate');
+    expect(deployScript).toContain('docker compose --env-file "$env_file" up -d');
+    expect(deployScript).toContain('npm run ops:smoke -- "$site_url"');
+    expect(deployment).toContain('npm run ops:deploy -- https://example.com');
+  });
+
   test('sets baseline security headers at the reverse proxy', async () => {
     const caddy = await readFile(join(repoRoot, 'infra/caddy/Caddyfile'), 'utf8');
 

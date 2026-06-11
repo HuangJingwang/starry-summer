@@ -22,7 +22,8 @@
     "ops:backup": "bash scripts/backup.sh",
     "ops:restore": "bash scripts/restore.sh",
     "ops:doctor": "bash scripts/doctor.sh",
-    "ops:smoke": "bash scripts/smoke.sh"
+    "ops:smoke": "bash scripts/smoke.sh",
+    "ops:deploy": "bash scripts/deploy.sh"
   },
   "engines": {
     "node": ">=22.0.0",
