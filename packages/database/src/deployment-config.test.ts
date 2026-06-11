@@ -26,6 +26,16 @@ describe('deployment configuration', () => {
     expect([...new Set(composeVariables)].filter((variable) => !documentedVariables.has(variable))).toEqual([]);
   });
 
+  test('keeps local-only data out of Docker build contexts', async () => {
+    const dockerignore = await readFile(join(repoRoot, '.dockerignore'), 'utf8');
+
+    expect(dockerignore).toContain('node_modules');
+    expect(dockerignore).toContain('.env');
+    expect(dockerignore).toContain('.next');
+    expect(dockerignore).toContain('dist');
+    expect(dockerignore).toContain('backups');
+  });
+
   test('runs database migrations before the API starts in Docker Compose', async () => {
     const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
 
