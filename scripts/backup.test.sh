@@ -59,7 +59,7 @@ if [[ "$1" == "run" ]]; then
 
   printf '%s\n' 'partial archive' >"$backup_mount/$archive_name"
 
-  if [[ "${BACKUP_TEST_FAIL_VOLUME_BACKUP:-}" == "YES" ]]; then
+  if [[ "${BACKUP_TEST_FAIL_VOLUME_BACKUP:-}" == "YES" || "${BACKUP_TEST_FAIL_ARCHIVE:-}" == "$archive_name" ]]; then
     exit 1
   fi
 
@@ -76,6 +76,7 @@ existing_backup_dir="$tmp_dir/existing-backup"
 failed_backup_dir="$tmp_dir/failed-backup"
 empty_backup_dir="$tmp_dir/empty-backup"
 failed_volume_backup_dir="$tmp_dir/failed-volume-backup"
+failed_second_volume_backup_dir="$tmp_dir/failed-second-volume-backup"
 export BACKUP_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
 echo "Running backup script tests"
@@ -146,6 +147,24 @@ fi
 if [[ -e "$failed_volume_backup_dir/api-uploads.tar.gz" || -e "$failed_volume_backup_dir/manifest.txt" ]]; then
   echo "Backup script left a final archive or manifest after volume backup failure."
   find "$failed_volume_backup_dir" -maxdepth 1 -type f -print 2>/dev/null || true
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" BACKUP_TEST_VOLUME_EXISTS=YES BACKUP_TEST_FAIL_ARCHIVE=minio-data.tar.gz.tmp bash "$repo_root/scripts/backup.sh" "$failed_second_volume_backup_dir" >"$tmp_dir/failed-second-volume-backup.log" 2>&1; then
+  echo "Backup script accepted a failed second volume archive."
+  cat "$tmp_dir/failed-second-volume-backup.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup volume failed: starry-summer_minio-data' "$tmp_dir/failed-second-volume-backup.log"; then
+  echo "Backup script did not explain second volume archive failure."
+  cat "$tmp_dir/failed-second-volume-backup.log"
+  exit 1
+fi
+
+if [[ -e "$failed_second_volume_backup_dir/api-uploads.tar.gz" || -e "$failed_second_volume_backup_dir/minio-data.tar.gz" || -e "$failed_second_volume_backup_dir/manifest.txt" ]]; then
+  echo "Backup script left a final archive or manifest after the second volume backup failed."
+  find "$failed_second_volume_backup_dir" -maxdepth 1 -type f -print 2>/dev/null || true
   exit 1
 fi
 

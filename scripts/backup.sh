@@ -43,18 +43,29 @@ fi
 mkdir -p "$backup_dir"
 absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
+cleanup_incomplete_backup() {
+  rm -f \
+    "$backup_dir/postgres.sql" \
+    "$backup_dir/postgres.sql.tmp" \
+    "$backup_dir/api-uploads.tar.gz" \
+    "$backup_dir/api-uploads.tar.gz.tmp" \
+    "$backup_dir/minio-data.tar.gz" \
+    "$backup_dir/minio-data.tar.gz.tmp" \
+    "$backup_dir/manifest.txt"
+}
+
 echo "Writing backup to $backup_dir"
 
 postgres_dump_tmp="$backup_dir/postgres.sql.tmp"
 
 if ! docker compose exec -T postgres pg_dump --clean --if-exists -U "$postgres_user" "$postgres_db" > "$postgres_dump_tmp"; then
-  rm -f "$postgres_dump_tmp" "$backup_dir/postgres.sql"
+  cleanup_incomplete_backup
   echo "PostgreSQL backup failed."
   exit 1
 fi
 
 if [[ ! -s "$postgres_dump_tmp" ]]; then
-  rm -f "$postgres_dump_tmp" "$backup_dir/postgres.sql"
+  cleanup_incomplete_backup
   echo "PostgreSQL backup produced an empty dump."
   exit 1
 fi
@@ -76,7 +87,7 @@ backup_volume() {
     -v "$absolute_backup_dir:/backup" \
     alpine:3.20 \
     sh -lc "cd /from && tar czf /backup/$archive_tmp ."; then
-    rm -f "$backup_dir/$archive_tmp" "$backup_dir/$archive_name"
+    cleanup_incomplete_backup
     echo "Backup volume failed: $volume_name"
     exit 1
   fi

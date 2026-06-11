@@ -142,6 +142,7 @@ describe('deployment configuration', () => {
     expect(backupScript).toContain('PostgreSQL backup failed.');
     expect(backupScript).toContain('PostgreSQL backup produced an empty dump.');
     expect(backupScript).toContain('Backup volume failed:');
+    expect(backupScript).toContain('cleanup_incomplete_backup');
     expect(backupScript).toContain('archive_tmp');
     expect(backupScript).toContain('postgres_sha256=');
     expect(backupScript).toContain('docker run --rm');
