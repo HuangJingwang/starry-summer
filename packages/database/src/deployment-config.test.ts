@@ -180,6 +180,7 @@ describe('deployment configuration', () => {
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
     const sharedSecretPath = join(tempDirectory, '.env.shared-secret');
+    const unsafeRedisUrlPath = join(tempDirectory, '.env.unsafe-redis-url');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
@@ -189,6 +190,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be different from SESSION_SECRET.');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');
+    expect(doctorScript).toContain('REDIS_URL must not point at localhost for production containers.');
     expect(doctorScript).toContain('CONTENT_REPOSITORY_DRIVER must be postgres for production.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
     expect(doctorScript).toContain('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.');
@@ -311,6 +313,11 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', sharedSecretPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('INTERACTION_HASH_SECRET must be different from SESSION_SECRET.'),
+    });
+    await writeFile(unsafeRedisUrlPath, [safeEnv, 'REDIS_URL=redis://localhost:6379'].join('\n'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeRedisUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('REDIS_URL must not point at localhost for production containers.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
   });

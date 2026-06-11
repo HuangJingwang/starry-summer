@@ -102,6 +102,18 @@ elif [[ -n "${POSTGRES_PASSWORD:-}" && -n "$database_url_password" && "$database
   fail "DATABASE_URL password must match POSTGRES_PASSWORD."
 fi
 
+if [[ -n "${REDIS_URL:-}" ]]; then
+  redis_url_host="$(
+    node -e "try { process.stdout.write(new URL(process.argv[1]).hostname) } catch { process.exit(1) }" "${REDIS_URL:-}" 2>/dev/null || true
+  )"
+
+  case "$redis_url_host" in
+    localhost | 127.0.0.1 | ::1)
+      fail "REDIS_URL must not point at localhost for production containers."
+      ;;
+  esac
+fi
+
 if [[ "${CONTENT_REPOSITORY_DRIVER:-}" != "postgres" ]]; then
   fail "CONTENT_REPOSITORY_DRIVER must be postgres for production."
 fi
