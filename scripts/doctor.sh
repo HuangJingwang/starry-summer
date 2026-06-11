@@ -114,6 +114,10 @@ case "$database_url_host" in
 esac
 
 if [[ -n "${REDIS_URL:-}" ]]; then
+  if [[ "${REDIS_URL}" != redis://* && "${REDIS_URL}" != rediss://* ]]; then
+    fail "REDIS_URL must start with redis:// or rediss://."
+  fi
+
   redis_url_host="$(
     node -e "try { process.stdout.write(new URL(process.argv[1]).hostname) } catch { process.exit(1) }" "${REDIS_URL:-}" 2>/dev/null || true
   )"

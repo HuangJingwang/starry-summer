@@ -183,6 +183,7 @@ describe('deployment configuration', () => {
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
     const sharedSecretPath = join(tempDirectory, '.env.shared-secret');
     const unsafeRedisUrlPath = join(tempDirectory, '.env.unsafe-redis-url');
+    const unsafeRedisProtocolPath = join(tempDirectory, '.env.unsafe-redis-protocol');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
@@ -194,6 +195,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('DATABASE_URL must start with postgresql:// or postgres://.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');
     expect(doctorScript).toContain('DATABASE_URL must not point at localhost for production containers.');
+    expect(doctorScript).toContain('REDIS_URL must start with redis:// or rediss://.');
     expect(doctorScript).toContain('REDIS_URL must not point at localhost for production containers.');
     expect(doctorScript).toContain('CONTENT_REPOSITORY_DRIVER must be postgres for production.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
@@ -344,6 +346,11 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeRedisUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('REDIS_URL must not point at localhost for production containers.'),
+    });
+    await writeFile(unsafeRedisProtocolPath, [safeEnv, 'REDIS_URL=http://redis:6379'].join('\n'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeRedisProtocolPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('REDIS_URL must start with redis:// or rediss://.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
   });
