@@ -181,6 +181,7 @@ describe('deployment configuration', () => {
     const unsafeDatabaseProtocolPath = join(tempDirectory, '.env.unsafe-database-protocol');
     const encodedDatabasePasswordPath = join(tempDirectory, '.env.encoded-database-password');
     const unsafeContentRepositoryPath = join(tempDirectory, '.env.unsafe-content-repository');
+    const invalidDomainPath = join(tempDirectory, '.env.invalid-domain');
     const invalidSiteUrlPath = join(tempDirectory, '.env.invalid-site-url');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
@@ -189,6 +190,7 @@ describe('deployment configuration', () => {
     const unsafeRedisProtocolPath = join(tempDirectory, '.env.unsafe-redis-protocol');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
+    expect(doctorScript).toContain('DOMAIN must be a hostname without a scheme or path.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must be a valid URL.');
     expect(doctorScript).toContain('ACME_EMAIL must be a valid email for HTTPS certificates.');
@@ -352,6 +354,11 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeContentRepositoryPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('CONTENT_REPOSITORY_DRIVER must be postgres for production.'),
+    });
+    await writeFile(invalidDomainPath, safeEnv.replace('DOMAIN=blog.example.com', 'DOMAIN=https://blog.example.com'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', invalidDomainPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('DOMAIN must be a hostname without a scheme or path.'),
     });
     await writeFile(invalidSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', invalidSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({

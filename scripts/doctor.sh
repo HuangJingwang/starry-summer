@@ -34,6 +34,9 @@ case "${DOMAIN:-}" in
   "" | localhost | 127.0.0.1)
     fail "DOMAIN must be your public domain, not localhost."
     ;;
+  *://* | */* | *:*)
+    fail "DOMAIN must be a hostname without a scheme or path."
+    ;;
 esac
 
 if [[ "${PUBLIC_SITE_URL:-}" != https://* ]]; then
