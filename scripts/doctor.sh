@@ -86,6 +86,8 @@ esac
 
 if [[ -z "${DATABASE_URL:-}" ]]; then
   fail "DATABASE_URL must be set for the API database connection."
+elif [[ "${DATABASE_URL}" != postgresql://* && "${DATABASE_URL}" != postgres://* ]]; then
+  fail "DATABASE_URL must start with postgresql:// or postgres://."
 elif [[ "${DATABASE_URL}" == *":starry@"* ]]; then
   fail "DATABASE_URL must not use the default starry database password."
 elif [[ "${DATABASE_URL}" == *":postgres@"* || "${DATABASE_URL}" == *":password@"* ]]; then
