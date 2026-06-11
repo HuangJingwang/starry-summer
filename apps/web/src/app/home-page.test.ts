@@ -29,4 +29,11 @@ describe('home page', () => {
     expect(source).toContain('设计与写作');
     expect(source).toContain('内容资产');
   });
+
+  test('keeps the owner admin entry out of the public top navigation', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+
+    expect(source).not.toContain('className="admin-link"');
+    expect(source).not.toContain('href="/admin"');
+  });
 });

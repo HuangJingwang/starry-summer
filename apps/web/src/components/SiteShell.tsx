@@ -26,9 +26,6 @@ export async function SiteShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <Link className="admin-link" href="/admin">
-          后台
-        </Link>
       </header>
       {children}
       <SiteFooter settings={settings} />
