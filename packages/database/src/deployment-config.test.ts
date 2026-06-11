@@ -317,6 +317,7 @@ describe('deployment configuration', () => {
     const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
 
     expect(packageJson.scripts?.['ops:deploy']).toBe('bash scripts/deploy.sh');
+    expect(packageJson.scripts?.['test:ops']).toContain('bash scripts/deploy.test.sh');
     expect(deployScript).toContain('npm run ops:doctor -- "$env_file"');
     expect(deployScript).toContain('export RELEASE_VERSION="${RELEASE_VERSION:-$release_version}"');
     expect(deployScript).toContain('export GIT_REVISION="${GIT_REVISION:-$git_revision}"');
