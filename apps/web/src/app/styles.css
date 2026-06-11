@@ -8,6 +8,21 @@
   --accent: #2f6f68;
   --accent-2: #9f4e3d;
   --dark: #111417;
+  --header-bg: rgba(247, 245, 241, 0.9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12110f;
+    --panel: #1d1b18;
+    --ink: #f0ece4;
+    --muted: #b4aca0;
+    --line: #3a352e;
+    --accent: #62a79d;
+    --accent-2: #e09872;
+    --dark: #080807;
+    --header-bg: rgba(18, 17, 15, 0.92);
+  }
 }
 
 * {
@@ -29,8 +44,17 @@ a {
 
 button,
 input,
+select,
 textarea {
+  color: var(--ink);
   font: inherit;
+}
+
+input,
+select,
+textarea {
+  background: var(--panel);
+  border-color: var(--line);
 }
 
 .site-shell {
@@ -45,7 +69,7 @@ textarea {
 
 .site-header {
   align-items: center;
-  background: rgba(247, 245, 241, 0.9);
+  background: var(--header-bg);
   border-bottom: 1px solid var(--line);
   display: grid;
   gap: 16px;
