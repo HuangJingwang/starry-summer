@@ -31,9 +31,26 @@ SH
 chmod +x "$tmp_dir/docker"
 
 backup_dir="$tmp_dir/backup"
+existing_backup_dir="$tmp_dir/existing-backup"
 export BACKUP_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
 echo "Running backup script tests"
+
+mkdir -p "$existing_backup_dir"
+printf '%s\n' 'old backup marker' >"$existing_backup_dir/manifest.txt"
+
+if PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/backup.sh" "$existing_backup_dir" >"$tmp_dir/existing-backup.log" 2>&1; then
+  echo "Backup script accepted an existing backup directory."
+  cat "$tmp_dir/existing-backup.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup directory already exists' "$tmp_dir/existing-backup.log"; then
+  echo "Backup script did not explain existing backup directory refusal."
+  cat "$tmp_dir/existing-backup.log"
+  exit 1
+fi
+
 PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/backup.sh" "$backup_dir"
 
 if ! grep -q -- '--clean' "$BACKUP_TEST_DOCKER_LOG"; then

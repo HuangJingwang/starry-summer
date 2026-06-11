@@ -17,6 +17,12 @@ compose_project_name="${COMPOSE_PROJECT_NAME:-$(basename "$repo_root")}"
 postgres_user="${POSTGRES_USER:-starry}"
 postgres_db="${POSTGRES_DB:-starry_summer}"
 
+if [[ -d "$backup_dir" ]] && [[ -n "$(find "$backup_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+  echo "Backup directory already exists and is not empty: $backup_dir"
+  echo "Choose a new backup directory to avoid mixing backup sets."
+  exit 1
+fi
+
 mkdir -p "$backup_dir"
 absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
