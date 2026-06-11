@@ -4,6 +4,11 @@ import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patc
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
+import {
+  resolvePublicClientAddress,
+  resolvePublicUserAgent,
+  type PublicClientRequest,
+} from '../security/public-client.js';
 import { PublicInteractionRateLimitGuard } from '../security/public-interaction-rate-limit.guard.js';
 import {
   InteractionsService,
@@ -12,13 +17,6 @@ import {
 } from './interactions.service.js';
 
 type CreateCommentRequest = Omit<CreateCommentInput, 'targetType'> & { targetType: string };
-type PublicInteractionRequest = {
-  headers?: Record<string, string | string[] | undefined>;
-  ip?: string;
-  socket?: {
-    remoteAddress?: string;
-  };
-};
 
 @Controller()
 export class InteractionsController {
@@ -26,7 +24,7 @@ export class InteractionsController {
 
   @Post('comments')
   @UseGuards(PublicInteractionRateLimitGuard)
-  createComment(@Body() input: CreateCommentRequest, @Req() request: PublicInteractionRequest) {
+  createComment(@Body() input: CreateCommentRequest, @Req() request: PublicClientRequest) {
     return this.interactionsService.createComment({
       ...input,
       targetType: parseCommentTargetType(input.targetType),
@@ -62,7 +60,7 @@ export class InteractionsController {
   likeContent(
     @Param('targetType') targetType: string,
     @Param('targetId') targetId: string,
-    @Req() request: PublicInteractionRequest,
+    @Req() request: PublicClientRequest,
   ) {
     return this.interactionsService.likeContent(parseContentType(targetType), targetId, createPublicActorHash(request));
   }
@@ -72,14 +70,14 @@ export class InteractionsController {
   recordView(
     @Param('targetType') targetType: string,
     @Param('targetId') targetId: string,
-    @Req() request: PublicInteractionRequest,
+    @Req() request: PublicClientRequest,
   ) {
     return this.interactionsService.recordView(parseContentType(targetType), targetId, createPublicActorHash(request));
   }
 
   @Post('guestbook')
   @UseGuards(PublicInteractionRateLimitGuard)
-  createGuestbookEntry(@Body() input: CreateGuestbookEntryInput, @Req() request: PublicInteractionRequest) {
+  createGuestbookEntry(@Body() input: CreateGuestbookEntryInput, @Req() request: PublicClientRequest) {
     return this.interactionsService.createGuestbookEntry({
       ...input,
       ...createPublicSubmissionMetadata(request),
@@ -146,11 +144,9 @@ function parseOptionalModerationStatus(value: string | undefined): ModerationSta
   return parseModerationStatus(value);
 }
 
-function createPublicActorHash(request: PublicInteractionRequest): string {
-  const forwardedFor = firstHeaderValue(request.headers?.['x-forwarded-for'])?.split(',')[0]?.trim() ?? '';
-  const realIp = firstHeaderValue(request.headers?.['x-real-ip'])?.trim() ?? '';
-  const ip = forwardedFor || realIp || request.ip || request.socket?.remoteAddress || 'unknown-ip';
-  const userAgent = firstHeaderValue(request.headers?.['user-agent'])?.trim() || 'unknown-agent';
+function createPublicActorHash(request: PublicClientRequest): string {
+  const ip = resolvePublicClientAddress(request);
+  const userAgent = resolvePublicUserAgent(request);
   const secret = process.env.INTERACTION_HASH_SECRET ?? process.env.SESSION_SECRET ?? 'development-interaction-secret';
 
   assertProductionInteractionHashSecret(secret);
@@ -158,19 +154,11 @@ function createPublicActorHash(request: PublicInteractionRequest): string {
   return createHash('sha256').update(`${secret}\n${ip}\n${userAgent}`).digest('hex');
 }
 
-function createPublicSubmissionMetadata(request: PublicInteractionRequest): { ipHash: string; userAgent: string } {
+function createPublicSubmissionMetadata(request: PublicClientRequest): { ipHash: string; userAgent: string } {
   return {
     ipHash: createPublicActorHash(request),
-    userAgent: normalizeUserAgent(firstHeaderValue(request.headers?.['user-agent'])),
+    userAgent: resolvePublicUserAgent(request),
   };
-}
-
-function firstHeaderValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function normalizeUserAgent(value: string | undefined): string {
-  return (value?.trim() || 'unknown-agent').slice(0, 500);
 }
 
 function assertProductionInteractionHashSecret(secret: string): void {
