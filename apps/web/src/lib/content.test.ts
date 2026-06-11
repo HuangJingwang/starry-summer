@@ -624,4 +624,20 @@ describe('web content helpers', () => {
     expect(adjacent.previous?.id).toBe('old');
     expect(adjacent.next?.id).toBe('new');
   });
+
+  test('finds adjacent content within the current content type', () => {
+    const adjacent = getAdjacentContent(
+      [
+        { id: 'old-post', title: 'Old Post', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01', slug: 'old-post' },
+        { id: 'near-note', title: 'Near Note', type: 'note', status: 'published', visibility: 'public', publishedAt: '2026-01-15', slug: 'near-note' },
+        { id: 'current-post', title: 'Current Post', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-02-01', slug: 'current-post' },
+        { id: 'near-project', title: 'Near Project', type: 'project', status: 'published', visibility: 'public', publishedAt: '2026-02-15', slug: 'near-project' },
+        { id: 'new-post', title: 'New Post', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-03-01', slug: 'new-post' },
+      ],
+      'current-post',
+    );
+
+    expect(adjacent.previous?.id).toBe('old-post');
+    expect(adjacent.next?.id).toBe('new-post');
+  });
 });

@@ -304,7 +304,13 @@ export function getTagHref(tag: string): string {
 }
 
 export function getAdjacentContent(items: SiteContentItem[], currentId: string): AdjacentContent {
-  const timeline = [...getPublicContent(items)].reverse();
+  const current = getPublicContent(items).find((item) => item.id === currentId);
+
+  if (!current) {
+    return { previous: null, next: null };
+  }
+
+  const timeline = [...getPublicContent(items, current.type)].reverse();
   const index = timeline.findIndex((item) => item.id === currentId);
 
   if (index === -1) {
