@@ -39,13 +39,30 @@ SH
 chmod +x "$tmp_dir/docker"
 
 backup_dir="$tmp_dir/backup"
+missing_manifest_dir="$tmp_dir/missing-manifest"
 mkdir -p "$backup_dir"
+mkdir -p "$missing_manifest_dir"
 printf '%s\n' '-- fake postgres dump --' >"$backup_dir/postgres.sql"
 printf '%s\n' 'fake upload archive' >"$backup_dir/api-uploads.tar.gz"
+printf '%s\n' '-- fake postgres dump --' >"$missing_manifest_dir/postgres.sql"
 
 export RESTORE_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
 echo "Running restore script tests"
+
+if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$missing_manifest_dir" >"$tmp_dir/missing-manifest.log" 2>&1; then
+  echo "Restore script accepted a directory without a manifest."
+  cat "$tmp_dir/missing-manifest.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup manifest not found' "$tmp_dir/missing-manifest.log"; then
+  echo "Restore script did not explain missing manifest refusal."
+  cat "$tmp_dir/missing-manifest.log"
+  exit 1
+fi
+
+printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$backup_dir/manifest.txt"
 PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$backup_dir"
 
 if ! grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then

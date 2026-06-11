@@ -131,6 +131,7 @@ describe('deployment configuration', () => {
     expect(backupScript).toContain('api-uploads');
     expect(restoreScript).toContain('docker compose exec -T postgres psql');
     expect(restoreScript).toContain('docker run --rm');
+    expect(restoreScript).toContain('Backup manifest not found');
     expect(deployment).toContain('npm run ops:backup');
     expect(deployment).toContain('npm run ops:restore -- backups/starry-summer-YYYY-MM-DD');
   });

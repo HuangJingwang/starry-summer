@@ -36,6 +36,12 @@ if [[ ! -f "$backup_dir/postgres.sql" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$backup_dir/manifest.txt" ]]; then
+  echo "Backup manifest not found: $backup_dir/manifest.txt"
+  echo "Refusing to restore from a directory that does not look like a Starry Summer backup."
+  exit 1
+fi
+
 absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
 restore_volume() {
