@@ -17,6 +17,14 @@ set -euo pipefail
 printf '%s\n' "$*" >>"${BACKUP_TEST_DOCKER_LOG:?}"
 
 if [[ "$1" == "compose" && "$2" == "exec" && "$5" == "pg_dump" ]]; then
+  if [[ "${BACKUP_TEST_FAIL_PG_DUMP:-}" == "YES" ]]; then
+    exit 1
+  fi
+
+  if [[ "${BACKUP_TEST_EMPTY_PG_DUMP:-}" == "YES" ]]; then
+    exit 0
+  fi
+
   printf '%s\n' '-- fake postgres dump --'
   exit 0
 fi
@@ -32,6 +40,8 @@ chmod +x "$tmp_dir/docker"
 
 backup_dir="$tmp_dir/backup"
 existing_backup_dir="$tmp_dir/existing-backup"
+failed_backup_dir="$tmp_dir/failed-backup"
+empty_backup_dir="$tmp_dir/empty-backup"
 export BACKUP_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
 echo "Running backup script tests"
@@ -48,6 +58,42 @@ fi
 if ! grep -q 'Backup directory already exists' "$tmp_dir/existing-backup.log"; then
   echo "Backup script did not explain existing backup directory refusal."
   cat "$tmp_dir/existing-backup.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" BACKUP_TEST_FAIL_PG_DUMP=YES bash "$repo_root/scripts/backup.sh" "$failed_backup_dir" >"$tmp_dir/failed-backup.log" 2>&1; then
+  echo "Backup script accepted a failed PostgreSQL dump."
+  cat "$tmp_dir/failed-backup.log"
+  exit 1
+fi
+
+if ! grep -q 'PostgreSQL backup failed.' "$tmp_dir/failed-backup.log"; then
+  echo "Backup script did not explain PostgreSQL dump failure."
+  cat "$tmp_dir/failed-backup.log"
+  exit 1
+fi
+
+if [[ -d "$failed_backup_dir" && -n "$(find "$failed_backup_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+  echo "Backup script left a partial backup after PostgreSQL dump failure."
+  find "$failed_backup_dir" -maxdepth 1 -type f -print 2>/dev/null || true
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" BACKUP_TEST_EMPTY_PG_DUMP=YES bash "$repo_root/scripts/backup.sh" "$empty_backup_dir" >"$tmp_dir/empty-backup.log" 2>&1; then
+  echo "Backup script accepted an empty PostgreSQL dump."
+  cat "$tmp_dir/empty-backup.log"
+  exit 1
+fi
+
+if ! grep -q 'PostgreSQL backup produced an empty dump.' "$tmp_dir/empty-backup.log"; then
+  echo "Backup script did not explain empty PostgreSQL dump refusal."
+  cat "$tmp_dir/empty-backup.log"
+  exit 1
+fi
+
+if [[ -d "$empty_backup_dir" && -n "$(find "$empty_backup_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+  echo "Backup script left a partial backup after empty PostgreSQL dump."
+  find "$empty_backup_dir" -maxdepth 1 -type f -print 2>/dev/null || true
   exit 1
 fi
 

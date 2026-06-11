@@ -139,6 +139,8 @@ describe('deployment configuration', () => {
     expect(packageJson.scripts?.['ops:backup']).toBe('bash scripts/backup.sh');
     expect(packageJson.scripts?.['ops:restore']).toBe('bash scripts/restore.sh');
     expect(backupScript).toContain('docker compose exec -T postgres pg_dump');
+    expect(backupScript).toContain('PostgreSQL backup failed.');
+    expect(backupScript).toContain('PostgreSQL backup produced an empty dump.');
     expect(backupScript).toContain('docker run --rm');
     expect(backupScript).toContain('api-uploads');
     expect(restoreScript).toContain('docker compose exec -T postgres psql');
