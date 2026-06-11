@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 
 import { AdminAuthGuard } from './admin-auth.guard.js';
-import { AuthService, type LoginInput } from './auth.service.js';
+import { AuthService, SESSION_MAX_AGE_MS, type LoginInput } from './auth.service.js';
 import { LoginRateLimitGuard } from './login-rate-limit.guard.js';
 
 interface CookieResponse {
@@ -29,6 +29,7 @@ export class AuthController {
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(session.expiresAt),
+      maxAge: SESSION_MAX_AGE_MS,
       path: '/',
     });
 

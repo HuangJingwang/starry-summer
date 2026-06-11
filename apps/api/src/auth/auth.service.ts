@@ -26,7 +26,7 @@ interface SessionPayload {
   expiresAt: string;
 }
 
-const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 8;
+export const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 8;
 
 @Injectable()
 export class AuthService {
