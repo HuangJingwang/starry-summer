@@ -16,7 +16,7 @@ fi
 site_url="${site_url%/}"
 
 if [[ "${ALLOW_DIRTY_DEPLOY:-false}" != "true" ]]; then
-  if ! git diff --quiet || ! git diff --cached --quiet; then
+  if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
     echo "Refusing to deploy with uncommitted changes."
     echo "Commit or stash local changes, or rerun with ALLOW_DIRTY_DEPLOY=true."
     exit 1

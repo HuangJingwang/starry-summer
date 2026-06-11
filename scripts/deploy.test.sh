@@ -26,6 +26,17 @@ if [[ "$1" == "diff" && "$2" == "--cached" && "$3" == "--quiet" ]]; then
   exit 0
 fi
 
+if [[ "$1" == "status" && "$2" == "--porcelain" && "$3" == "--untracked-files=all" ]]; then
+  if [[ "${FAKE_GIT_DIRTY:-false}" == "true" ]]; then
+    printf ' M scripts/deploy.sh\n'
+  elif [[ "${FAKE_GIT_STAGED_DIRTY:-false}" == "true" ]]; then
+    printf 'M  scripts/deploy.sh\n'
+  elif [[ "${FAKE_GIT_UNTRACKED:-false}" == "true" ]]; then
+    printf '?? stray.txt\n'
+  fi
+  exit 0
+fi
+
 if [[ "$1" == "rev-parse" && "$2" == "--short" && "$3" == "HEAD" ]]; then
   printf '%s\n' "${FAKE_GIT_REVISION:-abc1234}"
   exit 0
@@ -124,6 +135,18 @@ fi
 if ! grep -q 'Refusing to deploy with uncommitted changes.' "$tmp_dir/dirty.log"; then
   echo "Deploy script did not explain dirty worktree refusal."
   cat "$tmp_dir/dirty.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_GIT_UNTRACKED=true bash "$repo_root/scripts/deploy.sh" "https://example.com" >"$tmp_dir/untracked.log" 2>&1; then
+  echo "Deploy script accepted untracked files."
+  cat "$tmp_dir/untracked.log"
+  exit 1
+fi
+
+if ! grep -q 'Refusing to deploy with uncommitted changes.' "$tmp_dir/untracked.log"; then
+  echo "Deploy script did not explain untracked file refusal."
+  cat "$tmp_dir/untracked.log"
   exit 1
 fi
 
