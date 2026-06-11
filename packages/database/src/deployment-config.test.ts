@@ -175,6 +175,7 @@ describe('deployment configuration', () => {
     const unsafeS3PublicUrlPath = join(tempDirectory, '.env.unsafe-s3-public-url');
     const unsafeS3EndpointPath = join(tempDirectory, '.env.unsafe-s3-endpoint');
     const mismatchedDatabasePasswordPath = join(tempDirectory, '.env.mismatched-database-password');
+    const unsafeDatabaseHostPath = join(tempDirectory, '.env.unsafe-database-host');
     const encodedDatabasePasswordPath = join(tempDirectory, '.env.encoded-database-password');
     const unsafeContentRepositoryPath = join(tempDirectory, '.env.unsafe-content-repository');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
@@ -190,6 +191,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be different from SESSION_SECRET.');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');
+    expect(doctorScript).toContain('DATABASE_URL must not point at localhost for production containers.');
     expect(doctorScript).toContain('REDIS_URL must not point at localhost for production containers.');
     expect(doctorScript).toContain('CONTENT_REPOSITORY_DRIVER must be postgres for production.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
@@ -275,6 +277,17 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedDatabasePasswordPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('DATABASE_URL password must match POSTGRES_PASSWORD.'),
+    });
+    await writeFile(
+      unsafeDatabaseHostPath,
+      safeEnv.replace(
+        'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
+        'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@localhost:5432/starry_summer',
+      ),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeDatabaseHostPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('DATABASE_URL must not point at localhost for production containers.'),
     });
     await writeFile(
       encodedDatabasePasswordPath,
