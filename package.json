@@ -13,7 +13,7 @@
     "dev:api": "npm run start:dev --workspace @starry-summer/api",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present && npm run test:ops",
-    "test:ops": "bash scripts/smoke.test.sh && bash scripts/backup.test.sh && bash scripts/restore.test.sh && bash scripts/dockerfile.test.sh && bash scripts/deploy.test.sh",
+    "test:ops": "bash scripts/smoke.test.sh && bash scripts/backup.test.sh && bash scripts/restore.test.sh && bash scripts/dockerfile.test.sh && bash scripts/docker-preflight.test.sh && bash scripts/deploy.test.sh",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "auth:hash-password": "npm run hash-password --workspace @starry-summer/api",
@@ -23,6 +23,7 @@
     "ops:backup": "bash scripts/backup.sh",
     "ops:restore": "bash scripts/restore.sh",
     "ops:doctor": "bash scripts/doctor.sh",
+    "ops:docker-preflight": "bash scripts/docker-preflight.sh",
     "ops:smoke": "bash scripts/smoke.sh",
     "ops:deploy": "bash scripts/deploy.sh"
   },

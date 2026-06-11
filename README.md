@@ -84,6 +84,7 @@ Run the main checks:
 npm test
 npm run typecheck
 npm run build
+npm run ops:docker-preflight
 docker compose config --quiet
 ```
 
@@ -101,6 +102,7 @@ Start with:
 
 ```bash
 npm run ops:doctor
+npm run ops:docker-preflight
 npm run ops:deploy -- https://blog.your-domain.com
 ```
 

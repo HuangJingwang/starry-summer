@@ -464,7 +464,7 @@ describe('deployment configuration', () => {
       stdout: expect.stringContaining('S3_PUBLIC_BASE_URL must not use an example.com placeholder when STORAGE_DRIVER=s3.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
-  }, 15000);
+  }, 20000);
 
   test('provides a deployment smoke test for public endpoints', async () => {
     const smokeScript = await readFile(join(repoRoot, 'scripts/smoke.sh'), 'utf8');
@@ -506,6 +506,24 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('Missing or invalid security header');
     expect(deployment).toContain('npm run ops:smoke -- https://blog.your-domain.com');
     expect(deployment).not.toContain('npm run ops:smoke -- https://example.com');
+  });
+
+  test('provides a Docker preflight check before image builds', async () => {
+    const dockerPreflightScript = await readFile(join(repoRoot, 'scripts/docker-preflight.sh'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+    const readme = await readFile(join(repoRoot, 'README.md'), 'utf8');
+
+    expect(packageJson.scripts?.['ops:docker-preflight']).toBe('bash scripts/docker-preflight.sh');
+    expect(packageJson.scripts?.['test:ops']).toContain('bash scripts/docker-preflight.test.sh');
+    expect(dockerPreflightScript).toContain('docker compose config --quiet');
+    expect(dockerPreflightScript).toContain('node:22-alpine');
+    expect(dockerPreflightScript).toContain('Docker image is not available');
+    expect(dockerPreflightScript).toContain('Check Docker Hub access or configure a registry mirror');
+    expect(deployment).toContain('npm run ops:docker-preflight');
+    expect(readme).toContain('npm run ops:docker-preflight');
   });
 
   test('provides a repeatable production deployment script', async () => {

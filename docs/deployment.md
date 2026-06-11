@@ -62,6 +62,7 @@ npm run auth:interaction-secret
 Build the images and run migrations first:
 
 ```bash
+npm run ops:docker-preflight
 docker compose build
 docker compose run --rm migrate
 docker compose up -d
