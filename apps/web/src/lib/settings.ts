@@ -59,7 +59,7 @@ export const defaultSettings: SiteSettings = {
       'Small notes compound into a life you can revisit.',
     ],
   },
-  navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
+  navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'],
   updatedAt: '',
 };
 

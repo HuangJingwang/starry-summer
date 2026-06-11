@@ -22,7 +22,7 @@ describe('InMemorySettingsRepository', () => {
           'Small notes compound into a life you can revisit.',
         ],
       },
-      navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
+      navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'],
       updatedAt: '2026-06-10T00:00:00.000Z',
     });
   });
@@ -65,7 +65,7 @@ describe('InMemorySettingsRepository', () => {
           'Small notes compound into a life you can revisit.',
         ],
       },
-      navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
+      navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'],
     });
   });
 
@@ -91,7 +91,7 @@ describe('InMemorySettingsRepository', () => {
         motto: 'Stay curious, keep shipping.',
         quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
       },
-      navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'about'],
+      navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'],
     });
   });
 

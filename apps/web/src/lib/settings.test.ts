@@ -61,6 +61,7 @@ describe('settings client helpers', () => {
       ],
     });
     expect(normalizeSiteSettings({}).navigation).toContain('series');
+    expect(normalizeSiteSettings({}).navigation).toContain('search');
   });
 
   test('builds public and admin settings requests', () => {

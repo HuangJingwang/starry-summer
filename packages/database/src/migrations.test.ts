@@ -52,4 +52,17 @@ describe('database migrations', () => {
     expect(migration).toContain('references categories(id)');
     expect(migration).toContain('categories_parent_not_self');
   });
+
+  test('includes a migration that exposes search in default navigation', () => {
+    const migrationsDirectory = join(fileURLToPath(new URL('..', import.meta.url)), 'migrations');
+    const searchNavigationMigrationName = readdirSync(migrationsDirectory).find((name) => name.includes('search_navigation'));
+
+    expect(searchNavigationMigrationName).toBeDefined();
+
+    const migration = readFileSync(join(migrationsDirectory, searchNavigationMigrationName ?? ''), 'utf8');
+
+    expect(migration).toContain("'search'");
+    expect(migration).toContain('jsonb_array_elements_text');
+    expect(migration).toContain('site_settings');
+  });
 });
