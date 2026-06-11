@@ -67,11 +67,11 @@ case "$url" in
     if [[ -n "${FAKE_API_HEALTH_BODY:-}" ]]; then
       emit_body "$FAKE_API_HEALTH_BODY"
     else
-      emit_body '{"status":"ok","service":"starry-summer-api","components":{"api":{"status":"ok"},"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}'
+      emit_body '{"status":"ok","service":"starry-summer-api","release":{"version":"20260611091500","revision":"abc1234"},"components":{"api":{"status":"ok"},"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}'
     fi
     ;;
   */health)
-    emit_body '{"status":"ok"}'
+    emit_body "${FAKE_WEB_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-web\",\"release\":{\"version\":\"20260611091500\",\"revision\":\"abc1234\"}}}"
     ;;
   */)
     emit_body '<html>home</html>'
@@ -107,8 +107,15 @@ PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{
     "api": { "status": "ok" }
   },
   "service": "starry-summer-api",
+  "release": { "version": "20260611091500", "revision": "abc1234" },
   "status": "ok"
 }' bash "$repo_root/scripts/smoke.sh" "https://example.com"
+
+if PATH="$tmp_dir:$PATH" FAKE_WEB_HEALTH_BODY='{"status":"ok","service":"starry-summer-web"}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-web-release.log" 2>&1; then
+  echo "Smoke script accepted missing web release metadata."
+  cat "$tmp_dir/missing-web-release.log"
+  exit 1
+fi
 
 if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='<html>web</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unexpected-api-health.log" 2>&1; then
   echo "Smoke script accepted a non-API health response."
@@ -131,6 +138,12 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","components":{"database":{"status":"ok","driver":"postgres"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-redis-health.log" 2>&1; then
   echo "Smoke script accepted missing Redis health."
   cat "$tmp_dir/missing-redis-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","components":{"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-api-release.log" 2>&1; then
+  echo "Smoke script accepted missing API release metadata."
+  cat "$tmp_dir/missing-api-release.log"
   exit 1
 fi
 

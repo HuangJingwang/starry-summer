@@ -40,11 +40,42 @@ check_admin_protected_redirect() {
 check_health() {
   check_path "/health" "web health"
 
-  if ! grep -q '"status":"ok"' "$response_file"; then
-    echo "Health endpoint did not return status ok."
-    cat "$response_file"
-    exit 1
-  fi
+  check_web_health_json
+}
+
+check_web_health_json() {
+  node - "$response_file" <<'NODE'
+const { readFileSync } = require('node:fs');
+
+const responsePath = process.argv[2];
+let data;
+
+try {
+  data = JSON.parse(readFileSync(responsePath, 'utf8'));
+} catch {
+  console.error('Web health endpoint did not return JSON.');
+  console.error(readFileSync(responsePath, 'utf8'));
+  process.exit(1);
+}
+
+function fail(message) {
+  console.error(message);
+  console.error(JSON.stringify(data));
+  process.exit(1);
+}
+
+if (data.service !== 'starry-summer-web') {
+  fail('Web health endpoint did not return the web service marker.');
+}
+
+if (data.status !== 'ok') {
+  fail('Web health endpoint did not return status ok.');
+}
+
+if (!data.release?.version || !data.release?.revision) {
+  fail('Web health endpoint did not return release metadata.');
+}
+NODE
 }
 
 check_api_health_json() {
@@ -74,6 +105,10 @@ if (data.service !== 'starry-summer-api') {
 
 if (data.status !== 'ok') {
   fail('API health endpoint did not return status ok.');
+}
+
+if (!data.release?.version || !data.release?.revision) {
+  fail('API health endpoint did not return release metadata.');
 }
 
 if (data.components?.database?.status !== 'ok' || data.components?.database?.driver !== 'postgres') {
