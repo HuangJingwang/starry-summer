@@ -88,6 +88,16 @@ elif [[ "${DATABASE_URL}" == *":postgres@"* || "${DATABASE_URL}" == *":password@
   fail "DATABASE_URL must not use a default database password."
 fi
 
+database_url_password="$(
+  node -e "try { process.stdout.write(new URL(process.argv[1]).password) } catch { process.exit(1) }" "${DATABASE_URL:-}" 2>/dev/null || true
+)"
+
+if [[ -n "${DATABASE_URL:-}" && -z "$database_url_password" ]]; then
+  fail "DATABASE_URL must include the PostgreSQL password."
+elif [[ -n "${POSTGRES_PASSWORD:-}" && -n "$database_url_password" && "$database_url_password" != "${POSTGRES_PASSWORD:-}" ]]; then
+  fail "DATABASE_URL password must match POSTGRES_PASSWORD."
+fi
+
 case "${STORAGE_DRIVER:-local}" in
   local | s3)
     ;;
