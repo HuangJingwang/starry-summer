@@ -156,6 +156,12 @@ npm run ops:deploy -- https://example.com
 
 The deploy script runs `ops:doctor`, exports release metadata for `/health` and `/api/health`, builds images, runs migrations, starts the stack, and then runs `ops:smoke`.
 
+By default, the deploy script refuses to run with uncommitted local changes so the live `GIT_REVISION` remains traceable. For an intentional emergency deploy from a dirty worktree, use:
+
+```bash
+ALLOW_DIRTY_DEPLOY=true npm run ops:deploy -- https://example.com
+```
+
 You can also run the underlying commands manually:
 
 ```bash
