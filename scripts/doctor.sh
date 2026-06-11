@@ -74,6 +74,10 @@ if [[ ${#interaction_hash_secret} -lt 32 ]] || is_unset_or_placeholder "$interac
   fail "INTERACTION_HASH_SECRET must be at least 32 characters and not a placeholder."
 fi
 
+if [[ -n "$session_secret" && "$session_secret" == "$interaction_hash_secret" ]]; then
+  fail "INTERACTION_HASH_SECRET must be different from SESSION_SECRET."
+fi
+
 case "${POSTGRES_PASSWORD:-}" in
   "" | starry | postgres | password | change-me-before-production)
     fail "POSTGRES_PASSWORD must not use a default or weak value."
