@@ -37,7 +37,7 @@ export default async function HomePage() {
           <div className="hero__overlay" />
           <div className="hero__content">
             <p className="eyebrow">Personal content platform</p>
-            <h1>Starry Summer</h1>
+            <h1>{profile.title}</h1>
             <p>{settings.hero.tagline}</p>
             <p className="hero__motto">{profile.motto}</p>
             <div className="hero__actions" aria-label="Primary actions">
