@@ -100,6 +100,16 @@ chmod +x "$tmp_dir/curl"
 echo "Running smoke script tests"
 PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/smoke.sh" "https://example.com"
 
+PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{
+  "components": {
+    "redis": { "driver": "redis", "status": "ok" },
+    "database": { "driver": "postgres", "status": "ok" },
+    "api": { "status": "ok" }
+  },
+  "service": "starry-summer-api",
+  "status": "ok"
+}' bash "$repo_root/scripts/smoke.sh" "https://example.com"
+
 if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='<html>web</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unexpected-api-health.log" 2>&1; then
   echo "Smoke script accepted a non-API health response."
   cat "$tmp_dir/unexpected-api-health.log"

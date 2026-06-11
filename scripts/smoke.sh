@@ -47,32 +47,48 @@ check_health() {
   fi
 }
 
+check_api_health_json() {
+  node - "$response_file" <<'NODE'
+const { readFileSync } = require('node:fs');
+
+const responsePath = process.argv[2];
+let data;
+
+try {
+  data = JSON.parse(readFileSync(responsePath, 'utf8'));
+} catch {
+  console.error('API health endpoint did not return the API service marker.');
+  console.error(readFileSync(responsePath, 'utf8'));
+  process.exit(1);
+}
+
+function fail(message) {
+  console.error(message);
+  console.error(JSON.stringify(data));
+  process.exit(1);
+}
+
+if (data.service !== 'starry-summer-api') {
+  fail('API health endpoint did not return the API service marker.');
+}
+
+if (data.status !== 'ok') {
+  fail('API health endpoint did not return status ok.');
+}
+
+if (data.components?.database?.status !== 'ok' || data.components?.database?.driver !== 'postgres') {
+  fail('API health endpoint did not report PostgreSQL as healthy.');
+}
+
+if (data.components?.redis?.status !== 'ok' || data.components?.redis?.driver !== 'redis') {
+  fail('API health endpoint did not report Redis as healthy.');
+}
+NODE
+}
+
 check_api_health() {
   check_path "/api/health" "API health"
-
-  if ! grep -q '"service":"starry-summer-api"' "$response_file"; then
-    echo "API health endpoint did not return the API service marker."
-    cat "$response_file"
-    exit 1
-  fi
-
-  if ! grep -q '"status":"ok"' "$response_file"; then
-    echo "API health endpoint did not return status ok."
-    cat "$response_file"
-    exit 1
-  fi
-
-  if ! grep -q '"database":{"status":"ok","driver":"postgres"}' "$response_file"; then
-    echo "API health endpoint did not report PostgreSQL as healthy."
-    cat "$response_file"
-    exit 1
-  fi
-
-  if ! grep -q '"redis":{"status":"ok","driver":"redis"}' "$response_file"; then
-    echo "API health endpoint did not report Redis as healthy."
-    cat "$response_file"
-    exit 1
-  fi
+  check_api_health_json
 }
 
 check_rss() {
