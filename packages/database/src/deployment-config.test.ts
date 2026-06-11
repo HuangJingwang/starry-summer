@@ -100,6 +100,26 @@ describe('deployment configuration', () => {
     expect(deployment).toContain('npm run auth:interaction-secret');
   });
 
+  test('provides a local Docker env initializer for first boot', async () => {
+    const initEnvScript = await readFile(join(repoRoot, 'scripts/init-env.sh'), 'utf8');
+    const initEnvTestScript = await readFile(join(repoRoot, 'scripts/init-env.test.sh'), 'utf8');
+    const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const readme = await readFile(join(repoRoot, 'README.md'), 'utf8');
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(packageJson.scripts?.['ops:init-env']).toBe('bash scripts/init-env.sh');
+    expect(packageJson.scripts?.['test:ops']).toContain('bash scripts/init-env.test.sh');
+    expect(initEnvScript).toContain('INIT_ENV_OVERWRITE=YES');
+    expect(initEnvScript).toContain('npm run --silent auth:hash-password');
+    expect(initEnvScript).toContain('npm run --silent auth:secret');
+    expect(initEnvScript).toContain('npm run --silent auth:interaction-secret');
+    expect(initEnvTestScript).toContain('replace-with-scrypt-hash');
+    expect(readme).toContain('npm run ops:init-env -- "your local admin password"');
+    expect(deployment).toContain('The initializer copies `.env.example`');
+  });
+
   test('persists and exposes local uploads in Docker Compose', async () => {
     const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
     const env = await readFile(join(repoRoot, '.env.example'), 'utf8');

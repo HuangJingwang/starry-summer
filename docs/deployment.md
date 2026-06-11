@@ -11,7 +11,15 @@ This project targets a self-managed cloud server using Docker Compose, Caddy, Po
 
 ## 2. Environment Setup
 
-Copy `.env.example` to `.env` and change production values:
+For local Docker previews, generate `.env` with a local admin password:
+
+```bash
+npm run ops:init-env -- "your local admin password"
+```
+
+The initializer copies `.env.example`, replaces the admin password hash, `SESSION_SECRET`, and `INTERACTION_HASH_SECRET`, and refuses to overwrite an existing `.env` unless `INIT_ENV_OVERWRITE=YES` is set.
+
+For production, copy `.env.example` to `.env` and change production values:
 
 ```bash
 cp .env.example .env

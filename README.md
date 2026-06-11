@@ -62,18 +62,29 @@ npm run dev:web
 npm run dev:api
 ```
 
-Copy the environment example before production-style runs:
+Create a local Docker environment file with generated secrets and an admin password hash:
 
 ```bash
-cp .env.example .env
+npm run ops:init-env -- "your local admin password"
 ```
 
-Generate secrets and the admin password hash:
+This writes `.env` and refuses to overwrite an existing file unless `INIT_ENV_OVERWRITE=YES` is set.
+
+You can also generate individual values manually:
 
 ```bash
 npm run auth:secret
 npm run auth:interaction-secret
 npm run auth:hash-password -- "your strong password"
+```
+
+Run the production-like stack locally:
+
+```bash
+npm run ops:docker-preflight
+docker compose build
+docker compose run --rm migrate
+docker compose up -d
 ```
 
 ## Verification
