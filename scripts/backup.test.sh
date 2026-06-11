@@ -116,4 +116,10 @@ if ! grep -q -- '-- fake postgres dump --' "$backup_dir/postgres.sql"; then
   exit 1
 fi
 
+if ! grep -q '^postgres_sha256=' "$backup_dir/manifest.txt"; then
+  echo "Expected backup manifest to include a PostgreSQL checksum."
+  cat "$backup_dir/manifest.txt"
+  exit 1
+fi
+
 echo "Backup script tests passed"

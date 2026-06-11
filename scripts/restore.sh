@@ -16,6 +16,23 @@ compose_project_name="${COMPOSE_PROJECT_NAME:-$(basename "$repo_root")}"
 postgres_user="${POSTGRES_USER:-starry}"
 postgres_db="${POSTGRES_DB:-starry_summer}"
 
+sha256_file() {
+  local file_path="$1"
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file_path" | awk '{ print $1 }'
+    return
+  fi
+
+  if command -v shasum >/dev/null 2>&1; then
+    LC_ALL=C shasum -a 256 "$file_path" | awk '{ print $1 }'
+    return
+  fi
+
+  echo "sha256sum or shasum is required to verify backup checksums." >&2
+  exit 1
+}
+
 if [[ -z "$backup_dir" ]]; then
   echo "Usage: RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD"
   exit 1
@@ -48,7 +65,13 @@ if [[ ! -f "$backup_dir/manifest.txt" ]]; then
   exit 1
 fi
 
-backup_compose_project_name="$(awk -F= '$1 == "compose_project_name" { print $2; exit }' "$backup_dir/manifest.txt")"
+manifest_value() {
+  local key="$1"
+
+  awk -F= -v key="$key" '$1 == key { print $2; exit }' "$backup_dir/manifest.txt"
+}
+
+backup_compose_project_name="$(manifest_value "compose_project_name")"
 
 if [[ -z "$backup_compose_project_name" ]]; then
   echo "Backup manifest does not include compose_project_name."
@@ -80,6 +103,33 @@ verify_archive() {
   fi
 }
 
+verify_manifest_checksum() {
+  local manifest_key="$1"
+  local file_path="$2"
+  local expected_checksum
+  local actual_checksum
+
+  expected_checksum="$(manifest_value "$manifest_key")"
+
+  if [[ -z "$expected_checksum" ]]; then
+    return
+  fi
+
+  if [[ ! -f "$file_path" ]]; then
+    echo "Backup checksum target is missing: $file_path"
+    exit 1
+  fi
+
+  actual_checksum="$(sha256_file "$file_path")"
+
+  if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+    echo "Backup checksum does not match: $file_path"
+    echo "Expected: $expected_checksum"
+    echo "Actual: $actual_checksum"
+    exit 1
+  fi
+}
+
 restore_volume() {
   local volume_name="$1"
   local archive_name="$2"
@@ -99,6 +149,9 @@ restore_volume() {
 
 verify_archive "api-uploads.tar.gz"
 verify_archive "minio-data.tar.gz"
+verify_manifest_checksum "postgres_sha256" "$backup_dir/postgres.sql"
+verify_manifest_checksum "api_uploads_sha256" "$backup_dir/api-uploads.tar.gz"
+verify_manifest_checksum "minio_data_sha256" "$backup_dir/minio-data.tar.gz"
 
 docker compose up -d postgres
 docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U "$postgres_user" "$postgres_db" < "$backup_dir/postgres.sql"

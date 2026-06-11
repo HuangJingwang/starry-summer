@@ -44,12 +44,14 @@ empty_postgres_dir="$tmp_dir/empty-postgres"
 missing_project_manifest_dir="$tmp_dir/missing-project-manifest"
 wrong_project_dir="$tmp_dir/wrong-project"
 corrupt_archive_dir="$tmp_dir/corrupt-archive"
+tampered_checksum_dir="$tmp_dir/tampered-checksum"
 mkdir -p "$backup_dir"
 mkdir -p "$missing_manifest_dir"
 mkdir -p "$empty_postgres_dir"
 mkdir -p "$missing_project_manifest_dir"
 mkdir -p "$wrong_project_dir"
 mkdir -p "$corrupt_archive_dir"
+mkdir -p "$tampered_checksum_dir"
 printf '%s\n' '-- fake postgres dump --' >"$backup_dir/postgres.sql"
 mkdir -p "$tmp_dir/archive-source"
 printf '%s\n' 'fake upload archive' >"$tmp_dir/archive-source/file.txt"
@@ -64,6 +66,8 @@ printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=other-site' '
 printf '%s\n' '-- fake postgres dump --' >"$corrupt_archive_dir/postgres.sql"
 printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$corrupt_archive_dir/manifest.txt"
 printf '%s\n' 'not a gzip archive' >"$corrupt_archive_dir/api-uploads.tar.gz"
+printf '%s\n' '-- fake postgres dump --' >"$tampered_checksum_dir/postgres.sql"
+printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'postgres_sha256=0000000000000000000000000000000000000000000000000000000000000000' 'git_revision=abc1234' >"$tampered_checksum_dir/manifest.txt"
 
 export RESTORE_TEST_DOCKER_LOG="$tmp_dir/docker.log"
 
@@ -137,6 +141,24 @@ fi
 
 if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
   echo "Restore script touched PostgreSQL before rejecting the corrupt archive."
+  cat "$RESTORE_TEST_DOCKER_LOG"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$tampered_checksum_dir" >"$tmp_dir/tampered-checksum.log" 2>&1; then
+  echo "Restore script accepted a backup with a mismatched PostgreSQL checksum."
+  cat "$tmp_dir/tampered-checksum.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup checksum does not match' "$tmp_dir/tampered-checksum.log"; then
+  echo "Restore script did not explain PostgreSQL checksum mismatch refusal."
+  cat "$tmp_dir/tampered-checksum.log"
+  exit 1
+fi
+
+if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
+  echo "Restore script touched PostgreSQL before rejecting the checksum mismatch."
   cat "$RESTORE_TEST_DOCKER_LOG"
   exit 1
 fi

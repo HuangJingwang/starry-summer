@@ -17,6 +17,23 @@ compose_project_name="${COMPOSE_PROJECT_NAME:-$(basename "$repo_root")}"
 postgres_user="${POSTGRES_USER:-starry}"
 postgres_db="${POSTGRES_DB:-starry_summer}"
 
+sha256_file() {
+  local file_path="$1"
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file_path" | awk '{ print $1 }'
+    return
+  fi
+
+  if command -v shasum >/dev/null 2>&1; then
+    LC_ALL=C shasum -a 256 "$file_path" | awk '{ print $1 }'
+    return
+  fi
+
+  echo "sha256sum or shasum is required to write backup checksums." >&2
+  exit 1
+}
+
 if [[ -d "$backup_dir" ]] && [[ -n "$(find "$backup_dir" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
   echo "Backup directory already exists and is not empty: $backup_dir"
   echo "Choose a new backup directory to avoid mixing backup sets."
@@ -66,6 +83,13 @@ backup_volume "${compose_project_name}_minio-data" "minio-data.tar.gz"
 {
   echo "created_at=$timestamp"
   echo "compose_project_name=$compose_project_name"
+  echo "postgres_sha256=$(sha256_file "$backup_dir/postgres.sql")"
+  if [[ -f "$backup_dir/api-uploads.tar.gz" ]]; then
+    echo "api_uploads_sha256=$(sha256_file "$backup_dir/api-uploads.tar.gz")"
+  fi
+  if [[ -f "$backup_dir/minio-data.tar.gz" ]]; then
+    echo "minio_data_sha256=$(sha256_file "$backup_dir/minio-data.tar.gz")"
+  fi
   git rev-parse --short HEAD 2>/dev/null | sed 's/^/git_revision=/'
 } > "$backup_dir/manifest.txt"
 

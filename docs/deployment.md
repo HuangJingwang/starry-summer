@@ -110,7 +110,7 @@ This writes a directory such as `backups/starry-summer-2026-06-11-030000` contai
 - `postgres.sql`: PostgreSQL dump.
 - `api-uploads.tar.gz`: uploaded files when using local uploads.
 - `minio-data.tar.gz`: self-hosted MinIO data when the local Compose volume exists.
-- `manifest.txt`: timestamp, Compose project name, and git revision.
+- `manifest.txt`: timestamp, Compose project name, SHA-256 checksums, and git revision.
 
 You can pass a fixed output directory:
 
