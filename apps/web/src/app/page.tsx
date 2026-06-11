@@ -21,6 +21,7 @@ export default async function HomePage() {
     excludeIds: featured.map((item) => item.id),
     limit: 3,
   });
+  const projectCount = content.filter((item) => item.type === 'project').length;
   const profile = buildHomeProfileModel(settings, content);
   const stats = profile.stats;
   const heroBackgrounds =
@@ -38,55 +39,93 @@ export default async function HomePage() {
 
   return (
     <SiteShell>
-      <main>
-        <section className="hero">
+      <main className="portfolio-home">
+        <section className="portfolio-hero" id="about">
           <HomeHeroBackground backgrounds={heroBackgrounds} />
-          <div className="hero__overlay" />
-          <div className="hero__content">
-            <p className="eyebrow">个人内容平台</p>
-            <h1>{profile.title}</h1>
-            <p>{settings.hero.tagline}</p>
-            <p className="hero__motto">{profile.motto}</p>
-            <div className="hero__actions" aria-label="Primary actions">
-              <a href="/posts">阅读文章</a>
-              <a href="/projects">查看项目</a>
+          <div className="portfolio-hero__shade" />
+          <div className="portfolio-hero__canvas-word" aria-hidden="true">
+            ABOUT
+          </div>
+          <div className="portfolio-hero__inner">
+            <p className="portfolio-section-label">个人介绍</p>
+            <div className="portfolio-hero__grid">
+              <div
+                className="portfolio-portrait-card"
+                style={{ backgroundImage: `url("${heroBackgrounds[0]?.url}")` }}
+              >
+                <div className="portfolio-portrait-card__glass">
+                  <span>{profile.title}</span>
+                  <strong>{profile.ownerName.slice(0, 1) || 'S'}</strong>
+                </div>
+              </div>
+
+              <div className="portfolio-about-panel">
+                <p className="eyebrow">ABOUT ME</p>
+                <h1>Hi，我是 {profile.ownerName}</h1>
+                <p className="portfolio-about-panel__lead">{profile.description}</p>
+                <p className="portfolio-about-panel__motto">{profile.motto || settings.hero.tagline}</p>
+
+                <div className="portfolio-info-grid">
+                  <div>
+                    <span>我擅长</span>
+                    <strong>设计与写作 / 内容系统 / AI 工作流</strong>
+                  </div>
+                  <div>
+                    <span>服务领域</span>
+                    <strong>个人博客 / 项目记录 / 知识沉淀</strong>
+                  </div>
+                  <div>
+                    <span>站点</span>
+                    <strong>{profile.title}</strong>
+                  </div>
+                  <div>
+                    <span>最近更新</span>
+                    <strong>{profile.stats.lastPublishedAt || '持续构建中'}</strong>
+                  </div>
+                </div>
+
+                <div className="portfolio-stat-row" aria-label="站点数据">
+                  <div>
+                    <strong>{formatNumber(stats.publicCount)}+</strong>
+                    <span>内容资产</span>
+                  </div>
+                  <div>
+                    <strong>{formatNumber(projectCount)}+</strong>
+                    <span>项目实践</span>
+                  </div>
+                  <div>
+                    <strong>{formatNumber(stats.totalLikes)}+</strong>
+                    <span>收到喜欢</span>
+                  </div>
+                </div>
+
+                <div className="portfolio-now">
+                  <p>NOW BUILDING · 进行中</p>
+                  <div>
+                    <Link href="/posts">博客内容库</Link>
+                    <Link href="/projects">个人项目集</Link>
+                    <Link href="/guestbook">访客留言板</Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="stats-band" aria-label="站点统计">
-          <div>
-            <strong>{formatNumber(stats.publicCount)}</strong>
-            <span>已发布</span>
-          </div>
-          <div>
-            <strong>{formatNumber(stats.totalViews)}</strong>
-            <span>浏览</span>
-          </div>
-          <div>
-            <strong>{formatNumber(stats.totalLikes)}</strong>
-            <span>喜欢</span>
-          </div>
-          <div>
-            <strong>{stats.lastPublishedAt || '即将更新'}</strong>
-            <span>最近更新</span>
-          </div>
-        </section>
-
-        <section className="home-dashboard" aria-label="个人概览">
+        <section className="home-dashboard" id="advantage" aria-label="个人优势">
           <div className="home-profile">
-            <p className="eyebrow">个人资料</p>
-            <h2>{profile.ownerName}</h2>
-            <p>{profile.description}</p>
+            <p className="eyebrow">个人优势</p>
+            <h2>把生活、项目和知识长期整理成可回看的系统</h2>
+            <p>{settings.hero.tagline}</p>
             {profile.motto ? <blockquote>{profile.motto}</blockquote> : null}
             <dl>
               <div>
-                <dt>站点</dt>
-                <dd>{profile.title}</dd>
+                <dt>内容资产</dt>
+                <dd>{formatNumber(stats.publicCount)}</dd>
               </div>
               <div>
-                <dt>最新</dt>
-                <dd>{profile.stats.lastPublishedAt || '即将更新'}</dd>
+                <dt>浏览</dt>
+                <dd>{formatNumber(stats.totalViews)}</dd>
               </div>
             </dl>
           </div>
@@ -108,9 +147,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="content-section">
+        <section className="content-section" id="work">
           <div className="section-heading">
-            <p className="eyebrow">精选</p>
+            <p className="eyebrow">作品内容</p>
             <h2>最近沉淀</h2>
           </div>
           <div className="content-grid">
