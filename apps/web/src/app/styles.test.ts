@@ -23,4 +23,16 @@ describe('global styles', () => {
     expect(adminFieldBlock).toContain('background: var(--panel);');
     expect(adminFieldBlock).not.toContain('background: #fff;');
   });
+
+  test('defines the cyber archive visual system used by the home page', () => {
+    const css = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
+
+    expect(css).toContain('--cyber-bg: #04060e;');
+    expect(css).toContain('.cyber-home');
+    expect(css).toContain('.cyber-firefly');
+    expect(css).toContain('@keyframes cyber-firefly-drift');
+    expect(css).toContain('.author-bio-card');
+    expect(css).toContain('.content-filter-rail');
+    expect(css).toContain('.cyber-home .content-card');
+  });
 });

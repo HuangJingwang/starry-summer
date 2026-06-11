@@ -19,14 +19,17 @@ describe('home page', () => {
     expect(source).toContain('backgrounds={heroBackgrounds}');
   });
 
-  test('uses a portfolio-style about hero inspired by the approved reference', () => {
+  test('uses a cyber archive home layout inspired by the supplied reference', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
 
-    expect(source).toContain('className="portfolio-hero"');
-    expect(source).toContain('className="portfolio-portrait-card"');
-    expect(source).toContain('ABOUT ME');
-    expect(source).toContain('NOW BUILDING');
-    expect(source).toContain('设计与写作');
+    expect(source).toContain('className="cyber-home"');
+    expect(source).toContain('className="cyber-firefly-field"');
+    expect(source).toContain('className="cyber-hero"');
+    expect(source).toContain('className="author-bio-card"');
+    expect(source).toContain('className="author-profile-card"');
+    expect(source).toContain('夏夜数字档案');
+    expect(source).toContain('内容索引');
+    expect(source).toContain('className="content-empty-card"');
     expect(source).toContain('内容资产');
   });
 

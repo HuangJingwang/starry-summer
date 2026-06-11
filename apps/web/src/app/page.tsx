@@ -39,82 +39,90 @@ export default async function HomePage() {
 
   return (
     <SiteShell>
-      <main className="portfolio-home">
-        <section className="portfolio-hero" id="about">
+      <main className="cyber-home">
+        <div className="cyber-firefly-field" aria-hidden="true">
+          <span className="cyber-firefly cyber-firefly--one" />
+          <span className="cyber-firefly cyber-firefly--two" />
+          <span className="cyber-firefly cyber-firefly--three" />
+          <span className="cyber-firefly cyber-firefly--four" />
+          <span className="cyber-firefly cyber-firefly--five" />
+        </div>
+
+        <section className="cyber-hero" id="about">
           <HomeHeroBackground backgrounds={heroBackgrounds} />
-          <div className="portfolio-hero__shade" />
-          <div className="portfolio-hero__canvas-word" aria-hidden="true">
-            ABOUT
-          </div>
-          <div className="portfolio-hero__inner">
-            <p className="portfolio-section-label">个人介绍</p>
-            <div className="portfolio-hero__grid">
-              <div
-                className="portfolio-portrait-card"
-                style={{ backgroundImage: `url("${heroBackgrounds[0]?.url}")` }}
-              >
-                <div className="portfolio-portrait-card__glass">
-                  <span>{profile.title}</span>
-                  <strong>{profile.ownerName.slice(0, 1) || 'S'}</strong>
+          <div className="cyber-hero__shade" />
+          <div className="cyber-home__container cyber-hero__grid">
+            <article className="author-bio-card">
+              <p className="eyebrow">夏夜数字档案</p>
+              <h1>Hi，我是 {profile.ownerName}</h1>
+              <p className="author-bio-card__lead">{profile.description}</p>
+              <p className="author-bio-card__motto">{profile.motto || settings.hero.tagline}</p>
+
+              <div className="author-bio-card__meta">
+                <div>
+                  <span>站点</span>
+                  <strong>{profile.title}</strong>
+                </div>
+                <div>
+                  <span>方向</span>
+                  <strong>写作 / 笔记 / 项目 / 日常</strong>
+                </div>
+                <div>
+                  <span>最近更新</span>
+                  <strong>{profile.stats.lastPublishedAt || '持续构建中'}</strong>
                 </div>
               </div>
 
-              <div className="portfolio-about-panel">
-                <p className="eyebrow">ABOUT ME</p>
-                <h1>Hi，我是 {profile.ownerName}</h1>
-                <p className="portfolio-about-panel__lead">{profile.description}</p>
-                <p className="portfolio-about-panel__motto">{profile.motto || settings.hero.tagline}</p>
+              <div className="author-bio-card__actions" aria-label="快捷入口">
+                <Link href="/posts">阅读文章</Link>
+                <Link href="/notes">翻看笔记</Link>
+                <Link href="/guestbook">给我留言</Link>
+              </div>
+            </article>
 
-                <div className="portfolio-info-grid">
-                  <div>
-                    <span>我擅长</span>
-                    <strong>设计与写作 / 内容系统 / AI 工作流</strong>
-                  </div>
-                  <div>
-                    <span>服务领域</span>
-                    <strong>个人博客 / 项目记录 / 知识沉淀</strong>
-                  </div>
-                  <div>
-                    <span>站点</span>
-                    <strong>{profile.title}</strong>
-                  </div>
-                  <div>
-                    <span>最近更新</span>
-                    <strong>{profile.stats.lastPublishedAt || '持续构建中'}</strong>
-                  </div>
-                </div>
-
-                <div className="portfolio-stat-row" aria-label="站点数据">
-                  <div>
-                    <strong>{formatNumber(stats.publicCount)}+</strong>
-                    <span>内容资产</span>
-                  </div>
-                  <div>
-                    <strong>{formatNumber(projectCount)}+</strong>
-                    <span>项目实践</span>
-                  </div>
-                  <div>
-                    <strong>{formatNumber(stats.totalLikes)}+</strong>
-                    <span>收到喜欢</span>
-                  </div>
-                </div>
-
-                <div className="portfolio-now">
-                  <p>NOW BUILDING · 进行中</p>
-                  <div>
-                    <Link href="/posts">博客内容库</Link>
-                    <Link href="/projects">个人项目集</Link>
-                    <Link href="/guestbook">访客留言板</Link>
-                  </div>
+            <aside
+              className="author-profile-card"
+              style={{ backgroundImage: `url("${heroBackgrounds[0]?.url}")` }}
+              aria-label="站点概览"
+            >
+              <div className="author-profile-card__glass">
+                <span className="author-profile-card__avatar">{profile.ownerName.slice(0, 1) || 'S'}</span>
+                <div>
+                  <p>{profile.title}</p>
+                  <strong>{profile.ownerName}</strong>
                 </div>
               </div>
-            </div>
+              <dl className="author-profile-card__stats">
+                <div>
+                  <dt>Collection</dt>
+                  <dd>{formatNumber(stats.publicCount)}</dd>
+                </div>
+                <div>
+                  <dt>Total Views</dt>
+                  <dd>{formatNumber(stats.totalViews)}</dd>
+                </div>
+                <div>
+                  <dt>Likes</dt>
+                  <dd>{formatNumber(stats.totalLikes)}</dd>
+                </div>
+              </dl>
+            </aside>
           </div>
         </section>
 
-        <section className="home-dashboard" id="advantage" aria-label="个人优势">
+        <nav className="content-filter-rail cyber-home__container" aria-label="内容索引">
+          <span>内容索引</span>
+          <Link href="/posts">文章</Link>
+          <Link href="/notes">笔记</Link>
+          <Link href="/moments">日常</Link>
+          <Link href="/projects">项目</Link>
+          <Link href="/series">专题</Link>
+          <Link href="/search">搜索</Link>
+        </nav>
+
+        <section className="home-dashboard cyber-home__container" id="advantage" aria-label="个人优势">
           <div className="home-profile">
-            <p className="eyebrow">个人优势</p>
+            <p className="eyebrow">Creative System</p>
             <h2>把生活、项目和知识长期整理成可回看的系统</h2>
             <p>{settings.hero.tagline}</p>
             {profile.motto ? <blockquote>{profile.motto}</blockquote> : null}
@@ -124,8 +132,8 @@ export default async function HomePage() {
                 <dd>{formatNumber(stats.publicCount)}</dd>
               </div>
               <div>
-                <dt>浏览</dt>
-                <dd>{formatNumber(stats.totalViews)}</dd>
+                <dt>项目实践</dt>
+                <dd>{formatNumber(projectCount)}</dd>
               </div>
             </dl>
           </div>
@@ -147,23 +155,32 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section className="content-section" id="work">
+        <section className="content-section cyber-home__container" id="work">
           <div className="section-heading">
-            <p className="eyebrow">作品内容</p>
+            <p className="eyebrow">Featured Notes</p>
             <h2>最近沉淀</h2>
           </div>
-          <div className="content-grid">
-            {featured.map((item) => (
-              <ContentCard key={item.id} item={item} />
-            ))}
-          </div>
+          {featured.length > 0 ? (
+            <div className="content-grid">
+              {featured.map((item) => (
+                <ContentCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="content-empty-card">
+              <span>EMPTY COLLECTION</span>
+              <strong>还没有发布内容</strong>
+              <p>去后台发布第一篇文章、笔记、日常或项目后，这里会自动变成首页内容卡片。</p>
+              <Link href="/posts">查看内容库</Link>
+            </div>
+          )}
         </section>
 
         {popular.length > 0 ? (
-          <section className="content-section content-section--subtle">
+          <section className="content-section content-section--subtle cyber-home__container">
             <div className="section-heading section-heading--row">
               <div>
-                <p className="eyebrow">热门</p>
+                <p className="eyebrow">Popular Signals</p>
                 <h2>热门内容</h2>
               </div>
               <Link href="/posts?sort=popular">查看热门文章</Link>
