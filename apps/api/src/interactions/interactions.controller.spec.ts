@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { GUARDS_METADATA } from '@nestjs/common/constants';
+
+import { ReaderAuthGuard } from '../auth/reader-auth.guard';
+import { PublicInteractionRateLimitGuard } from '../security/public-interaction-rate-limit.guard';
 import { InteractionsController } from './interactions.controller';
 
 describe('InteractionsController', () => {
@@ -126,15 +130,30 @@ describe('InteractionsController', () => {
     expect(interactionsService.likeContent).not.toHaveBeenCalled();
   });
 
-  test('adds moderation metadata to guestbook entries', () => {
+  test('requires GitHub reader auth before creating guestbook entries', () => {
+    expect(Reflect.getMetadata(GUARDS_METADATA, InteractionsController.prototype.createGuestbookEntry)).toEqual([
+      ReaderAuthGuard,
+      PublicInteractionRateLimitGuard,
+    ]);
+  });
+
+  test('adds moderation metadata and GitHub identity to guestbook entries', () => {
     const controller = new InteractionsController(interactionsService as never);
 
     controller.createGuestbookEntry(
       {
-        authorName: 'Ada',
         body: 'Hello',
       },
       {
+        readerSession: {
+          kind: 'reader',
+          provider: 'github',
+          providerId: '123',
+          login: 'ada',
+          displayName: 'Ada Lovelace',
+          profileUrl: 'https://github.com/ada',
+          expiresAt: '2026-06-12T00:00:00.000Z',
+        },
         headers: {
           'user-agent': 'Safari',
           'x-real-ip': '198.51.100.9',
@@ -143,7 +162,7 @@ describe('InteractionsController', () => {
     );
 
     expect(interactionsService.createGuestbookEntry).toHaveBeenCalledWith({
-      authorName: 'Ada',
+      authorName: 'Ada Lovelace',
       body: 'Hello',
       ipHash: expect.stringMatching(/^[a-f0-9]{64}$/),
       userAgent: 'Safari',

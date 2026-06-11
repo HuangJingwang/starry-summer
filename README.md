@@ -7,6 +7,7 @@ It is designed as a public personal site plus a private admin console. The V1 di
 ## Features
 
 - Public pages for posts, notes, moments, projects, archives, tags, categories, series, search, guestbook, RSS, sitemap, and about.
+- Guestbook submissions require GitHub reader login and still enter the owner moderation queue before public display.
 - Admin login and protected management pages for content, taxonomy, assets, comments, guestbook moderation, settings, projects, and Markdown import/export.
 - Content lifecycle with drafts, published posts, private content, archived content, comments, likes, and view counts.
 - Markdown rendering pipeline shared between authoring and public reading.
@@ -77,6 +78,8 @@ npm run auth:secret
 npm run auth:interaction-secret
 npm run auth:hash-password -- "your strong password"
 ```
+
+For guestbook submissions, create a GitHub OAuth App and set `GITHUB_CLIENT_ID` plus `GITHUB_CLIENT_SECRET`. The callback URL is `/api/auth/github/callback` under your public site URL.
 
 Run the production-like stack locally:
 

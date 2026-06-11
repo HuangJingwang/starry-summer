@@ -32,6 +32,7 @@ Required production changes:
 - `ACME_EMAIL`: email used by Caddy for HTTPS certificates.
 - `SESSION_SECRET`: a long random string.
 - `INTERACTION_HASH_SECRET`: a long random string used to anonymize and deduplicate public likes/views.
+- `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`: GitHub OAuth App credentials used for reader login before guestbook submissions.
 - `ADMIN_EMAIL`: owner login email.
 - `ADMIN_PASSWORD_HASH`: a strong password hash generated before first real login.
 - `POSTGRES_PASSWORD`: a strong database password.
@@ -64,6 +65,12 @@ Generate the public interaction hash secret separately:
 ```bash
 npm run auth:interaction-secret
 ```
+
+Create a GitHub OAuth App for reader login:
+
+- Homepage URL: the same value as `PUBLIC_SITE_URL`.
+- Authorization callback URL: `https://blog.your-domain.com/api/auth/github/callback`.
+- Paste the Client ID and Client Secret into `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
 
 ## 3. First Boot
 

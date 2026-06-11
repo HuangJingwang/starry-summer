@@ -4,6 +4,7 @@ import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Patc
 import type { ContentType, ModerationStatus } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
+import { ReaderAuthGuard, type ReaderAuthenticatedRequest } from '../auth/reader-auth.guard.js';
 import {
   resolvePublicClientAddress,
   resolvePublicUserAgent,
@@ -17,6 +18,8 @@ import {
 } from './interactions.service.js';
 
 type CreateCommentRequest = Omit<CreateCommentInput, 'targetType'> & { targetType: string };
+type CreateGuestbookRequest = Pick<CreateGuestbookEntryInput, 'body'>;
+type ReaderPublicClientRequest = PublicClientRequest & ReaderAuthenticatedRequest;
 
 @Controller()
 export class InteractionsController {
@@ -76,10 +79,13 @@ export class InteractionsController {
   }
 
   @Post('guestbook')
-  @UseGuards(PublicInteractionRateLimitGuard)
-  createGuestbookEntry(@Body() input: CreateGuestbookEntryInput, @Req() request: PublicClientRequest) {
+  @UseGuards(ReaderAuthGuard, PublicInteractionRateLimitGuard)
+  createGuestbookEntry(@Body() input: CreateGuestbookRequest, @Req() request: ReaderPublicClientRequest) {
+    const reader = request.readerSession;
+
     return this.interactionsService.createGuestbookEntry({
       ...input,
+      authorName: reader?.displayName || reader?.login || 'GitHub 用户',
       ...createPublicSubmissionMetadata(request),
     });
   }

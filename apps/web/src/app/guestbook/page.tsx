@@ -1,7 +1,10 @@
+import { cookies } from 'next/headers';
+
 import { GuestbookForm } from '@/components/GuestbookForm';
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadApprovedGuestbookEntries } from '@/lib/public-comments';
+import { loadReaderSession } from '@/lib/reader-auth';
 
 export function generateMetadata() {
   return loadPublicPageMetadata({
@@ -12,7 +15,12 @@ export function generateMetadata() {
 }
 
 export default async function GuestbookPage() {
-  const entries = await loadApprovedGuestbookEntries();
+  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
+  const cookieHeader = (await cookies()).toString();
+  const [entries, readerSession] = await Promise.all([
+    loadApprovedGuestbookEntries(),
+    loadReaderSession({ apiBaseUrl, cookieHeader }),
+  ]);
 
   return (
     <SiteShell>
@@ -44,8 +52,8 @@ export default async function GuestbookPage() {
           <section className="guestbook-panel">
             <p className="eyebrow">Leave a signal</p>
             <h2>写点什么</h2>
-            <p>随便留一句话，审核通过后会在这里公开展示。</p>
-            <GuestbookForm />
+            <p>用 GitHub 登录后留一句话，审核通过后会在这里公开展示。</p>
+            <GuestbookForm reader={readerSession.authenticated ? readerSession : null} />
           </section>
         </div>
       </main>

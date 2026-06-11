@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createHmac } from 'node:crypto';
 
-import { AuthService } from './auth.service';
+import { AuthService, READER_SESSION_MAX_AGE_MS } from './auth.service';
 import { createPasswordHash } from './password';
 
 describe('AuthService', () => {
@@ -66,6 +66,62 @@ describe('AuthService', () => {
     const signature = createHmac('sha256', sessionSecret).update(encodedPayload).digest('base64url');
 
     expect(service.verifySession(`${encodedPayload}.${signature}`)).toBeNull();
+  });
+
+  test('creates and verifies GitHub reader sessions separately from admin sessions', async () => {
+    const service = new AuthService({
+      adminEmail: 'owner@example.com',
+      adminPasswordHash: createPasswordHash('secret-password', 'auth-service-salt'),
+      sessionSecret: 'test-session-secret',
+    });
+    const adminSession = await service.login({
+      email: 'owner@example.com',
+      password: 'secret-password',
+    });
+
+    const readerSession = service.createReaderSession({
+      providerId: '12345',
+      login: 'reader',
+      displayName: 'Reader Name',
+      avatarUrl: 'https://avatars.githubusercontent.com/u/12345',
+      profileUrl: 'https://github.com/reader',
+    });
+
+    expect(readerSession).toMatchObject({
+      provider: 'github',
+      providerId: '12345',
+      login: 'reader',
+      displayName: 'Reader Name',
+      profileUrl: 'https://github.com/reader',
+      expiresAt: expect.any(String),
+    });
+    expect(Date.parse(readerSession.expiresAt)).toBeGreaterThan(Date.now() + READER_SESSION_MAX_AGE_MS - 10_000);
+    expect(service.verifyReaderSession(readerSession.token)).toMatchObject({
+      provider: 'github',
+      providerId: '12345',
+      login: 'reader',
+      displayName: 'Reader Name',
+    });
+    expect(service.verifyReaderSession(adminSession.token)).toBeNull();
+  });
+
+  test('builds GitHub OAuth authorize URLs from configured credentials', () => {
+    const service = new AuthService({
+      adminEmail: 'owner@example.com',
+      adminPasswordHash: createPasswordHash('secret-password', 'auth-service-salt'),
+      sessionSecret: 'test-session-secret',
+      githubClientId: 'github-client-id',
+      githubClientSecret: 'github-client-secret',
+    });
+
+    const url = service.buildGithubAuthorizeUrl({
+      state: 'state-token',
+      redirectUri: 'https://blog.example.com/api/auth/github/callback',
+    });
+
+    expect(url.toString()).toBe(
+      'https://github.com/login/oauth/authorize?client_id=github-client-id&redirect_uri=https%3A%2F%2Fblog.example.com%2Fapi%2Fauth%2Fgithub%2Fcallback&scope=read%3Auser&state=state-token',
+    );
   });
 
   test('rejects signed sessions for a different admin email', () => {

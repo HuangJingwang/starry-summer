@@ -195,6 +195,8 @@ describe('deployment configuration', () => {
       'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
       'SESSION_SECRET=12345678901234567890123456789012',
       'INTERACTION_HASH_SECRET=abcdefabcdefabcdefabcdefabcdef12',
+      'GITHUB_CLIENT_ID=github-client-id',
+      'GITHUB_CLIENT_SECRET=github-client-secret',
       'POSTGRES_PASSWORD=replace-me-with-a-real-password',
       'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
       'CONTENT_REPOSITORY_DRIVER=postgres',
@@ -243,6 +245,8 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be different from SESSION_SECRET.');
+    expect(doctorScript).toContain('GITHUB_CLIENT_ID is required for guestbook GitHub login.');
+    expect(doctorScript).toContain('GITHUB_CLIENT_SECRET is required for guestbook GitHub login.');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('DATABASE_URL must start with postgresql:// or postgres://.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');

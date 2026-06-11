@@ -103,6 +103,14 @@ if [[ -n "$session_secret" && "$session_secret" == "$interaction_hash_secret" ]]
   fail "INTERACTION_HASH_SECRET must be different from SESSION_SECRET."
 fi
 
+if is_unset_or_placeholder "${GITHUB_CLIENT_ID:-}"; then
+  fail "GITHUB_CLIENT_ID is required for guestbook GitHub login."
+fi
+
+if is_unset_or_placeholder "${GITHUB_CLIENT_SECRET:-}"; then
+  fail "GITHUB_CLIENT_SECRET is required for guestbook GitHub login."
+fi
+
 case "${POSTGRES_PASSWORD:-}" in
   "" | starry | postgres | password | change-me-before-production)
     fail "POSTGRES_PASSWORD must not use a default or weak value."

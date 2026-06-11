@@ -13,7 +13,6 @@ export interface CommentInput {
 }
 
 export interface GuestbookInput {
-  authorName: string;
   body: string;
 }
 
@@ -126,9 +125,9 @@ export function buildGuestbookRequest(input: GuestbookInput): InteractionRequest
     url: '/api/guestbook',
     init: {
       method: 'POST',
+      credentials: 'include',
       headers: jsonHeaders,
       body: JSON.stringify({
-        authorName: input.authorName.trim(),
         body: input.body.trim(),
       }),
     },

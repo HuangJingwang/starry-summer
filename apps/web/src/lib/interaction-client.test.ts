@@ -88,10 +88,22 @@ describe('interaction client helpers', () => {
     });
   });
 
-  test('builds guestbook request', () => {
-    expect(buildGuestbookRequest({ authorName: ' Visitor ', body: ' Hello. ' }).init.body).toBe(
+  test('builds credentialed guestbook request without accepting a forged author name', () => {
+    expect(buildGuestbookRequest({ body: ' Hello. ' })).toEqual({
+      url: '/api/guestbook',
+      init: {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          body: 'Hello.',
+        }),
+      },
+    });
+    expect(buildGuestbookRequest({ body: ' Hello. ' }).init.body).toBe(
       JSON.stringify({
-        authorName: 'Visitor',
         body: 'Hello.',
       }),
     );

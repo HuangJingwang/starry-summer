@@ -743,6 +743,54 @@ body:has(.cyber-home) .site-footer a {
   margin: 0;
 }
 
+.guestbook-login-gate,
+.guestbook-reader {
+  background: rgba(4, 6, 14, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.guestbook-login-gate p {
+  color: rgba(226, 232, 240, 0.72);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.guestbook-login-gate a,
+.guestbook-reader a {
+  color: #cffafe;
+  font-weight: 900;
+}
+
+.guestbook-login-gate a {
+  background: linear-gradient(135deg, var(--cyber-cyan), var(--cyber-teal) 58%, var(--cyber-purple));
+  border-radius: 999px;
+  color: #031018;
+  justify-self: start;
+  min-height: 42px;
+  padding: 11px 16px;
+}
+
+.guestbook-reader {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.guestbook-reader span {
+  color: rgba(148, 163, 184, 0.78);
+  font-size: 0.74rem;
+  font-weight: 900;
+  grid-column: 1 / -1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.guestbook-reader strong {
+  color: #fff;
+}
+
 .guestbook-page .guestbook-list {
   margin-top: 20px;
 }
@@ -2687,6 +2735,10 @@ body:has(.guestbook-page) .site-footer a {
   .guestbook-panel {
     border-radius: 18px;
     padding: 22px;
+  }
+
+  .guestbook-reader {
+    grid-template-columns: 1fr;
   }
 
   .portfolio-hero__inner {
