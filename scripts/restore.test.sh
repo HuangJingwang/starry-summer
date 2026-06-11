@@ -40,13 +40,17 @@ chmod +x "$tmp_dir/docker"
 
 backup_dir="$tmp_dir/backup"
 missing_manifest_dir="$tmp_dir/missing-manifest"
+missing_project_manifest_dir="$tmp_dir/missing-project-manifest"
 wrong_project_dir="$tmp_dir/wrong-project"
 mkdir -p "$backup_dir"
 mkdir -p "$missing_manifest_dir"
+mkdir -p "$missing_project_manifest_dir"
 mkdir -p "$wrong_project_dir"
 printf '%s\n' '-- fake postgres dump --' >"$backup_dir/postgres.sql"
 printf '%s\n' 'fake upload archive' >"$backup_dir/api-uploads.tar.gz"
 printf '%s\n' '-- fake postgres dump --' >"$missing_manifest_dir/postgres.sql"
+printf '%s\n' '-- fake postgres dump --' >"$missing_project_manifest_dir/postgres.sql"
+printf '%s\n' 'created_at=2026-06-11-093300' 'git_revision=abc1234' >"$missing_project_manifest_dir/manifest.txt"
 printf '%s\n' '-- fake postgres dump --' >"$wrong_project_dir/postgres.sql"
 printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=other-site' 'git_revision=abc1234' >"$wrong_project_dir/manifest.txt"
 
@@ -63,6 +67,18 @@ fi
 if ! grep -q 'Backup manifest not found' "$tmp_dir/missing-manifest.log"; then
   echo "Restore script did not explain missing manifest refusal."
   cat "$tmp_dir/missing-manifest.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$missing_project_manifest_dir" >"$tmp_dir/missing-project-manifest.log" 2>&1; then
+  echo "Restore script accepted a manifest without a Compose project name."
+  cat "$tmp_dir/missing-project-manifest.log"
+  exit 1
+fi
+
+if ! grep -q 'Backup manifest does not include compose_project_name.' "$tmp_dir/missing-project-manifest.log"; then
+  echo "Restore script did not explain missing Compose project name refusal."
+  cat "$tmp_dir/missing-project-manifest.log"
   exit 1
 fi
 

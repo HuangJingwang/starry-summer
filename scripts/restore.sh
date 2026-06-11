@@ -44,6 +44,12 @@ fi
 
 backup_compose_project_name="$(awk -F= '$1 == "compose_project_name" { print $2; exit }' "$backup_dir/manifest.txt")"
 
+if [[ -z "$backup_compose_project_name" ]]; then
+  echo "Backup manifest does not include compose_project_name."
+  echo "Refusing to restore from a manifest that cannot be matched to this Compose project."
+  exit 1
+fi
+
 if [[ -n "$backup_compose_project_name" && "$backup_compose_project_name" != "$compose_project_name" && "${RESTORE_ALLOW_PROJECT_MISMATCH:-}" != "YES" ]]; then
   echo "Backup Compose project does not match the current Compose project."
   echo "Backup project: $backup_compose_project_name"
