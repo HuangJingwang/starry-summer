@@ -80,6 +80,9 @@ case "$url" in
   */api/settings)
     emit_body "${FAKE_SETTINGS_BODY:-{\"siteTitle\":\"Starry Summer\",\"siteDescription\":\"Personal blog\"}}"
     ;;
+  */api/content\?q=starry)
+    emit_body "${FAKE_CONTENT_SEARCH_BODY:-[]}"
+    ;;
   */health)
     emit_body "${FAKE_WEB_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-web\",\"release\":{\"version\":\"20260611091500\",\"revision\":\"abc1234\"}}}"
     ;;
@@ -160,6 +163,12 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_SETTINGS_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-settings.log" 2>&1; then
   echo "Smoke script accepted a non-JSON settings response."
   cat "$tmp_dir/non-json-settings.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_CONTENT_SEARCH_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-content-search.log" 2>&1; then
+  echo "Smoke script accepted a non-JSON content search response."
+  cat "$tmp_dir/non-json-content-search.log"
   exit 1
 fi
 
