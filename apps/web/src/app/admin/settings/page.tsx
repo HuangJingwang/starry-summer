@@ -5,7 +5,7 @@ export default function AdminSettingsPage() {
   return (
     <AdminShell>
       <section className="admin-panel wide">
-        <p className="eyebrow">Settings</p>
+        <p className="eyebrow">设置</p>
         <h1>站点配置</h1>
         <SettingsManager />
       </section>

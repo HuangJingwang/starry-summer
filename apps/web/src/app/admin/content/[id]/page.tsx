@@ -21,7 +21,7 @@ export default async function EditContentPage({ params }: { params: Promise<{ id
   return (
     <AdminShell>
       <section className="admin-panel wide">
-        <p className="eyebrow">Edit</p>
+        <p className="eyebrow">编辑</p>
         <h1>{item.title}</h1>
         <AdminContentForm
           mode="edit"

@@ -12,7 +12,7 @@ import {
 
 type TransferState = 'idle' | 'submitting' | 'success' | 'error';
 
-const exampleMarkdown = ['---', 'title: Imported Post', 'slug: imported-post', 'summary: Imported from Markdown', '---', '# Imported Post'].join('\n');
+const exampleMarkdown = ['---', 'title: 导入示例', 'slug: imported-post', 'summary: 从 Markdown 导入', '---', '# 导入示例'].join('\n');
 
 export function AdminMarkdownTransfer() {
   const [exportedMarkdown, setExportedMarkdown] = useState('');
@@ -127,40 +127,40 @@ export function AdminMarkdownTransfer() {
   return (
     <div className="split-panels">
       <form action={exportMarkdown}>
-        <h2>Export</h2>
+        <h2>导出</h2>
         <p>按内容 ID 导出带 front matter 的 Markdown。</p>
-        <input name="contentId" placeholder="content id" required />
+        <input name="contentId" placeholder="内容 ID" required />
         <button type="submit" disabled={state === 'submitting'}>
-          Export Markdown
+          导出 Markdown
         </button>
         <button type="button" onClick={exportAllMarkdown} disabled={state === 'submitting'}>
-          Export all
+          导出全部
         </button>
         {exportedMarkdown ? (
           <>
-            <textarea rows={12} value={exportedMarkdown} readOnly aria-label="Exported Markdown" />
+            <textarea rows={12} value={exportedMarkdown} readOnly aria-label="已导出的 Markdown" />
             <button type="button" onClick={downloadExport}>
-              Download .md
+              下载 .md
             </button>
           </>
         ) : null}
       </form>
       <form action={importMarkdown}>
-        <h2>Import</h2>
+        <h2>导入</h2>
         <p>从 Markdown 恢复内容，导入后先作为草稿进入内容管理。</p>
-        <select name="type" defaultValue="post" aria-label="Content type">
-          <option value="post">Post</option>
-          <option value="note">Note</option>
-          <option value="moment">Moment</option>
-          <option value="project">Project</option>
-          <option value="page">Page</option>
+        <select name="type" defaultValue="post" aria-label="内容类型">
+          <option value="post">文章</option>
+          <option value="note">笔记</option>
+          <option value="moment">日常</option>
+          <option value="project">项目</option>
+          <option value="page">页面</option>
         </select>
         <textarea name="markdown" rows={12} defaultValue={exampleMarkdown} />
         <button type="submit" disabled={state === 'submitting'}>
-          Import Markdown
+          导入 Markdown
         </button>
         <button type="submit" formAction={importMarkdownArchive} disabled={state === 'submitting'}>
-          Import archive
+          导入归档
         </button>
       </form>
       {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}

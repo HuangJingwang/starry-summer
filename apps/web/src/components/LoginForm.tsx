@@ -37,7 +37,7 @@ export function LoginForm({ redirectTo = '/admin' }: { redirectTo?: string }) {
 
   return (
     <form className="login-panel" action={handleSubmit}>
-      <p className="eyebrow">Owner only</p>
+      <p className="eyebrow">仅站长可用</p>
       <h1>登录</h1>
       <label>
         邮箱

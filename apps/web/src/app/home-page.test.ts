@@ -10,4 +10,12 @@ describe('home page', () => {
     expect(source).toContain('<h1>{profile.title}</h1>');
     expect(source).not.toContain('<h1>Starry Summer</h1>');
   });
+
+  test('uses uploaded background assets for a rotating home hero image pool', () => {
+    const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
+
+    expect(source).toContain('loadPublicAssets({ usage:');
+    expect(source).toContain('<HomeHeroBackground');
+    expect(source).toContain('backgrounds={heroBackgrounds}');
+  });
 });

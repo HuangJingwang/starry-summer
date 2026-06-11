@@ -62,14 +62,14 @@ export function AdminSessionStatus() {
   }
 
   if (loading) {
-    return <div className="admin-session">Checking session</div>;
+    return <div className="admin-session">正在检查登录状态</div>;
   }
 
   if (!session) {
     return (
       <div className="admin-session">
-        <span>Not signed in</span>
-        <Link href="/admin/login">Login</Link>
+        <span>未登录</span>
+        <Link href="/admin/login">登录</Link>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export function AdminSessionStatus() {
     <div className="admin-session">
       <span>{session.email}</span>
       <button type="button" onClick={logout}>
-        Logout
+        退出登录
       </button>
     </div>
   );

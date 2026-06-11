@@ -5,7 +5,7 @@ export default function AdminAssetsPage() {
   return (
     <AdminShell>
       <section className="admin-panel wide">
-        <p className="eyebrow">Assets</p>
+        <p className="eyebrow">素材</p>
         <h1>图片与附件</h1>
         <AssetManager />
       </section>

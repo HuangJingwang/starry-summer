@@ -93,16 +93,16 @@ export function SettingsManager() {
     <form className="content-form" action={save} key={buildSettingsFormKey(settings)}>
       <div className="form-grid">
         <label>
-          Site title
+          站点标题
           <input name="title" defaultValue={settings.profile.title} />
         </label>
         <label>
-          Owner
+          作者名称
           <input name="ownerName" defaultValue={settings.profile.ownerName} />
         </label>
       </div>
       <label>
-        SEO description
+        SEO 描述
         <textarea name="description" rows={4} defaultValue={settings.profile.description} />
       </label>
       <label>
@@ -136,11 +136,11 @@ export function SettingsManager() {
         <input name="backgroundImageUrl" defaultValue={settings.hero.backgroundImageUrl} placeholder="/hero-workspace.png" />
       </label>
       <label>
-        Navigation
+        导航配置
         <input name="navigation" defaultValue={settings.navigation.join(', ')} />
       </label>
       <button type="submit" disabled={state === 'loading' || state === 'submitting'}>
-        {state === 'submitting' ? 'Saving' : 'Save settings'}
+        {state === 'submitting' ? '保存中' : '保存设置'}
       </button>
       {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
     </form>

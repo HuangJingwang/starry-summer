@@ -41,7 +41,7 @@ export function LikeButton({
 
   return (
     <button className="like-button" type="button" onClick={like} disabled={pending}>
-      {pending ? 'Saving' : 'Like'} · {count}
+      {pending ? '保存中' : '喜欢'} · {count}
     </button>
   );
 }

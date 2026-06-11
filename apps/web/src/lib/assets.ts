@@ -82,6 +82,18 @@ export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): A
   };
 }
 
+export function buildPublicAssetListRequest(options: AssetRequestOptions = {}): AssetRequest {
+  return {
+    url: buildAssetUrl('/api/assets', options),
+    init: {
+      method: 'GET',
+      next: {
+        revalidate: 60,
+      },
+    },
+  };
+}
+
 export function buildAssetDeleteRequest(id: string): AssetRequest {
   return {
     url: `/api/admin/assets/${id}`,
@@ -169,6 +181,31 @@ export async function loadRandomAsset(
     return normalizeStoredAsset(data as Partial<StoredAsset>);
   } catch {
     return null;
+  }
+}
+
+export async function loadPublicAssets(
+  options: AssetRequestOptions = {},
+  fetcher: (url: string, init: RequestInit) => Promise<Response> = (url, init) => fetch(url, init),
+): Promise<StoredAsset[]> {
+  const request = buildPublicAssetListRequest(options);
+
+  try {
+    const response = await fetcher(request.url, request.init);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data: unknown = await response.json();
+
+    if (!Array.isArray(data)) {
+      return [];
+    }
+
+    return data.map((item) => normalizeStoredAsset(item as Partial<StoredAsset>));
+  } catch {
+    return [];
   }
 }
 

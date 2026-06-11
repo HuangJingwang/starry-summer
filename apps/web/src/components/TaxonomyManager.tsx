@@ -14,16 +14,16 @@ import {
 
 const taxonomyCopy: Record<TaxonomyType, { title: string; placeholder: string }> = {
   category: {
-    title: 'Categories',
-    placeholder: 'Long form writing',
+    title: '分类',
+    placeholder: '长文写作',
   },
   tag: {
-    title: 'Tags',
+    title: '标签',
     placeholder: 'Markdown',
   },
   series: {
-    title: 'Series',
-    placeholder: 'Platform notes',
+    title: '系列',
+    placeholder: '平台笔记',
   },
 };
 
@@ -99,24 +99,24 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
   return (
     <section>
       <h2>{copy.title}</h2>
-      <div className="taxonomy-list" aria-label={`${copy.title} list`}>
-        {state === 'loading' ? <p>Loading...</p> : null}
+      <div className="taxonomy-list" aria-label={`${copy.title}列表`}>
+        {state === 'loading' ? <p>加载中...</p> : null}
         {terms.length === 0 && state !== 'loading' ? <p className="empty-state">暂无条目</p> : null}
         {terms.map((term) => (
           <article key={term.id} className="taxonomy-term">
             <div>
               <strong>{term.name}</strong>
-              <span>{term.parentId ? `${term.slug} / parent ${parentLabel(terms, term.parentId)}` : term.slug}</span>
+              <span>{term.parentId ? `${term.slug} / 父级 ${parentLabel(terms, term.parentId)}` : term.slug}</span>
             </div>
             <button type="button" onClick={() => deleteTerm(term.id)} disabled={state === 'submitting'}>
-              Delete
+              删除
             </button>
           </article>
         ))}
       </div>
       <form className="taxonomy-form" action={create}>
         <label>
-          Name
+          名称
           <input name="name" placeholder={copy.placeholder} required />
         </label>
         <label>
@@ -124,14 +124,14 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
           <input name="slug" placeholder="leave blank to auto-generate" />
         </label>
         <label>
-          Description
-          <textarea name="description" rows={3} placeholder="Optional notes for this taxonomy term" />
+          描述
+          <textarea name="description" rows={3} placeholder="这个分类条目的补充说明" />
         </label>
         {type === 'category' ? (
           <label>
-            Parent
+            父级分类
             <select name="parentId" defaultValue="">
-              <option value="">None</option>
+              <option value="">无</option>
               {terms.map((term) => (
                 <option key={term.id} value={term.id}>
                   {term.name}
@@ -141,11 +141,11 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
           </label>
         ) : null}
         <label>
-          Sort
+          排序
           <input name="sortOrder" type="number" defaultValue={0} />
         </label>
         <button type="submit" disabled={state === 'submitting'}>
-          {state === 'submitting' ? 'Saving' : 'Save'}
+          {state === 'submitting' ? '保存中' : '保存'}
         </button>
         {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
       </form>

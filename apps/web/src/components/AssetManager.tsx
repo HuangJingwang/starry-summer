@@ -137,7 +137,7 @@ export function AssetManager() {
         </label>
         <input name="file" type="file" accept="image/*,.pdf,.txt,.md,text/markdown" />
         <button type="submit" disabled={state === 'uploading'}>
-          {state === 'uploading' ? 'Uploading' : 'Upload'}
+          {state === 'uploading' ? '上传中' : '上传'}
         </button>
         <button type="button" onClick={() => loadAssets()} disabled={state === 'uploading'}>
           刷新图库
@@ -145,7 +145,7 @@ export function AssetManager() {
       </form>
       {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
       {assets.length > 0 ? (
-        <div className="asset-list" aria-label="Uploaded assets">
+        <div className="asset-list" aria-label="已上传素材">
           {assets.map((asset) => (
             <article key={asset.storageKey} className="asset-item">
               <div>
@@ -159,7 +159,7 @@ export function AssetManager() {
                 {asset.publicUrl}
               </a>
               <button type="button" onClick={() => deleteAsset(asset)} disabled={state === 'uploading'}>
-                Delete
+                删除
               </button>
             </article>
           ))}

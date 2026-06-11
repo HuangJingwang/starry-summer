@@ -20,17 +20,17 @@ interface ModerationManagerProps {
 type LoadState = 'idle' | 'loading' | 'submitting' | 'error';
 
 const statusOptions: Array<{ label: string; value: ModerationStatus | '' }> = [
-  { label: 'Pending', value: 'pending' },
-  { label: 'Approved', value: 'approved' },
-  { label: 'Rejected', value: 'rejected' },
-  { label: 'Spam', value: 'spam' },
-  { label: 'All', value: '' },
+  { label: '待审核', value: 'pending' },
+  { label: '已通过', value: 'approved' },
+  { label: '已拒绝', value: 'rejected' },
+  { label: '垃圾信息', value: 'spam' },
+  { label: '全部', value: '' },
 ];
 
 const actionOptions: Array<{ label: string; value: ModerationStatus }> = [
-  { label: 'Approve', value: 'approved' },
-  { label: 'Reject', value: 'rejected' },
-  { label: 'Spam', value: 'spam' },
+  { label: '通过', value: 'approved' },
+  { label: '拒绝', value: 'rejected' },
+  { label: '标为垃圾', value: 'spam' },
 ];
 
 async function send(request: { url: string; init: RequestInit }) {
@@ -81,7 +81,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
   }
 
   async function deleteRecord(id: string) {
-    if (!window.confirm('Permanently delete this submission?')) {
+    if (!window.confirm('确认永久删除这条提交吗？')) {
       return;
     }
 
@@ -99,7 +99,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
 
   return (
     <div className="moderation-manager">
-      <div className="moderation-toolbar" role="tablist" aria-label="Moderation status">
+      <div className="moderation-toolbar" role="tablist" aria-label="审核状态">
         {statusOptions.map((option) => (
           <button
             key={option.label}
@@ -113,7 +113,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
       </div>
       {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
       <div className="moderation-list">
-        {state === 'loading' ? <p className="empty-state">Loading...</p> : null}
+        {state === 'loading' ? <p className="empty-state">加载中...</p> : null}
         {records.length === 0 && state !== 'loading' ? <p className="empty-state">{emptyText}</p> : null}
         {records.map((record) => (
           <article key={record.id}>
@@ -126,7 +126,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
             </small>
             {record.ipHash || record.userAgent ? (
               <small className="moderation-source">
-                {record.ipHash ? `source ${record.ipHash.slice(0, 12)}` : 'source unknown'}
+                {record.ipHash ? `来源 ${record.ipHash.slice(0, 12)}` : '来源未知'}
                 {record.userAgent ? ` · ${record.userAgent}` : ''}
               </small>
             ) : null}
@@ -142,7 +142,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
                 </button>
               ))}
               <button type="button" disabled={state === 'submitting'} onClick={() => deleteRecord(record.id)}>
-                Delete
+                删除
               </button>
             </div>
           </article>

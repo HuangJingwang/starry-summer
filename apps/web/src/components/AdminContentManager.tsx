@@ -75,7 +75,7 @@ export function AdminContentManager({
             ? `已加载 ${result.items.length} 条后台内容。`
             : '当前显示本地样例内容。'}
       </p>
-      <div className="admin-status-grid" aria-label="Content status overview">
+      <div className="admin-status-grid" aria-label="内容状态概览">
         {dashboard.statusCards.map((card) => (
           <Link key={card.label} className={card.active ? 'active' : ''} href={card.href}>
             <span>{card.label}</span>
@@ -86,7 +86,7 @@ export function AdminContentManager({
       <div className="admin-content-summary">
         <div>
           <strong>{dashboard.filteredTotal}</strong>
-          <span>{dashboard.activeFilters.length > 0 ? dashboard.activeFilters.join(' / ') : 'All content'}</span>
+          <span>{dashboard.activeFilters.length > 0 ? dashboard.activeFilters.join(' / ') : '全部内容'}</span>
         </div>
         <div>
           <strong>最近更新</strong>

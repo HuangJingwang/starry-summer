@@ -140,7 +140,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       } catch {
         if (!cancelled) {
           setAssetState('error');
-          setAssetMessage('素材列表加载失败，可先到 Assets 页面上传或稍后重试。');
+          setAssetMessage('素材列表加载失败，可先到素材管理页面上传或稍后重试。');
         }
       }
     }
@@ -388,11 +388,11 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
               markDirtyAndSaveLocalDraft();
             }}
           >
-            <option value="post">Post</option>
-            <option value="note">Note</option>
-            <option value="moment">Moment</option>
-            <option value="project">Project</option>
-            <option value="page">Page</option>
+            <option value="post">文章</option>
+            <option value="note">笔记</option>
+            <option value="moment">日常</option>
+            <option value="project">项目</option>
+            <option value="page">页面</option>
           </select>
         </label>
         <label>
@@ -440,7 +440,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       </div>
       {initialValue?.coverImageUrl ? (
         <a className="cover-preview" href={initialValue.coverImageUrl} target="_blank" rel="noreferrer">
-          <img src={initialValue.coverImageUrl} alt={initialValue.coverAltText || initialValue.title || 'Content cover'} />
+          <img src={initialValue.coverImageUrl} alt={initialValue.coverAltText || initialValue.title || '内容封面'} />
           <span>查看当前封面</span>
         </a>
       ) : null}
@@ -462,7 +462,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         <section className="project-fields" aria-label="项目信息">
           <div className="section-heading section-heading--row">
             <div>
-              <p className="eyebrow">Project</p>
+              <p className="eyebrow">项目</p>
               <h2>项目信息</h2>
             </div>
           </div>
@@ -471,10 +471,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
               项目状态
               <select name="projectStatus" defaultValue={initialValue?.project?.status ?? ''}>
                 <option value="">未设置</option>
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-                <option value="completed">Completed</option>
-                <option value="archived">Archived</option>
+                <option value="active">进行中</option>
+                <option value="paused">暂停</option>
+                <option value="completed">已完成</option>
+                <option value="archived">已归档</option>
               </select>
             </label>
             <label>
@@ -490,19 +490,19 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
               <input name="projectEndedAt" type="date" defaultValue={initialValue?.project?.endedAt ?? ''} />
             </label>
             <label>
-              Website
+              官网
               <input name="projectWebsiteUrl" defaultValue={initialValue?.project?.links?.website ?? ''} placeholder="https://example.com" />
             </label>
             <label>
-              Repository
+              代码仓库
               <input name="projectRepositoryUrl" defaultValue={initialValue?.project?.links?.repository ?? ''} placeholder="https://github.com/me/project" />
             </label>
             <label>
-              Demo
+              演示地址
               <input name="projectDemoUrl" defaultValue={initialValue?.project?.links?.demo ?? ''} placeholder="https://demo.example.com" />
             </label>
             <label>
-              Article
+              相关文章
               <input name="projectArticleUrl" defaultValue={initialValue?.project?.links?.article ?? ''} placeholder="https://example.com/writeup" />
             </label>
           </div>
@@ -515,11 +515,11 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         </label>
         <label>
           <input name="featured" type="checkbox" defaultChecked={initialValue?.featured ?? false} />
-          Featured
+          首页精选
         </label>
         <label>
           <input name="pinned" type="checkbox" defaultChecked={initialValue?.pinned ?? false} />
-          Pinned
+          置顶
         </label>
       </div>
       <div className="editor-grid">
@@ -562,30 +562,30 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
           />
         </section>
         <section className="preview-pane" aria-live="polite">
-          <p className="eyebrow">Preview</p>
+          <p className="eyebrow">预览</p>
           <h2>{preview.title}</h2>
           <p>{preview.excerpt}</p>
-          <span>{preview.wordCount} words</span>
+          <span>{preview.wordCount} 字</span>
         </section>
       </div>
       <div className="admin-actions">
         <button type="submit" disabled={state === 'submitting'}>
-          {state === 'submitting' ? 'Saving' : 'Save draft'}
+          {state === 'submitting' ? '保存中' : '保存草稿'}
         </button>
         <button type="submit" formAction={(formData) => runSave(formData, 'publish')} disabled={state === 'submitting'}>
-          Publish
+          发布
         </button>
         {mode === 'edit' ? (
           <>
             <button type="submit" formAction={(formData) => runSave(formData, 'archive')} disabled={state === 'submitting'}>
-              Archive
+              归档
             </button>
             <button type="submit" formAction={(formData) => runSave(formData, 'restore-draft')} disabled={state === 'submitting'}>
-              Restore draft
+              恢复为草稿
             </button>
             {initialValue?.status === 'archived' ? (
               <button type="button" onClick={runDelete} disabled={state === 'submitting'}>
-                Delete permanently
+                永久删除
               </button>
             ) : null}
           </>

@@ -5,7 +5,7 @@ export default function AdminExportPage() {
   return (
     <AdminShell>
       <section className="admin-panel wide">
-        <p className="eyebrow">Markdown ownership</p>
+        <p className="eyebrow">Markdown 归档</p>
         <h1>导入与导出</h1>
         <AdminMarkdownTransfer />
       </section>

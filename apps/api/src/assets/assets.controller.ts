@@ -29,6 +29,11 @@ export class AssetsController {
 export class PublicAssetsController {
   constructor(@Inject(AssetsService) private readonly assetsService: AssetsService) {}
 
+  @Get()
+  list(@Query('usage') usage?: AssetUsage) {
+    return this.assetsService.list({ usage: usage ? normalizeAssetUsage(usage) : 'background' });
+  }
+
   @Get('random')
   random(@Query('usage') usage?: AssetUsage) {
     return this.assetsService.random({ usage: usage ? normalizeAssetUsage(usage) : 'background' });

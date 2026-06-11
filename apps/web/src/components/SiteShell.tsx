@@ -19,7 +19,7 @@ export async function SiteShell({ children }: { children: ReactNode }) {
           <span className="brand-mark">S</span>
           <span>{settings.profile.title}</span>
         </Link>
-        <nav className="site-nav" aria-label="Primary navigation">
+        <nav className="site-nav" aria-label="主导航">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
               {item.label}
@@ -27,7 +27,7 @@ export async function SiteShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <Link className="admin-link" href="/admin">
-          Admin
+          后台
         </Link>
       </header>
       {children}
@@ -46,7 +46,7 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
         <span>{footer.ownerName}</span>
       </div>
       <p>{footer.description}</p>
-      <nav aria-label="Footer links">
+      <nav aria-label="页脚链接">
         {footer.links.map((link) => (
           <a
             key={`${link.label}-${link.href}`}

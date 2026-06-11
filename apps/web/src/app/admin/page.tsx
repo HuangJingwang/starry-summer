@@ -25,17 +25,17 @@ export default async function AdminPage() {
     <AdminShell>
       <section className="admin-panel">
         <div>
-          <p className="eyebrow">Admin</p>
+          <p className="eyebrow">后台</p>
           <h1>创作后台</h1>
           <p>管理文章、笔记、日常、项目、评论、留言和站点配置。</p>
         </div>
         <div className="admin-grid">
-          <span>Total {stats.total}</span>
-          <span>Published {stats.published}</span>
-          <span>Private {stats.private}</span>
-          <span>Archived {stats.archived}</span>
-          <span>Pending comments {pendingComments}</span>
-          <span>Guestbook review {pendingGuestbook}</span>
+          <span>全部内容 {stats.total}</span>
+          <span>已发布 {stats.published}</span>
+          <span>私密内容 {stats.private}</span>
+          <span>已归档 {stats.archived}</span>
+          <span>待审评论 {pendingComments}</span>
+          <span>待审留言 {pendingGuestbook}</span>
         </div>
         <div className="admin-actions">
           <Link href="/admin/content/new">新建内容</Link>

@@ -22,7 +22,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const updatedAt = item.updatedAt && item.updatedAt !== item.publishedAt ? item.updatedAt : undefined;
   const taxonomyGroups = getContentTaxonomyLinkGroups(item);
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
-    <section className="detail-comments" aria-label="Comments">
+    <section className="detail-comments" aria-label="评论">
       <h2>评论</h2>
       <CommentList targetType={item.type} targetId={item.id} />
       <CommentForm targetType={item.type} targetId={item.id} />
@@ -42,7 +42,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       ) : null}
       <div className="detail__meta">
         <time dateTime={item.publishedAt}>{item.publishedAt}</time>
-        {updatedAt ? <time dateTime={updatedAt}>Updated {updatedAt}</time> : null}
+        {updatedAt ? <time dateTime={updatedAt}>更新于 {updatedAt}</time> : null}
         <span>{readingTime}</span>
         <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>
         {item.sourceType === 'repost' && item.sourceUrl ? (
@@ -50,7 +50,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
             原文
           </a>
         ) : null}
-        <span>{item.viewCount ?? 0} views</span>
+        <span>{item.viewCount ?? 0} 次浏览</span>
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>
       {item.series && item.series.length > 0 ? (
@@ -121,17 +121,17 @@ function ProjectMeta({ item }: { item: SiteContentItem }) {
   }
 
   const links = [
-    ['Website', project.links?.website],
-    ['Repository', project.links?.repository],
-    ['Demo', project.links?.demo],
-    ['Article', project.links?.article],
+    ['官网', project.links?.website],
+    ['代码仓库', project.links?.repository],
+    ['演示', project.links?.demo],
+    ['文章', project.links?.article],
   ].filter(([, href]) => Boolean(href)) as Array<[string, string]>;
 
   return (
-    <section className="project-meta" aria-label="Project metadata">
+    <section className="project-meta" aria-label="项目信息">
       <div>
         <span>状态</span>
-        <strong>{project.status ?? 'active'}</strong>
+        <strong>{formatProjectStatus(project.status)}</strong>
       </div>
       {project.stack && project.stack.length > 0 ? (
         <div>
@@ -147,7 +147,7 @@ function ProjectMeta({ item }: { item: SiteContentItem }) {
         <div>
           <span>周期</span>
           <strong>
-            {project.startedAt ?? 'unknown'} - {project.endedAt ?? 'Present'}
+            {project.startedAt ?? '未知'} - {project.endedAt ?? '至今'}
           </strong>
         </div>
       ) : null}
@@ -165,6 +165,17 @@ function ProjectMeta({ item }: { item: SiteContentItem }) {
       ) : null}
     </section>
   );
+}
+
+function formatProjectStatus(status: NonNullable<SiteContentItem['project']>['status'] | undefined): string {
+  const labels: Record<string, string> = {
+    active: '进行中',
+    paused: '暂停',
+    completed: '已完成',
+    archived: '已归档',
+  };
+
+  return labels[String(status ?? 'active')] ?? String(status ?? 'active');
 }
 
 async function CommentList({ targetType, targetId }: { targetType: CommentTargetType; targetId: string }) {

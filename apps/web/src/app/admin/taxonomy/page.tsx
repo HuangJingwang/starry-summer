@@ -5,7 +5,7 @@ export default function AdminTaxonomyPage() {
   return (
     <AdminShell>
       <section className="admin-panel wide">
-        <p className="eyebrow">Taxonomy</p>
+        <p className="eyebrow">分类</p>
         <h1>分类、标签与系列</h1>
         <TaxonomyManager />
       </section>

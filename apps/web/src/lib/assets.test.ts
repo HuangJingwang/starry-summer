@@ -6,6 +6,7 @@ import {
   buildAssetUploadRequest,
   buildMarkdownAssetEmbed,
   insertMarkdownAsset,
+  loadPublicAssets,
   loadRandomAsset,
   normalizeStoredAsset,
 } from './assets';
@@ -88,9 +89,10 @@ describe('asset client helpers', () => {
   });
 
   test('builds gallery list and random image requests', async () => {
-    const { buildAdminAssetListRequest, buildRandomAssetRequest } = await import('./assets');
+    const { buildAdminAssetListRequest, buildPublicAssetListRequest, buildRandomAssetRequest } = await import('./assets');
 
     expect(buildAdminAssetListRequest({ usage: 'background' }).url).toBe('/api/admin/assets?usage=background');
+    expect(buildPublicAssetListRequest({ usage: 'background' }).url).toBe('/api/assets?usage=background');
     expect(buildRandomAssetRequest({ usage: 'background' }).url).toBe('/api/assets/random?usage=background');
     expect(buildAssetDeleteRequest('asset-1')).toEqual({
       url: '/api/admin/assets/asset-1',
@@ -99,6 +101,43 @@ describe('asset client helpers', () => {
         credentials: 'include',
       },
     });
+  });
+
+  test('loads uploaded background assets for the home hero rotation', async () => {
+    await expect(
+      loadPublicAssets(
+        { usage: 'background', apiBaseUrl: 'https://api.example.com/' },
+        async (url, init) => {
+          expect(url).toBe('https://api.example.com/assets?usage=background');
+          expect(init).toEqual({
+            method: 'GET',
+            next: {
+              revalidate: 60,
+            },
+          });
+
+          return new Response(
+            JSON.stringify([
+              {
+                id: 'asset-1',
+                publicUrl: 'https://cdn.example.com/hero-1.jpg',
+                usage: 'background',
+              },
+              {
+                id: 'asset-2',
+                publicUrl: 'https://cdn.example.com/hero-2.jpg',
+                usage: 'background',
+              },
+            ]),
+          );
+        },
+      ),
+    ).resolves.toMatchObject([
+      { id: 'asset-1', publicUrl: 'https://cdn.example.com/hero-1.jpg', usage: 'background' },
+      { id: 'asset-2', publicUrl: 'https://cdn.example.com/hero-2.jpg', usage: 'background' },
+    ]);
+
+    await expect(loadPublicAssets({ usage: 'background' }, async () => new Response('Not found', { status: 404 }))).resolves.toEqual([]);
   });
 
   test('normalizes stored asset API data', () => {
