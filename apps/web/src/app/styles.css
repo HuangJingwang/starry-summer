@@ -1199,7 +1199,7 @@ textarea {
 .split-panels input,
 .split-panels select,
 .split-panels textarea {
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);

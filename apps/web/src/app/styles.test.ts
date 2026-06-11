@@ -15,4 +15,12 @@ describe('global styles', () => {
     expect(darkModeBlock).toContain('--muted:');
     expect(darkModeBlock).toContain('--line:');
   });
+
+  test('keeps admin form fields on the theme panel background', () => {
+    const css = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
+    const adminFieldBlock = css.match(/\.admin-filter input,[\s\S]*?\.split-panels textarea\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+
+    expect(adminFieldBlock).toContain('background: var(--panel);');
+    expect(adminFieldBlock).not.toContain('background: #fff;');
+  });
 });
