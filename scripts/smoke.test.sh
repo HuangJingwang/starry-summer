@@ -59,6 +59,13 @@ emit_body() {
 }
 
 case "$url" in
+  */api/admin/content)
+    if [[ -n "$write_out" ]]; then
+      printf '%s' "${FAKE_ADMIN_API_STATUS:-401}"
+    else
+      emit_body '{"message":"Unauthorized","statusCode":401}'
+    fi
+    ;;
   */admin/content)
     printf 'HTTP/1.1 307 Temporary Redirect\r\nLocation: https://example.com/admin/login?next=%%2Fadmin%%2Fcontent\r\n\r\n' >"$header_file"
     printf '307'
@@ -91,7 +98,7 @@ case "$url" in
     ;;
 esac
 
-if [[ -n "$write_out" && "$url" != */admin/content ]]; then
+if [[ -n "$write_out" && "$url" != */admin/content && "$url" != */api/admin/content ]]; then
   printf '%s' "$write_out"
 fi
 SH
@@ -162,6 +169,12 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_SECURITY_HEADERS=$'HTTP/1.1 200 OK\r\nX-Frame-Options: DENY\r\n\r\n' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-security-headers.log" 2>&1; then
   echo "Smoke script accepted missing security headers."
   cat "$tmp_dir/missing-security-headers.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_ADMIN_API_STATUS=200 bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unprotected-admin-api.log" 2>&1; then
+  echo "Smoke script accepted an unprotected admin API endpoint."
+  cat "$tmp_dir/unprotected-admin-api.log"
   exit 1
 fi
 

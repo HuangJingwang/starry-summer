@@ -37,6 +37,18 @@ check_admin_protected_redirect() {
   fi
 }
 
+check_admin_api_protected() {
+  local status_code
+
+  echo "Checking admin API protected response: $SITE_URL/api/admin/content"
+  status_code=$(curl --silent --show-error --output /dev/null --write-out "%{http_code}" --max-time 10 "$SITE_URL/api/admin/content")
+
+  if [[ "$status_code" != "401" && "$status_code" != "403" ]]; then
+    echo "Admin API endpoint did not reject unauthenticated access. Status: $status_code"
+    exit 1
+  fi
+}
+
 check_health() {
   check_path "/health" "web health"
 
@@ -195,6 +207,7 @@ check_security_headers
 check_path "/" "home page"
 check_path "/admin/login" "admin login"
 check_admin_protected_redirect
+check_admin_api_protected
 check_rss
 check_sitemap
 

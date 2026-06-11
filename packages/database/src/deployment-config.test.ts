@@ -299,6 +299,8 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('/admin/content');
     expect(smokeScript).toContain('admin protected redirect');
     expect(smokeScript).toContain('Location header did not point to /admin/login.');
+    expect(smokeScript).toContain('/api/admin/content');
+    expect(smokeScript).toContain('Admin API endpoint did not reject unauthenticated access.');
     expect(smokeScript).toContain('/rss.xml');
     expect(smokeScript).toContain('/sitemap.xml');
     expect(smokeScript).toContain('RSS endpoint did not return an RSS channel.');
