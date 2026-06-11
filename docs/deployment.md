@@ -135,6 +135,7 @@ RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD
 ```
 
 The restore script imports `postgres.sql` into PostgreSQL and restores `api-uploads` and `minio-data` archives when those files are present.
+It also checks the backup manifest's Compose project name before restoring. For an intentional cross-project restore, rerun with `RESTORE_ALLOW_PROJECT_MISMATCH=YES`.
 
 After restore, run:
 

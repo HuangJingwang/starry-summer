@@ -42,6 +42,16 @@ if [[ ! -f "$backup_dir/manifest.txt" ]]; then
   exit 1
 fi
 
+backup_compose_project_name="$(awk -F= '$1 == "compose_project_name" { print $2; exit }' "$backup_dir/manifest.txt")"
+
+if [[ -n "$backup_compose_project_name" && "$backup_compose_project_name" != "$compose_project_name" && "${RESTORE_ALLOW_PROJECT_MISMATCH:-}" != "YES" ]]; then
+  echo "Backup Compose project does not match the current Compose project."
+  echo "Backup project: $backup_compose_project_name"
+  echo "Current project: $compose_project_name"
+  echo "Set RESTORE_ALLOW_PROJECT_MISMATCH=YES only if you intentionally want to restore across projects."
+  exit 1
+fi
+
 absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
 restore_volume() {
