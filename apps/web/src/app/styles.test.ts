@@ -35,4 +35,14 @@ describe('global styles', () => {
     expect(css).toContain('.content-filter-rail');
     expect(css).toContain('.cyber-home .content-card');
   });
+
+  test('keeps the guestbook page inside the cyber glass visual system', () => {
+    const css = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
+
+    expect(css).toContain('.guestbook-page');
+    expect(css).toContain('.guestbook-copy-card');
+    expect(css).toContain('.guestbook-panel');
+    expect(css).toContain('.guestbook-page .guestbook-form');
+    expect(css).toContain('.guestbook-page .guestbook-form button');
+  });
 });

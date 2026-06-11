@@ -610,6 +610,173 @@ body:has(.cyber-home) .site-footer a {
   border-color: rgba(148, 163, 184, 0.2);
 }
 
+.guestbook-page {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(34, 211, 238, 0.1), transparent 28%),
+    radial-gradient(circle at 86% 76%, rgba(167, 139, 250, 0.09), transparent 32%),
+    linear-gradient(180deg, var(--cyber-bg) 0%, #050912 100%);
+  color: var(--cyber-ink);
+  min-height: calc(100vh - 71px);
+}
+
+.guestbook-layout {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
+  margin: 0 auto;
+  max-width: 1160px;
+}
+
+.guestbook-copy-card,
+.guestbook-panel {
+  backdrop-filter: blur(18px);
+  background: var(--cyber-panel);
+  border: 1px solid var(--cyber-line);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+  padding: clamp(24px, 4vw, 42px);
+  position: relative;
+}
+
+.guestbook-copy-card::before,
+.guestbook-panel::before {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.14), transparent 30%),
+    radial-gradient(circle at 100% 100%, rgba(167, 139, 250, 0.12), transparent 34%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.guestbook-copy-card > *,
+.guestbook-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.guestbook-page .eyebrow {
+  color: var(--cyber-cyan);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.guestbook-page .page-title {
+  max-width: 640px;
+}
+
+.guestbook-page .page-title h1,
+.guestbook-panel h2 {
+  color: #faf8f5;
+}
+
+.guestbook-page .page-title p:not(.eyebrow),
+.guestbook-panel > p:not(.eyebrow) {
+  color: rgba(226, 232, 240, 0.68);
+}
+
+.guestbook-panel {
+  align-self: start;
+  display: grid;
+  gap: 14px;
+}
+
+.guestbook-panel h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.guestbook-panel > p:not(.eyebrow) {
+  line-height: 1.7;
+  margin: 0;
+}
+
+.guestbook-page .empty-state {
+  background: rgba(4, 6, 14, 0.46);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px;
+  color: rgba(226, 232, 240, 0.68);
+  margin: 0;
+  padding: 18px;
+}
+
+.guestbook-page .guestbook-form {
+  background: rgba(4, 6, 14, 0.5);
+  border-color: rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  box-shadow: none;
+  margin-top: 6px;
+}
+
+.guestbook-page .guestbook-form input,
+.guestbook-page .guestbook-form textarea {
+  background: rgba(2, 6, 15, 0.72);
+  border-color: rgba(148, 163, 184, 0.26);
+  color: var(--cyber-ink);
+}
+
+.guestbook-page .guestbook-form input::placeholder,
+.guestbook-page .guestbook-form textarea::placeholder {
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.guestbook-page .guestbook-form input:focus,
+.guestbook-page .guestbook-form textarea:focus {
+  border-color: rgba(34, 211, 238, 0.72);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12);
+  outline: none;
+}
+
+.guestbook-page .guestbook-form button {
+  background: linear-gradient(135deg, var(--cyber-cyan), var(--cyber-teal) 58%, var(--cyber-purple));
+  border: 0;
+  border-radius: 999px;
+  color: #031018;
+  font-weight: 900;
+  min-height: 46px;
+}
+
+.guestbook-page .guestbook-form p {
+  color: rgba(226, 232, 240, 0.72);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.guestbook-page .guestbook-list {
+  margin-top: 20px;
+}
+
+.guestbook-page .guestbook-list li {
+  background: rgba(4, 6, 14, 0.5);
+  border-color: rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+}
+
+.guestbook-page .guestbook-list strong {
+  color: #fff;
+}
+
+.guestbook-page .guestbook-list p,
+.guestbook-page .guestbook-list li div {
+  color: rgba(226, 232, 240, 0.68);
+}
+
+body:has(.guestbook-page) .site-footer {
+  background: #04060e;
+  border-top-color: rgba(30, 41, 59, 0.72);
+  color: var(--cyber-muted);
+}
+
+body:has(.guestbook-page) .site-footer strong,
+body:has(.guestbook-page) .site-footer a {
+  color: var(--cyber-ink);
+}
+
+body:has(.guestbook-page) .site-footer a {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
 .portfolio-home {
   background:
     linear-gradient(180deg, #030706 0%, #07100f 50%, #050807 100%);
@@ -2447,6 +2614,7 @@ body:has(.cyber-home) .site-footer a {
   .cyber-hero__grid,
   .author-bio-card__meta,
   .cyber-home .home-dashboard,
+  .guestbook-layout,
   .home-dashboard,
   .home-profile dl,
   .content-grid,
@@ -2509,6 +2677,16 @@ body:has(.cyber-home) .site-footer a {
   .content-filter-rail a,
   .author-bio-card__actions a {
     text-align: center;
+  }
+
+  .guestbook-page {
+    min-height: auto;
+  }
+
+  .guestbook-copy-card,
+  .guestbook-panel {
+    border-radius: 18px;
+    padding: 22px;
   }
 
   .portfolio-hero__inner {
