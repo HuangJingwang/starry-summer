@@ -1,6 +1,15 @@
 import { GuestbookForm } from '@/components/GuestbookForm';
 import { SiteShell } from '@/components/SiteShell';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadApprovedGuestbookEntries } from '@/lib/public-comments';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '留言板',
+    description: '读者留言和站点交流，会先进入审核队列再公开展示。',
+    path: '/guestbook',
+  });
+}
 
 export default async function GuestbookPage() {
   const entries = await loadApprovedGuestbookEntries();

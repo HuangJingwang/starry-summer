@@ -1,5 +1,14 @@
 import { SiteShell } from '@/components/SiteShell';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadPublicSettings } from '@/lib/settings';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '关于',
+    description: '个人资料、社交链接和站点介绍。',
+    path: '/about',
+  });
+}
 
 export default async function AboutPage() {
   const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';

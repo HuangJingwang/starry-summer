@@ -1,7 +1,16 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
 import { groupContentBySeries } from '@/lib/content';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '系列',
+    description: '连续写作、项目日志和长期主题的完整上下文。',
+    path: '/series',
+  });
+}
 
 export default async function SeriesPage() {
   const content = await loadSiteContent();

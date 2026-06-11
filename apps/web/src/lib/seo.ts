@@ -47,6 +47,38 @@ export function buildSiteMetadata(settings: SiteSettings, siteUrl: string): Meta
   };
 }
 
+export interface PageMetadataInput {
+  title: string;
+  description: string;
+  path: string;
+}
+
+export function buildPageMetadata(input: PageMetadataInput, settings: SiteSettings, siteUrl: string): Metadata {
+  const publicSiteUrl = normalizePublicSiteUrl(siteUrl);
+  const path = normalizePagePath(input.path);
+  const url = `${publicSiteUrl}${path}`;
+
+  return {
+    title: `${input.title} | ${settings.profile.title}`,
+    description: input.description,
+    alternates: {
+      canonical: path,
+    },
+    openGraph: {
+      title: input.title,
+      description: input.description,
+      url,
+      siteName: settings.profile.title,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: input.title,
+      description: input.description,
+    },
+  };
+}
+
 export function buildContentMetadata(item: SiteContentItem, settings: SiteSettings, siteUrl: string): Metadata {
   const href = getContentHref(item);
   const publicSiteUrl = normalizePublicSiteUrl(siteUrl);
@@ -178,4 +210,14 @@ function normalizeMetadataImageUrl(imageUrl: string | undefined, siteUrl: string
   }
 
   return `${normalizePublicSiteUrl(siteUrl)}/${normalized.replace(/^\/+/, '')}`;
+}
+
+function normalizePagePath(path: string): string {
+  const normalized = path.trim();
+
+  if (!normalized || normalized === '/') {
+    return '/';
+  }
+
+  return `/${normalized.replace(/^\/+|\/+$/g, '')}`;
 }

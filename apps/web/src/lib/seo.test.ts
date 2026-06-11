@@ -4,6 +4,7 @@ import type { SiteContentItem } from './content';
 import { defaultSettings } from './settings';
 import {
   buildContentMetadata,
+  buildPageMetadata,
   buildRobotsText,
   buildRssXml,
   buildSitemapXml,
@@ -76,6 +77,38 @@ describe('SEO helpers', () => {
         type: 'article',
         publishedTime: '2026-06-10',
         modifiedTime: '2026-06-11',
+      },
+    });
+  });
+
+  test('builds canonical metadata for public index pages', () => {
+    expect(
+      buildPageMetadata(
+        {
+          title: '文章',
+          description: '长文、教程、观点和阶段性复盘。',
+          path: '/posts',
+        },
+        defaultSettings,
+        'https://example.com/',
+      ),
+    ).toMatchObject({
+      title: `文章 | ${defaultSettings.profile.title}`,
+      description: '长文、教程、观点和阶段性复盘。',
+      alternates: {
+        canonical: '/posts',
+      },
+      openGraph: {
+        title: '文章',
+        description: '长文、教程、观点和阶段性复盘。',
+        url: 'https://example.com/posts',
+        siteName: defaultSettings.profile.title,
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: '文章',
+        description: '长文、教程、观点和阶段性复盘。',
       },
     });
   });

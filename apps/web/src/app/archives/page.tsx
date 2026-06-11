@@ -2,7 +2,16 @@ import Link from 'next/link';
 
 import { SiteShell } from '@/components/SiteShell';
 import { getContentHref, groupContentByMonth } from '@/lib/content';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '归档',
+    description: '按发布时间整理所有公开内容，方便从时间线回看文章、笔记、日常和项目。',
+    path: '/archives',
+  });
+}
 
 export default async function ArchivesPage() {
   const content = await loadSiteContent();

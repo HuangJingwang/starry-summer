@@ -1,6 +1,15 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '笔记',
+    description: '读书摘录、技术片段和临时灵感。',
+    path: '/notes',
+  });
+}
 
 export default async function NotesPage() {
   const notes = await loadSiteContent('note');

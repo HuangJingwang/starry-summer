@@ -3,7 +3,16 @@ import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
 import { normalizeContentSort } from '@/lib/content';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '文章',
+    description: '长文、教程、观点和阶段性复盘。',
+    path: '/posts',
+  });
+}
 
 export default async function PostsPage({
   searchParams,

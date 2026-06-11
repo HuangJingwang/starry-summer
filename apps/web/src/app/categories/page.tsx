@@ -1,7 +1,16 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
 import { groupContentByCategory } from '@/lib/content';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '分类',
+    description: '按主题整理公开内容，把文章、笔记、日常和项目放回长期线索里。',
+    path: '/categories',
+  });
+}
 
 export default async function CategoriesPage() {
   const content = await loadSiteContent();

@@ -1,6 +1,15 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '项目',
+    description: '开源项目、产品实验和作品集记录。',
+    path: '/projects',
+  });
+}
 
 export default async function ProjectsPage() {
   const projects = await loadSiteContent('project');

@@ -1,6 +1,15 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '搜索',
+    description: '搜索已发布的文章、笔记、日常和项目。',
+    path: '/search',
+  });
+}
 
 export default async function SearchPage({
   searchParams,

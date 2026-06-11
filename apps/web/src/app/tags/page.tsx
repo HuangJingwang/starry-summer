@@ -1,7 +1,16 @@
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
 import { groupContentByTag } from '@/lib/content';
+import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
+
+export function generateMetadata() {
+  return loadPublicPageMetadata({
+    title: '标签',
+    description: '用关键词串起文章、笔记、日常和项目，快速回到相同主题的内容。',
+    path: '/tags',
+  });
+}
 
 export default async function TagsPage() {
   const content = await loadSiteContent();
