@@ -178,6 +178,8 @@ describe('deployment configuration', () => {
     const unsafeS3EndpointPath = join(tempDirectory, '.env.unsafe-s3-endpoint');
     const invalidS3EndpointPath = join(tempDirectory, '.env.invalid-s3-endpoint');
     const mismatchedDatabasePasswordPath = join(tempDirectory, '.env.mismatched-database-password');
+    const mismatchedDatabaseUserPath = join(tempDirectory, '.env.mismatched-database-user');
+    const mismatchedDatabaseNamePath = join(tempDirectory, '.env.mismatched-database-name');
     const unsafeDatabaseHostPath = join(tempDirectory, '.env.unsafe-database-host');
     const unsafeDatabaseProtocolPath = join(tempDirectory, '.env.unsafe-database-protocol');
     const encodedDatabasePasswordPath = join(tempDirectory, '.env.encoded-database-password');
@@ -209,6 +211,8 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('DATABASE_URL must start with postgresql:// or postgres://.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');
+    expect(doctorScript).toContain('DATABASE_URL username must match POSTGRES_USER.');
+    expect(doctorScript).toContain('DATABASE_URL database name must match POSTGRES_DB.');
     expect(doctorScript).toContain('DATABASE_URL must not point at localhost for production containers.');
     expect(doctorScript).toContain('REDIS_URL must start with redis:// or rediss://.');
     expect(doctorScript).toContain('REDIS_URL must not point at localhost for production containers.');
@@ -323,6 +327,16 @@ describe('deployment configuration', () => {
       code: 1,
       stdout: expect.stringContaining('DATABASE_URL password must match POSTGRES_PASSWORD.'),
     });
+    await writeFile(mismatchedDatabaseUserPath, [safeEnv, 'POSTGRES_USER=writer'].join('\n'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedDatabaseUserPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('DATABASE_URL username must match POSTGRES_USER.'),
+    });
+    await writeFile(mismatchedDatabaseNamePath, [safeEnv, 'POSTGRES_DB=archive'].join('\n'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedDatabaseNamePath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('DATABASE_URL database name must match POSTGRES_DB.'),
+    });
     await writeFile(
       unsafeDatabaseHostPath,
       safeEnv.replace(
@@ -435,7 +449,7 @@ describe('deployment configuration', () => {
       stdout: expect.stringContaining('S3_PUBLIC_BASE_URL must not use an example.com placeholder when STORAGE_DRIVER=s3.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
-  }, 10000);
+  }, 15000);
 
   test('provides a deployment smoke test for public endpoints', async () => {
     const smokeScript = await readFile(join(repoRoot, 'scripts/smoke.sh'), 'utf8');
