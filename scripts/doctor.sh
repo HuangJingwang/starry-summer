@@ -105,6 +105,10 @@ if [[ "${STORAGE_DRIVER:-local}" == "local" ]]; then
 fi
 
 if [[ "${STORAGE_DRIVER:-local}" == "s3" ]]; then
+  if [[ "${S3_PUBLIC_BASE_URL:-}" != https://* ]]; then
+    fail "S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3."
+  fi
+
   case "${S3_ACCESS_KEY:-}" in
     "" | minioadmin | access-key | change-me-before-production)
       fail "S3_ACCESS_KEY must not use a default or placeholder value when STORAGE_DRIVER=s3."

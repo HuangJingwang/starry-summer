@@ -141,12 +141,14 @@ describe('deployment configuration', () => {
       'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
       'S3_ACCESS_KEY=starry-prod-access',
       'S3_SECRET_KEY=starry-prod-secret',
+      'S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer',
     ].join('\n');
     const tempDirectory = await mkdtemp(join(tmpdir(), 'starry-summer-env-'));
     const safeEnvPath = join(tempDirectory, '.env');
     const localStorageEnvPath = join(tempDirectory, '.env.local-storage');
     const unsafeLocalUploadUrlPath = join(tempDirectory, '.env.unsafe-local-upload-url');
     const unsafeS3EnvPath = join(tempDirectory, '.env.unsafe-s3');
+    const unsafeS3PublicUrlPath = join(tempDirectory, '.env.unsafe-s3-public-url');
     const mismatchedSiteUrlPath = join(tempDirectory, '.env.mismatched-site-url');
     const unsafePasswordHashPath = join(tempDirectory, '.env.unsafe-password-hash');
 
@@ -158,6 +160,7 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL host must match DOMAIN.');
     expect(doctorScript).toContain('LOCAL_UPLOAD_PUBLIC_URL must be a root-relative path when STORAGE_DRIVER=local.');
+    expect(doctorScript).toContain('S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3.');
     expect(deployment).toContain('npm run ops:doctor');
 
     await expect(execFileAsync('bash', ['scripts/doctor.sh', '.env.example'], { cwd: repoRoot })).rejects.toMatchObject({
@@ -203,6 +206,17 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeS3EnvPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('S3_ACCESS_KEY must not use a default or placeholder value when STORAGE_DRIVER=s3.'),
+    });
+    await writeFile(
+      unsafeS3PublicUrlPath,
+      [
+        safeEnv.replace('S3_PUBLIC_BASE_URL=https://assets.example.com/starry-summer', 'S3_PUBLIC_BASE_URL=http://localhost:9000/starry-summer'),
+        'STORAGE_DRIVER=s3',
+      ].join('\n'),
+    );
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeS3PublicUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('S3_PUBLIC_BASE_URL must start with https:// when STORAGE_DRIVER=s3.'),
     });
     await writeFile(mismatchedSiteUrlPath, safeEnv.replace('PUBLIC_SITE_URL=https://blog.example.com', 'PUBLIC_SITE_URL=https://wrong.example.com'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', mismatchedSiteUrlPath], { cwd: repoRoot })).rejects.toMatchObject({
