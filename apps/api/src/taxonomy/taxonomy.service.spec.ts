@@ -54,6 +54,16 @@ describe('TaxonomyService', () => {
     );
   });
 
+  test('rejects deep category parent cycles', async () => {
+    const root = await service.createTerm('category', { name: 'Root' });
+    const branch = await service.createTerm('category', { name: 'Branch', parentId: root.id });
+    const leaf = await service.createTerm('category', { name: 'Leaf', parentId: branch.id });
+
+    await expect(service.updateTerm('category', root.id, { parentId: leaf.id })).rejects.toThrow(
+      'A category cannot use one of its descendants as parent',
+    );
+  });
+
   test('clears category parents during updates', async () => {
     const parent = await service.createTerm('category', { name: 'Writing' });
     const child = await service.createTerm('category', { name: 'Long Form', parentId: parent.id });

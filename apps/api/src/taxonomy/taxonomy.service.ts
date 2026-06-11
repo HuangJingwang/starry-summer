@@ -138,9 +138,29 @@ export class TaxonomyService {
       throw new NotFoundException(`Parent category ${normalizedParentId} was not found`);
     }
 
-    if (currentId && parent.parentId === currentId) {
-      throw new BadRequestException('A category cannot use one of its children as parent');
+    if (currentId && await this.isDescendantOf(parent, currentId)) {
+      throw new BadRequestException('A category cannot use one of its descendants as parent');
     }
+  }
+
+  private async isDescendantOf(candidateParent: TaxonomyTerm, currentId: string): Promise<boolean> {
+    let cursor: TaxonomyTerm | null = candidateParent;
+    const visited = new Set<string>();
+
+    while (cursor?.parentId) {
+      if (cursor.parentId === currentId) {
+        return true;
+      }
+
+      if (visited.has(cursor.parentId)) {
+        return false;
+      }
+
+      visited.add(cursor.parentId);
+      cursor = await this.repository.findById('category', cursor.parentId);
+    }
+
+    return false;
   }
 
   private normalizeSlug(value: string): string {
