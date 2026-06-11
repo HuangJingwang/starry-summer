@@ -155,8 +155,8 @@ describe('deployment configuration', () => {
     const safeEnv = [
       'DOMAIN=blog.example.com',
       'PUBLIC_SITE_URL=https://blog.example.com',
-      'ACME_EMAIL=ops@example.com',
-      'ADMIN_EMAIL=owner@example.com',
+      'ACME_EMAIL=ops@starry-summer.dev',
+      'ADMIN_EMAIL=owner@starry-summer.dev',
       'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
       'SESSION_SECRET=12345678901234567890123456789012',
       'INTERACTION_HASH_SECRET=abcdefabcdefabcdefabcdefabcdef12',
@@ -188,12 +188,16 @@ describe('deployment configuration', () => {
     const sharedSecretPath = join(tempDirectory, '.env.shared-secret');
     const unsafeRedisUrlPath = join(tempDirectory, '.env.unsafe-redis-url');
     const unsafeRedisProtocolPath = join(tempDirectory, '.env.unsafe-redis-protocol');
+    const placeholderAcmeEmailPath = join(tempDirectory, '.env.placeholder-acme-email');
+    const placeholderAdminEmailPath = join(tempDirectory, '.env.placeholder-admin-email');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('DOMAIN must be a hostname without a scheme or path.');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must start with https://');
     expect(doctorScript).toContain('PUBLIC_SITE_URL must be a valid URL.');
     expect(doctorScript).toContain('ACME_EMAIL must be a valid email for HTTPS certificates.');
+    expect(doctorScript).toContain('ACME_EMAIL must not use an example.com placeholder.');
+    expect(doctorScript).toContain('ADMIN_EMAIL must not use an example.com placeholder.');
     expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be different from SESSION_SECRET.');
@@ -392,6 +396,16 @@ describe('deployment configuration', () => {
     await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeRedisProtocolPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('REDIS_URL must start with redis:// or rediss://.'),
+    });
+    await writeFile(placeholderAcmeEmailPath, safeEnv.replace('ACME_EMAIL=ops@starry-summer.dev', 'ACME_EMAIL=ops@example.com'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderAcmeEmailPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('ACME_EMAIL must not use an example.com placeholder.'),
+    });
+    await writeFile(placeholderAdminEmailPath, safeEnv.replace('ADMIN_EMAIL=owner@starry-summer.dev', 'ADMIN_EMAIL=owner@example.com'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderAdminEmailPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('ADMIN_EMAIL must not use an example.com placeholder.'),
     });
     await rm(tempDirectory, { recursive: true, force: true });
   }, 10000);

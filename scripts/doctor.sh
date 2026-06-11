@@ -57,10 +57,14 @@ fi
 
 if [[ "${ACME_EMAIL:-}" != *@* ]]; then
   fail "ACME_EMAIL must be a valid email for HTTPS certificates."
+elif [[ "${ACME_EMAIL:-}" == *@example.com ]]; then
+  fail "ACME_EMAIL must not use an example.com placeholder."
 fi
 
 if [[ "${ADMIN_EMAIL:-}" != *@* ]]; then
   fail "ADMIN_EMAIL must be a valid owner login email."
+elif [[ "${ADMIN_EMAIL:-}" == *@example.com ]]; then
+  fail "ADMIN_EMAIL must not use an example.com placeholder."
 fi
 
 if is_unset_or_placeholder "${ADMIN_PASSWORD_HASH:-}"; then
