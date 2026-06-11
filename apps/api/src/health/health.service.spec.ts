@@ -2,6 +2,13 @@ import { describe, expect, test } from 'vitest';
 
 import { HealthService } from './health.service';
 
+const defaultRelease = {
+  release: {
+    version: 'development',
+    revision: 'unknown',
+  },
+};
+
 describe('HealthService', () => {
   test('reports ok when the API uses in-memory repositories', async () => {
     const service = new HealthService({
@@ -11,12 +18,28 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual({
       status: 'ok',
       service: 'starry-summer-api',
+      ...defaultRelease,
       components: {
         api: { status: 'ok' },
         database: {
           status: 'skipped',
           driver: 'memory',
         },
+      },
+    });
+  });
+
+  test('includes release metadata for deployment diagnostics', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      releaseVersion: '2026.06.11',
+      gitRevision: 'abc1234',
+    });
+
+    await expect(service.check()).resolves.toMatchObject({
+      release: {
+        version: '2026.06.11',
+        revision: 'abc1234',
       },
     });
   });
@@ -29,6 +52,7 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual({
       status: 'degraded',
       service: 'starry-summer-api',
+      ...defaultRelease,
       components: {
         api: { status: 'ok' },
         database: {
@@ -50,6 +74,7 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual({
       status: 'ok',
       service: 'starry-summer-api',
+      ...defaultRelease,
       components: {
         api: { status: 'ok' },
         database: {
@@ -72,6 +97,7 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual({
       status: 'degraded',
       service: 'starry-summer-api',
+      ...defaultRelease,
       components: {
         api: { status: 'ok' },
         database: {
@@ -95,6 +121,7 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual({
       status: 'degraded',
       service: 'starry-summer-api',
+      ...defaultRelease,
       components: {
         api: { status: 'ok' },
         database: {
@@ -120,6 +147,7 @@ describe('HealthService', () => {
     await expect(service.check()).resolves.toEqual({
       status: 'ok',
       service: 'starry-summer-api',
+      ...defaultRelease,
       components: {
         api: { status: 'ok' },
         database: {

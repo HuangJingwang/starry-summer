@@ -31,6 +31,7 @@ Required production changes:
 - `STORAGE_DRIVER`: use `local` for single-server disk uploads or `s3` for MinIO/S3-compatible object storage.
 - `S3_PUBLIC_BASE_URL`: public asset base URL when `STORAGE_DRIVER=s3`, for example `https://assets.example.com/starry-summer` or a CDN URL.
 - `S3_FORCE_PATH_STYLE`: keep `true` for self-hosted MinIO and most S3-compatible services; set `false` only for providers that require virtual-hosted bucket URLs.
+- RELEASE_VERSION and GIT_REVISION are returned by `/health` and `/api/health` so you can confirm which release is live after deployment.
 
 Check the production environment before first boot:
 

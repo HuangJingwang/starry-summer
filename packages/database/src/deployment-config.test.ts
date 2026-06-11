@@ -54,6 +54,18 @@ describe('deployment configuration', () => {
     expect(compose.match(/SESSION_SECRET: \$\{SESSION_SECRET:-change-me-before-production\}/g)).toHaveLength(2);
   });
 
+  test('passes release metadata into web and API health checks', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
+    const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
+    const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
+
+    expect(compose.match(/RELEASE_VERSION: \$\{RELEASE_VERSION:-development\}/g)).toHaveLength(2);
+    expect(compose.match(/GIT_REVISION: \$\{GIT_REVISION:-unknown\}/g)).toHaveLength(2);
+    expect(env).toContain('RELEASE_VERSION=development');
+    expect(env).toContain('GIT_REVISION=unknown');
+    expect(deployment).toContain('RELEASE_VERSION and GIT_REVISION are returned by `/health` and `/api/health`');
+  });
+
   test('uses container network hosts in the production env example', async () => {
     const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
 

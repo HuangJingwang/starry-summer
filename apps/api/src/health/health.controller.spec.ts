@@ -21,6 +21,10 @@ describe('HealthController', () => {
     await expect(controller.check()).resolves.toEqual({
       status: 'ok',
       service: 'starry-summer-api',
+      release: {
+        version: 'development',
+        revision: 'unknown',
+      },
       components: {
         api: { status: 'ok' },
         database: {

@@ -16,6 +16,10 @@ export interface ComponentHealth {
 export interface HealthReport {
   status: HealthStatus;
   service: 'starry-summer-api';
+  release: {
+    version: string;
+    revision: string;
+  };
   components: {
     api: ComponentHealth;
     database: ComponentHealth & { status: DatabaseHealthStatus };
@@ -29,6 +33,8 @@ export interface HealthServiceOptions {
   pingDatabase?: (databaseUrl: string) => Promise<void>;
   redisUrl?: string;
   pingRedis?: (redisUrl: string) => Promise<void>;
+  releaseVersion?: string;
+  gitRevision?: string;
 }
 
 @Injectable()
@@ -38,6 +44,8 @@ export class HealthService {
   private readonly pingDatabase: (databaseUrl: string) => Promise<void>;
   private readonly redisUrl?: string;
   private readonly pingRedis: (redisUrl: string) => Promise<void>;
+  private readonly releaseVersion: string;
+  private readonly gitRevision: string;
 
   constructor(options: HealthServiceOptions = {}) {
     this.repositoryDriver = options.repositoryDriver ?? process.env.CONTENT_REPOSITORY_DRIVER ?? 'memory';
@@ -45,6 +53,8 @@ export class HealthService {
     this.pingDatabase = options.pingDatabase ?? pingPostgres;
     this.redisUrl = options.redisUrl ?? process.env.REDIS_URL;
     this.pingRedis = options.pingRedis ?? pingRedis;
+    this.releaseVersion = options.releaseVersion ?? process.env.RELEASE_VERSION ?? 'development';
+    this.gitRevision = options.gitRevision ?? process.env.GIT_REVISION ?? 'unknown';
   }
 
   async check(): Promise<HealthReport> {
@@ -58,6 +68,10 @@ export class HealthService {
     return {
       status,
       service: 'starry-summer-api',
+      release: {
+        version: this.releaseVersion,
+        revision: this.gitRevision,
+      },
       components: {
         api: { status: 'ok' },
         database,
