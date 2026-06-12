@@ -1,77 +1,89 @@
 # Starry Summer
 
-Starry Summer is a single-owner personal content platform for articles, notes, moments, projects, comments, likes, view counts, guestbook messages, and Markdown-based content ownership.
+Starry Summer 是一个面向单人长期使用的个人内容平台。它把公开阅读站点和私有创作后台放在同一个系统里，用来沉淀文章、笔记、日常、项目、评论、留言、素材和部署资料。
 
-It is designed as a public personal site plus a private admin console. The V1 direction is a calm, information-rich blog system that can run on a cloud server with Docker Compose and grow into a larger personal publishing platform over time.
+这个项目的目标不是做一个短期博客模板，而是做一套可以长期维护、可备份、可迁移、可部署到云服务器的个人内容基础设施。公开页面保持深色、安静、内容优先；后台则以中文、实用、紧凑和高效为主。
 
-## Features
+## 项目特点
 
-- Public pages for posts, notes, moments, projects, archives, tags, categories, series, search, guestbook, RSS, sitemap, and about.
-- Guestbook submissions require GitHub reader login and still enter the owner moderation queue before public display.
-- Admin login and protected management pages for content, taxonomy, assets, comments, guestbook moderation, settings, projects, and Markdown import/export.
-- Content lifecycle with drafts, published posts, private content, archived content, comments, likes, and view counts.
-- Markdown rendering pipeline shared between authoring and public reading.
-- PostgreSQL persistence, Redis support, local uploads, MinIO/S3-compatible object storage, and Docker Compose deployment.
-- Production checks for environment safety, smoke testing, backup, restore, checksum verification, and repeatable deployment.
+- 公开站点：文章、笔记、日常、项目、归档、标签、分类、系列、搜索、留言板、RSS、站点地图和关于页。
+- 创作后台：内容管理、项目管理、素材管理、评论审核、留言审核、分类标签、站点设置、Markdown 导入导出。
+- 内容生命周期：草稿、发布、私密、归档、恢复草稿、永久删除，以及评论、点赞和浏览统计。
+- 写作体验：Markdown 编辑、实时预览、本地草稿、素材插入、封面选择和发布前设置。
+- 互动边界：公开可读，评论和留言写入需要读者登录，并进入后台审核队列。
+- 内容所有权：支持 Markdown 全量导出和归档导入，方便长期保存和迁移。
+- 部署运维：支持 Docker Compose、Caddy、PostgreSQL、Redis、MinIO/S3 兼容存储、备份恢复和烟雾测试。
 
-## Stack
+## 技术栈
 
-- Next.js and React for the public site and admin UI.
-- NestJS for the API service.
-- PostgreSQL for content, taxonomy, assets, settings, and interactions.
-- Redis for cache-oriented production health and future job support.
-- Docker Compose and Caddy for single-server deployment.
-- TypeScript workspaces for shared domain, database, and Markdown packages.
+- Web：Next.js、React、TypeScript
+- API：NestJS、TypeScript
+- 数据库：PostgreSQL
+- 缓存与健康检查：Redis
+- 文件存储：本地上传、MinIO 或 S3 兼容对象存储
+- 部署：Docker Compose、Caddy
+- Monorepo：npm workspaces，共享领域类型、数据库迁移和 Markdown 渲染能力
 
-## Repository Layout
+## 目录结构
 
 ```text
 apps/
-  web/  Public site and admin UI
-  api/  Backend API
+  web/  公开站点和后台界面
+  api/  后端 API 服务
 packages/
-  shared/    Shared domain contracts
-  markdown/  Markdown parsing and rendering helpers
-  database/  Database migrations and deployment checks
+  shared/    共享领域类型和契约
+  markdown/  Markdown 解析、渲染和导入导出辅助能力
+  database/  数据库迁移、部署配置检查和数据结构测试
 infra/
-  caddy/     Reverse proxy configuration
-scripts/    Backup, restore, deploy, doctor, and smoke checks
+  caddy/     Caddy 反向代理配置
+scripts/    备份、恢复、部署、体检、烟雾测试和环境初始化脚本
 docs/
-  deployment.md
-  security.md
-  superpowers/
+  deployment.md  部署和运维手册
+  security.md    安全说明
+  superpowers/   设计与实现计划记录
 ```
 
-## Getting Started
+## 本地开发
 
-Requirements:
+环境要求：
 
-- Node.js 22 or newer.
-- npm 10 or newer.
-- Docker and Docker Compose for the full production-like stack.
+- Node.js 22 或更新版本
+- npm 10 或更新版本
+- Docker 和 Docker Compose，用于运行接近生产环境的完整栈
 
-Install dependencies:
+安装依赖：
 
 ```bash
 npm install
 ```
 
-Run the web and API apps during development:
+分别启动 Web 和 API：
 
 ```bash
 npm run dev:web
 npm run dev:api
 ```
 
-Create a local Docker environment file with generated secrets and an admin password hash:
+默认开发地址：
+
+- Web：http://127.0.0.1:3000
+- API：http://127.0.0.1:4000
+
+## 环境配置
+
+首次本地 Docker 预览时，可以用脚本生成 `.env`、后台密码哈希和会话密钥：
 
 ```bash
 npm run ops:init-env -- "your local admin password"
 ```
 
-This writes `.env` and refuses to overwrite an existing file unless `INIT_ENV_OVERWRITE=YES` is set.
+脚本会拒绝覆盖已有 `.env`。如果确实需要覆盖，显式设置：
 
-You can also generate individual values manually:
+```bash
+INIT_ENV_OVERWRITE=YES npm run ops:init-env -- "your local admin password"
+```
+
+也可以单独生成密钥或密码哈希：
 
 ```bash
 npm run auth:secret
@@ -79,9 +91,21 @@ npm run auth:interaction-secret
 npm run auth:hash-password -- "your strong password"
 ```
 
-For guestbook submissions, create a GitHub OAuth App and set `GITHUB_CLIENT_ID` plus `GITHUB_CLIENT_SECRET`. The callback URL is `/api/auth/github/callback` under your public site URL.
+留言和评论的读者登录依赖 GitHub OAuth App。需要配置：
 
-Run the production-like stack locally:
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+
+OAuth 回调地址是你的公开站点域名下的 `/api/auth/github/callback`。
+
+如果需要在首页展示最近的 LeetCode 记录，可以设置：
+
+- `LEETCODE_USERNAME`
+- `LEETCODE_RECENT_LIMIT`
+
+## Docker 预览
+
+启动接近生产环境的本地栈：
 
 ```bash
 npm run ops:docker-preflight
@@ -90,9 +114,16 @@ docker compose run --rm migrate
 docker compose up -d
 ```
 
-## Verification
+常用检查：
 
-Run the main checks:
+```bash
+docker compose ps
+docker compose logs -f web api
+```
+
+## 验证命令
+
+提交或部署前建议运行：
 
 ```bash
 npm test
@@ -102,37 +133,48 @@ npm run ops:docker-preflight
 docker compose config --quiet
 ```
 
-Operational scripts are covered by:
+运维脚本测试：
 
 ```bash
 npm run test:ops
 ```
 
-## Deployment
+## 部署与运维
 
-The production path targets a self-managed cloud server with Docker Compose, Caddy, PostgreSQL, Redis, and local or S3-compatible storage.
+生产路径面向自托管云服务器，核心组件包括 Docker Compose、Caddy、PostgreSQL、Redis，以及本地或 S3 兼容对象存储。
 
-Start with:
+部署前检查：
 
 ```bash
 npm run ops:doctor
 npm run ops:docker-preflight
+```
+
+执行部署：
+
+```bash
 npm run ops:deploy -- https://blog.your-domain.com
 ```
 
-Backups and restores:
+备份：
 
 ```bash
 npm run ops:backup
+```
+
+恢复：
+
+```bash
 RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD
 ```
 
-The backup manifest records Compose project identity and SHA-256 checksums, and restore validates them before touching PostgreSQL or Docker volumes.
+备份清单会记录 Docker Compose 项目标识和 SHA-256 校验值；恢复脚本会在写入 PostgreSQL 或 Docker volume 前做校验。
 
-See [docs/deployment.md](docs/deployment.md) for the full server setup and operational runbook.
+完整服务器配置、环境变量、Caddy 路由、备份恢复和上线流程见 [docs/deployment.md](docs/deployment.md)。
 
-## Status
+## 当前状态
 
-This project is under active development from the approved product design in [docs/superpowers/specs/2026-06-10-personal-content-platform-design.md](docs/superpowers/specs/2026-06-10-personal-content-platform-design.md).
+Starry Summer 仍在积极开发中。当前重点是完善 V1：稳定的公开个人站点、私有后台、Markdown 内容所有权、读者互动边界、素材管理和可重复部署流程。
 
-The current focus is completing a production-ready V1 for a personal public blog with a private owner-only admin area.
+已批准的产品设计记录在 [docs/superpowers/specs/2026-06-10-personal-content-platform-design.md](docs/superpowers/specs/2026-06-10-personal-content-platform-design.md)。
+
