@@ -4,6 +4,16 @@ Starry Summer 是一个面向单人长期使用的个人内容平台。它把公
 
 这个项目的目标不是做一个短期博客模板，而是做一套可以长期维护、可备份、可迁移、可部署到云服务器的个人内容基础设施。公开页面保持深色、安静、内容优先；后台则以中文、实用、紧凑和高效为主。
 
+## 界面预览
+
+公开首页以深色 cyber archive 风格承载个人介绍、内容入口和近期数据。
+
+![Starry Summer 公开首页](docs/screenshots/home.png)
+
+| 内容列表 | 后台写作 |
+| --- | --- |
+| ![文章列表页面](docs/screenshots/posts.png) | ![后台写作页面](docs/screenshots/admin-writing.png) |
+
 ## 项目特点
 
 - 公开站点：文章、笔记、日常、项目、归档、标签、分类、系列、搜索、留言板、RSS、站点地图和关于页。
@@ -177,4 +187,3 @@ RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD
 Starry Summer 仍在积极开发中。当前重点是完善 V1：稳定的公开个人站点、私有后台、Markdown 内容所有权、读者互动边界、素材管理和可重复部署流程。
 
 已批准的产品设计记录在 [docs/superpowers/specs/2026-06-10-personal-content-platform-design.md](docs/superpowers/specs/2026-06-10-personal-content-platform-design.md)。
-
