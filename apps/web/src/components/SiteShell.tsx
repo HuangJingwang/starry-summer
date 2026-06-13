@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { buildPublicNavigation } from '@/lib/navigation';
 import { buildSiteFooterModel } from '@/lib/site-shell';
 import type { SiteSettings } from '@/lib/settings';
@@ -31,10 +32,13 @@ export async function SiteShell({ children }: { children: ReactNode }) {
             </div>
           </nav>
         </div>
-        <form className="site-search" action="/search" role="search" aria-label="站内搜索">
-          <input name="q" type="search" enterKeyHint="search" placeholder="搜索" aria-label="站内搜索" />
-          <button type="submit">搜索</button>
-        </form>
+        <div className="site-header__tools">
+          <form className="site-search" action="/search" role="search" aria-label="站内搜索">
+            <input name="q" type="search" enterKeyHint="search" placeholder="搜索" aria-label="站内搜索" />
+            <button type="submit">搜索</button>
+          </form>
+          <ThemeToggle />
+        </div>
       </header>
       {children}
       <SiteFooter settings={settings} />

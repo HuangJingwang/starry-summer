@@ -115,6 +115,7 @@ describe('admin detail polish', () => {
     expect(source).toContain('settings-navigation-grid');
     expect(source).toContain('settings-safety-note');
     expect(source).toContain('公开显示名建议保持为 Aster.H');
+    expect(source).not.toContain('/hero-workspace.png');
     expect(source).not.toContain("{ key: 'series', label: '专题'");
     expect(source).not.toContain("{ key: 'guestbook', label: '留言'");
     expect(source).not.toContain("String(formData.get('navigation') ?? '').split(',')");

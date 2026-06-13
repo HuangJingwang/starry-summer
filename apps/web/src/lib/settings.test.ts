@@ -62,13 +62,14 @@ describe('settings client helpers', () => {
     expect(normalizeSiteSettings({}).profile.description).not.toContain('AI Agent');
     expect(normalizeSiteSettings({}).hero).toEqual({
       tagline: '把技术探索、项目实践和日常思考长期沉淀成一个可回看的个人知识系统。',
-      backgroundImageUrl: '/hero-workspace.png',
+      backgroundImageUrl: '',
       motto: 'Stay curious. Keep building.',
       quotes: [
         '用代码解决问题，用文字留下路径。',
         '把每一次实践沉淀成未来可以复用的认知。',
       ],
     });
+    expect(normalizeSiteSettings({}).hero.backgroundImageUrl).not.toBe('/hero-workspace.png');
     expect(normalizeSiteSettings({}).navigation).toContain('search');
     expect(normalizeSiteSettings({}).navigation[0]).toBe('search');
     expect(normalizeSiteSettings({}).navigation).not.toContain('series');

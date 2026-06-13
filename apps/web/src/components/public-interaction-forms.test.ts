@@ -220,11 +220,11 @@ describe('public interaction forms', () => {
     expect(bodyField).toContain('id={counterId}');
   });
 
-  test('keeps the guestbook form behind the disabled public guestbook route', () => {
+  test('keeps the guestbook form out of the disabled public guestbook route', () => {
     const guestbookForm = readFileSync(join(process.cwd(), 'src/components/GuestbookForm.tsx'), 'utf8');
     const guestbookPage = readFileSync(join(process.cwd(), 'src/app/guestbook/page.tsx'), 'utf8');
 
-    expect(guestbookPage).toContain('notFound();');
+    expect(guestbookPage).toContain('留言功能已关闭');
     expect(guestbookPage).not.toContain('loadReaderSession');
     expect(guestbookPage).not.toContain('<GuestbookForm reader={readerSession.authenticated ? readerSession : null} />');
     expect(guestbookForm).toContain("import { PublicGitHubLoginGate } from '@/components/PublicGitHubLoginGate';");
@@ -283,7 +283,9 @@ describe('public interaction forms', () => {
     const guestbookPage = readFileSync(join(process.cwd(), 'src/app/guestbook/page.tsx'), 'utf8');
     const navigation = readFileSync(join(process.cwd(), 'src/lib/navigation.ts'), 'utf8');
 
-    expect(guestbookPage).toContain('notFound();');
+    expect(guestbookPage).toContain('留言功能已关闭');
+    expect(guestbookPage).toContain('className="page-main guestbook-page guestbook-page--disabled"');
+    expect(guestbookPage).not.toContain('notFound();');
     expect(guestbookPage).not.toContain('用 GitHub 登录后留一句话，发布后会直接显示在这里。');
     expect(guestbookPage).not.toContain("description: '读者留言和站点交流，需要 GitHub 登录后发布。'");
     expect(guestbookPage).not.toContain('审核队列');

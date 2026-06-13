@@ -1,10 +1,9 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { ContentCard } from '@/components/ContentCard';
-import { HomeHeroBackground } from '@/components/HomeHeroBackground';
 import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
-import { loadPublicAssets } from '@/lib/assets';
 import { getContentHref, getFeaturedContent, getPopularContent } from '@/lib/content';
 import { buildHomeProfileModel } from '@/lib/home-profile';
 import { loadSiteContent } from '@/lib/public-content';
@@ -12,10 +11,9 @@ import { loadPublicSettings } from '@/lib/settings';
 
 export default async function HomePage() {
   const apiBaseUrl = process.env.API_BASE_URL;
-  const [content, settings, backgroundAssets] = await Promise.all([
+  const [content, settings] = await Promise.all([
     loadSiteContent(),
     loadPublicSettings(undefined, { apiBaseUrl }),
-    loadPublicAssets({ usage: 'background', apiBaseUrl }),
   ]);
   const featured = getFeaturedContent(content).slice(0, 3);
   const popular = getPopularContent(content, {
@@ -25,28 +23,11 @@ export default async function HomePage() {
   const projectCount = content.filter((item) => item.type === 'project').length;
   const profile = buildHomeProfileModel(settings, content);
   const stats = profile.stats;
-  const heroBackgrounds =
-    backgroundAssets.length > 0
-      ? backgroundAssets.map((asset) => ({
-          url: asset.publicUrl,
-          alt: asset.altText || '首页轮换背景图',
-        }))
-      : [
-          {
-            url: settings.hero.backgroundImageUrl,
-            alt: '首页默认背景图',
-          },
-        ];
-  const ownerPortrait = {
-    url: '/images/aster-profile.png',
-    alt: `${profile.ownerName} 的个人照片`,
-  };
 
   return (
     <SiteShell>
       <main className="portfolio-home">
         <section className="portfolio-hero" id="about" aria-label="Starry Summer 首页">
-          <HomeHeroBackground backgrounds={heroBackgrounds} />
           <StarrySkyCanvas className="portfolio-hero__canvas" />
           <div className="portfolio-hero__shade" />
 
@@ -101,7 +82,28 @@ export default async function HomePage() {
             </div>
 
             <figure className="portfolio-hero__portrait">
-              <img src={ownerPortrait.url} alt={ownerPortrait.alt} />
+              <Image
+                className="portfolio-hero__night-avatar"
+                src="/images/aster-profile.png"
+                alt="Aster.H 的夜晚头像"
+                width={1254}
+                height={1254}
+                priority
+              />
+              <Image
+                className="portfolio-hero__day-avatar"
+                src="/images/aster-day-profile.png"
+                alt="Aster.H 的夏日头像"
+                width={1254}
+                height={1254}
+                priority
+              />
+              <div className="portfolio-hero__signal" aria-hidden="true">
+                <strong>Starry Summer</strong>
+                <span />
+                <span />
+                <span />
+              </div>
               <figcaption>
                 <span>站主</span>
                 <strong>{profile.ownerName}</strong>
@@ -115,6 +117,10 @@ export default async function HomePage() {
         </section>
 
         <section className="home-dashboard cyber-home__container" id="advantage" aria-label="个人优势">
+          <div className="summer-detail-field summer-detail-field--dashboard" aria-hidden="true">
+            <span className="summer-detail summer-detail--cola" />
+            <span className="summer-detail summer-detail--lemon" />
+          </div>
           <div className="home-profile">
             <p className="eyebrow">Creative System</p>
             <h2>把生活、项目和知识长期整理成可回看的系统</h2>
@@ -150,6 +156,10 @@ export default async function HomePage() {
         </section>
 
         <section className="content-section cyber-home__container" id="work">
+          <div className="summer-detail-field summer-detail-field--featured" aria-hidden="true">
+            <span className="summer-detail summer-detail--surfboard" />
+            <span className="summer-detail summer-detail--ice" />
+          </div>
           <div className="section-heading">
             <p className="eyebrow">Featured Notes</p>
             <h2>最近沉淀</h2>
@@ -172,6 +182,10 @@ export default async function HomePage() {
 
         {popular.length > 0 ? (
           <section className="content-section content-section--subtle cyber-home__container">
+            <div className="summer-detail-field summer-detail-field--popular" aria-hidden="true">
+              <span className="summer-detail summer-detail--sun-glass" />
+              <span className="summer-detail summer-detail--lemon" />
+            </div>
             <div className="section-heading section-heading--row">
               <div>
                 <p className="eyebrow">Popular Signals</p>

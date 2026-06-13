@@ -47,7 +47,7 @@ export const defaultSiteSettings: SiteSettings = {
   },
   hero: {
     tagline: '把技术探索、项目实践和日常思考长期沉淀成一个可回看的个人知识系统。',
-    backgroundImageUrl: '/hero-workspace.png',
+    backgroundImageUrl: '',
     motto: 'Stay curious. Keep building.',
     quotes: [
       '用代码解决问题，用文字留下路径。',

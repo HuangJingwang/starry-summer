@@ -120,9 +120,26 @@ describe('global styles', () => {
     expect(css).not.toContain('.portfolio-hero__stats dd {\n  color: #fff;\n  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;\n  font-size: clamp(1.18rem, 2vw, 1.6rem);\n  font-weight: 900;\n  margin: 0;\n  white-space: nowrap;\n}');
     expect(css).toContain('.portfolio-hero__actions');
     expect(css).toContain('.portfolio-hero__portrait');
+    expect(css).toContain('.portfolio-hero__night-avatar');
+    expect(css).toContain('.portfolio-hero__day-avatar');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__night-avatar");
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__day-avatar");
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__signal");
     expect(css).toContain('.portfolio-hero__scroll');
     expect(css).toContain('.portfolio-hero__canvas');
     expect(css).toContain('min-height: 100vh;');
+    expect(css).toContain('.theme-toggle');
+    expect(css).toContain(':root[data-theme=\'summer-day\'] .portfolio-home');
+    expect(css).toContain('rgba(255, 213, 105');
+    expect(css).toContain('--summer-sky');
+    expect(css).toContain('--summer-cloud');
+    expect(css).toContain('--summer-sea');
+    expect(css).toContain('summer-breeze');
+    expect(css).toContain('summer-cloud-drift');
+    expect(css).toContain('summer-shore-breath');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-home::before");
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-home::after");
+    expect(css).toContain(':root[data-theme=\'summer-day\'] .portfolio-hero__canvas');
     expect(css).not.toContain('.home-landing');
     expect(css).not.toContain('.home-overview');
     expect(css).not.toContain('animation: home-scroll-float');
@@ -131,6 +148,21 @@ describe('global styles', () => {
     expect(css).toContain('var(--cyber-cyan)');
     expect(css).not.toContain('#CCFF00');
     expect(css).not.toContain('#ccff00');
+  });
+
+  test('keeps a distinct avatar for the summer night and day home themes', () => {
+    const css = readGlobalStyles();
+    const nightAvatarBlock = css.match(/\.portfolio-hero__night-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const summerDayAvatarBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__day-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+
+    expect(nightAvatarBlock).toContain('display: block;');
+    expect(css).toContain('.portfolio-hero__day-avatar {\n  display: none;\n}');
+    expect(css).toContain(
+      ":root[data-theme='summer-day'] .portfolio-hero__night-avatar,\n:root[data-theme='summer-day'] .portfolio-hero__signal {\n  display: none;\n}",
+    );
+    expect(summerDayAvatarBlock).toContain('display: block;');
   });
 
   test('does not keep the abandoned layered overview information grid', () => {
@@ -152,6 +184,47 @@ describe('global styles', () => {
     expect(responsiveCss).not.toContain('.home-overview__panel');
     expect(css).not.toContain('#CCFF00');
     expect(css).not.toContain('#ccff00');
+  });
+
+  test('keeps the home dashboard in the summer day theme', () => {
+    const css = readGlobalStyles();
+    const dayDashboardBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.home-dashboard\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayFocusCardBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.home-focus a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayHomeHeadingBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.home-profile h2\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+
+    expect(css).toContain(":root[data-theme='summer-day'] .home-dashboard");
+    expect(css).toContain(":root[data-theme='summer-day'] .home-profile h2");
+    expect(css).toContain(":root[data-theme='summer-day'] .home-focus a");
+    expect(dayDashboardBlock).toContain('rgba(255, 255, 244');
+    expect(dayDashboardBlock).not.toContain('#07100f');
+    expect(dayFocusCardBlock).toContain('rgba(255, 255, 244');
+    expect(dayHomeHeadingBlock).toContain('#17343a');
+  });
+
+  test('adds non-interactive summer details across the day home sections', () => {
+    const css = readGlobalStyles();
+    const detailFieldBlock = css.match(/\.summer-detail-field\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayDetailFieldBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.summer-detail-field\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+
+    expect(css).toContain('.summer-detail-field');
+    expect(css).toContain('.summer-detail');
+    expect(css).toContain('.summer-detail--cola');
+    expect(css).toContain('.summer-detail--lemon');
+    expect(css).toContain('.summer-detail--surfboard');
+    expect(css).toContain('.summer-detail--ice');
+    expect(css).toContain('.summer-detail--sun-glass');
+    expect(css).toContain('.summer-detail-field--dashboard');
+    expect(css).toContain('.summer-detail-field--featured');
+    expect(css).toContain('.summer-detail-field--popular');
+    expect(css).toContain(":root[data-theme='summer-day'] .summer-detail-field");
+    expect(detailFieldBlock).toContain('display: none;');
+    expect(detailFieldBlock).toContain('pointer-events: none;');
+    expect(dayDetailFieldBlock).toContain('display: block;');
   });
 
   test('keeps the portfolio home navigation visible while preserving the full-screen hero', () => {
@@ -224,6 +297,22 @@ describe('global styles', () => {
     expect(portfolioSearchBlock).toContain('width: min(100%, 260px);');
   });
 
+  test('keeps the portfolio home theme switch inside the mobile header', () => {
+    const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+    const mobilePortfolioToolsBlock =
+      responsiveCss.match(/body:has\(\.portfolio-home\) \.site-header__tools\s*{(?<body>[\s\S]*?)\n  }/)?.groups
+        ?.body ?? '';
+    const mobilePortfolioSearchBlock =
+      responsiveCss.match(/body:has\(\.portfolio-home\) \.site-search\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ??
+      '';
+
+    expect(responsiveCss).toContain('body:has(.portfolio-home) .site-header__tools');
+    expect(mobilePortfolioToolsBlock).toContain('grid-template-columns: 1fr;');
+    expect(mobilePortfolioToolsBlock).toContain('justify-items: stretch;');
+    expect(mobilePortfolioSearchBlock).toContain('width: 100%;');
+    expect(mobilePortfolioSearchBlock).toContain('max-width: none;');
+  });
+
   test('keeps the guestbook page inside the cyber glass visual system', () => {
     const css = readGlobalStyles();
 
@@ -232,6 +321,18 @@ describe('global styles', () => {
     expect(css).toContain('.guestbook-panel');
     expect(css).toContain('.guestbook-page .guestbook-form');
     expect(css).toContain('.guestbook-page .guestbook-form button');
+  });
+
+  test('keeps the disabled guestbook page readable in the summer day theme', () => {
+    const css = readGlobalStyles();
+    const dayGuestbookCardBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.guestbook-page \.guestbook-copy-card,[\s\S]*?\.guestbook-panel\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+
+    expect(css).toContain(":root[data-theme='summer-day'] .guestbook-page .guestbook-copy-card");
+    expect(css).toContain(":root[data-theme='summer-day'] .guestbook-page .page-title h1");
+    expect(css).toContain(":root[data-theme='summer-day'] .guestbook-disabled-actions a");
+    expect(dayGuestbookCardBlock).toContain('rgba(255, 255, 244');
+    expect(dayGuestbookCardBlock).not.toContain('var(--cyber-panel)');
   });
 
   test('keeps the search page form inside the cyber glass visual system', () => {
@@ -294,6 +395,37 @@ describe('global styles', () => {
     expect(detailBodyBlock).not.toContain('background: var(--panel);');
     expect(commentEmptyBlock).not.toContain('background: var(--panel);');
     expect(adjacentBlock).not.toContain('background: var(--panel);');
+  });
+
+  test('keeps the selected summer day theme on public reader routes', () => {
+    const css = readGlobalStyles();
+    const dayPageMainBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.page-main\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayHeaderBlock =
+      css.match(/:root\[data-theme='summer-day'\] body:has\(\.page-main\) \.site-header\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayDetailBodyBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main");
+    expect(css).toContain(":root[data-theme='summer-day'] body:has(.page-main) .site-header");
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main .content-card");
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main .archive-list");
+    expect(css).toContain(":root[data-theme='summer-day'] .detail__body");
+    expect(css).toContain(":root[data-theme='summer-day'] body:has(.page-main) .site-footer");
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main::before");
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main::after");
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main > *");
+    expect(dayPageMainBlock).toContain('#f4fbf0');
+    expect(dayPageMainBlock).toContain('isolation: isolate;');
+    expect(dayPageMainBlock).toContain('overflow: hidden;');
+    expect(css).toContain('animation: summer-cloud-drift');
+    expect(css).toContain('animation: summer-shore-breath');
+    expect(css).toContain('pointer-events: none;');
+    expect(css).toContain('var(--summer-cloud)');
+    expect(css).toContain('var(--summer-sea)');
+    expect(dayHeaderBlock).toContain('rgba(255, 255, 244');
+    expect(dayDetailBodyBlock).toContain('rgba(255, 255, 244');
   });
 
   test('keeps like feedback compact and readable in article metadata', () => {

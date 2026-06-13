@@ -31,6 +31,34 @@
     width: 100%;
   }
 
+  .site-header__tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+
+  .theme-toggle {
+    justify-self: end;
+  }
+
+  body:has(.portfolio-home) .site-header {
+    grid-template-columns: 1fr;
+  }
+
+  body:has(.portfolio-home) .site-header__tools {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+
+  body:has(.portfolio-home) .site-search {
+    max-width: none;
+    width: 100%;
+  }
+
+  body:has(.portfolio-home) .theme-toggle {
+    justify-self: start;
+  }
+
   body:has(.cyber-home) .site-shell {
     height: auto;
     min-height: 100vh;
@@ -376,6 +404,40 @@
 
   .portfolio-hero__scroll {
     bottom: 18px;
+  }
+
+  .summer-detail-field {
+    opacity: 0.48;
+  }
+
+  .summer-detail-field--dashboard .summer-detail--cola {
+    bottom: 18px;
+    right: 18px;
+    transform: rotate(-8deg) scale(0.78);
+  }
+
+  .summer-detail-field--dashboard .summer-detail--lemon,
+  .summer-detail-field--popular .summer-detail--sun-glass {
+    display: none;
+  }
+
+  .summer-detail-field--featured .summer-detail--surfboard {
+    right: -58px;
+    top: 22px;
+    transform: rotate(-12deg) scale(0.72);
+  }
+
+  .summer-detail-field--featured .summer-detail--ice {
+    bottom: 16px;
+    left: 16px;
+    transform: rotate(9deg) scale(0.82);
+  }
+
+  .summer-detail-field--popular .summer-detail--lemon {
+    bottom: 18px;
+    left: auto;
+    right: 18px;
+    transform: rotate(-14deg) scale(0.78);
   }
 
   .author-bio-card,

@@ -161,7 +161,7 @@ export function SettingsManager() {
         </label>
         <label>
           备用首页背景
-          <input name="backgroundImageUrl" defaultValue={settings.hero.backgroundImageUrl} placeholder="/hero-workspace.png" />
+          <input name="backgroundImageUrl" defaultValue={settings.hero.backgroundImageUrl} placeholder="/images/your-summer-background.jpg" />
         </label>
       </section>
       <section className="settings-section settings-section--compact">

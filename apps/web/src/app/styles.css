@@ -241,6 +241,49 @@ body:has(.cyber-home) .site-header {
   padding: 0 12px;
 }
 
+.site-header__tools {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: end;
+  min-width: 0;
+}
+
+.theme-toggle {
+  align-items: center;
+  background: rgba(4, 6, 14, 0.62);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 36px;
+  overflow: hidden;
+  padding: 3px;
+}
+
+.theme-toggle button {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(226, 232, 240, 0.68);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  min-height: 28px;
+  padding: 0 9px;
+}
+
+.theme-toggle button[aria-pressed='true'] {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.94), rgba(45, 212, 191, 0.86));
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.2);
+  color: #031018;
+}
+
+.theme-toggle button:focus-visible {
+  outline: 2px solid rgba(34, 211, 238, 0.72);
+  outline-offset: 2px;
+}
+
 body:has(.portfolio-home) .site-header {
   background: rgba(4, 6, 14, 0.88);
   border: 0;
@@ -291,7 +334,9 @@ body:has(.portfolio-home) .site-nav a:focus-visible {
 }
 
 body:has(.portfolio-home) .site-search {
+  flex: 1 1 0;
   justify-self: end;
+  min-width: 0;
   width: min(100%, 260px);
 }
 
@@ -1180,6 +1225,30 @@ body:has(.cyber-home) .site-footer a {
   padding: 11px 16px;
 }
 
+.guestbook-disabled-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.guestbook-disabled-actions a {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.24);
+  border-radius: 999px;
+  color: #cffafe;
+  font-weight: 900;
+  min-height: 40px;
+  padding: 10px 14px;
+}
+
+.guestbook-disabled-actions a:hover,
+.guestbook-disabled-actions a:focus-visible {
+  background: rgba(34, 211, 238, 0.14);
+  border-color: rgba(34, 211, 238, 0.48);
+  color: #fff;
+  outline: none;
+}
+
 .guestbook-reader {
   grid-template-columns: minmax(0, 1fr) auto;
 }
@@ -1658,12 +1727,96 @@ body:has(.guestbook-page) .site-footer a {
   z-index: 1;
 }
 
-.portfolio-hero__portrait img {
+.portfolio-hero__night-avatar,
+.portfolio-hero__day-avatar {
   aspect-ratio: 1;
   border-radius: 20px;
-  display: block;
+  height: auto;
   object-fit: cover;
   width: 100%;
+}
+
+.portfolio-hero__night-avatar {
+  display: block;
+}
+
+.portfolio-hero__day-avatar {
+  display: none;
+}
+
+.portfolio-hero__signal {
+  align-content: end;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle at 24% 24%, rgba(34, 211, 238, 0.32), transparent 24%),
+    radial-gradient(circle at 74% 30%, rgba(167, 139, 250, 0.24), transparent 28%),
+    linear-gradient(135deg, rgba(7, 10, 18, 0.94), rgba(11, 18, 32, 0.88));
+  border-radius: 20px;
+  display: none;
+  isolation: isolate;
+  min-height: 280px;
+  overflow: hidden;
+  padding: 28px;
+  position: relative;
+  width: 100%;
+}
+
+.portfolio-hero__signal::before,
+.portfolio-hero__signal::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.portfolio-hero__signal::before {
+  background:
+    linear-gradient(90deg, rgba(34, 211, 238, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), transparent);
+}
+
+.portfolio-hero__signal::after {
+  background:
+    radial-gradient(circle at 22% 28%, rgba(34, 211, 238, 0.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 54% 42%, rgba(45, 212, 191, 0.86) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 66%, rgba(167, 139, 250, 0.76) 0 2px, transparent 3px),
+    linear-gradient(135deg, transparent 26%, rgba(34, 211, 238, 0.28) 27%, transparent 28% 46%, rgba(45, 212, 191, 0.18) 47%, transparent 48%);
+}
+
+.portfolio-hero__signal span {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(45, 212, 191, 0.08));
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-radius: 999px;
+  display: block;
+  height: 10px;
+  margin-top: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.portfolio-hero__signal span:nth-of-type(1) {
+  width: 54%;
+}
+
+.portfolio-hero__signal span:nth-of-type(2) {
+  width: 78%;
+}
+
+.portfolio-hero__signal span:nth-of-type(3) {
+  width: 36%;
+}
+
+.portfolio-hero__signal strong {
+  color: rgba(248, 250, 252, 0.92);
+  font-size: clamp(1.8rem, 4vw, 3.3rem);
+  line-height: 0.95;
+  margin-bottom: auto;
+  max-width: 8ch;
+  position: relative;
+  text-shadow: 0 0 36px rgba(34, 211, 238, 0.24);
+  z-index: 1;
 }
 
 .portfolio-hero__portrait figcaption {
@@ -2131,7 +2284,9 @@ body:has(.guestbook-page) .site-footer a {
   display: grid;
   gap: 18px;
   grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  overflow: hidden;
   padding: clamp(28px, 5vw, 56px) clamp(16px, 5vw, 72px);
+  position: relative;
 }
 
 .home-profile {
@@ -2227,6 +2382,179 @@ body:has(.guestbook-page) .site-footer a {
   line-height: 1.6;
 }
 
+.summer-detail-field {
+  display: none;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.summer-detail {
+  animation: summer-detail-bob 8s ease-in-out infinite;
+  display: block;
+  opacity: 0.78;
+  position: absolute;
+}
+
+.home-dashboard > :not(.summer-detail-field),
+.portfolio-home .content-section > :not(.summer-detail-field) {
+  position: relative;
+  z-index: 1;
+}
+
+.summer-detail--cola {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0 18%, rgba(117, 61, 24, 0.3) 18% 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.34), transparent 42%);
+  border: 1px solid rgba(8, 116, 127, 0.18);
+  border-radius: 12px 12px 18px 18px;
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.18), 0 18px 34px rgba(101, 145, 131, 0.16);
+  height: 78px;
+  width: 50px;
+}
+
+.summer-detail--cola::before {
+  background: linear-gradient(180deg, rgba(8, 116, 127, 0.42), rgba(8, 116, 127, 0.08));
+  border-radius: 999px;
+  content: '';
+  height: 82px;
+  left: 34px;
+  position: absolute;
+  top: -30px;
+  transform: rotate(16deg);
+  width: 4px;
+}
+
+.summer-detail--cola::after {
+  background:
+    radial-gradient(circle at 26% 28%, rgba(255, 255, 255, 0.9) 0 5px, transparent 6px),
+    radial-gradient(circle at 66% 42%, rgba(255, 255, 255, 0.72) 0 4px, transparent 5px),
+    radial-gradient(circle at 44% 68%, rgba(255, 255, 255, 0.62) 0 3px, transparent 4px);
+  content: '';
+  inset: 12px 8px 10px;
+  position: absolute;
+}
+
+.summer-detail--lemon {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 244, 0.92) 0 11%, transparent 12%),
+    repeating-conic-gradient(from 6deg, rgba(255, 213, 105, 0.88) 0 18deg, rgba(255, 248, 171, 0.84) 18deg 34deg);
+  border: 5px solid rgba(255, 213, 105, 0.72);
+  border-radius: 50%;
+  box-shadow: 0 16px 34px rgba(255, 213, 105, 0.18);
+  height: 74px;
+  width: 74px;
+}
+
+.summer-detail--surfboard {
+  background:
+    linear-gradient(90deg, transparent 0 44%, rgba(255, 255, 244, 0.82) 44% 49%, transparent 49%),
+    linear-gradient(135deg, rgba(255, 213, 105, 0.86), rgba(45, 212, 191, 0.62) 48%, rgba(125, 211, 252, 0.72));
+  border: 1px solid rgba(8, 116, 127, 0.2);
+  border-radius: 999px 999px 999px 999px / 62% 62% 38% 38%;
+  box-shadow: 0 18px 42px rgba(101, 145, 131, 0.18);
+  height: 42px;
+  transform: rotate(-9deg);
+  width: 176px;
+}
+
+.summer-detail--ice {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(125, 211, 252, 0.2)),
+    rgba(255, 255, 255, 0.44);
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  border-radius: 12px;
+  box-shadow:
+    42px 26px 0 -7px rgba(255, 255, 255, 0.5),
+    42px 26px 0 -6px rgba(125, 211, 252, 0.22),
+    0 20px 34px rgba(101, 145, 131, 0.12);
+  height: 34px;
+  transform: rotate(11deg);
+  width: 34px;
+}
+
+.summer-detail--sun-glass {
+  height: 42px;
+  width: 112px;
+}
+
+.summer-detail--sun-glass::before,
+.summer-detail--sun-glass::after {
+  background:
+    linear-gradient(135deg, rgba(8, 18, 28, 0.88), rgba(8, 116, 127, 0.62)),
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 244, 0.72) 0 5px, transparent 6px);
+  border: 2px solid rgba(23, 52, 58, 0.42);
+  border-radius: 10px 10px 16px 16px;
+  content: '';
+  height: 34px;
+  position: absolute;
+  top: 4px;
+  width: 46px;
+}
+
+.summer-detail--sun-glass::before {
+  left: 0;
+  transform: rotate(5deg);
+}
+
+.summer-detail--sun-glass::after {
+  right: 0;
+  transform: rotate(-5deg);
+}
+
+.summer-detail-field--dashboard .summer-detail--cola {
+  bottom: clamp(26px, 5vw, 58px);
+  right: clamp(30px, 7vw, 92px);
+  transform: rotate(-6deg);
+}
+
+.summer-detail-field--dashboard .summer-detail--lemon {
+  right: clamp(76px, 12vw, 156px);
+  top: clamp(20px, 4vw, 42px);
+  transform: rotate(18deg);
+}
+
+.summer-detail-field--featured .summer-detail--surfboard {
+  right: clamp(24px, 7vw, 88px);
+  top: clamp(34px, 5vw, 68px);
+}
+
+.summer-detail-field--featured .summer-detail--ice {
+  bottom: clamp(24px, 5vw, 62px);
+  left: clamp(22px, 5vw, 72px);
+}
+
+.summer-detail-field--popular .summer-detail--sun-glass {
+  right: clamp(26px, 7vw, 96px);
+  top: clamp(28px, 5vw, 70px);
+  transform: rotate(7deg);
+}
+
+.summer-detail-field--popular .summer-detail--lemon {
+  bottom: clamp(24px, 5vw, 58px);
+  height: 58px;
+  left: clamp(20px, 6vw, 78px);
+  transform: rotate(-14deg);
+  width: 58px;
+}
+
+:root[data-theme='summer-day'] .summer-detail-field {
+  display: block;
+}
+
+@keyframes summer-detail-bob {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+
+  50% {
+    margin-top: -8px;
+  }
+}
+
 .content-section,
 .page-main {
   padding: clamp(42px, 8vw, 96px) clamp(16px, 5vw, 72px);
@@ -2235,6 +2563,8 @@ body:has(.guestbook-page) .site-footer a {
 .portfolio-home .content-section {
   background: #050807;
   color: #f6f8f2;
+  overflow: hidden;
+  position: relative;
 }
 
 .content-section--subtle {
@@ -2352,6 +2682,410 @@ body:has(.guestbook-page) .site-footer a {
   background: rgba(34, 211, 238, 0.08);
   border-color: rgba(34, 211, 238, 0.25);
   color: #cffafe;
+}
+
+:root[data-theme='summer-day'] {
+  color-scheme: light;
+  --summer-sky: #e8f8ff;
+  --summer-sky-soft: #f4fbf0;
+  --summer-cloud: rgba(255, 255, 255, 0.76);
+  --summer-cloud-soft: rgba(255, 255, 255, 0.42);
+  --summer-sea: rgba(125, 211, 252, 0.42);
+  --summer-sea-deep: rgba(45, 212, 191, 0.28);
+  --summer-sun: rgba(255, 213, 105, 0.62);
+  --summer-ink: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) {
+  background: #f4fbf0;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-header {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 244, 0.82), rgba(223, 247, 255, 0.68)),
+    rgba(255, 253, 239, 0.78);
+  border-bottom-color: rgba(89, 124, 100, 0.2);
+  box-shadow: 0 18px 54px rgba(77, 112, 104, 0.1);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .brand {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .brand-mark {
+  background: linear-gradient(135deg, #ffd569, #7dd3c7 58%, #93c5fd);
+  box-shadow: 0 0 22px rgba(255, 213, 105, 0.34);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-nav a {
+  color: rgba(23, 52, 58, 0.78);
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-nav a:hover,
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-nav a:focus-visible {
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-search,
+:root[data-theme='summer-day'] body:has(.portfolio-home) .theme-toggle {
+  background: rgba(255, 255, 244, 0.7);
+  border-color: rgba(45, 109, 116, 0.18);
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-search input {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-search input::placeholder,
+:root[data-theme='summer-day'] body:has(.portfolio-home) .theme-toggle button {
+  color: rgba(23, 52, 58, 0.56);
+}
+
+:root[data-theme='summer-day'] body:has(.portfolio-home) .site-search button,
+:root[data-theme='summer-day'] body:has(.portfolio-home) .theme-toggle button[aria-pressed='true'] {
+  background: linear-gradient(135deg, #ffd569, #8ee2d1);
+  box-shadow: 0 0 18px rgba(255, 213, 105, 0.2);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .portfolio-home {
+  background:
+    radial-gradient(circle at 78% 10%, var(--summer-sun), transparent 26%),
+    linear-gradient(180deg, var(--summer-sky) 0%, #fff8dc 42%, var(--summer-sky-soft) 100%);
+  color: #17343a;
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
+:root[data-theme='summer-day'] .portfolio-home::before,
+:root[data-theme='summer-day'] .portfolio-home::after {
+  content: '';
+  inset-inline: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+:root[data-theme='summer-day'] .portfolio-home::before {
+  animation: summer-cloud-drift 28s ease-in-out infinite alternate;
+  background:
+    radial-gradient(ellipse at 12% 38%, var(--summer-cloud) 0 16%, transparent 34%),
+    radial-gradient(ellipse at 31% 24%, var(--summer-cloud-soft) 0 18%, transparent 38%),
+    radial-gradient(ellipse at 72% 34%, var(--summer-cloud) 0 14%, transparent 34%),
+    radial-gradient(ellipse at 88% 18%, var(--summer-cloud-soft) 0 16%, transparent 34%);
+  height: min(36vw, 340px);
+  opacity: 0.74;
+  top: 64px;
+}
+
+:root[data-theme='summer-day'] .portfolio-home::after {
+  animation: summer-shore-breath 18s ease-in-out infinite alternate;
+  background:
+    linear-gradient(180deg, transparent 0%, var(--summer-sea) 42%, rgba(255, 255, 244, 0.58) 68%, var(--summer-sea-deep) 100%),
+    repeating-linear-gradient(96deg, rgba(255, 255, 255, 0.38) 0 1px, transparent 1px 72px);
+  bottom: -8%;
+  height: min(34vw, 320px);
+  opacity: 0.7;
+}
+
+:root[data-theme='summer-day'] .portfolio-home > * {
+  position: relative;
+  z-index: 1;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero {
+  background:
+    radial-gradient(circle at 82% 16%, var(--summer-sun), transparent 24%),
+    radial-gradient(circle at 18% 22%, rgba(125, 211, 252, 0.34), transparent 31%),
+    radial-gradient(circle at 70% 82%, rgba(134, 239, 172, 0.24), transparent 28%),
+    linear-gradient(180deg, var(--summer-sky) 0%, #fff8dd 48%, var(--summer-sky-soft) 100%);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero::before,
+:root[data-theme='summer-day'] .portfolio-hero::after {
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero::before {
+  animation: summer-breeze 12s ease-in-out infinite alternate;
+  background:
+    radial-gradient(ellipse at 18% 18%, var(--summer-cloud) 0 14%, transparent 31%),
+    radial-gradient(ellipse at 70% 20%, var(--summer-cloud-soft) 0 17%, transparent 35%),
+    linear-gradient(105deg, transparent 0 34%, rgba(255, 255, 255, 0.42) 46%, transparent 58%),
+    repeating-linear-gradient(115deg, rgba(8, 116, 127, 0.07) 0 1px, transparent 1px 86px);
+  opacity: 0.52;
+  z-index: -1;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero::after {
+  animation: summer-breeze 16s ease-in-out infinite alternate-reverse;
+  background:
+    linear-gradient(180deg, transparent 56%, var(--summer-sea) 82%, rgba(255, 255, 244, 0.42) 100%),
+    radial-gradient(circle at 12% 72%, rgba(125, 211, 252, 0.24) 0 2px, transparent 3px),
+    radial-gradient(circle at 42% 28%, rgba(255, 213, 105, 0.22) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 58%, rgba(45, 212, 191, 0.18) 0 2px, transparent 3px);
+  background-size: 220px 180px;
+  opacity: 0.78;
+  z-index: -1;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__canvas {
+  filter: blur(1px) saturate(0.5);
+  mix-blend-mode: soft-light;
+  opacity: 0.06;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__shade {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 248, 220, 0.38) 72%, rgba(244, 251, 240, 0.94)),
+    linear-gradient(90deg, rgba(255, 255, 244, 0.74), rgba(255, 255, 244, 0.18) 50%, rgba(235, 248, 255, 0.58));
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__badge,
+:root[data-theme='summer-day'] .portfolio-section-label,
+:root[data-theme='summer-day'] .portfolio-about-panel .eyebrow,
+:root[data-theme='summer-day'] .portfolio-stat-row strong {
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__name,
+:root[data-theme='summer-day'] .portfolio-about-panel h1,
+:root[data-theme='summer-day'] .section-heading h2,
+:root[data-theme='summer-day'] .page-title h1 {
+  color: #17343a;
+  text-shadow: 0 12px 42px rgba(125, 171, 151, 0.14);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__role,
+:root[data-theme='summer-day'] .portfolio-hero__lead,
+:root[data-theme='summer-day'] .portfolio-about-panel__lead,
+:root[data-theme='summer-day'] .portfolio-info-grid span,
+:root[data-theme='summer-day'] .portfolio-now p,
+:root[data-theme='summer-day'] .portfolio-stat-row span,
+:root[data-theme='summer-day'] .portfolio-home .content-card p,
+:root[data-theme='summer-day'] .portfolio-home .content-card__meta,
+:root[data-theme='summer-day'] .portfolio-home .content-card__footer {
+  color: rgba(23, 52, 58, 0.62);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__motto,
+:root[data-theme='summer-day'] .portfolio-about-panel__motto,
+:root[data-theme='summer-day'] .portfolio-info-grid strong {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__outline,
+:root[data-theme='summer-day'] .portfolio-hero__canvas-word {
+  -webkit-text-stroke-color: rgba(8, 116, 127, 0.22);
+  opacity: 0.2;
+  text-shadow: 0 0 70px rgba(255, 213, 105, 0.26);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__stats div,
+:root[data-theme='summer-day'] .portfolio-hero__portrait,
+:root[data-theme='summer-day'] .portfolio-home .content-card,
+:root[data-theme='summer-day'] .home-photo-album__viewport {
+  background: rgba(255, 255, 244, 0.62);
+  border-color: rgba(45, 109, 116, 0.16);
+  box-shadow: 0 24px 70px rgba(101, 145, 131, 0.14);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__stats dt {
+  color: rgba(23, 52, 58, 0.56);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__stats dd,
+:root[data-theme='summer-day'] .portfolio-home .content-card {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__primary {
+  background: linear-gradient(135deg, #ffd569, #8ee2d1 56%, #93c5fd);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__secondary,
+:root[data-theme='summer-day'] .portfolio-hero__social,
+:root[data-theme='summer-day'] .portfolio-now a,
+:root[data-theme='summer-day'] .section-heading--row a {
+  background: rgba(255, 255, 244, 0.54);
+  border-color: rgba(8, 116, 127, 0.24);
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__portrait::before,
+:root[data-theme='summer-day'] .portfolio-info-grid,
+:root[data-theme='summer-day'] .content-section--subtle {
+  border-color: rgba(45, 109, 116, 0.16);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__day-avatar {
+  display: block;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__night-avatar,
+:root[data-theme='summer-day'] .portfolio-hero__signal {
+  display: none;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__portrait figcaption {
+  background: rgba(255, 255, 244, 0.72);
+  border-color: rgba(8, 116, 127, 0.18);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__portrait figcaption span {
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__signal {
+  background:
+    radial-gradient(circle at 24% 24%, rgba(255, 213, 105, 0.38), transparent 26%),
+    radial-gradient(circle at 72% 34%, rgba(125, 211, 252, 0.32), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 244, 0.86), rgba(224, 247, 239, 0.72));
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__signal::before {
+  background:
+    linear-gradient(90deg, rgba(8, 116, 127, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(8, 116, 127, 0.1) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__signal::after {
+  background:
+    radial-gradient(circle at 22% 28%, rgba(255, 213, 105, 0.92) 0 2px, transparent 3px),
+    radial-gradient(circle at 54% 42%, rgba(8, 116, 127, 0.58) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 66%, rgba(45, 212, 191, 0.52) 0 2px, transparent 3px),
+    linear-gradient(135deg, transparent 26%, rgba(8, 116, 127, 0.2) 27%, transparent 28% 46%, rgba(255, 213, 105, 0.24) 47%, transparent 48%);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__signal span {
+  background: linear-gradient(135deg, rgba(8, 116, 127, 0.14), rgba(255, 213, 105, 0.14));
+  border-color: rgba(8, 116, 127, 0.16);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__signal strong {
+  color: #17343a;
+  text-shadow: 0 10px 34px rgba(125, 171, 151, 0.18);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__scroll {
+  color: rgba(23, 52, 58, 0.52);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__scroll::after {
+  background: linear-gradient(180deg, rgba(8, 116, 127, 0.58), transparent);
+}
+
+:root[data-theme='summer-day'] .portfolio-about-panel,
+:root[data-theme='summer-day'] .portfolio-home .content-section {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(125, 211, 252, 0.2), transparent 26%),
+    linear-gradient(180deg, #f4fbf0 0%, #fffbea 100%);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .home-dashboard {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(125, 211, 252, 0.18), transparent 28%),
+    radial-gradient(circle at 84% 78%, rgba(255, 213, 105, 0.18), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 244, 0.78), rgba(244, 251, 240, 0.92));
+  border-bottom-color: rgba(45, 109, 116, 0.14);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .home-profile .eyebrow,
+:root[data-theme='summer-day'] .home-focus span {
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .home-profile h2 {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .home-focus strong {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .home-profile p:not(.eyebrow),
+:root[data-theme='summer-day'] .home-focus small,
+:root[data-theme='summer-day'] .home-profile dt {
+  color: rgba(23, 52, 58, 0.62);
+}
+
+:root[data-theme='summer-day'] .home-profile blockquote {
+  border-left-color: #2dd4bf;
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .home-profile dl div {
+  border-top-color: rgba(45, 109, 116, 0.16);
+}
+
+:root[data-theme='summer-day'] .home-profile dd {
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .home-focus a {
+  background: rgba(255, 255, 244, 0.66);
+  border-color: rgba(45, 109, 116, 0.16);
+  box-shadow: 0 20px 60px rgba(101, 145, 131, 0.1);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .home-focus a:hover {
+  border-color: rgba(8, 116, 127, 0.28);
+  box-shadow: 0 24px 70px rgba(101, 145, 131, 0.16);
+}
+
+:root[data-theme='summer-day'] .portfolio-home .content-card__series a {
+  background: rgba(8, 116, 127, 0.08);
+  border-color: rgba(8, 116, 127, 0.2);
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .home-photo-album__slide::after {
+  background: linear-gradient(180deg, transparent 44%, rgba(23, 52, 58, 0.48));
+}
+
+@keyframes summer-breeze {
+  from {
+    transform: translate3d(-12px, -4px, 0);
+  }
+
+  to {
+    transform: translate3d(14px, 6px, 0);
+  }
+}
+
+@keyframes summer-cloud-drift {
+  from {
+    transform: translate3d(-18px, 0, 0);
+  }
+
+  to {
+    transform: translate3d(24px, 10px, 0);
+  }
+}
+
+@keyframes summer-shore-breath {
+  from {
+    filter: saturate(0.92);
+    transform: translate3d(0, 8px, 0);
+  }
+
+  to {
+    filter: saturate(1.08);
+    transform: translate3d(0, -8px, 0);
+  }
 }
 
 .content-card__cover {
@@ -3317,6 +4051,259 @@ body:has(.search-page) .site-footer a {
 .adjacent-content strong {
   font-size: 1rem;
   line-height: 1.4;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) {
+  background: #f4fbf0;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-header {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 244, 0.84), rgba(223, 247, 255, 0.7)),
+    rgba(255, 253, 239, 0.8);
+  border-color: rgba(45, 109, 116, 0.16);
+  box-shadow: 0 18px 54px rgba(77, 112, 104, 0.1);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .brand {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .brand-mark {
+  background: linear-gradient(135deg, #ffd569, #7dd3c7 58%, #93c5fd);
+  box-shadow: 0 0 22px rgba(255, 213, 105, 0.34);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-nav a {
+  background: rgba(255, 255, 244, 0.52);
+  border-color: rgba(45, 109, 116, 0.14);
+  color: rgba(23, 52, 58, 0.74);
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-nav a:hover,
+:root[data-theme='summer-day'] body:has(.page-main) .site-nav a:focus-visible {
+  background: rgba(255, 213, 105, 0.18);
+  border-color: rgba(8, 116, 127, 0.24);
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-search,
+:root[data-theme='summer-day'] body:has(.page-main) .theme-toggle {
+  background: rgba(255, 255, 244, 0.72);
+  border-color: rgba(45, 109, 116, 0.18);
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-search input {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-search input::placeholder,
+:root[data-theme='summer-day'] body:has(.page-main) .theme-toggle button {
+  color: rgba(23, 52, 58, 0.56);
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-search button,
+:root[data-theme='summer-day'] body:has(.page-main) .theme-toggle button[aria-pressed='true'] {
+  background: linear-gradient(135deg, #ffd569, #8ee2d1);
+  box-shadow: 0 0 18px rgba(255, 213, 105, 0.2);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .page-main {
+  background:
+    radial-gradient(circle at 16% 14%, rgba(125, 211, 252, 0.18), transparent 28%),
+    radial-gradient(circle at 86% 70%, rgba(255, 213, 105, 0.2), transparent 30%),
+    linear-gradient(180deg, #f4fbf0 0%, #fffbea 100%);
+  color: #17343a;
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
+:root[data-theme='summer-day'] .page-main::before,
+:root[data-theme='summer-day'] .page-main::after {
+  content: '';
+  inset-inline: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+:root[data-theme='summer-day'] .page-main::before {
+  animation: summer-cloud-drift 30s ease-in-out infinite alternate;
+  background:
+    radial-gradient(ellipse at 9% 42%, var(--summer-cloud) 0 15%, transparent 32%),
+    radial-gradient(ellipse at 30% 24%, var(--summer-cloud-soft) 0 16%, transparent 34%),
+    radial-gradient(ellipse at 82% 30%, var(--summer-cloud) 0 12%, transparent 30%);
+  height: min(30vw, 260px);
+  opacity: 0.62;
+  top: 0;
+}
+
+:root[data-theme='summer-day'] .page-main::after {
+  animation: summer-shore-breath 20s ease-in-out infinite alternate;
+  background:
+    linear-gradient(180deg, transparent 0%, var(--summer-sea) 48%, rgba(255, 255, 244, 0.5) 72%, var(--summer-sea-deep) 100%),
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.34) 0 1px, transparent 1px 64px);
+  bottom: -10%;
+  height: min(28vw, 240px);
+  opacity: 0.58;
+}
+
+:root[data-theme='summer-day'] .page-main > * {
+  position: relative;
+  z-index: 1;
+}
+
+:root[data-theme='summer-day'] .page-main .eyebrow,
+:root[data-theme='summer-day'] .detail-taxonomy > span,
+:root[data-theme='summer-day'] .inline-comment-composer span,
+:root[data-theme='summer-day'] .inline-comment-card span,
+:root[data-theme='summer-day'] .moderation-anchor span {
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .page-main .page-title h1,
+:root[data-theme='summer-day'] .guestbook-page .page-title h1,
+:root[data-theme='summer-day'] .guestbook-panel h2,
+:root[data-theme='summer-day'] .page-main .category-section__heading h2,
+:root[data-theme='summer-day'] .page-main .archive-month__heading h2,
+:root[data-theme='summer-day'] .detail-comments h2,
+:root[data-theme='summer-day'] .adjacent-content strong,
+:root[data-theme='summer-day'] .project-meta strong,
+:root[data-theme='summer-day'] .detail-toc a,
+:root[data-theme='summer-day'] .detail-comments__list strong,
+:root[data-theme='summer-day'] .guestbook-list strong {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .page-main .page-title p:not(.eyebrow),
+:root[data-theme='summer-day'] .guestbook-page .page-title p:not(.eyebrow),
+:root[data-theme='summer-day'] .guestbook-panel > p:not(.eyebrow),
+:root[data-theme='summer-day'] .page-main .archive-total,
+:root[data-theme='summer-day'] .page-main .category-section__heading span,
+:root[data-theme='summer-day'] .page-main .archive-month__heading span,
+:root[data-theme='summer-day'] .page-main .content-card__meta,
+:root[data-theme='summer-day'] .page-main .content-card__footer,
+:root[data-theme='summer-day'] .page-main .content-card p,
+:root[data-theme='summer-day'] .page-main .archive-item time,
+:root[data-theme='summer-day'] .page-main .archive-item span,
+:root[data-theme='summer-day'] .detail__summary,
+:root[data-theme='summer-day'] .detail__meta,
+:root[data-theme='summer-day'] .project-meta span,
+:root[data-theme='summer-day'] .inline-comment-card small,
+:root[data-theme='summer-day'] .adjacent-content span {
+  color: rgba(23, 52, 58, 0.62);
+}
+
+:root[data-theme='summer-day'] .page-main .content-card,
+:root[data-theme='summer-day'] .page-main .archive-list,
+:root[data-theme='summer-day'] .guestbook-page .guestbook-copy-card,
+:root[data-theme='summer-day'] .guestbook-page .guestbook-panel {
+  background: rgba(255, 255, 244, 0.68);
+  border-color: rgba(45, 109, 116, 0.16);
+  box-shadow: 0 20px 70px rgba(101, 145, 131, 0.12);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .guestbook-page .guestbook-copy-card::before,
+:root[data-theme='summer-day'] .guestbook-page .guestbook-panel::before {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 213, 105, 0.2), transparent 30%),
+    radial-gradient(circle at 100% 100%, rgba(125, 211, 252, 0.2), transparent 34%);
+}
+
+:root[data-theme='summer-day'] .detail__body,
+:root[data-theme='summer-day'] .detail-toc,
+:root[data-theme='summer-day'] .project-meta,
+:root[data-theme='summer-day'] .inline-comment-rail,
+:root[data-theme='summer-day'] .inline-comment-card,
+:root[data-theme='summer-day'] .detail-comments__list li,
+:root[data-theme='summer-day'] .guestbook-list li,
+:root[data-theme='summer-day'] .detail-comments__empty,
+:root[data-theme='summer-day'] .adjacent-content a,
+:root[data-theme='summer-day'] .adjacent-content__empty {
+  background: rgba(255, 255, 244, 0.68);
+  border-color: rgba(45, 109, 116, 0.16);
+  box-shadow: 0 20px 70px rgba(101, 145, 131, 0.12);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .page-main .content-card:hover {
+  border-color: rgba(8, 116, 127, 0.28);
+  box-shadow: 0 24px 80px rgba(101, 145, 131, 0.18);
+}
+
+:root[data-theme='summer-day'] .page-main .content-card h3,
+:root[data-theme='summer-day'] .page-main .content-card h3 a,
+:root[data-theme='summer-day'] .page-main .archive-item {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .page-main .content-card h3 a:hover,
+:root[data-theme='summer-day'] .page-main .content-card h3 a:focus-visible {
+  color: #08747f;
+  outline-color: rgba(8, 116, 127, 0.34);
+}
+
+:root[data-theme='summer-day'] .page-main .sort-tabs a,
+:root[data-theme='summer-day'] .page-main .content-card__series a,
+:root[data-theme='summer-day'] .page-main .detail-taxonomy a,
+:root[data-theme='summer-day'] .guestbook-disabled-actions a,
+:root[data-theme='summer-day'] .project-meta li,
+:root[data-theme='summer-day'] .project-meta a {
+  background: rgba(8, 116, 127, 0.08);
+  border-color: rgba(8, 116, 127, 0.2);
+  color: #08747f;
+}
+
+:root[data-theme='summer-day'] .page-main .sort-tabs a[aria-current='page'],
+:root[data-theme='summer-day'] .detail__meta .like-button {
+  background: linear-gradient(135deg, #ffd569, #8ee2d1);
+  border-color: transparent;
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .page-main .content-card__series a:hover,
+:root[data-theme='summer-day'] .page-main .detail-taxonomy a:hover,
+:root[data-theme='summer-day'] .page-main .detail-taxonomy a:focus-visible,
+:root[data-theme='summer-day'] .guestbook-disabled-actions a:hover,
+:root[data-theme='summer-day'] .guestbook-disabled-actions a:focus-visible,
+:root[data-theme='summer-day'] .page-main .archive-item:hover {
+  background: rgba(255, 213, 105, 0.18);
+  border-color: rgba(8, 116, 127, 0.3);
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] .detail__body {
+  background: rgba(255, 255, 244, 0.72);
+}
+
+:root[data-theme='summer-day'] .detail-cover,
+:root[data-theme='summer-day'] .detail__meta,
+:root[data-theme='summer-day'] .page-main .category-section__heading {
+  border-color: rgba(45, 109, 116, 0.16);
+}
+
+:root[data-theme='summer-day'] .markdown-code-block {
+  box-shadow: 0 18px 50px rgba(101, 145, 131, 0.12);
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-footer {
+  background: #f4fbf0;
+  border-top-color: rgba(45, 109, 116, 0.16);
+  color: rgba(23, 52, 58, 0.62);
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-footer strong,
+:root[data-theme='summer-day'] body:has(.page-main) .site-footer a {
+  color: #17343a;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .site-footer a {
+  border-color: rgba(45, 109, 116, 0.18);
 }
 
 .archive-timeline {

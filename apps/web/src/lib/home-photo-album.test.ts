@@ -4,12 +4,12 @@ import { buildHomePhotoAlbumItems, type HomePhotoAlbumImage } from './home-photo
 
 describe('home photo album helpers', () => {
   const portrait: HomePhotoAlbumImage = {
-    url: '/images/aster-profile.png',
-    alt: 'Aster.H 的个人照片',
+    url: '/images/default-post-cover.png',
+    alt: 'Aster.H 的内容封面',
   };
 
   const backgrounds: HomePhotoAlbumImage[] = [
-    { url: '/hero-workspace.png', alt: '首页默认背景图' },
+    { url: '/images/default-post-cover.png', alt: '默认内容封面' },
   ];
 
   test('uses uploaded content images for the home photo album', () => {
@@ -58,13 +58,13 @@ describe('home photo album helpers', () => {
       }),
     ).toEqual([
       {
-        url: '/images/aster-profile.png',
-        alt: 'Aster.H 的个人照片',
+        url: '/images/default-post-cover.png',
+        alt: 'Aster.H 的内容封面',
         caption: 'Portrait',
       },
       {
-        url: '/hero-workspace.png',
-        alt: '首页默认背景图',
+        url: '/images/default-post-cover.png',
+        alt: '默认内容封面',
         caption: 'Memory 01',
       },
     ]);

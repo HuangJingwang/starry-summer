@@ -13,7 +13,22 @@ describe('home page', () => {
     expect(source).toContain('<h1 className="portfolio-hero__name">{profile.ownerName}</h1>');
     expect(source).toContain('<p className="portfolio-hero__role">Content Builder</p>');
     expect(source).toContain('className="portfolio-hero__portrait"');
-    expect(source).toContain('/images/aster-profile.png');
+    expect(source).toContain('className="portfolio-hero__signal"');
+    expect(source).toContain('className="portfolio-hero__night-avatar"');
+    expect(source).toContain('src="/images/aster-profile.png"');
+    expect(source).toContain('alt="Aster.H 的夜晚头像"');
+    expect(source).toContain('className="portfolio-hero__day-avatar"');
+    expect(source).toContain('src="/images/aster-day-profile.png"');
+    expect(source).toContain('alt="Aster.H 的夏日头像"');
+    expect(source).toContain('className="summer-detail-field summer-detail-field--dashboard"');
+    expect(source).toContain('className="summer-detail summer-detail--cola"');
+    expect(source).toContain('className="summer-detail summer-detail--lemon"');
+    expect(source).toContain('className="summer-detail-field summer-detail-field--featured"');
+    expect(source).toContain('className="summer-detail summer-detail--surfboard"');
+    expect(source).toContain('className="summer-detail summer-detail--ice"');
+    expect(source).toContain('className="summer-detail-field summer-detail-field--popular"');
+    expect(source).toContain('className="summer-detail summer-detail--sun-glass"');
+    expect(source).toContain('aria-hidden="true"');
     expect(source).toContain('SCROLL TO ENTER');
     expect(source).not.toContain('className="home-landing"');
     expect(source).not.toContain('className="home-overview"');
@@ -36,12 +51,14 @@ describe('home page', () => {
     expect(source).toContain('<JuejinIcon />');
   });
 
-  test('uses uploaded background assets for a rotating home hero image pool', () => {
+  test('does not render the old desktop workspace image as the home background', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
 
-    expect(source).toContain('loadPublicAssets({ usage:');
-    expect(source).toContain('<HomeHeroBackground');
-    expect(source).toContain('backgrounds={heroBackgrounds}');
+    expect(source).not.toContain("import { HomeHeroBackground } from '@/components/HomeHeroBackground';");
+    expect(source).not.toContain('loadPublicAssets({ usage:');
+    expect(source).not.toContain('<HomeHeroBackground');
+    expect(source).not.toContain('heroBackgrounds');
+    expect(source).not.toContain('/hero-workspace.png');
   });
 
   test('keeps the README screenshot public navigation visible on the home page', () => {

@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, test } from 'vitest';
 
 import { buildSiteFooterModel } from './site-shell';
@@ -44,5 +47,12 @@ describe('site shell helpers', () => {
         },
       ],
     });
+  });
+
+  test('renders the public day night theme toggle in the shared shell', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+
+    expect(source).toContain("import { ThemeToggle } from '@/components/ThemeToggle';");
+    expect(source).toContain('<ThemeToggle />');
   });
 });
