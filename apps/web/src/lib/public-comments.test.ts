@@ -53,6 +53,38 @@ describe('public comment helpers', () => {
     });
   });
 
+  test('normalizes public inline comment anchors', () => {
+    expect(
+      normalizePublicComment({
+        id: 'comment-1',
+        authorName: 'Reader',
+        body: 'Nice writing.',
+        createdAt: '2026-06-10T00:00:00.000Z',
+        anchor: {
+          text: 'selected passage',
+          prefix: 'before',
+          suffix: 'after',
+          start: 12,
+          end: 28,
+          hash: 'a'.repeat(64),
+        },
+      }),
+    ).toEqual({
+      id: 'comment-1',
+      authorName: 'Reader',
+      body: 'Nice writing.',
+      createdAt: '2026-06-10T00:00:00.000Z',
+      anchor: {
+        text: 'selected passage',
+        prefix: 'before',
+        suffix: 'after',
+        start: 12,
+        end: 28,
+        hash: 'a'.repeat(64),
+      },
+    });
+  });
+
   test('loads approved comments from the API', async () => {
     const comments = await loadApprovedComments('post', 'post-1', {
       apiBaseUrl: 'https://api.example.com',

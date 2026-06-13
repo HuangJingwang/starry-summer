@@ -9,13 +9,14 @@ type LoginState = 'idle' | 'submitting' | 'success' | 'error';
 export function LoginForm({ redirectTo = '/admin' }: { redirectTo?: string }) {
   const [state, setState] = useState<LoginState>('idle');
   const [message, setMessage] = useState('');
+  const loginBusy = state === 'submitting';
 
   async function handleSubmit(formData: FormData) {
     setState('submitting');
     setMessage('');
 
     const request = buildLoginRequest({
-      email: String(formData.get('email') ?? ''),
+      account: String(formData.get('account') ?? ''),
       password: String(formData.get('password') ?? ''),
     });
 
@@ -31,26 +32,39 @@ export function LoginForm({ redirectTo = '/admin' }: { redirectTo?: string }) {
       window.location.assign(redirectTo);
     } catch {
       setState('error');
-      setMessage('邮箱或密码不正确，或 API 服务暂不可用。');
+      setMessage('账号或密码不正确，或 API 服务暂不可用。');
     }
   }
 
   return (
-    <form className="login-panel" action={handleSubmit}>
-      <p className="eyebrow">仅站长可用</p>
-      <h1>登录</h1>
-      <label>
-        邮箱
-        <input name="email" type="email" placeholder="owner@example.com" autoComplete="username" required />
-      </label>
-      <label>
-        密码
-        <input name="password" type="password" placeholder="••••••••" autoComplete="current-password" required />
-      </label>
-      <button type="submit" disabled={state === 'submitting'}>
-        {state === 'submitting' ? '登录中' : '登录'}
-      </button>
-      {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
+    <form className="login-panel" action={handleSubmit} aria-busy={loginBusy}>
+      <div className="login-panel__brand">
+        <span className="login-panel__mark" aria-hidden="true">
+          SS
+        </span>
+        <div>
+          <p className="eyebrow">安全入口</p>
+          <h1>内容系统后台</h1>
+          <p>登录后可管理文章、项目、留言、素材与站点配置。</p>
+        </div>
+      </div>
+      <div className="login-panel__fields">
+        <label>
+          <span>账号</span>
+          <input name="account" type="text" placeholder="owner@example.com" autoComplete="username" required />
+        </label>
+        <label>
+          <span>密码</span>
+          <input name="password" type="password" placeholder="请输入后台密码" autoComplete="current-password" required />
+        </label>
+      </div>
+      <div className="login-panel__actions">
+        <button type="submit" disabled={loginBusy} aria-disabled={loginBusy}>
+          {state === 'submitting' ? '登录中' : '进入后台'}
+        </button>
+        <span>仅站长可用，会话将以安全 Cookie 保存。</span>
+      </div>
+      {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
     </form>
   );
 }

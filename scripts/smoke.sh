@@ -4,6 +4,7 @@ set -euo pipefail
 SITE_URL="${1:-${SITE_URL:-http://127.0.0.1:3000}}"
 SITE_URL="${SITE_URL%/}"
 response_file="/tmp/starry-summer-smoke-response"
+public_post_id=""
 
 trap 'rm -f "$response_file"' EXIT
 
@@ -45,6 +46,118 @@ check_admin_api_protected() {
 
   if [[ "$status_code" != "401" && "$status_code" != "403" ]]; then
     echo "Admin API endpoint did not reject unauthenticated access. Status: $status_code"
+    exit 1
+  fi
+}
+
+ensure_public_post_id() {
+  if [[ -n "$public_post_id" ]]; then
+    return
+  fi
+
+  echo "Finding public post for interaction smoke checks: $SITE_URL/api/content?type=post" >&2
+  curl --fail --silent --show-error --location --max-time 10 "$SITE_URL/api/content?type=post" >"$response_file"
+
+  public_post_id=$(
+    node - "$response_file" <<'NODE'
+const { readFileSync } = require('node:fs');
+
+const responsePath = process.argv[2];
+let data;
+
+try {
+  data = JSON.parse(readFileSync(responsePath, 'utf8'));
+} catch {
+  console.error('Public post discovery endpoint did not return JSON.');
+  console.error(readFileSync(responsePath, 'utf8'));
+  process.exit(1);
+}
+
+if (!Array.isArray(data)) {
+  console.error('Public post discovery endpoint did not return a JSON array.');
+  console.error(JSON.stringify(data));
+  process.exit(1);
+}
+
+const post = data.find((item) => item && typeof item === 'object' && item.type === 'post' && typeof item.id === 'string' && item.id.length > 0);
+
+if (post) {
+  process.stdout.write(post.id);
+}
+NODE
+  )
+}
+
+check_public_like_post() {
+  local status_code
+
+  ensure_public_post_id
+
+  if [[ -z "$public_post_id" ]]; then
+    echo "Skipping anonymous public like submission check because no published post was returned."
+    return
+  fi
+
+  echo "Checking anonymous public like submission: $SITE_URL/api/likes/post/$public_post_id"
+  status_code=$(
+    curl \
+      --silent \
+      --show-error \
+      --output /dev/null \
+      --write-out "%{http_code}" \
+      --request POST \
+      --max-time 10 \
+      "$SITE_URL/api/likes/post/$public_post_id"
+  )
+
+  if [[ "$status_code" != "200" && "$status_code" != "201" ]]; then
+    echo "Public like endpoint did not accept an anonymous request. Status: $status_code"
+    exit 1
+  fi
+}
+
+check_unauthenticated_comment_submission() {
+  local status_code
+
+  echo "Checking unauthenticated comment submission rejection: $SITE_URL/api/comments"
+  status_code=$(
+    curl \
+      --silent \
+      --show-error \
+      --output /dev/null \
+      --write-out "%{http_code}" \
+      --request POST \
+      --header "content-type: application/json" \
+      --data '{"targetType":"post","targetId":"smoke-post","body":"Smoke comment should require login."}' \
+      --max-time 10 \
+      "$SITE_URL/api/comments"
+  )
+
+  if [[ "$status_code" != "401" && "$status_code" != "403" ]]; then
+    echo "Comment submission endpoint did not require reader login. Status: $status_code"
+    exit 1
+  fi
+}
+
+check_unauthenticated_guestbook_submission() {
+  local status_code
+
+  echo "Checking unauthenticated guestbook submission rejection: $SITE_URL/api/guestbook"
+  status_code=$(
+    curl \
+      --silent \
+      --show-error \
+      --output /dev/null \
+      --write-out "%{http_code}" \
+      --request POST \
+      --header "content-type: application/json" \
+      --data '{"body":"Smoke guestbook message should require login."}' \
+      --max-time 10 \
+      "$SITE_URL/api/guestbook"
+  )
+
+  if [[ "$status_code" != "401" && "$status_code" != "403" ]]; then
+    echo "Guestbook submission endpoint did not require reader login. Status: $status_code"
     exit 1
   fi
 }
@@ -130,6 +243,13 @@ if (data.components?.database?.status !== 'ok' || data.components?.database?.dri
 if (data.components?.redis?.status !== 'ok' || data.components?.redis?.driver !== 'redis') {
   fail('API health endpoint did not report Redis as healthy.');
 }
+
+const storage = data.components?.storage;
+const storageDriver = storage?.driver;
+
+if (storage?.status !== 'ok' || !['local', 's3'].includes(storageDriver)) {
+  fail('API health endpoint did not report upload storage as healthy.');
+}
 NODE
 }
 
@@ -157,6 +277,12 @@ try {
 
 if (!data || typeof data !== 'object' || Array.isArray(data)) {
   console.error('Settings API endpoint did not return a JSON object.');
+  console.error(JSON.stringify(data));
+  process.exit(1);
+}
+
+if (data.profile?.ownerName !== 'Aster.H') {
+  console.error('Settings API endpoint did not return the public owner alias.');
   console.error(JSON.stringify(data));
   process.exit(1);
 }
@@ -214,7 +340,14 @@ NODE
 }
 
 check_comments_api() {
-  check_path "/api/comments/post/smoke-post" "comments API"
+  ensure_public_post_id
+
+  if [[ -z "$public_post_id" ]]; then
+    echo "Skipping comments API check because no published post was returned."
+    return
+  fi
+
+  check_path "/api/comments/post/$public_post_id" "comments API"
 
   node - "$response_file" <<'NODE'
 const { readFileSync } = require('node:fs');
@@ -337,6 +470,9 @@ check_settings_api
 check_content_search_api
 check_guestbook_api
 check_comments_api
+check_public_like_post
+check_unauthenticated_comment_submission
+check_unauthenticated_guestbook_submission
 check_random_asset_api
 check_rss
 check_sitemap

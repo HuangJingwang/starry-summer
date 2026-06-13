@@ -6,6 +6,7 @@ import {
   buildGuestbookRequest,
   buildDedupedLikeRequest,
   buildDedupedViewRequest,
+  createPersistentInteractionSeenStore,
   buildLikeRequest,
   buildModerationActionRequest,
   buildModerationDeleteRequest,
@@ -13,6 +14,7 @@ import {
   loadAdminModerationCount,
   normalizeModerationRecord,
   PUBLIC_SUBMISSION_LIMITS,
+  readInteractionErrorMessage,
 } from './interaction-client';
 
 describe('interaction client helpers', () => {
@@ -63,29 +65,83 @@ describe('interaction client helpers', () => {
     expect(buildDedupedLikeRequest('post', 'post-2', seen)).toEqual(buildLikeRequest('post', 'post-2'));
   });
 
+  test('persists seen likes across browser reloads', () => {
+    const writes: string[] = [];
+    const storage = {
+      getItem: (key: string) =>
+        key === 'starry-summer:seen-interactions' ? JSON.stringify(['like:post:post-1']) : null,
+      setItem: (_key: string, value: string) => {
+        writes.push(value);
+      },
+    };
+    const seen = createPersistentInteractionSeenStore(new Set<string>(), storage);
+
+    expect(buildDedupedLikeRequest('post', 'post-1', seen)).toBeNull();
+    expect(buildDedupedLikeRequest('post', 'post-2', seen)).toEqual(buildLikeRequest('post', 'post-2'));
+    expect(JSON.parse(writes.at(-1) ?? '[]')).toEqual(['like:post:post-1', 'like:post:post-2']);
+  });
+
   test('builds comment request', () => {
     expect(
       buildCommentRequest({
         targetType: 'post',
         targetId: 'post-1',
-        authorName: ' Reader ',
         body: ' Nice post. ',
       }),
     ).toEqual({
       url: '/api/comments',
       init: {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
           targetType: 'post',
           targetId: 'post-1',
-          authorName: 'Reader',
           body: 'Nice post.',
         }),
       },
     });
+    expect(buildCommentRequest({ targetType: 'post', targetId: 'post-1', body: ' Nice post. ' }).init.body).toBe(
+      JSON.stringify({
+        targetType: 'post',
+        targetId: 'post-1',
+        body: 'Nice post.',
+      }),
+    );
+  });
+
+  test('builds anchored inline comment request', () => {
+    expect(
+      buildCommentRequest({
+        targetType: 'post',
+        targetId: 'post-1',
+        body: ' Inline note. ',
+        anchor: {
+          text: 'selected passage',
+          prefix: 'before',
+          suffix: 'after',
+          start: 12,
+          end: 28,
+          hash: 'a'.repeat(64),
+        },
+      }).init.body,
+    ).toBe(
+      JSON.stringify({
+        targetType: 'post',
+        targetId: 'post-1',
+        body: 'Inline note.',
+        anchor: {
+          text: 'selected passage',
+          prefix: 'before',
+          suffix: 'after',
+          start: 12,
+          end: 28,
+          hash: 'a'.repeat(64),
+        },
+      }),
+    );
   });
 
   test('builds credentialed guestbook request without accepting a forged author name', () => {
@@ -181,6 +237,32 @@ describe('interaction client helpers', () => {
     expect(buildModerationDeleteRequest('guestbook', 'entry-1').url).toBe('/api/admin/guestbook/entry-1');
   });
 
+  test('reads specific interaction API error messages', async () => {
+    await expect(
+      readInteractionErrorMessage(
+        new Response(JSON.stringify({ message: 'Comment was already moderated' }), {
+          status: 409,
+          headers: { 'content-type': 'application/json' },
+        }),
+        '操作失败。',
+      ),
+    ).resolves.toBe('Comment was already moderated');
+
+    await expect(
+      readInteractionErrorMessage(
+        new Response(JSON.stringify({ message: ['Reader session is required'] }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        }),
+        '操作失败。',
+      ),
+    ).resolves.toBe('Reader session is required');
+  });
+
+  test('falls back to a friendly interaction error when response has no readable message', async () => {
+    await expect(readInteractionErrorMessage(new Response('', { status: 500 }), '操作失败。')).resolves.toBe('操作失败。');
+  });
+
   test('normalizes moderation records', () => {
     expect(
       normalizeModerationRecord({
@@ -204,6 +286,44 @@ describe('interaction client helpers', () => {
       ipHash: 'ip-hash-1',
       userAgent: 'Mozilla/5.0',
       createdAt: '2026-06-10T00:00:00.000Z',
+    });
+  });
+
+  test('normalizes moderation records with inline anchors', () => {
+    expect(
+      normalizeModerationRecord({
+        id: 'comment-1',
+        targetType: 'post',
+        targetId: 'post-1',
+        authorName: 'Reader',
+        body: 'Nice.',
+        status: 'pending',
+        createdAt: '2026-06-10T00:00:00.000Z',
+        anchor: {
+          text: 'selected passage',
+          prefix: 'before',
+          suffix: 'after',
+          start: 12,
+          end: 28,
+          hash: 'a'.repeat(64),
+        },
+      }),
+    ).toEqual({
+      id: 'comment-1',
+      targetType: 'post',
+      targetId: 'post-1',
+      authorName: 'Reader',
+      body: 'Nice.',
+      status: 'pending',
+      createdAt: '2026-06-10T00:00:00.000Z',
+      anchor: {
+        text: 'selected passage',
+        prefix: 'before',
+        suffix: 'after',
+        start: 12,
+        end: 28,
+        hash: 'a'.repeat(64),
+      },
     });
   });
 });

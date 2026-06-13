@@ -91,10 +91,10 @@ describe('PostgresSettingsRepository', () => {
     ).toEqual({
       tagline: 'A public trail of private work.',
       backgroundImageUrl: 'https://cdn.example.com/hero.jpg',
-      motto: 'Build a public trail of private work.',
+      motto: 'Stay curious. Keep building.',
       quotes: [
-        'Build a public trail of private work.',
-        'Small notes compound into a life you can revisit.',
+        '用代码解决问题，用文字留下路径。',
+        '把每一次实践沉淀成未来可以复用的认知。',
       ],
     });
   });

@@ -27,21 +27,37 @@ export default async function AdminProjectsPage({
           <div>
             <p className="eyebrow">项目</p>
             <h1>项目管理</h1>
+            <p>集中管理项目档案、状态、技术栈、分类标签和发布节奏。</p>
           </div>
-          <Link href="/admin/content/new?type=project">新建项目</Link>
+          <Link href="/admin/projects/new">新建项目</Link>
         </div>
-        <form className="admin-filter" action="/admin/projects">
-          <input name="q" defaultValue={q} placeholder="搜索项目标题、摘要、技术栈" />
-          <select name="status" defaultValue={filters.status ?? ''} aria-label="项目内容状态">
-            <option value="">全部状态</option>
-            <option value="draft">草稿</option>
-            <option value="published">已发布</option>
-            <option value="private">私密</option>
-            <option value="archived">已归档</option>
-          </select>
-          <input name="category" defaultValue={filters.category ?? ''} placeholder="分类" />
-          <input name="tag" defaultValue={filters.tag ?? ''} placeholder="标签" />
-          <input name="series" defaultValue={filters.series ?? ''} placeholder="系列" />
+        <form className="admin-filter admin-filter--projects" action="/admin/projects" aria-label="项目筛选">
+          <label className="admin-filter__search">
+            搜索
+            <input name="q" defaultValue={q} placeholder="项目标题、摘要、技术栈" />
+          </label>
+          <label>
+            状态
+            <select name="status" defaultValue={filters.status ?? ''} aria-label="项目内容状态">
+              <option value="">全部状态</option>
+              <option value="draft">草稿</option>
+              <option value="published">已发布</option>
+              <option value="private">私密</option>
+              <option value="archived">已归档</option>
+            </select>
+          </label>
+          <label>
+            分类
+            <input name="category" defaultValue={filters.category ?? ''} placeholder="分类" />
+          </label>
+          <label>
+            标签
+            <input name="tag" defaultValue={filters.tag ?? ''} placeholder="标签" />
+          </label>
+          <label>
+            系列
+            <input name="series" defaultValue={filters.series ?? ''} placeholder="系列" />
+          </label>
           <button type="submit">筛选</button>
         </form>
         <AdminContentManager

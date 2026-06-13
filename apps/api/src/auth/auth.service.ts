@@ -13,7 +13,8 @@ export interface AuthConfig {
 }
 
 export interface LoginInput {
-  email: string;
+  email?: string;
+  account?: string;
   password: string;
 }
 
@@ -49,6 +50,11 @@ export interface ReaderSession {
 
 export type ReaderSessionPayload = Omit<ReaderSession, 'token'> & { kind: 'reader' };
 
+export interface ReaderLoginStatePayload {
+  stateToken: string;
+  encodedNext: string;
+}
+
 export interface GithubAuthorizeInput {
   state: string;
   redirectUri: string;
@@ -70,6 +76,8 @@ interface GithubUserResponse {
 
 export const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 8;
 export const READER_SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30;
+export const DEFAULT_ADMIN_ACCOUNT = 'owner@example.com';
+export const DEFAULT_ADMIN_PASSWORD_HASH = '';
 
 @Injectable()
 export class AuthService {
@@ -77,8 +85,8 @@ export class AuthService {
 
   constructor(config?: Partial<AuthConfig>) {
     this.config = {
-      adminEmail: config?.adminEmail ?? process.env.ADMIN_EMAIL ?? 'owner@example.com',
-      adminPasswordHash: config?.adminPasswordHash ?? process.env.ADMIN_PASSWORD_HASH ?? '',
+      adminEmail: config?.adminEmail ?? process.env.ADMIN_EMAIL ?? DEFAULT_ADMIN_ACCOUNT,
+      adminPasswordHash: config?.adminPasswordHash ?? process.env.ADMIN_PASSWORD_HASH ?? DEFAULT_ADMIN_PASSWORD_HASH,
       sessionSecret: config?.sessionSecret ?? process.env.SESSION_SECRET ?? 'development-session-secret',
       githubClientId: config?.githubClientId ?? process.env.GITHUB_CLIENT_ID,
       githubClientSecret: config?.githubClientSecret ?? process.env.GITHUB_CLIENT_SECRET,
@@ -88,7 +96,8 @@ export class AuthService {
   }
 
   async login(input: LoginInput): Promise<AdminSession> {
-    const emailMatches = input.email.trim().toLowerCase() === this.config.adminEmail.trim().toLowerCase();
+    const loginAccount = (input.account ?? input.email ?? '').trim().toLowerCase();
+    const emailMatches = loginAccount === this.config.adminEmail.trim().toLowerCase();
     const passwordMatches =
       this.config.adminPasswordHash.length > 0 && verifyPassword(input.password, this.config.adminPasswordHash);
 
@@ -187,6 +196,37 @@ export class AuthService {
     url.searchParams.set('state', input.state);
 
     return url;
+  }
+
+  createReaderLoginState(stateToken: string, nextPath: string): string {
+    const encodedNext = encodeURIComponent(nextPath);
+    const payload = `${stateToken}.${encodedNext}`;
+
+    return `${payload}.${this.sign(payload)}`;
+  }
+
+  verifyReaderLoginState(value: string | undefined): ReaderLoginStatePayload | null {
+    const state = value ?? '';
+    const firstSeparatorIndex = state.indexOf('.');
+    const lastSeparatorIndex = state.lastIndexOf('.');
+
+    if (firstSeparatorIndex < 0 || lastSeparatorIndex <= firstSeparatorIndex) {
+      return null;
+    }
+
+    const stateToken = state.slice(0, firstSeparatorIndex);
+    const encodedNext = state.slice(firstSeparatorIndex + 1, lastSeparatorIndex);
+    const signature = state.slice(lastSeparatorIndex + 1);
+    const payload = `${stateToken}.${encodedNext}`;
+    const expectedSignature = this.sign(payload);
+    const actual = Buffer.from(signature);
+    const expected = Buffer.from(expectedSignature);
+
+    if (!stateToken || !encodedNext || actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
+      return null;
+    }
+
+    return { stateToken, encodedNext };
   }
 
   async loadGithubReaderProfile(

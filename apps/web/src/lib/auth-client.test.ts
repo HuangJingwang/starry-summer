@@ -4,14 +4,14 @@ import { buildAdminLoginRedirectPath, buildLoginRequest, buildLogoutRequest, bui
 
 describe('auth client helpers', () => {
   test('normalizes owner login input', () => {
-    expect(normalizeLoginInput({ email: ' Owner@Example.COM ', password: ' secret ' })).toEqual({
-      email: 'owner@example.com',
+    expect(normalizeLoginInput({ account: ' owner@example.com ', password: ' secret ' })).toEqual({
+      account: 'owner@example.com',
       password: ' secret ',
     });
   });
 
   test('builds a credentialed login request', () => {
-    expect(buildLoginRequest({ email: 'owner@example.com', password: 'secret' })).toEqual({
+    expect(buildLoginRequest({ account: 'owner@example.com', password: 'secret' })).toEqual({
       url: '/api/auth/login',
       init: {
         method: 'POST',
@@ -19,7 +19,7 @@ describe('auth client helpers', () => {
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify({ email: 'owner@example.com', password: 'secret' }),
+        body: JSON.stringify({ account: 'owner@example.com', password: 'secret' }),
       },
     });
   });

@@ -1,6 +1,7 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 
+import { resolvePublicClientAddress } from '../security/public-client.js';
 import { RateLimitService } from '../security/rate-limit.service.js';
 
 interface HttpRequest {
@@ -30,13 +31,6 @@ export class LoginRateLimitGuard implements CanActivate {
   }
 
   private actorKey(request: HttpRequest): string {
-    const forwardedFor = request.headers['x-forwarded-for'];
-    const forwarded = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-    const forwardedActors = forwarded
-      ?.split(',')
-      .map((item) => item.trim())
-      .filter(Boolean);
-
-    return forwardedActors?.[forwardedActors.length - 1] || request.ip || 'unknown';
+    return resolvePublicClientAddress(request);
   }
 }

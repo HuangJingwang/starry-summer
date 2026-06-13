@@ -71,9 +71,17 @@ export class AdminAuthGuard implements CanActivate {
 
   private assertAllowedOrigin(value: string | string[] | undefined): void {
     const origin = Array.isArray(value) ? value[0] : value;
-    const allowedOrigins = [process.env.WEB_ORIGIN ?? 'http://localhost:3000', process.env.PUBLIC_SITE_URL]
+    const allowedOrigins = [process.env.WEB_ORIGIN, process.env.PUBLIC_SITE_URL]
       .map((item) => item?.trim().replace(/\/+$/, ''))
       .filter(Boolean);
+
+    if (allowedOrigins.length === 0) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new ForbiddenException('Admin request origin is not configured for production');
+      }
+
+      allowedOrigins.push('http://localhost:3000');
+    }
 
     if (!origin || !allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
       throw new ForbiddenException('Admin request origin is not allowed');

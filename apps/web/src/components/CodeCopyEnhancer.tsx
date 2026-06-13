@@ -2,6 +2,13 @@
 
 import { useEffect } from 'react';
 
+const defaultCopyLabel = '复制代码';
+const defaultCopyAriaLabel = '复制代码块';
+const successCopyLabel = '已复制';
+const successCopyAriaLabel = '代码已复制';
+const failureCopyLabel = '复制失败';
+const failureCopyAriaLabel = '代码复制失败';
+
 export function CodeCopyEnhancer() {
   useEffect(() => {
     async function copyText(text: string) {
@@ -44,11 +51,12 @@ export function CodeCopyEnhancer() {
         return;
       }
 
-      const originalLabel = button.textContent ?? 'Copy';
       const didCopy = await copyText(code);
-      button.textContent = didCopy ? 'Copied' : 'Failed';
+      button.textContent = didCopy ? successCopyLabel : failureCopyLabel;
+      button.setAttribute('aria-label', didCopy ? successCopyAriaLabel : failureCopyAriaLabel);
       window.setTimeout(() => {
-        button.textContent = originalLabel;
+        button.textContent = defaultCopyLabel;
+        button.setAttribute('aria-label', defaultCopyAriaLabel);
       }, 1_500);
     }
 

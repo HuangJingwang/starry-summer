@@ -8,6 +8,7 @@ import {
   buildUpdateTaxonomyTermRequest,
   groupTaxonomyTermsByType,
   normalizeTaxonomyTerm,
+  readTaxonomyErrorMessage,
 } from './taxonomy';
 
 describe('taxonomy client helpers', () => {
@@ -61,6 +62,30 @@ describe('taxonomy client helpers', () => {
         credentials: 'include',
       },
     });
+  });
+
+  test('reads taxonomy API JSON error messages', async () => {
+    const response = new Response(JSON.stringify({ message: 'Slug 已存在' }), {
+      status: 409,
+      headers: { 'content-type': 'application/json' },
+    });
+
+    await expect(readTaxonomyErrorMessage(response, '保存失败')).resolves.toBe('Slug 已存在');
+  });
+
+  test('joins taxonomy API validation error arrays', async () => {
+    const response = new Response(JSON.stringify({ message: ['名称不能为空', 'Slug 格式不正确'] }), {
+      status: 400,
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+    });
+
+    await expect(readTaxonomyErrorMessage(response, '保存失败')).resolves.toBe('名称不能为空；Slug 格式不正确');
+  });
+
+  test('falls back when taxonomy API error body is empty', async () => {
+    const response = new Response('', { status: 500 });
+
+    await expect(readTaxonomyErrorMessage(response, '请求失败')).resolves.toBe('请求失败');
   });
 
   test('reads taxonomy form data', () => {

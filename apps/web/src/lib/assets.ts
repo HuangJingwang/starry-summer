@@ -35,6 +35,7 @@ export interface AssetRequest {
 export interface AssetRequestOptions {
   usage?: AssetUsage;
   apiBaseUrl?: string;
+  timeoutMs?: number;
 }
 
 export interface MarkdownSelectionRange {
@@ -53,7 +54,7 @@ export async function buildAssetUploadPayload(file: File, options: AssetUploadPa
 
   return {
     filename: uploadFile.name,
-    mimeType: uploadFile.type || 'application/octet-stream',
+    mimeType: normalizeUploadMimeType(uploadFile.type, uploadFile.name),
     base64: bytesToBase64(new Uint8Array(await uploadFile.arrayBuffer())),
   };
 }
@@ -102,6 +103,25 @@ export function buildAssetDeleteRequest(id: string): AssetRequest {
       credentials: 'include',
     },
   };
+}
+
+export async function readAssetErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const contentType = response.headers.get('content-type') ?? '';
+
+    if (contentType.includes('application/json')) {
+      const data = (await response.json()) as { message?: unknown; error?: unknown };
+      const message = normalizeErrorMessage(data.message) || normalizeErrorMessage(data.error);
+
+      return message || fallback;
+    }
+
+    const text = (await response.text()).trim();
+
+    return text || fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export function buildRandomAssetRequest(options: AssetRequestOptions = {}): AssetRequest {
@@ -161,12 +181,19 @@ export function insertMarkdownAsset(
 
 export async function loadRandomAsset(
   options: AssetRequestOptions = {},
-  fetcher: (url: string, init: RequestInit) => Promise<Response> = (url, init) => fetch(url, init),
+  fetcher?: (url: string, init: RequestInit) => Promise<Response>,
 ): Promise<StoredAsset | null> {
+  if (!fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+    return null;
+  }
+
   const request = buildRandomAssetRequest(options);
+  const activeFetcher = fetcher ?? ((url: string, init: RequestInit) => fetch(url, init));
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
 
   try {
-    const response = await fetcher(request.url, request.init);
+    const response = await activeFetcher(request.url, { ...request.init, signal: controller.signal });
 
     if (!response.ok) {
       return null;
@@ -181,17 +208,26 @@ export async function loadRandomAsset(
     return normalizeStoredAsset(data as Partial<StoredAsset>);
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
 export async function loadPublicAssets(
   options: AssetRequestOptions = {},
-  fetcher: (url: string, init: RequestInit) => Promise<Response> = (url, init) => fetch(url, init),
+  fetcher?: (url: string, init: RequestInit) => Promise<Response>,
 ): Promise<StoredAsset[]> {
+  if (!fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+    return [];
+  }
+
   const request = buildPublicAssetListRequest(options);
+  const activeFetcher = fetcher ?? ((url: string, init: RequestInit) => fetch(url, init));
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
 
   try {
-    const response = await fetcher(request.url, request.init);
+    const response = await activeFetcher(request.url, { ...request.init, signal: controller.signal });
 
     if (!response.ok) {
       return [];
@@ -206,6 +242,8 @@ export async function loadPublicAssets(
     return data.map((item) => normalizeStoredAsset(item as Partial<StoredAsset>));
   } catch {
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -220,6 +258,18 @@ function buildAssetUrl(path: string, options: AssetRequestOptions): string {
   const params = new URLSearchParams({ usage: options.usage });
 
   return `${baseUrl}${apiPath}?${params.toString()}`;
+}
+
+function normalizeErrorMessage(value: unknown): string {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).join('；');
+  }
+
+  return '';
 }
 
 async function prepareUploadFile(file: File, options: AssetUploadPayloadOptions): Promise<File> {
@@ -247,7 +297,51 @@ async function prepareUploadFile(file: File, options: AssetUploadPayloadOptions)
 }
 
 function canOptimizeImage(file: File): boolean {
-  return ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+  return ['image/jpeg', 'image/png', 'image/webp'].includes(normalizeUploadMimeType(file.type, file.name));
+}
+
+function normalizeUploadMimeType(mimeType: string, filename: string): string {
+  const normalized = mimeType.trim().toLowerCase();
+
+  if (normalized === 'image/jpg') {
+    return 'image/jpeg';
+  }
+
+  if (normalized) {
+    return normalized;
+  }
+
+  const extension = filename.split('.').pop()?.toLowerCase();
+
+  if (extension === 'jpg' || extension === 'jpeg') {
+    return 'image/jpeg';
+  }
+
+  if (extension === 'png') {
+    return 'image/png';
+  }
+
+  if (extension === 'webp') {
+    return 'image/webp';
+  }
+
+  if (extension === 'gif') {
+    return 'image/gif';
+  }
+
+  if (extension === 'pdf') {
+    return 'application/pdf';
+  }
+
+  if (extension === 'md' || extension === 'markdown') {
+    return 'text/markdown';
+  }
+
+  if (extension === 'txt') {
+    return 'text/plain';
+  }
+
+  return 'application/octet-stream';
 }
 
 function createBrowserImageUploadOptimizer(): ImageUploadOptimizer | null {

@@ -7,7 +7,7 @@ import type { SiteSettings } from './settings';
 const settings: SiteSettings = {
   profile: {
     title: 'Starry Summer',
-    ownerName: 'Jing',
+    ownerName: 'Private Owner',
     description: 'Personal notes and projects.',
     socialLinks: [],
   },
@@ -45,7 +45,7 @@ describe('home profile model', () => {
     );
 
     expect(model).toEqual({
-      ownerName: 'Jing',
+      ownerName: 'Aster.H',
       title: 'Starry Summer',
       description: 'Personal notes and projects.',
       motto: 'Keep a record.',

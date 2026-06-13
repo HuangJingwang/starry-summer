@@ -137,6 +137,113 @@ describe('HealthService', () => {
     });
   });
 
+  test('reports ok when local upload storage is writable', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      storageDriver: 'local',
+      localUploadDir: '/app/uploads',
+      pingLocalUploadDir: async () => undefined,
+    });
+
+    await expect(service.check()).resolves.toEqual({
+      status: 'ok',
+      service: 'starry-summer-api',
+      ...defaultRelease,
+      components: {
+        api: { status: 'ok' },
+        database: {
+          status: 'skipped',
+          driver: 'memory',
+        },
+        storage: {
+          status: 'ok',
+          driver: 'local',
+        },
+      },
+    });
+  });
+
+  test('reports degraded when local upload storage is not writable', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      storageDriver: 'local',
+      localUploadDir: '/app/uploads',
+      pingLocalUploadDir: async () => {
+        throw new Error('permission denied');
+      },
+    });
+
+    await expect(service.check()).resolves.toMatchObject({
+      status: 'degraded',
+      components: {
+        storage: {
+          status: 'error',
+          driver: 'local',
+          message: 'permission denied',
+        },
+      },
+    });
+  });
+
+  test('reports ok when S3-compatible storage is reachable', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      storageDriver: 's3',
+      s3Bucket: 'starry-summer',
+      pingS3Bucket: async () => undefined,
+    });
+
+    await expect(service.check()).resolves.toMatchObject({
+      status: 'ok',
+      components: {
+        storage: {
+          status: 'ok',
+          driver: 's3',
+        },
+      },
+    });
+  });
+
+  test('reports degraded when S3-compatible storage is missing a bucket', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      storageDriver: 's3',
+    });
+
+    await expect(service.check()).resolves.toMatchObject({
+      status: 'degraded',
+      components: {
+        storage: {
+          status: 'missing',
+          driver: 's3',
+          message: 'S3_BUCKET is required when STORAGE_DRIVER=s3',
+        },
+      },
+    });
+  });
+
+  test('reports degraded when S3-compatible storage is unreachable', async () => {
+    const service = new HealthService({
+      repositoryDriver: 'memory',
+      storageDriver: 's3',
+      s3Bucket: 'starry-summer',
+      pingS3Bucket: async () => {
+        throw new Error('bucket unavailable');
+      },
+    });
+
+    await expect(service.check()).resolves.toMatchObject({
+      status: 'degraded',
+      components: {
+        storage: {
+          status: 'error',
+          driver: 's3',
+          message: 'bucket unavailable',
+        },
+      },
+    });
+  });
+
   test('reports ok when Redis ping succeeds', async () => {
     const service = new HealthService({
       repositoryDriver: 'memory',

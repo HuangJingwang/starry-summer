@@ -1,35 +1,72 @@
 'use client';
 
-import { useState } from 'react';
+import { useId } from 'react';
 
-import { buildCommentRequest, PUBLIC_SUBMISSION_LIMITS, type CommentTargetType } from '@/lib/interaction-client';
+import { buildCommentRequest, type CommentTargetType } from '@/lib/interaction-client';
+import type { AuthenticatedReaderSession } from '@/lib/reader-auth';
+import { PublicGitHubLoginGate } from '@/components/PublicGitHubLoginGate';
+import { PublicReaderIdentity } from '@/components/PublicReaderIdentity';
+import { PublicSubmissionBodyField } from '@/components/PublicSubmissionBodyField';
+import { PublicSubmissionSubmitButton } from '@/components/PublicSubmissionSubmitButton';
+import { usePublicSubmissionForm } from '@/components/usePublicSubmissionForm';
 
-export function CommentForm({ targetType, targetId }: { targetType: CommentTargetType; targetId: string }) {
-  const [message, setMessage] = useState('');
+export function CommentForm({
+  targetType,
+  targetId,
+  reader,
+  loginNextPath,
+}: {
+  targetType: CommentTargetType;
+  targetId: string;
+  reader: AuthenticatedReaderSession | null;
+  loginNextPath: string;
+}) {
+  const bodyCounterId = useId();
+  const {
+    body,
+    formRef,
+    isBodyBlank,
+    isSubmitting,
+    message,
+    remainingBodyLength,
+    setBody,
+    statusProps,
+    submit,
+  } = usePublicSubmissionForm({
+    buildRequest: (formData) =>
+      buildCommentRequest({
+        targetType,
+        targetId,
+        body: String(formData.get('body') ?? ''),
+      }),
+    failureMessage: '提交失败，请稍后再试。',
+    successMessage: '评论已发布。',
+  });
 
-  async function submit(formData: FormData) {
-    const request = buildCommentRequest({
-      targetType,
-      targetId,
-      authorName: String(formData.get('authorName') ?? ''),
-      body: String(formData.get('body') ?? ''),
-    });
-
-    try {
-      const response = await fetch(request.url, request.init);
-      setMessage(response.ok ? '评论已提交，审核通过后会公开显示。' : '提交失败，请稍后再试。');
-    } catch {
-      setMessage('API 暂不可用，稍后再试。');
-    }
+  if (!reader) {
+    return (
+      <PublicGitHubLoginGate actionLabel="GitHub 登录后评论" nextPath={loginNextPath}>
+        为了避免匿名刷屏和垃圾评论，请先用 GitHub 登录。
+      </PublicGitHubLoginGate>
+    );
   }
 
   return (
-    <form className="interaction-form" action={submit}>
+    <form ref={formRef} className="interaction-form" action={submit} aria-busy={isSubmitting}>
       <h2>评论</h2>
-      <input name="authorName" placeholder="你的名字" maxLength={PUBLIC_SUBMISSION_LIMITS.authorName} required />
-      <textarea name="body" placeholder="写下你的想法" rows={4} maxLength={PUBLIC_SUBMISSION_LIMITS.body} required />
-      <button type="submit">提交评论</button>
-      {message ? <p>{message}</p> : null}
+      <PublicReaderIdentity reader={reader} />
+      <PublicSubmissionBodyField
+        body={body}
+        counterId={bodyCounterId}
+        onBodyChange={setBody}
+        placeholder="写下你的想法"
+        remainingBodyLength={remainingBodyLength}
+        rows={4}
+      />
+      <PublicSubmissionSubmitButton disabled={isSubmitting || isBodyBlank} isSubmitting={isSubmitting}>
+        提交评论
+      </PublicSubmissionSubmitButton>
+      {message ? <p {...statusProps}>{message}</p> : null}
     </form>
   );
 }

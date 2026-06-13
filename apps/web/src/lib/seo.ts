@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { getContentHref, groupContentByCategory, groupContentBySeries, groupContentByTag, type SiteContentItem } from './content';
+import { getContentCover } from './content-cover';
 import type { SiteSettings } from './settings';
 
 const defaultSiteUrl = 'http://localhost:3000';
@@ -86,7 +87,8 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
   const socialTitle = item.seoTitle?.trim() || item.title;
   const metadataTitle = item.seoTitle?.trim() || `${item.title} | ${settings.profile.title}`;
   const description = item.seoDescription?.trim() || item.summary || settings.profile.description;
-  const coverImageUrl = normalizeMetadataImageUrl(item.coverImageUrl, publicSiteUrl);
+  const cover = getContentCover(item);
+  const coverImageUrl = normalizeMetadataImageUrl(cover?.imageUrl, publicSiteUrl);
 
   return {
     title: metadataTitle,
@@ -108,7 +110,7 @@ export function buildContentMetadata(item: SiteContentItem, settings: SiteSettin
             images: [
               {
                 url: coverImageUrl,
-                alt: item.coverAltText || item.title,
+                alt: cover?.altText || item.title,
               },
             ],
           }
@@ -166,7 +168,7 @@ function getLatestContentTimestamp(content: SiteContentItem[]): string {
 
 export function buildSitemapXml(siteUrl: string, content: SiteContentItem[]): string {
   const url = normalizePublicSiteUrl(siteUrl);
-  const staticRoutes = ['', 'posts', 'notes', 'moments', 'projects', 'series', 'categories', 'tags', 'archives', 'guestbook', 'about', 'search'];
+  const staticRoutes = ['', 'posts', 'moments', 'projects', 'series', 'categories', 'tags', 'archives', 'about', 'search'];
   const contentRouteMetadata = new Map(content.map((item) => [getContentHref(item).slice(1), item.updatedAt || item.publishedAt]));
   const contentRoutes = [...contentRouteMetadata.keys()];
   const categoryRoutes = groupContentByCategory(content).map((group) => `categories/${group.key}`);

@@ -34,6 +34,7 @@ describe('deployment configuration', () => {
     expect(dockerignore).toContain('.next');
     expect(dockerignore).toContain('dist');
     expect(dockerignore).toContain('backups');
+    expect(dockerignore).toContain('_wechat_project_run_*');
   });
 
   test('runs database migrations before the API starts in Docker Compose', async () => {
@@ -82,16 +83,22 @@ describe('deployment configuration', () => {
     expect(env).toContain('DATABASE_URL=postgresql://starry:starry@postgres:5432/starry_summer');
     expect(env).toContain('CONTENT_REPOSITORY_DRIVER=postgres');
     expect(env).toContain('REDIS_URL=redis://redis:6379');
+    expect(env).toContain('TRUST_PROXY=true');
   });
 
   test('documents the password hash command consistently with the auth implementation', async () => {
+    const compose = await readFile(join(repoRoot, 'docker-compose.yml'), 'utf8');
     const env = await readFile(join(repoRoot, '.env.example'), 'utf8');
     const packageJson = JSON.parse(await readFile(join(repoRoot, 'package.json'), 'utf8')) as {
       scripts?: Record<string, string>;
     };
     const deployment = await readFile(join(repoRoot, 'docs/deployment.md'), 'utf8');
 
+    expect(env).toContain('ADMIN_EMAIL=owner@example.com');
     expect(env).toContain('ADMIN_PASSWORD_HASH=replace-with-scrypt-hash');
+    expect(compose).toContain('ADMIN_EMAIL: ${ADMIN_EMAIL:-owner@example.com}');
+    expect(compose).toContain('ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-replace-with-scrypt-hash}');
+    expect(compose).toContain('GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL:-}');
     expect(packageJson.scripts?.['auth:hash-password']).toBe('npm run hash-password --workspace @starry-summer/api');
     expect(packageJson.scripts?.['auth:secret']).toBe('npm run session-secret --workspace @starry-summer/api');
     expect(packageJson.scripts?.['auth:interaction-secret']).toBe('npm run interaction-secret --workspace @starry-summer/api');
@@ -115,7 +122,7 @@ describe('deployment configuration', () => {
     expect(initEnvScript).toContain('npm run --silent auth:hash-password');
     expect(initEnvScript).toContain('npm run --silent auth:secret');
     expect(initEnvScript).toContain('npm run --silent auth:interaction-secret');
-    expect(initEnvTestScript).toContain('replace-with-scrypt-hash');
+    expect(initEnvTestScript).toContain('ADMIN_PASSWORD_HASH=scrypt:');
     expect(readme).toContain('npm run ops:init-env -- "your local admin password"');
     expect(deployment).toContain('The initializer copies `.env.example`');
   });
@@ -191,12 +198,14 @@ describe('deployment configuration', () => {
       'DOMAIN=blog.starry-summer.dev',
       'PUBLIC_SITE_URL=https://blog.starry-summer.dev',
       'ACME_EMAIL=ops@starry-summer.dev',
-      'ADMIN_EMAIL=owner@starry-summer.dev',
+      'ADMIN_EMAIL=admin@starry-summer.dev',
       'ADMIN_PASSWORD_HASH=scrypt:32768:8:1:salt:hash',
       'SESSION_SECRET=12345678901234567890123456789012',
       'INTERACTION_HASH_SECRET=abcdefabcdefabcdefabcdefabcdef12',
       'GITHUB_CLIENT_ID=github-client-id',
       'GITHUB_CLIENT_SECRET=github-client-secret',
+      'GITHUB_CALLBACK_URL=https://blog.starry-summer.dev/api/auth/github/callback',
+      'TRUST_PROXY=true',
       'POSTGRES_PASSWORD=replace-me-with-a-real-password',
       'DATABASE_URL=postgresql://starry:replace-me-with-a-real-password@postgres:5432/starry_summer',
       'CONTENT_REPOSITORY_DRIVER=postgres',
@@ -230,8 +239,9 @@ describe('deployment configuration', () => {
     const sharedSecretPath = join(tempDirectory, '.env.shared-secret');
     const unsafeRedisUrlPath = join(tempDirectory, '.env.unsafe-redis-url');
     const unsafeRedisProtocolPath = join(tempDirectory, '.env.unsafe-redis-protocol');
+    const unsafeTrustProxyPath = join(tempDirectory, '.env.unsafe-trust-proxy');
     const placeholderAcmeEmailPath = join(tempDirectory, '.env.placeholder-acme-email');
-    const placeholderAdminEmailPath = join(tempDirectory, '.env.placeholder-admin-email');
+    const missingAdminAccountPath = join(tempDirectory, '.env.missing-admin-account');
 
     expect(packageJson.scripts?.['ops:doctor']).toBe('bash scripts/doctor.sh');
     expect(doctorScript).toContain('DOMAIN must be a hostname without a scheme or path.');
@@ -241,12 +251,16 @@ describe('deployment configuration', () => {
     expect(doctorScript).toContain('PUBLIC_SITE_URL must not use an example.com placeholder.');
     expect(doctorScript).toContain('ACME_EMAIL must be a valid email for HTTPS certificates.');
     expect(doctorScript).toContain('ACME_EMAIL must not use an example.com placeholder.');
+    expect(doctorScript).toContain('ADMIN_EMAIL must be set to the owner login account.');
     expect(doctorScript).toContain('ADMIN_EMAIL must not use an example.com placeholder.');
     expect(doctorScript).toContain('ADMIN_PASSWORD_HASH is still a placeholder');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be at least 32 characters');
     expect(doctorScript).toContain('INTERACTION_HASH_SECRET must be different from SESSION_SECRET.');
     expect(doctorScript).toContain('GITHUB_CLIENT_ID is required for guestbook GitHub login.');
     expect(doctorScript).toContain('GITHUB_CLIENT_SECRET is required for guestbook GitHub login.');
+    expect(doctorScript).toContain('GITHUB_CALLBACK_URL must be set to the GitHub OAuth callback URL.');
+    expect(doctorScript).toContain('GITHUB_CALLBACK_URL must equal PUBLIC_SITE_URL plus /api/auth/github/callback.');
+    expect(doctorScript).toContain('TRUST_PROXY must be true for the Caddy reverse-proxy deployment.');
     expect(doctorScript).toContain('DATABASE_URL must not use the default starry database password.');
     expect(doctorScript).toContain('DATABASE_URL must start with postgresql:// or postgres://.');
     expect(doctorScript).toContain('DATABASE_URL password must match POSTGRES_PASSWORD.');
@@ -466,15 +480,20 @@ describe('deployment configuration', () => {
       code: 1,
       stdout: expect.stringContaining('REDIS_URL must start with redis:// or rediss://.'),
     });
+    await writeFile(unsafeTrustProxyPath, safeEnv.replace('TRUST_PROXY=true', 'TRUST_PROXY=false'));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', unsafeTrustProxyPath], { cwd: repoRoot })).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('TRUST_PROXY must be true for the Caddy reverse-proxy deployment.'),
+    });
     await writeFile(placeholderAcmeEmailPath, safeEnv.replace('ACME_EMAIL=ops@starry-summer.dev', 'ACME_EMAIL=ops@example.com'));
     await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderAcmeEmailPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
       stdout: expect.stringContaining('ACME_EMAIL must not use an example.com placeholder.'),
     });
-    await writeFile(placeholderAdminEmailPath, safeEnv.replace('ADMIN_EMAIL=owner@starry-summer.dev', 'ADMIN_EMAIL=owner@example.com'));
-    await expect(execFileAsync('bash', ['scripts/doctor.sh', placeholderAdminEmailPath], { cwd: repoRoot })).rejects.toMatchObject({
+    await writeFile(missingAdminAccountPath, safeEnv.replace('ADMIN_EMAIL=admin@starry-summer.dev', 'ADMIN_EMAIL='));
+    await expect(execFileAsync('bash', ['scripts/doctor.sh', missingAdminAccountPath], { cwd: repoRoot })).rejects.toMatchObject({
       code: 1,
-      stdout: expect.stringContaining('ADMIN_EMAIL must not use an example.com placeholder.'),
+      stdout: expect.stringContaining('ADMIN_EMAIL must be set to the owner login account.'),
     });
     await writeFile(
       placeholderS3PublicUrlPath,
@@ -504,6 +523,7 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('/api/health');
     expect(smokeScript).toContain('PostgreSQL as healthy');
     expect(smokeScript).toContain('Redis as healthy');
+    expect(smokeScript).toContain('upload storage as healthy');
     expect(smokeScript).toContain('/admin/login');
     expect(smokeScript).toContain('/admin/content');
     expect(smokeScript).toContain('admin protected redirect');
@@ -516,8 +536,13 @@ describe('deployment configuration', () => {
     expect(smokeScript).toContain('Content search API endpoint did not return JSON.');
     expect(smokeScript).toContain('/api/guestbook');
     expect(smokeScript).toContain('Guestbook API endpoint did not return JSON.');
-    expect(smokeScript).toContain('/api/comments/post/smoke-post');
+    expect(smokeScript).toContain('/api/content?type=post');
+    expect(smokeScript).toContain('/api/comments/post/$public_post_id');
     expect(smokeScript).toContain('Comments API endpoint did not return JSON.');
+    expect(smokeScript).toContain('/api/likes/post/$public_post_id');
+    expect(smokeScript).toContain('Public like endpoint did not accept an anonymous request.');
+    expect(smokeScript).toContain('Comment submission endpoint did not require reader login.');
+    expect(smokeScript).toContain('Guestbook submission endpoint did not require reader login.');
     expect(smokeScript).toContain('/api/assets/random?usage=background');
     expect(smokeScript).toContain('Random asset API endpoint did not return JSON.');
     expect(smokeScript).toContain('/rss.xml');
@@ -542,6 +567,7 @@ describe('deployment configuration', () => {
 
     expect(packageJson.scripts?.['ops:docker-preflight']).toBe('bash scripts/docker-preflight.sh');
     expect(packageJson.scripts?.['test:ops']).toContain('bash scripts/docker-preflight.test.sh');
+    expect(dockerPreflightScript).toContain('TRUST_PROXY');
     expect(dockerPreflightScript).toContain('docker compose config --quiet');
     expect(dockerPreflightScript).toContain('node:22-alpine');
     expect(dockerPreflightScript).toContain('Docker image is not available');
@@ -582,6 +608,7 @@ describe('deployment configuration', () => {
 
     expect(deployment).toContain('`DOMAIN`: your public domain, for example `blog.your-domain.com`.');
     expect(deployment).toContain('`PUBLIC_SITE_URL`: `https://blog.your-domain.com`.');
+    expect(deployment).toContain('`TRUST_PROXY=true`: trust Caddy forwarded client IP headers for rate limiting.');
     expect(deployment).toContain('`https://assets.your-domain.com/starry-summer`');
     expect(deployment).not.toContain('`example.com`');
     expect(deployment).not.toContain('https://example.com');

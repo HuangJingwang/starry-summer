@@ -14,7 +14,26 @@ describe('SettingsService', () => {
     await expect(service.getSettings()).resolves.toMatchObject({
       profile: {
         title: 'Starry Summer',
-        ownerName: 'Owner',
+        ownerName: 'Aster.H',
+      },
+    });
+  });
+
+  test('keeps the public owner alias fixed while preserving admin settings', async () => {
+    await service.updateSettings({
+      profile: {
+        ownerName: 'Private Owner',
+      },
+    });
+
+    await expect(service.getSettings()).resolves.toMatchObject({
+      profile: {
+        ownerName: 'Private Owner',
+      },
+    });
+    await expect(service.getPublicSettings()).resolves.toMatchObject({
+      profile: {
+        ownerName: 'Aster.H',
       },
     });
   });
@@ -23,10 +42,10 @@ describe('SettingsService', () => {
     const updated = await service.updateSettings({
       profile: {
         title: '  My Blog  ',
-        ownerName: '  Huang Jingwang  ',
+        ownerName: '  Aster.H  ',
         description: '  Notes and daily writing.  ',
         socialLinks: [
-          { label: ' GitHub ', href: ' https://github.com/hjw ' },
+          { label: ' GitHub ', href: ' https://github.com/aster-h ' },
           { label: 'Empty', href: '   ' },
         ],
       },
@@ -34,9 +53,9 @@ describe('SettingsService', () => {
 
     expect(updated.profile).toEqual({
       title: 'My Blog',
-      ownerName: 'Huang Jingwang',
+      ownerName: 'Aster.H',
       description: 'Notes and daily writing.',
-      socialLinks: [{ label: 'GitHub', href: 'https://github.com/hjw' }],
+      socialLinks: [{ label: 'GitHub', href: 'https://github.com/aster-h' }],
     });
   });
 

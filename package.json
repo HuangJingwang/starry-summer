@@ -3,6 +3,15 @@
   "private": true,
   "version": "0.1.0",
   "description": "Personal content platform for writing, notes, moments, projects, and reader interaction.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aster-H/starry-summer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Aster-H/starry-summer/issues"
+  },
+  "homepage": "https://github.com/Aster-H/starry-summer#readme",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -13,7 +22,7 @@
     "dev:api": "npm run start:dev --workspace @starry-summer/api",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present && npm run test:ops",
-    "test:ops": "bash scripts/smoke.test.sh && bash scripts/backup.test.sh && bash scripts/restore.test.sh && bash scripts/dockerfile.test.sh && bash scripts/docker-preflight.test.sh && bash scripts/init-env.test.sh && bash scripts/deploy.test.sh",
+    "test:ops": "bash scripts/smoke.test.sh && bash scripts/backup.test.sh && bash scripts/restore.test.sh && bash scripts/dockerfile.test.sh && bash scripts/docker-preflight.test.sh && bash scripts/init-env.test.sh && bash scripts/doctor.test.sh && bash scripts/repository-hygiene.test.sh && bash scripts/deploy.test.sh",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "auth:hash-password": "npm run hash-password --workspace @starry-summer/api",

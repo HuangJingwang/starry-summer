@@ -1,10 +1,12 @@
 import type { CommentTargetType } from './interaction-client';
+import type { InlineCommentAnchor } from './selection-comments';
 
 export interface PublicComment {
   id: string;
   authorName: string;
   body: string;
   createdAt: string;
+  anchor?: InlineCommentAnchor;
 }
 
 export type PublicGuestbookEntry = PublicComment;
@@ -66,6 +68,7 @@ export function normalizePublicComment(input: Partial<PublicComment> & { id: str
     authorName: input.authorName ?? '',
     body: input.body ?? '',
     createdAt: input.createdAt ?? '',
+    ...(input.anchor ? { anchor: input.anchor } : {}),
   };
 }
 

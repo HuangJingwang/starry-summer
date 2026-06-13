@@ -120,6 +120,84 @@ describe('AssetsService', () => {
     });
   });
 
+  test('normalizes non-standard jpg mime types before storage validation', async () => {
+    const savedInputs: Array<{ filename: string; mimeType: string; bytes: Buffer }> = [];
+    const service = new AssetsService(
+      {
+        save: async (input) => {
+          savedInputs.push(input);
+
+          return {
+            storageKey: 'wechat-image.jpg',
+            publicUrl: '/uploads/wechat-image.jpg',
+            mimeType: input.mimeType,
+            byteSize: input.bytes.byteLength,
+          };
+        },
+        delete: async () => undefined,
+      },
+      new InMemoryAssetRepository(),
+    );
+
+    await service.upload({
+      filename: 'WechatIMG8477.jpg',
+      mimeType: 'image/jpg',
+      base64: Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64'),
+      usage: 'content',
+    });
+
+    expect(savedInputs).toMatchObject([
+      {
+        filename: 'WechatIMG8477.jpg',
+        mimeType: 'image/jpeg',
+      },
+    ]);
+  });
+
+  test('infers jpeg mime type from jpg filenames when API clients send generic mime types', async () => {
+    const savedInputs: Array<{ filename: string; mimeType: string; bytes: Buffer }> = [];
+    const service = new AssetsService(
+      {
+        save: async (input) => {
+          savedInputs.push(input);
+
+          return {
+            storageKey: input.filename,
+            publicUrl: `/uploads/${input.filename}`,
+            mimeType: input.mimeType,
+            byteSize: input.bytes.byteLength,
+          };
+        },
+        delete: async () => undefined,
+      },
+      new InMemoryAssetRepository(),
+    );
+
+    await service.upload({
+      filename: 'WechatIMG8477.jpg',
+      mimeType: 'application/octet-stream',
+      base64: Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64'),
+      usage: 'content',
+    });
+    await service.upload({
+      filename: 'AnotherPhoto.JPEG',
+      mimeType: '',
+      base64: Buffer.from([0xff, 0xd8, 0xff, 0xd9]).toString('base64'),
+      usage: 'cover',
+    });
+
+    expect(savedInputs).toMatchObject([
+      {
+        filename: 'WechatIMG8477.jpg',
+        mimeType: 'image/jpeg',
+      },
+      {
+        filename: 'AnotherPhoto.JPEG',
+        mimeType: 'image/jpeg',
+      },
+    ]);
+  });
+
   test('rejects malformed base64 upload payloads before storage writes', async () => {
     let saveCalls = 0;
     const service = new AssetsService(

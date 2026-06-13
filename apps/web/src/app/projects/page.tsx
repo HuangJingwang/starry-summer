@@ -18,7 +18,7 @@ export default async function ProjectsPage() {
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">Projects</p>
+          <p className="eyebrow">项目</p>
           <h1>项目</h1>
         </div>
         <div className="content-grid">

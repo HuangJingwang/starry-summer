@@ -22,6 +22,13 @@ docker compose version >/dev/null
 echo "Checking Docker Compose configuration"
 docker compose config --quiet
 
+compose_config="$(docker compose config)"
+
+if ! grep -q 'TRUST_PROXY' <<<"$compose_config"; then
+  echo "Docker Compose API service must pass TRUST_PROXY for reverse-proxy client identity."
+  exit 1
+fi
+
 for image in "${required_images[@]}"; do
   echo "Checking Docker image: $image"
 

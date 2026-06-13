@@ -140,3 +140,34 @@ export function buildDeleteTaxonomyTermRequest(type: TaxonomyType, id: string): 
     },
   };
 }
+
+export async function readTaxonomyErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const contentType = response.headers.get('content-type') ?? '';
+
+    if (contentType.includes('application/json')) {
+      const data = (await response.json()) as { message?: unknown; error?: unknown };
+      const message = normalizeTaxonomyErrorMessage(data.message) || normalizeTaxonomyErrorMessage(data.error);
+
+      return message || fallback;
+    }
+
+    const text = (await response.text()).trim();
+
+    return text || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeTaxonomyErrorMessage(value: unknown): string {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).join('；');
+  }
+
+  return '';
+}

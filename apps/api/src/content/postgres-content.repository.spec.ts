@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, test } from 'vitest';
 
 import {
@@ -9,10 +12,39 @@ import {
   buildContentSelect,
   buildContentUpdate,
   mapContentRow,
+  slugifyTaxonomyLabel,
   type ContentItemRow,
 } from './postgres-content.repository';
 
 describe('PostgresContentRepository mapping', () => {
+  test('keeps PostgreSQL repository orchestration separate from SQL builders and row mappers', () => {
+    const modulePaths = [
+      'src/content/postgres-content.mapper.ts',
+      'src/content/postgres-content.sql.ts',
+      'src/content/postgres-content-taxonomy.ts',
+    ];
+    const repositorySource = readFileSync(join(process.cwd(), 'src/content/postgres-content.repository.ts'), 'utf8');
+
+    for (const modulePath of modulePaths) {
+      expect(readFileSync(join(process.cwd(), modulePath), 'utf8').length).toBeGreaterThan(0);
+    }
+
+    expect(repositorySource).toContain("from './postgres-content.mapper.js'");
+    expect(repositorySource).toContain("from './postgres-content.sql.js'");
+    expect(repositorySource).toContain("from './postgres-content-taxonomy.js'");
+    expect(repositorySource).toContain("export * from './postgres-content.mapper.js'");
+    expect(repositorySource).toContain("export * from './postgres-content.sql.js'");
+    expect(repositorySource).toContain("export * from './postgres-content-taxonomy.js'");
+    expect(repositorySource).not.toContain('export function buildContentSelect');
+    expect(repositorySource).not.toContain('export function mapContentRow');
+    expect(repositorySource).not.toContain('function slugifyTaxonomyLabel');
+  });
+
+  test('normalizes taxonomy labels into stable slugs', () => {
+    expect(slugifyTaxonomyLabel(' Build Log / 2026 ')).toBe('build-log-2026');
+    expect(slugifyTaxonomyLabel('星夏札记')).toBe('星夏札记');
+  });
+
   test('maps database rows to content records', () => {
     const row: ContentItemRow = {
       id: 'content-1',

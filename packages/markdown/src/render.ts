@@ -37,7 +37,7 @@ const allowedAttributes: sanitizeHtml.IOptions['allowedAttributes'] = {
   img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
   code: ['class'],
   div: ['class'],
-  button: ['type', 'class', 'data-copy-code', 'aria-label'],
+  button: ['type', 'class', 'data-copy-code', 'aria-label', 'aria-live'],
   span: ['class'],
 };
 
@@ -164,9 +164,10 @@ function rehypeCodeBlocks() {
                   type: 'button',
                   className: ['markdown-code-block__copy'],
                   dataCopyCode: 'true',
-                  ariaLabel: 'Copy code block',
+                  ariaLabel: '复制代码块',
+                  ariaLive: 'polite',
                 },
-                children: [{ type: 'text', value: 'Copy' }],
+                children: [{ type: 'text', value: '复制代码' }],
               },
             ],
           },

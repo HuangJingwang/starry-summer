@@ -138,4 +138,34 @@ describe('AdminAuthGuard', () => {
       restoreEnv('PUBLIC_SITE_URL', previousPublicSiteUrl);
     }
   });
+
+  test('requires an explicit allowed origin for production cookie admin mutations', async () => {
+    const session = await authService.login({ email: 'owner@example.com', password: 'secret-password' });
+    const guard = new AdminAuthGuard(authService);
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousWebOrigin = process.env.WEB_ORIGIN;
+    const previousPublicSiteUrl = process.env.PUBLIC_SITE_URL;
+
+    process.env.NODE_ENV = 'production';
+    delete process.env.WEB_ORIGIN;
+    delete process.env.PUBLIC_SITE_URL;
+
+    try {
+      expect(() =>
+        guard.canActivate(
+          createContext(
+            {
+              cookie: `ss_session=${session.token}`,
+              origin: 'http://localhost:3000',
+            },
+            { method: 'POST' },
+          ),
+        ),
+      ).toThrow('Admin request origin is not configured for production');
+    } finally {
+      restoreEnv('NODE_ENV', previousNodeEnv);
+      restoreEnv('WEB_ORIGIN', previousWebOrigin);
+      restoreEnv('PUBLIC_SITE_URL', previousPublicSiteUrl);
+    }
+  });
 });

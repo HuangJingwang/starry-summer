@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module.js';
 import { ContentModule } from '../content/content.module.js';
+import { createDemoComments, createDemoGuestbookEntries } from '../demo/demo-data.js';
 import { SecurityModule } from '../security/security.module.js';
 import { InteractionsController } from './interactions.controller.js';
 import {
@@ -23,7 +24,10 @@ function createInteractionsRepository(): InteractionsRepository {
     return new PostgresInteractionsRepository(databaseUrl);
   }
 
-  return new InMemoryInteractionsRepository();
+  return new InMemoryInteractionsRepository(undefined, {
+    comments: createDemoComments(),
+    guestbookEntries: createDemoGuestbookEntries(),
+  });
 }
 
 @Module({

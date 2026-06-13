@@ -1,6 +1,4 @@
-import type { AdminContentFilter, ContentRecord, ContentRecordPatch, PublicContentFilter } from './content.service';
-
-export type CreateContentRecordInput = Omit<ContentRecord, 'createdAt' | 'id' | 'updatedAt'>;
+import type { AdminContentFilter, ContentRecord, ContentRecordPatch, CreateContentRecordInput, PublicContentFilter } from './content.types.js';
 
 export interface ContentRepository {
   create(input: CreateContentRecordInput): Promise<ContentRecord>;
@@ -18,7 +16,20 @@ export class InMemoryContentRepository implements ContentRepository {
   private readonly records = new Map<string, ContentRecord>();
   private nextId = 1;
 
-  constructor(private readonly now: () => string = () => new Date().toISOString()) {}
+  constructor(
+    private readonly now: () => string = () => new Date().toISOString(),
+    initialRecords: ContentRecord[] = [],
+  ) {
+    for (const record of initialRecords) {
+      this.records.set(record.id, {
+        ...record,
+        categories: [...record.categories],
+        tags: [...record.tags],
+        series: [...record.series],
+        project: cloneProjectMetadata(record.project),
+      });
+    }
+  }
 
   async create(input: CreateContentRecordInput): Promise<ContentRecord> {
     const now = this.now();

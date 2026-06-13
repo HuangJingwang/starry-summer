@@ -1,10 +1,15 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, test } from 'vitest';
 
 import {
+  seedContent,
   getContentBySlug,
   getContentHref,
   getAdjacentContent,
   canShowComments,
+  formatPublicContentType,
   getCategoryHref,
   getContentByCategorySlug,
   getContentTaxonomyLinkGroups,
@@ -24,10 +29,45 @@ import {
   groupContentByTag,
   normalizeContentSort,
   estimateReadingTime,
+  buildSearchResultPreviews,
+  normalizeSearchContentKind,
+  splitHighlightedSearchText,
   searchContent,
 } from './content';
+import { DEFAULT_POST_COVER } from './content-cover';
 
 describe('web content helpers', () => {
+  test('keeps public content helpers split into focused modules behind a stable barrel', () => {
+    const modulePaths = [
+      'src/lib/content-types.ts',
+      'src/lib/content-public.ts',
+      'src/lib/content-taxonomy.ts',
+      'src/lib/content-search.ts',
+      'src/lib/content-seed.ts',
+    ];
+    const barrel = readFileSync(join(process.cwd(), 'src/lib/content.ts'), 'utf8');
+
+    for (const modulePath of modulePaths) {
+      expect(readFileSync(join(process.cwd(), modulePath), 'utf8').length).toBeGreaterThan(0);
+    }
+
+    expect(barrel).toContain("export * from './content-types';");
+    expect(barrel).toContain("export * from './content-public';");
+    expect(barrel).toContain("export * from './content-taxonomy';");
+    expect(barrel).toContain("export * from './content-search';");
+    expect(barrel).toContain("export * from './content-seed';");
+    expect(barrel.split('\n')).toHaveLength(6);
+  });
+
+  test('uses the default post cover for seed featured items instead of the home workspace image', () => {
+    const seedFeaturedCovers = seedContent
+      .filter((item) => item.featured && ['intro-post', 'project-starry'].includes(item.id))
+      .map((item) => item.coverImageUrl);
+
+    expect(seedFeaturedCovers).toEqual([DEFAULT_POST_COVER.imageUrl, DEFAULT_POST_COVER.imageUrl]);
+    expect(seedContent.some((item) => item.coverImageUrl === '/hero-workspace.png')).toBe(false);
+  });
+
   test('filters public content and sorts newest first', () => {
     const visible = getPublicContent([
       { id: '1', title: 'Old', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01' },
@@ -55,6 +95,27 @@ describe('web content helpers', () => {
     expect(visible.map((item) => item.id)).toEqual(['pinned', 'popular', 'newer']);
   });
 
+  test('treats posts and notes as one public article stream', () => {
+    const visible = getPublicContent(
+      [
+        { id: 'post', title: 'Post', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-06-10' },
+        { id: 'note', title: 'Note', type: 'note', status: 'published', visibility: 'public', publishedAt: '2026-06-11' },
+        { id: 'moment', title: 'Moment', type: 'moment', status: 'published', visibility: 'public', publishedAt: '2026-06-12' },
+      ],
+      'article',
+    );
+
+    expect(visible.map((item) => item.id)).toEqual(['note', 'post']);
+  });
+
+  test('formats notes as articles for public pages', () => {
+    expect(formatPublicContentType('post')).toBe('文章');
+    expect(formatPublicContentType('note')).toBe('文章');
+    expect(formatPublicContentType('moment')).toBe('日常');
+    expect(formatPublicContentType('project')).toBe('项目');
+    expect(formatPublicContentType('page')).toBe('页面');
+  });
+
   test('normalizes content sort values for public pages', () => {
     expect(normalizeContentSort('popular')).toBe('popular');
     expect(normalizeContentSort('latest')).toBe('latest');
@@ -79,9 +140,9 @@ describe('web content helpers', () => {
   });
 
   test('estimates reading time from mixed Chinese and English content', () => {
-    expect(estimateReadingTime('短文')).toBe('1 min read');
-    expect(estimateReadingTime('word '.repeat(401))).toBe('3 min read');
-    expect(estimateReadingTime('中文'.repeat(260))).toBe('3 min read');
+    expect(estimateReadingTime('短文')).toBe('1 分钟阅读');
+    expect(estimateReadingTime('word '.repeat(401))).toBe('3 分钟阅读');
+    expect(estimateReadingTime('中文'.repeat(260))).toBe('3 分钟阅读');
   });
 
   test('builds detail taxonomy groups from categories and tags', () => {
@@ -91,8 +152,8 @@ describe('web content helpers', () => {
         tags: ['Next.js', 'Platform', 'Next.js'],
       }),
     ).toEqual([
-      { label: '分类', ariaLabel: 'Categories', items: ['Writing'] },
-      { label: '标签', ariaLabel: 'Tags', items: ['Next.js', 'Platform'] },
+      { label: '分类', ariaLabel: '分类', items: ['Writing'] },
+      { label: '标签', ariaLabel: '标签', items: ['Next.js', 'Platform'] },
     ]);
   });
 
@@ -105,12 +166,12 @@ describe('web content helpers', () => {
     ).toEqual([
       {
         label: '分类',
-        ariaLabel: 'Categories',
+        ariaLabel: '分类',
         items: [{ label: 'Writing', href: '/categories/writing' }],
       },
       {
         label: '标签',
-        ariaLabel: 'Tags',
+        ariaLabel: '标签',
         items: [{ label: 'Next.js', href: '/tags/next-js' }],
       },
     ]);
@@ -351,6 +412,61 @@ describe('web content helpers', () => {
     expect(results.map((item) => item.id)).toEqual(['title', 'category', 'body']);
   });
 
+  test('normalizes search content kind filters for the public search page', () => {
+    expect(normalizeSearchContentKind('article')).toBe('article');
+    expect(normalizeSearchContentKind('moment')).toBe('moment');
+    expect(normalizeSearchContentKind('project')).toBe('project');
+    expect(normalizeSearchContentKind('all')).toBe('all');
+    expect(normalizeSearchContentKind('page')).toBe('all');
+    expect(normalizeSearchContentKind(undefined)).toBe('all');
+  });
+
+  test('builds search result previews with snippets and matched fields', () => {
+    const previews = buildSearchResultPreviews(
+      [
+        {
+          id: 'title',
+          title: 'PostgreSQL Backup Plan',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-10',
+          summary: 'A quiet deployment checklist.',
+          bodyMarkdown: 'Nightly database snapshots and restore drills.',
+        },
+        {
+          id: 'body',
+          title: 'Deployment Note',
+          type: 'note',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-09',
+          categories: ['Ops'],
+          bodyMarkdown: 'This note explains PostgreSQL restore practice for a personal archive.',
+        },
+      ],
+      'postgresql restore',
+    );
+
+    expect(previews).toEqual([
+      {
+        item: expect.objectContaining({ id: 'body' }),
+        snippet: expect.stringContaining('PostgreSQL restore practice'),
+        matchedFields: ['正文'],
+      },
+    ]);
+  });
+
+  test('splits highlighted search text without losing surrounding copy', () => {
+    expect(splitHighlightedSearchText('Personal PostgreSQL restore practice', 'postgresql restore')).toEqual([
+      { text: 'Personal ', highlighted: false },
+      { text: 'PostgreSQL', highlighted: true },
+      { text: ' ', highlighted: false },
+      { text: 'restore', highlighted: true },
+      { text: ' practice', highlighted: false },
+    ]);
+  });
+
   test('builds public content hrefs', () => {
     expect(
       getContentHref({
@@ -363,6 +479,17 @@ describe('web content helpers', () => {
         slug: 'a',
       }),
     ).toBe('/posts/a');
+    expect(
+      getContentHref({
+        id: 'note-1',
+        title: 'Note',
+        type: 'note',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-01-01',
+        slug: 'note-a',
+      }),
+    ).toBe('/posts/note-a');
     expect(
       getContentHref({
         id: '2',
@@ -388,6 +515,19 @@ describe('web content helpers', () => {
 
     expect(item?.id).toBe('1');
     expect(getContentBySlug([], 'post', 'missing')).toBeNull();
+  });
+
+  test('finds notes through the article slug lookup', () => {
+    const item = getContentBySlug(
+      [
+        { id: '1', title: 'A', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01', slug: 'a' },
+        { id: '2', title: 'B', type: 'note', status: 'published', visibility: 'public', publishedAt: '2026-01-02', slug: 'b' },
+      ],
+      'article',
+      'b',
+    );
+
+    expect(item?.id).toBe('2');
   });
 
   test('groups public content into archive months', () => {
@@ -625,7 +765,7 @@ describe('web content helpers', () => {
     expect(adjacent.next?.id).toBe('new');
   });
 
-  test('finds adjacent content within the current content type', () => {
+  test('finds adjacent content within the merged article stream', () => {
     const adjacent = getAdjacentContent(
       [
         { id: 'old-post', title: 'Old Post', type: 'post', status: 'published', visibility: 'public', publishedAt: '2026-01-01', slug: 'old-post' },
@@ -637,7 +777,7 @@ describe('web content helpers', () => {
       'current-post',
     );
 
-    expect(adjacent.previous?.id).toBe('old-post');
+    expect(adjacent.previous?.id).toBe('near-note');
     expect(adjacent.next?.id).toBe('new-post');
   });
 });

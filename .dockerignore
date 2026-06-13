@@ -9,6 +9,7 @@ coverage
 **/coverage
 backups
 **/backups
+_wechat_project_run_*
 .env
 .env.local
 *.log

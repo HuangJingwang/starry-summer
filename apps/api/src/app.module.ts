@@ -7,10 +7,11 @@ import { HealthController } from './health/health.controller.js';
 import { HealthService } from './health/health.service.js';
 import { InteractionsModule } from './interactions/interactions.module.js';
 import { SettingsModule } from './settings/settings.module.js';
+import { StudyModule } from './study/study.module.js';
 import { TaxonomyModule } from './taxonomy/taxonomy.module.js';
 
 @Module({
-  imports: [AssetsModule, AuthModule, ContentModule, InteractionsModule, SettingsModule, TaxonomyModule],
+  imports: [AssetsModule, AuthModule, ContentModule, InteractionsModule, SettingsModule, StudyModule, TaxonomyModule],
   controllers: [HealthController],
   providers: [HealthService],
 })

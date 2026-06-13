@@ -12,8 +12,18 @@ export interface CommentRecord {
   body: string;
   status: ModerationStatus;
   createdAt: string;
+  anchor?: CommentAnchor;
   ipHash?: string;
   userAgent?: string;
+}
+
+export interface CommentAnchor {
+  text: string;
+  prefix: string;
+  suffix: string;
+  start: number;
+  end: number;
+  hash: string;
 }
 
 export interface CreateCommentInput {
@@ -21,6 +31,7 @@ export interface CreateCommentInput {
   targetId: string;
   authorName: string;
   body: string;
+  anchor?: CommentAnchor;
   ipHash?: string;
   userAgent?: string;
 }
@@ -62,12 +73,14 @@ export class InteractionsService {
 
   async createComment(input: CreateCommentInput): Promise<CommentRecord> {
     const submission = normalizePublicSubmission(input);
+    const anchor = normalizeCommentAnchor(input.anchor);
 
     await this.commentTargetPolicy?.ensureCanComment(input.targetType, input.targetId);
 
     return this.repository.createComment({
       ...input,
       ...submission,
+      ...(anchor ? { anchor } : {}),
     });
   }
 
@@ -171,4 +184,46 @@ function normalizePublicSubmission<T extends { authorName: string; body: string 
   }
 
   return { authorName, body };
+}
+
+function normalizeCommentAnchor(anchor: CommentAnchor | undefined): CommentAnchor | undefined {
+  if (!anchor) {
+    return undefined;
+  }
+
+  const text = anchor.text.trim().replace(/\s+/g, ' ');
+  const prefix = anchor.prefix.trim().replace(/\s+/g, ' ');
+  const suffix = anchor.suffix.trim().replace(/\s+/g, ' ');
+  const start = Number(anchor.start);
+  const end = Number(anchor.end);
+  const hash = anchor.hash.trim().toLowerCase();
+
+  if (!text) {
+    throw new BadRequestException('Anchor text is required');
+  }
+
+  if (text.length > 500) {
+    throw new BadRequestException('Anchor text must be at most 500 characters');
+  }
+
+  if (prefix.length > 160 || suffix.length > 160) {
+    throw new BadRequestException('Anchor context must be at most 160 characters');
+  }
+
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start || end - start > 1_000) {
+    throw new BadRequestException('Anchor range is invalid');
+  }
+
+  if (!/^[a-f0-9]{64}$/.test(hash)) {
+    throw new BadRequestException('Anchor hash is invalid');
+  }
+
+  return {
+    text,
+    prefix,
+    suffix,
+    start,
+    end,
+    hash,
+  };
 }

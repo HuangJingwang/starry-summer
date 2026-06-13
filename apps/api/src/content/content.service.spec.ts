@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { InMemoryContentRepository } from './content.repository';
@@ -10,6 +13,26 @@ describe('ContentService', () => {
   beforeEach(() => {
     repository = new InMemoryContentRepository();
     service = new ContentService(repository);
+  });
+
+  test('keeps content service orchestration separate from domain types and helper logic', () => {
+    const modulePaths = [
+      'src/content/content.types.ts',
+      'src/content/content-normalization.ts',
+      'src/content/content-markdown.ts',
+    ];
+    const serviceSource = readFileSync(join(process.cwd(), 'src/content/content.service.ts'), 'utf8');
+    const repositorySource = readFileSync(join(process.cwd(), 'src/content/content.repository.ts'), 'utf8');
+
+    for (const modulePath of modulePaths) {
+      expect(readFileSync(join(process.cwd(), modulePath), 'utf8').length).toBeGreaterThan(0);
+    }
+
+    expect(repositorySource).toContain("from './content.types.js'");
+    expect(repositorySource).not.toContain("from './content.service'");
+    expect(serviceSource).toContain("from './content.types.js'");
+    expect(serviceSource).toContain("from './content-normalization.js'");
+    expect(serviceSource).toContain("from './content-markdown.js'");
   });
 
   test('creates drafts for admin authoring', async () => {

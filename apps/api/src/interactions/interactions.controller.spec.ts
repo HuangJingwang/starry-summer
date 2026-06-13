@@ -30,9 +30,34 @@ describe('InteractionsController', () => {
     vi.unstubAllEnvs();
   });
 
-  test('accepts supported comment targets', () => {
+  test('requires GitHub reader auth before creating comments', () => {
+    expect(Reflect.getMetadata(GUARDS_METADATA, InteractionsController.prototype.createComment)).toEqual([
+      ReaderAuthGuard,
+      PublicInteractionRateLimitGuard,
+    ]);
+  });
+
+  test('allows public likes and views without GitHub reader auth', () => {
+    expect(Reflect.getMetadata(GUARDS_METADATA, InteractionsController.prototype.likeContent)).toEqual([
+      PublicInteractionRateLimitGuard,
+    ]);
+    expect(Reflect.getMetadata(GUARDS_METADATA, InteractionsController.prototype.recordView)).toEqual([
+      PublicInteractionRateLimitGuard,
+    ]);
+  });
+
+  test('accepts supported comment targets from GitHub readers', () => {
     const controller = new InteractionsController(interactionsService as never);
     const request = {
+      readerSession: {
+        kind: 'reader',
+        provider: 'github',
+        providerId: '123',
+        login: 'ada',
+        displayName: 'Ada Lovelace',
+        profileUrl: 'https://github.com/ada',
+        expiresAt: '2026-06-12T00:00:00.000Z',
+      } as const,
       headers: {
         'user-agent': 'Mozilla/5.0',
         'x-forwarded-for': '203.0.113.10, 10.0.0.1',
@@ -43,7 +68,6 @@ describe('InteractionsController', () => {
     controller.createComment({
       targetType: 'post',
       targetId: 'post-1',
-      authorName: 'Ada',
       body: 'Nice',
     }, request);
     controller.listApprovedComments('note', 'note-1');
@@ -51,12 +75,51 @@ describe('InteractionsController', () => {
     expect(interactionsService.createComment).toHaveBeenCalledWith({
       targetType: 'post',
       targetId: 'post-1',
-      authorName: 'Ada',
+      authorName: 'Ada Lovelace',
       body: 'Nice',
       ipHash: expect.stringMatching(/^[a-f0-9]{64}$/),
       userAgent: 'Mozilla/5.0',
     });
     expect(interactionsService.listApprovedComments).toHaveBeenCalledWith('note', 'note-1');
+  });
+
+  test('passes inline comment anchors from GitHub readers', () => {
+    const controller = new InteractionsController(interactionsService as never);
+    const anchor = {
+      text: 'selected passage',
+      prefix: 'before',
+      suffix: 'after',
+      start: 12,
+      end: 28,
+      hash: 'a'.repeat(64),
+    };
+
+    controller.createComment({
+      targetType: 'post',
+      targetId: 'post-1',
+      body: 'Nice',
+      anchor,
+    }, {
+      readerSession: {
+        kind: 'reader',
+        provider: 'github',
+        providerId: '123',
+        login: 'ada',
+        displayName: 'Ada Lovelace',
+        profileUrl: 'https://github.com/ada',
+        expiresAt: '2026-06-12T00:00:00.000Z',
+      },
+      headers: {},
+    });
+
+    expect(interactionsService.createComment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        targetType: 'post',
+        targetId: 'post-1',
+        body: 'Nice',
+        anchor,
+      }),
+    );
   });
 
   test('rejects unsupported comment targets', () => {
@@ -65,7 +128,6 @@ describe('InteractionsController', () => {
     expect(() => controller.createComment({
       targetType: 'page',
       targetId: 'about',
-      authorName: 'Ada',
       body: 'Nice',
     }, { headers: {} })).toThrow('Unsupported comment target type: page');
     expect(() => controller.listApprovedComments('moment', 'daily-1')).toThrow('Unsupported comment target type: moment');
@@ -119,6 +181,47 @@ describe('InteractionsController', () => {
     expect(() => controller.recordView('essay', 'essay-1', request)).toThrow('Unsupported content type: essay');
   });
 
+  test('rejects unsafe public interaction target ids before repository calls', () => {
+    const controller = new InteractionsController(interactionsService as never);
+    const request = {
+      readerSession: {
+        kind: 'reader',
+        provider: 'github',
+        providerId: '123',
+        login: 'ada',
+        displayName: 'Ada Lovelace',
+        profileUrl: 'https://github.com/ada',
+        expiresAt: '2026-06-12T00:00:00.000Z',
+      } as const,
+      headers: {},
+    };
+    const publicRequest = { headers: {} };
+
+    expect(() =>
+      controller.createComment(
+        {
+          targetType: 'post',
+          targetId: '../admin',
+          body: 'Nice',
+        },
+        request,
+      ),
+    ).toThrow('Public interaction target id is invalid');
+    expect(() => controller.listApprovedComments('post', 'post id')).toThrow(
+      'Public interaction target id is invalid',
+    );
+    expect(() => controller.likeContent('post', 'a'.repeat(129), publicRequest)).toThrow(
+      'Public interaction target id is invalid',
+    );
+    expect(() => controller.recordView('post', '', publicRequest)).toThrow(
+      'Public interaction target id is invalid',
+    );
+    expect(interactionsService.createComment).not.toHaveBeenCalled();
+    expect(interactionsService.listApprovedComments).not.toHaveBeenCalled();
+    expect(interactionsService.likeContent).not.toHaveBeenCalled();
+    expect(interactionsService.recordView).not.toHaveBeenCalled();
+  });
+
   test('rejects weak interaction hash secrets in production', () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('INTERACTION_HASH_SECRET', 'change-me-before-production');
@@ -126,6 +229,18 @@ describe('InteractionsController', () => {
 
     expect(() => controller.likeContent('post', 'post-1', { headers: {} })).toThrow(
       'INTERACTION_HASH_SECRET must be at least 32 characters and not a placeholder in production',
+    );
+    expect(interactionsService.likeContent).not.toHaveBeenCalled();
+  });
+
+  test('requires a dedicated interaction hash secret in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('INTERACTION_HASH_SECRET', undefined);
+    vi.stubEnv('SESSION_SECRET', '12345678901234567890123456789012');
+    const controller = new InteractionsController(interactionsService as never);
+
+    expect(() => controller.likeContent('post', 'post-1', { headers: {} })).toThrow(
+      'INTERACTION_HASH_SECRET must be configured separately in production',
     );
     expect(interactionsService.likeContent).not.toHaveBeenCalled();
   });

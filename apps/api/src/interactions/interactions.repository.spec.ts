@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { InMemoryInteractionsRepository } from './interactions.repository';
 
 describe('InMemoryInteractionsRepository', () => {
-  test('stores comments until they are moderated', async () => {
+  test('stores approved comments and still supports moderation changes', async () => {
     const repository = new InMemoryInteractionsRepository(() => '2026-06-10T00:00:00.000Z');
 
     const comment = await repository.createComment({
@@ -21,17 +21,46 @@ describe('InMemoryInteractionsRepository', () => {
       targetId: 'post-1',
       authorName: 'Reader',
       body: 'Nice writing.',
-      status: 'pending',
+      status: 'approved',
       createdAt: '2026-06-10T00:00:00.000Z',
       ipHash: 'ip-hash-1',
       userAgent: 'Mozilla/5.0',
     });
+    expect(await repository.listApprovedComments('post', 'post-1')).toEqual([
+      expect.objectContaining({ id: comment.id, status: 'approved' }),
+    ]);
+
+    await repository.moderateComment(comment.id, 'rejected');
+
     expect(await repository.listApprovedComments('post', 'post-1')).toEqual([]);
+  });
+
+  test('stores inline comment anchor metadata', async () => {
+    const repository = new InMemoryInteractionsRepository(() => '2026-06-10T00:00:00.000Z');
+    const anchor = {
+      text: 'selected passage',
+      prefix: 'before',
+      suffix: 'after',
+      start: 12,
+      end: 28,
+      hash: 'a'.repeat(64),
+    };
+
+    const comment = await repository.createComment({
+      targetType: 'post',
+      targetId: 'post-1',
+      authorName: 'Reader',
+      body: 'Inline thought.',
+      anchor,
+    });
 
     await repository.moderateComment(comment.id, 'approved');
 
     expect(await repository.listApprovedComments('post', 'post-1')).toEqual([
-      expect.objectContaining({ id: comment.id, status: 'approved' }),
+      expect.objectContaining({
+        id: comment.id,
+        anchor,
+      }),
     ]);
   });
 

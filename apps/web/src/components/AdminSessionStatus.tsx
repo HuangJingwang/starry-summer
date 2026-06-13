@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 
-import { buildAdminLoginRedirectPath, buildLogoutRequest, buildSessionRequest } from '@/lib/auth-client';
+import { buildLogoutRequest, buildSessionRequest } from '@/lib/auth-client';
 
 interface AdminSession {
   email: string;
@@ -12,7 +11,6 @@ interface AdminSession {
 
 export function AdminSessionStatus() {
   const [session, setSession] = useState<AdminSession | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -35,11 +33,6 @@ export function AdminSessionStatus() {
         if (active) {
           setSession(null);
         }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
       });
 
     return () => {
@@ -47,36 +40,17 @@ export function AdminSessionStatus() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!loading && !session) {
-      window.location.assign(buildAdminLoginRedirectPath(`${window.location.pathname}${window.location.search}`));
-    }
-  }, [loading, session]);
-
   async function logout() {
     const request = buildLogoutRequest();
 
     await fetch(request.url, request.init).catch(() => undefined);
     setSession(null);
-    window.location.assign('/admin/login');
-  }
-
-  if (loading) {
-    return <div className="admin-session">正在检查登录状态</div>;
-  }
-
-  if (!session) {
-    return (
-      <div className="admin-session">
-        <span>未登录</span>
-        <Link href="/admin/login">登录</Link>
-      </div>
-    );
+    window.location.replace('/admin/login');
   }
 
   return (
     <div className="admin-session">
-      <span>{session.email}</span>
+      <span>{session?.email ?? '后台会话'}</span>
       <button type="button" onClick={logout}>
         退出登录
       </button>

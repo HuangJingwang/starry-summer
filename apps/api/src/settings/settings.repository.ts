@@ -40,20 +40,21 @@ export const SETTINGS_REPOSITORY = Symbol('SETTINGS_REPOSITORY');
 export const defaultSiteSettings: SiteSettings = {
   profile: {
     title: 'Starry Summer',
-    ownerName: 'Owner',
-    description: 'A personal content platform.',
+    ownerName: 'Aster.H',
+    description:
+      '我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。',
     socialLinks: [],
   },
   hero: {
-    tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
-    backgroundImageUrl: '/hero-workspace.png',
-    motto: 'Build a public trail of private work.',
+    tagline: '把技术探索、项目实践和日常思考长期沉淀成一个可回看的个人知识系统。',
+    backgroundImageUrl: '',
+    motto: 'Stay curious. Keep building.',
     quotes: [
-      'Build a public trail of private work.',
-      'Small notes compound into a life you can revisit.',
+      '用代码解决问题，用文字留下路径。',
+      '把每一次实践沉淀成未来可以复用的认知。',
     ],
   },
-  navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'],
+  navigation: ['search', 'posts', 'moments', 'projects'],
   updatedAt: '2026-06-10T00:00:00.000Z',
 };
 

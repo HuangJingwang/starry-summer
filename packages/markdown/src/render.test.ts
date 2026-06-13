@@ -52,6 +52,10 @@ describe('Markdown rendering', () => {
     expect(html).toContain('class="markdown-code-block__language">ts</span>');
     expect(html).toContain('type="button"');
     expect(html).toContain('data-copy-code="true"');
+    expect(html).toContain('aria-label="复制代码块"');
+    expect(html).toContain('aria-live="polite"');
+    expect(html).toContain('>复制代码</button>');
+    expect(html).not.toContain('Copy');
     expect(html).toContain('class="token keyword">const</span>');
     expect(html).toContain('class="token string">"42"</span>');
   });

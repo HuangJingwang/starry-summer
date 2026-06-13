@@ -105,6 +105,7 @@ npm run auth:hash-password -- "your strong password"
 
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
+- `GITHUB_CALLBACK_URL`
 
 OAuth 回调地址是你的公开站点域名下的 `/api/auth/github/callback`。
 
@@ -148,6 +149,12 @@ docker compose config --quiet
 ```bash
 npm run test:ops
 ```
+
+## 开源与贡献
+
+Starry Summer 使用 MIT License。开源协作前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [SECURITY.md](SECURITY.md)。
+
+请不要提交真实账号、密码哈希、OAuth 密钥、生产数据、私有姓名、上传素材或本地参考导入目录。`.env.example` 只能保留占位值；本地 `.env` 请用 `npm run ops:init-env` 生成。
 
 ## 部署与运维
 
