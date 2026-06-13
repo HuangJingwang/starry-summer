@@ -9,6 +9,7 @@ import {
   loadPublicAssets,
   loadRandomAsset,
   normalizeStoredAsset,
+  readAssetErrorMessage,
 } from './assets';
 
 describe('asset client helpers', () => {
@@ -19,6 +20,24 @@ describe('asset client helpers', () => {
       filename: 'Hello Image.PNG',
       mimeType: 'image/png',
       base64: 'aGVsbG8=',
+    });
+  });
+
+  test('infers a standard jpeg mime type for jpg files when the browser leaves file type blank', async () => {
+    const file = new File([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], 'WechatIMG8477.jpg', { type: '' });
+
+    await expect(buildAssetUploadPayload(file)).resolves.toMatchObject({
+      filename: 'WechatIMG8477.jpg',
+      mimeType: 'image/jpeg',
+    });
+  });
+
+  test('normalizes non-standard image jpg mime types before upload', async () => {
+    const file = new File([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], 'WechatIMG8477.jpg', { type: 'image/jpg' });
+
+    await expect(buildAssetUploadPayload(file)).resolves.toMatchObject({
+      filename: 'WechatIMG8477.jpg',
+      mimeType: 'image/jpeg',
     });
   });
 
@@ -88,6 +107,32 @@ describe('asset client helpers', () => {
     });
   });
 
+  test('reads specific API error messages for asset upload failures', async () => {
+    await expect(
+      readAssetErrorMessage(
+        new Response(JSON.stringify({ message: 'Upload content does not match declared type: image/jpeg' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        }),
+        '上传失败。',
+      ),
+    ).resolves.toBe('Upload content does not match declared type: image/jpeg');
+
+    await expect(
+      readAssetErrorMessage(
+        new Response(JSON.stringify({ message: ['Upload exceeds 10485760 bytes'] }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        }),
+        '上传失败。',
+      ),
+    ).resolves.toBe('Upload exceeds 10485760 bytes');
+  });
+
+  test('falls back to a friendly asset upload error when API response has no readable message', async () => {
+    await expect(readAssetErrorMessage(new Response('', { status: 500 }), '上传失败。')).resolves.toBe('上传失败。');
+  });
+
   test('builds gallery list and random image requests', async () => {
     const { buildAdminAssetListRequest, buildPublicAssetListRequest, buildRandomAssetRequest } = await import('./assets');
 
@@ -109,12 +154,13 @@ describe('asset client helpers', () => {
         { usage: 'background', apiBaseUrl: 'https://api.example.com/' },
         async (url, init) => {
           expect(url).toBe('https://api.example.com/assets?usage=background');
-          expect(init).toEqual({
+          expect(init).toMatchObject({
             method: 'GET',
             next: {
               revalidate: 60,
             },
           });
+          expect(init.signal).toBeInstanceOf(AbortSignal);
 
           return new Response(
             JSON.stringify([
@@ -138,6 +184,10 @@ describe('asset client helpers', () => {
     ]);
 
     await expect(loadPublicAssets({ usage: 'background' }, async () => new Response('Not found', { status: 404 }))).resolves.toEqual([]);
+  });
+
+  test('uses an empty asset list during server render when no API base URL is configured', async () => {
+    await expect(loadPublicAssets({ usage: 'background' })).resolves.toEqual([]);
   });
 
   test('normalizes stored asset API data', () => {
@@ -169,12 +219,13 @@ describe('asset client helpers', () => {
         { usage: 'background', apiBaseUrl: 'https://api.example.com/' },
         async (url, init) => {
           expect(url).toBe('https://api.example.com/assets/random?usage=background');
-          expect(init).toEqual({
+          expect(init).toMatchObject({
             method: 'GET',
             next: {
               revalidate: 60,
             },
           });
+          expect(init.signal).toBeInstanceOf(AbortSignal);
 
           return new Response(
             JSON.stringify({
@@ -192,6 +243,10 @@ describe('asset client helpers', () => {
     });
 
     await expect(loadRandomAsset({ usage: 'background' }, async () => new Response('Not found', { status: 404 }))).resolves.toBeNull();
+  });
+
+  test('uses null random assets during server render when no API base URL is configured', async () => {
+    await expect(loadRandomAsset({ usage: 'background' })).resolves.toBeNull();
   });
 
   test('builds markdown embeds for images and attachments', () => {

@@ -75,8 +75,8 @@ elif [[ "${ACME_EMAIL:-}" == *@example.com ]]; then
   fail "ACME_EMAIL must not use an example.com placeholder."
 fi
 
-if [[ "${ADMIN_EMAIL:-}" != *@* ]]; then
-  fail "ADMIN_EMAIL must be a valid owner login email."
+if is_unset_or_placeholder "${ADMIN_EMAIL:-}"; then
+  fail "ADMIN_EMAIL must be set to the owner login account."
 elif [[ "${ADMIN_EMAIL:-}" == *@example.com ]]; then
   fail "ADMIN_EMAIL must not use an example.com placeholder."
 fi
@@ -109,6 +109,18 @@ fi
 
 if is_unset_or_placeholder "${GITHUB_CLIENT_SECRET:-}"; then
   fail "GITHUB_CLIENT_SECRET is required for guestbook GitHub login."
+fi
+
+expected_github_callback_url="${PUBLIC_SITE_URL%/}/api/auth/github/callback"
+
+if is_unset_or_placeholder "${GITHUB_CALLBACK_URL:-}"; then
+  fail "GITHUB_CALLBACK_URL must be set to the GitHub OAuth callback URL."
+elif [[ "${GITHUB_CALLBACK_URL:-}" != "$expected_github_callback_url" ]]; then
+  fail "GITHUB_CALLBACK_URL must equal PUBLIC_SITE_URL plus /api/auth/github/callback."
+fi
+
+if [[ "${TRUST_PROXY:-}" != "true" ]]; then
+  fail "TRUST_PROXY must be true for the Caddy reverse-proxy deployment."
 fi
 
 case "${POSTGRES_PASSWORD:-}" in

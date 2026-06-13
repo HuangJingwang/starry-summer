@@ -1,7 +1,8 @@
 import { BadRequestException, Controller, Get, Inject, Query } from '@nestjs/common';
 import type { ContentType } from '@starry-summer/shared';
 
-import { ContentService, type PublicContentSort } from './content.service.js';
+import { ContentService } from './content.service.js';
+import type { PublicContentSort } from './content.types.js';
 
 @Controller('content')
 export class ContentController {

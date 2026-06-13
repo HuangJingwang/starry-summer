@@ -13,19 +13,28 @@ export async function SiteShell({ children }: { children: ReactNode }) {
   const navItems = buildPublicNavigation(settings.navigation);
 
   return (
-    <div className="site-shell">
-      <header className="site-header">
-        <Link className="brand" href="/" aria-label={`${settings.profile.title} home`}>
+    <div id="top" className="site-shell">
+      <header className="site-header site-nav-card">
+        <Link className="brand site-nav-card__brand" href="/#top" aria-label={`${settings.profile.title} 首页`}>
           <span className="brand-mark">S</span>
           <span>{settings.profile.title}</span>
         </Link>
-        <nav className="site-nav" aria-label="主导航">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="site-nav-card__body">
+          <span className="site-nav-card__group-label">General</span>
+          <nav className="site-nav" aria-label="主导航">
+            <div className="site-nav__items">
+              {navItems.map((item) => (
+                <Link key={item.href} href={item.href}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        </div>
+        <form className="site-search" action="/search" role="search" aria-label="站内搜索">
+          <input name="q" type="search" enterKeyHint="search" placeholder="搜索" aria-label="站内搜索" />
+          <button type="submit">搜索</button>
+        </form>
       </header>
       {children}
       <SiteFooter settings={settings} />

@@ -11,6 +11,8 @@ import {
   buildViewInsert,
   mapCommentRow,
   mapGuestbookRow,
+  mapPublicCommentRow,
+  mapPublicGuestbookRow,
   type CommentRow,
   type GuestbookEntryRow,
 } from './postgres-interactions.repository';
@@ -42,6 +44,37 @@ describe('PostgresInteractionsRepository mapping', () => {
     });
   });
 
+  test('maps inline comment anchor columns', () => {
+    const row: CommentRow = {
+      id: 'comment-1',
+      target_type: 'post',
+      target_id: '11111111-1111-4111-8111-111111111111',
+      author_name: 'Reader',
+      body: 'Nice writing.',
+      status: 'approved',
+      anchor_text: 'selected passage',
+      anchor_prefix: 'before',
+      anchor_suffix: 'after',
+      anchor_start: 12,
+      anchor_end: 28,
+      anchor_hash: 'a'.repeat(64),
+      created_at: new Date('2026-06-10T00:00:00.000Z'),
+    };
+
+    expect(mapCommentRow(row)).toEqual(
+      expect.objectContaining({
+        anchor: {
+          text: 'selected passage',
+          prefix: 'before',
+          suffix: 'after',
+          start: 12,
+          end: 28,
+          hash: 'a'.repeat(64),
+        },
+      }),
+    );
+  });
+
   test('maps guestbook rows to public records', () => {
     const row: GuestbookEntryRow = {
       id: 'entry-1',
@@ -64,6 +97,50 @@ describe('PostgresInteractionsRepository mapping', () => {
     });
   });
 
+  test('strips moderation metadata from public comment rows', () => {
+    const row: CommentRow = {
+      id: 'comment-1',
+      target_type: 'post',
+      target_id: '11111111-1111-4111-8111-111111111111',
+      author_name: 'Reader',
+      body: 'Nice writing.',
+      status: 'approved',
+      ip_hash: 'ip-hash-1',
+      user_agent: 'Mozilla/5.0',
+      created_at: new Date('2026-06-10T00:00:00.000Z'),
+    };
+
+    expect(mapPublicCommentRow(row)).toEqual({
+      id: 'comment-1',
+      targetType: 'post',
+      targetId: '11111111-1111-4111-8111-111111111111',
+      authorName: 'Reader',
+      body: 'Nice writing.',
+      status: 'approved',
+      createdAt: '2026-06-10T00:00:00.000Z',
+    });
+  });
+
+  test('strips moderation metadata from public guestbook rows', () => {
+    const row: GuestbookEntryRow = {
+      id: 'entry-1',
+      author_name: 'Visitor',
+      body: 'Hello there.',
+      status: 'approved',
+      ip_hash: 'ip-hash-1',
+      user_agent: 'Mozilla/5.0',
+      created_at: new Date('2026-06-10T01:00:00.000Z'),
+    };
+
+    expect(mapPublicGuestbookRow(row)).toEqual({
+      id: 'entry-1',
+      authorName: 'Visitor',
+      body: 'Hello there.',
+      status: 'approved',
+      createdAt: '2026-06-10T01:00:00.000Z',
+    });
+  });
+
   test('builds comment insert SQL and values', () => {
     const insert = buildCommentInsert({
       targetType: 'post',
@@ -76,6 +153,7 @@ describe('PostgresInteractionsRepository mapping', () => {
 
     expect(insert.sql).toContain('insert into comments');
     expect(insert.sql).toContain('target_type');
+    expect(insert.sql).toContain('status');
     expect(insert.sql).toContain('ip_hash');
     expect(insert.sql).toContain('user_agent');
     expect(insert.sql).toContain('returning *');
@@ -84,8 +162,50 @@ describe('PostgresInteractionsRepository mapping', () => {
       '11111111-1111-4111-8111-111111111111',
       'Reader',
       'Nice writing.',
+      'approved',
       'ip-hash-1',
       'Mozilla/5.0',
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ]);
+  });
+
+  test('builds comment insert SQL and values with anchor metadata', () => {
+    const insert = buildCommentInsert({
+      targetType: 'post',
+      targetId: '11111111-1111-4111-8111-111111111111',
+      authorName: 'Reader',
+      body: 'Nice writing.',
+      anchor: {
+        text: 'selected passage',
+        prefix: 'before',
+        suffix: 'after',
+        start: 12,
+        end: 28,
+        hash: 'a'.repeat(64),
+      },
+    });
+
+    expect(insert.sql).toContain('anchor_text');
+    expect(insert.sql).toContain('anchor_hash');
+    expect(insert.values).toEqual([
+      'post',
+      '11111111-1111-4111-8111-111111111111',
+      'Reader',
+      'Nice writing.',
+      'approved',
+      null,
+      null,
+      'selected passage',
+      'before',
+      'after',
+      12,
+      28,
+      'a'.repeat(64),
     ]);
   });
 
@@ -99,9 +219,10 @@ describe('PostgresInteractionsRepository mapping', () => {
 
     expect(insert.sql).toContain('insert into guestbook_entries');
     expect(insert.sql).toContain('author_name');
+    expect(insert.sql).toContain('status');
     expect(insert.sql).toContain('ip_hash');
     expect(insert.sql).toContain('user_agent');
-    expect(insert.values).toEqual(['Visitor', 'Hello from the guestbook.', 'ip-hash-1', 'Mozilla/5.0']);
+    expect(insert.values).toEqual(['Visitor', 'Hello from the guestbook.', 'approved', 'ip-hash-1', 'Mozilla/5.0']);
   });
 
   test('builds moderation updates for known interaction tables', () => {

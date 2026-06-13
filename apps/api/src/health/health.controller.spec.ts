@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { SELF_DECLARED_DEPS_METADATA } from '@nestjs/common/constants';
 
 import { HealthController } from './health.controller';
@@ -17,8 +17,9 @@ describe('HealthController', () => {
         repositoryDriver: 'memory',
       }),
     );
+    const response = { status: vi.fn() };
 
-    await expect(controller.check()).resolves.toEqual({
+    await expect(controller.check(response as never)).resolves.toEqual({
       status: 'ok',
       service: 'starry-summer-api',
       release: {
@@ -33,5 +34,38 @@ describe('HealthController', () => {
         },
       },
     });
+    expect(response.status).toHaveBeenCalledWith(200);
+  });
+
+  test('sets HTTP 503 for degraded deployment health reports', async () => {
+    const controller = new HealthController({
+      check: async () => ({
+        status: 'degraded',
+        service: 'starry-summer-api',
+        release: {
+          version: 'development',
+          revision: 'unknown',
+        },
+        components: {
+          api: { status: 'ok' },
+          database: {
+            status: 'error',
+            driver: 'postgres',
+            message: 'connection refused',
+          },
+        },
+      }),
+    } as HealthService);
+    const response = { status: vi.fn() };
+
+    await expect(controller.check(response as never)).resolves.toMatchObject({
+      status: 'degraded',
+      components: {
+        database: {
+          status: 'error',
+        },
+      },
+    });
+    expect(response.status).toHaveBeenCalledWith(503);
   });
 });

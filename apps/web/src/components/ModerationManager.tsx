@@ -8,6 +8,7 @@ import {
   buildModerationActionRequest,
   buildModerationDeleteRequest,
   normalizeModerationRecord,
+  readInteractionErrorMessage,
   type ModerationRecord,
   type ModerationResource,
 } from '@/lib/interaction-client';
@@ -20,24 +21,35 @@ interface ModerationManagerProps {
 type LoadState = 'idle' | 'loading' | 'submitting' | 'error';
 
 const statusOptions: Array<{ label: string; value: ModerationStatus | '' }> = [
-  { label: '待审核', value: 'pending' },
-  { label: '已通过', value: 'approved' },
-  { label: '已拒绝', value: 'rejected' },
+  { label: '待处理', value: 'pending' },
+  { label: '已显示', value: 'approved' },
+  { label: '已隐藏', value: 'rejected' },
   { label: '垃圾信息', value: 'spam' },
   { label: '全部', value: '' },
 ];
 
 const actionOptions: Array<{ label: string; value: ModerationStatus }> = [
-  { label: '通过', value: 'approved' },
-  { label: '拒绝', value: 'rejected' },
+  { label: '显示', value: 'approved' },
+  { label: '隐藏', value: 'rejected' },
   { label: '标为垃圾', value: 'spam' },
 ];
+
+const statusLabels: Record<ModerationStatus, string> = {
+  approved: '已显示',
+  pending: '待处理',
+  rejected: '已隐藏',
+  spam: '垃圾信息',
+};
+
+function moderationStatusTabId(status: ModerationStatus | ''): string {
+  return `moderation-status-${status || 'all'}`;
+}
 
 async function send(request: { url: string; init: RequestInit }) {
   const response = await fetch(request.url, request.init);
 
   if (!response.ok) {
-    throw new Error(`Request failed with ${response.status}`);
+    throw new Error(await readInteractionErrorMessage(response, `请求失败，服务器返回 ${response.status}。`));
   }
 
   return response.json().catch(() => null);
@@ -48,6 +60,8 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
   const [records, setRecords] = useState<ModerationRecord[]>([]);
   const [state, setState] = useState<LoadState>('idle');
   const [message, setMessage] = useState('');
+  const activeStatusLabel = statusOptions.find((option) => option.value === status)?.label ?? '全部';
+  const resourceLabel = resource === 'comments' ? '评论' : '留言';
 
   async function load(nextStatus: ModerationStatus | '' = status) {
     setState('loading');
@@ -57,9 +71,9 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
       const data = await send(buildAdminModerationListRequest(resource, nextStatus || undefined));
       setRecords(Array.isArray(data) ? data.map((item) => normalizeModerationRecord(item)) : []);
       setState('idle');
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('读取失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '读取失败，请确认已登录且 API 服务可用。');
     }
   }
 
@@ -74,9 +88,9 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
     try {
       await send(buildModerationActionRequest(resource, id, nextStatus));
       await load(status);
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('审核操作失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '状态更新失败，请确认已登录且 API 服务可用。');
     }
   }
 
@@ -91,34 +105,62 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
     try {
       await send(buildModerationDeleteRequest(resource, id));
       await load(status);
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('删除失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '删除失败，请确认已登录且 API 服务可用。');
     }
   }
 
   return (
     <div className="moderation-manager">
-      <div className="moderation-toolbar" role="tablist" aria-label="审核状态">
-        {statusOptions.map((option) => (
-          <button
-            key={option.label}
-            type="button"
-            className={status === option.value ? 'active' : ''}
-            onClick={() => setStatus(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
+      <div className="moderation-toolbar-shell">
+        <div className="moderation-current">
+          <span>当前视图</span>
+          <strong>{activeStatusLabel}</strong>
+          <small>{state === 'loading' ? '正在同步' : `${records.length} 条${resourceLabel}`}</small>
+        </div>
+        <div className="moderation-toolbar" role="tablist" aria-label="互动状态">
+          {statusOptions.map((option) => (
+            <button
+              key={option.label}
+              id={moderationStatusTabId(option.value)}
+              type="button"
+              role="tab"
+              aria-selected={status === option.value}
+              aria-controls="moderation-panel"
+              className={status === option.value ? 'active' : ''}
+              onClick={() => setStatus(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
-      {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
-      <div className="moderation-list">
+      {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
+      <div
+        id="moderation-panel"
+        className="moderation-list"
+        role="tabpanel"
+        aria-busy={state === 'loading'}
+        aria-labelledby={moderationStatusTabId(status)}
+      >
         {state === 'loading' ? <p className="empty-state">加载中...</p> : null}
-        {records.length === 0 && state !== 'loading' ? <p className="empty-state">{emptyText}</p> : null}
+        {records.length === 0 && state !== 'loading' ? (
+          <div className="moderation-empty-card">
+            <strong>{emptyText}</strong>
+            <p>{status ? `当前没有${activeStatusLabel}的${resourceLabel}。` : `${resourceLabel}队列已经清空。`}</p>
+          </div>
+        ) : null}
         {records.map((record) => (
-          <article key={record.id}>
-            <span>{record.status}</span>
+          <article className="moderation-card" key={record.id}>
+            <span>{statusLabels[record.status]}</span>
             <strong>{record.authorName}</strong>
+            {record.anchor ? (
+              <blockquote className="moderation-anchor">
+                <span>划线原文</span>
+                {record.anchor.text}
+              </blockquote>
+            ) : null}
             <p>{record.body}</p>
             <small>
               {record.targetType && record.targetId ? `${record.targetType}:${record.targetId} · ` : ''}

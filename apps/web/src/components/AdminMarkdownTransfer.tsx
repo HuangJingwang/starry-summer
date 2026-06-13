@@ -19,6 +19,7 @@ export function AdminMarkdownTransfer() {
   const [exportFilename, setExportFilename] = useState('starry-summer-export.md');
   const [state, setState] = useState<TransferState>('idle');
   const [message, setMessage] = useState('');
+  const transferBusy = state === 'submitting';
 
   async function exportMarkdown(formData: FormData) {
     setState('submitting');
@@ -125,45 +126,75 @@ export function AdminMarkdownTransfer() {
   }
 
   return (
-    <div className="split-panels">
-      <form action={exportMarkdown}>
-        <h2>导出</h2>
-        <p>按内容 ID 导出带 front matter 的 Markdown。</p>
-        <input name="contentId" placeholder="内容 ID" required />
-        <button type="submit" disabled={state === 'submitting'}>
-          导出 Markdown
-        </button>
-        <button type="button" onClick={exportAllMarkdown} disabled={state === 'submitting'}>
-          导出全部
-        </button>
+    <div className="admin-transfer">
+      <form className="admin-transfer-card" action={exportMarkdown} aria-busy={transferBusy}>
+        <div className="admin-transfer-card__header">
+          <span>Export</span>
+          <h2>导出</h2>
+          <p>按内容 ID 导出带 front matter 的 Markdown，也可以一次打包全部内容。</p>
+        </div>
+        <label>
+          内容 ID
+          <input name="contentId" placeholder="例如：post-2026-archive" required />
+        </label>
+        <div className="admin-transfer-actions">
+          <button type="submit" disabled={transferBusy} aria-disabled={transferBusy}>
+            导出 Markdown
+          </button>
+          <button type="button" onClick={exportAllMarkdown} disabled={transferBusy} aria-disabled={transferBusy}>
+            导出全部
+          </button>
+        </div>
         {exportedMarkdown ? (
-          <>
+          <div className="admin-export-preview">
+            <div>
+              <strong>导出结果</strong>
+              <span>{exportFilename}</span>
+            </div>
             <textarea rows={12} value={exportedMarkdown} readOnly aria-label="已导出的 Markdown" />
             <button type="button" onClick={downloadExport}>
               下载 .md
             </button>
-          </>
+          </div>
         ) : null}
       </form>
-      <form action={importMarkdown}>
-        <h2>导入</h2>
-        <p>从 Markdown 恢复内容，导入后先作为草稿进入内容管理。</p>
-        <select name="type" defaultValue="post" aria-label="内容类型">
-          <option value="post">文章</option>
-          <option value="note">笔记</option>
-          <option value="moment">日常</option>
-          <option value="project">项目</option>
-          <option value="page">页面</option>
-        </select>
+      <form className="admin-transfer-card" action={importMarkdown} aria-busy={transferBusy}>
+        <div className="admin-transfer-card__header">
+          <span>Import</span>
+          <h2>导入</h2>
+          <p>从 Markdown 恢复内容，导入后先作为草稿进入内容管理。</p>
+        </div>
+        <div className="admin-import-checklist">
+          <strong>导入前检查</strong>
+          <ul>
+            <li>单篇导入会使用下方选择的内容类型，归档导入会读取 Starry Summer 导出标记。</li>
+            <li>建议保留 title、slug、summary、tags、categories 等 front matter，方便导入后继续管理。</li>
+            <li>同 slug 内容会被后端拒绝；如果要保留两份内容，请先修改 slug 后再导入。</li>
+          </ul>
+        </div>
+        <label>
+          内容类型
+          <select name="type" defaultValue="post" aria-label="内容类型">
+            <option value="post">文章</option>
+            <option value="moment">日常</option>
+            <option value="project">项目</option>
+            <option value="page">页面</option>
+          </select>
+        </label>
+        <label>
+          Markdown 内容
         <textarea name="markdown" rows={12} defaultValue={exampleMarkdown} />
-        <button type="submit" disabled={state === 'submitting'}>
-          导入 Markdown
-        </button>
-        <button type="submit" formAction={importMarkdownArchive} disabled={state === 'submitting'}>
-          导入归档
-        </button>
+        </label>
+        <div className="admin-transfer-actions">
+          <button type="submit" disabled={transferBusy} aria-disabled={transferBusy}>
+            导入 Markdown
+          </button>
+          <button type="submit" formAction={importMarkdownArchive} disabled={transferBusy} aria-disabled={transferBusy}>
+            导入归档
+          </button>
+        </div>
       </form>
-      {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
+      {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
     </div>
   );
 }

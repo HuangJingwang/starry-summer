@@ -101,7 +101,7 @@ create table if not exists comments (
   author_name text not null,
   author_email_hash text,
   body text not null,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'spam')),
+  status text not null default 'approved' check (status in ('pending', 'approved', 'rejected', 'spam')),
   ip_hash text,
   user_agent text,
   created_at timestamptz not null default now(),
@@ -117,7 +117,7 @@ create table if not exists guestbook_entries (
   author_name text not null,
   author_email_hash text,
   body text not null,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'spam')),
+  status text not null default 'approved' check (status in ('pending', 'approved', 'rejected', 'spam')),
   ip_hash text,
   user_agent text,
   created_at timestamptz not null default now(),
@@ -153,6 +153,6 @@ create table if not exists site_settings (
 
 insert into site_settings (key, value)
 values
-  ('profile', '{"title":"Starry Summer","ownerName":"Owner","description":"A personal content platform.","socialLinks":[]}'::jsonb),
-  ('navigation', '["posts","notes","moments","projects","series","guestbook","about"]'::jsonb)
+  ('profile', '{"title":"Starry Summer","ownerName":"Aster.H","description":"我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。","socialLinks":[]}'::jsonb),
+  ('navigation', '["search","posts","moments","projects"]'::jsonb)
 on conflict (key) do nothing;

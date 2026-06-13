@@ -63,4 +63,4 @@ mv "$tmp_file" "$target_file"
 trap - EXIT
 
 echo "Wrote Docker environment file: $target_file"
-echo "Admin login email: owner@example.com"
+echo "Admin login account: owner@example.com"

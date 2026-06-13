@@ -10,7 +10,7 @@ export class SettingsController {
 
   @Get('settings')
   getPublicSettings() {
-    return this.settingsService.getSettings();
+    return this.settingsService.getPublicSettings();
   }
 
   @Get('admin/settings')

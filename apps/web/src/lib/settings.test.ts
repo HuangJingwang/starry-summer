@@ -9,15 +9,20 @@ import {
   loadPublicSettings,
   normalizeSiteSettings,
   parseHeroQuotesText,
+  readSettingsErrorMessage,
 } from './settings';
 
 describe('settings client helpers', () => {
+  const privateOwnerName = String.fromCharCode(0x9ec4, 0x4eac, 0x671b);
+  const defaultProfileDescription =
+    '我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。';
+
   test('normalizes site settings responses', () => {
     expect(
       normalizeSiteSettings({
         profile: {
           title: 'My Blog',
-          ownerName: 'Owner',
+          ownerName: 'Private Owner',
           description: 'Notes',
           socialLinks: [
             { label: ' GitHub ', href: ' https://github.com/me ' },
@@ -36,7 +41,7 @@ describe('settings client helpers', () => {
     ).toEqual({
       profile: {
         title: 'My Blog',
-        ownerName: 'Owner',
+        ownerName: 'Aster.H',
         description: 'Notes',
         socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
       },
@@ -51,17 +56,33 @@ describe('settings client helpers', () => {
     });
 
     expect(normalizeSiteSettings({}).profile.socialLinks).toEqual([]);
+    expect(normalizeSiteSettings({}).profile.ownerName).toBe('Aster.H');
+    expect(normalizeSiteSettings({}).profile.description).toBe(defaultProfileDescription);
+    expect(normalizeSiteSettings({}).profile.description).not.toContain(privateOwnerName);
+    expect(normalizeSiteSettings({}).profile.description).not.toContain('AI Agent');
     expect(normalizeSiteSettings({}).hero).toEqual({
-      tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+      tagline: '把技术探索、项目实践和日常思考长期沉淀成一个可回看的个人知识系统。',
       backgroundImageUrl: '/hero-workspace.png',
-      motto: 'Build a public trail of private work.',
+      motto: 'Stay curious. Keep building.',
       quotes: [
-        'Build a public trail of private work.',
-        'Small notes compound into a life you can revisit.',
+        '用代码解决问题，用文字留下路径。',
+        '把每一次实践沉淀成未来可以复用的认知。',
       ],
     });
-    expect(normalizeSiteSettings({}).navigation).toContain('series');
     expect(normalizeSiteSettings({}).navigation).toContain('search');
+    expect(normalizeSiteSettings({}).navigation[0]).toBe('search');
+    expect(normalizeSiteSettings({}).navigation).not.toContain('series');
+    expect(normalizeSiteSettings({}).navigation).not.toContain('guestbook');
+    expect(normalizeSiteSettings({}).navigation).not.toContain('about');
+  });
+
+  test('uses default settings during server render when no API base URL is configured', async () => {
+    await expect(loadPublicSettings()).resolves.toMatchObject({
+      profile: {
+        ownerName: 'Aster.H',
+        description: defaultProfileDescription,
+      },
+    });
   });
 
   test('builds public and admin settings requests', () => {
@@ -134,6 +155,32 @@ describe('settings client helpers', () => {
     });
   });
 
+  test('reads specific settings API error messages', async () => {
+    await expect(
+      readSettingsErrorMessage(
+        new Response(JSON.stringify({ message: 'Owner name is required' }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        }),
+        '保存失败。',
+      ),
+    ).resolves.toBe('Owner name is required');
+
+    await expect(
+      readSettingsErrorMessage(
+        new Response(JSON.stringify({ message: ['Navigation contains unsupported key'] }), {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        }),
+        '保存失败。',
+      ),
+    ).resolves.toBe('Navigation contains unsupported key');
+  });
+
+  test('falls back to a friendly settings error when response has no readable message', async () => {
+    await expect(readSettingsErrorMessage(new Response('', { status: 500 }), '保存失败。')).resolves.toBe('保存失败。');
+  });
+
   test('builds a form key that changes when loaded settings change', () => {
     const fallback = normalizeSiteSettings({});
     const loaded = normalizeSiteSettings({
@@ -163,7 +210,7 @@ describe('settings client helpers', () => {
           JSON.stringify({
             profile: {
               title: 'Public Blog',
-              ownerName: 'Owner',
+              ownerName: 'Private Owner',
               description: 'Public description',
               socialLinks: [{ label: 'GitHub', href: 'https://github.com/public-blog' }],
             },
@@ -181,7 +228,7 @@ describe('settings client helpers', () => {
     ).resolves.toEqual({
       profile: {
         title: 'Public Blog',
-        ownerName: 'Owner',
+        ownerName: 'Aster.H',
         description: 'Public description',
         socialLinks: [{ label: 'GitHub', href: 'https://github.com/public-blog' }],
       },
@@ -198,6 +245,7 @@ describe('settings client helpers', () => {
     await expect(loadPublicSettings(async () => new Response('Unavailable', { status: 503 }))).resolves.toMatchObject({
       profile: {
         title: 'Starry Summer',
+        ownerName: 'Aster.H',
       },
     });
   });

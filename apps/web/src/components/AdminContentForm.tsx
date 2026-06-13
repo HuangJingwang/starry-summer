@@ -1,5 +1,6 @@
 'use client';
 
+import { renderMarkdown } from '@starry-summer/markdown';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectMetadata } from '@starry-summer/shared';
 
@@ -21,9 +22,16 @@ import {
   getContentDraftStorageKey,
   getUnsavedContentWarning,
   parseContentDraftSnapshot,
+  readAdminContentErrorMessage,
   serializeContentDraftSnapshot,
   type ContentDraftSnapshot,
 } from '@/lib/admin-content';
+import {
+  applyMarkdownCommand,
+  createMarkdownEditorStats,
+  type MarkdownEditorCommand,
+} from '@/lib/markdown-editor';
+import { AdminPublishSettingsPanel } from './AdminPublishSettingsPanel';
 
 interface AdminContentFormInitialValue {
   id?: string;
@@ -59,13 +67,27 @@ type SaveState = 'idle' | 'submitting' | 'success' | 'error';
 type AssetLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 const fallbackMarkdown = '# 新内容标题\n\n这里写正文。';
-const authoringAssetUsages: AssetUsage[] = ['content', 'attachment'];
+const authoringAssetUsages: AssetUsage[] = ['content', 'attachment', 'cover'];
+const markdownToolbarCommands: Array<{ command: MarkdownEditorCommand; label: string; icon: string }> = [
+  { command: 'heading', label: '标题', icon: 'H' },
+  { command: 'bold', label: '加粗', icon: 'B' },
+  { command: 'italic', label: '斜体', icon: 'I' },
+  { command: 'link', label: '链接', icon: '↗' },
+  { command: 'quote', label: '引用', icon: '“' },
+  { command: 'unordered-list', label: '无序列表', icon: '•' },
+  { command: 'ordered-list', label: '有序列表', icon: '1.' },
+  { command: 'code-block', label: '代码', icon: '</>' },
+  { command: 'divider', label: '分割线', icon: '—' },
+];
 
 export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const markdownTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const undoStackRef = useRef<string[]>([]);
+  const redoStackRef = useRef<string[]>([]);
   const [state, setState] = useState<SaveState>('idle');
   const [message, setMessage] = useState('');
+  const [title, setTitle] = useState(initialValue?.title ?? '');
   const [markdown, setMarkdown] = useState(initialValue?.bodyMarkdown ?? fallbackMarkdown);
   const [contentType, setContentType] = useState<ContentType>(initialValue?.type ?? 'post');
   const [isDirty, setIsDirty] = useState(false);
@@ -75,7 +97,16 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   const [assetMessage, setAssetMessage] = useState('');
   const [authoringAssets, setAuthoringAssets] = useState<StoredAsset[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState('');
+  const [selectedCoverAssetId, setSelectedCoverAssetId] = useState(initialValue?.coverAssetId ?? '');
+  const [coverAssetId, setCoverAssetId] = useState(initialValue?.coverAssetId ?? '');
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [publishSettingsOpen, setPublishSettingsOpen] = useState(mode === 'edit');
   const preview = useMemo(() => createMarkdownPreview(markdown), [markdown]);
+  const editorStats = useMemo(() => createMarkdownEditorStats(markdown), [markdown]);
+  const coverAssets = useMemo(
+    () => authoringAssets.filter((asset) => asset.usage === 'cover' && asset.mimeType.startsWith('image/')),
+    [authoringAssets],
+  );
   const draftStorageKey = useMemo(() => getContentDraftStorageKey(initialValue?.id), [initialValue?.id]);
 
   useEffect(() => {
@@ -136,6 +167,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
 
         setAuthoringAssets(assets);
         setSelectedAssetId((current) => current || assets[0]?.id || '');
+        setSelectedCoverAssetId((current) => current || assets.find((asset) => asset.usage === 'cover' && asset.mimeType.startsWith('image/'))?.id || '');
         setAssetState('ready');
       } catch {
         if (!cancelled) {
@@ -151,6 +183,26 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    void renderMarkdown(markdown)
+      .then((html) => {
+        if (active) {
+          setPreviewHtml(html);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setPreviewHtml('<p>预览生成失败，请检查 Markdown 内容。</p>');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [markdown]);
 
   function readDraftSnapshot(bodyMarkdownOverride?: string): ContentDraftSnapshot | null {
     if (!formRef.current) {
@@ -198,6 +250,57 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     saveLocalDraft(nextMarkdown);
   }
 
+  function setMarkdownFromEditor(nextMarkdown: string, selectionStart?: number, selectionEnd?: number) {
+    setMarkdown(nextMarkdown);
+    markDirtyAndSaveMarkdownDraft(nextMarkdown);
+
+    window.requestAnimationFrame(() => {
+      markdownTextareaRef.current?.focus();
+
+      if (selectionStart !== undefined && selectionEnd !== undefined) {
+        markdownTextareaRef.current?.setSelectionRange(selectionStart, selectionEnd);
+      }
+    });
+  }
+
+  function runMarkdownCommand(command: MarkdownEditorCommand) {
+    const textarea = markdownTextareaRef.current;
+    const result = applyMarkdownCommand(
+      markdown,
+      {
+        start: textarea?.selectionStart ?? markdown.length,
+        end: textarea?.selectionEnd ?? markdown.length,
+      },
+      command,
+    );
+
+    undoStackRef.current.push(markdown);
+    redoStackRef.current = [];
+    setMarkdownFromEditor(result.markdown, result.selectionStart, result.selectionEnd);
+  }
+
+  function undoMarkdownCommand() {
+    const previousMarkdown = undoStackRef.current.pop();
+
+    if (previousMarkdown === undefined) {
+      return;
+    }
+
+    redoStackRef.current.push(markdown);
+    setMarkdownFromEditor(previousMarkdown);
+  }
+
+  function redoMarkdownCommand() {
+    const nextMarkdown = redoStackRef.current.pop();
+
+    if (nextMarkdown === undefined) {
+      return;
+    }
+
+    undoStackRef.current.push(markdown);
+    setMarkdownFromEditor(nextMarkdown);
+  }
+
   function recoverLocalDraft() {
     if (!localDraft || !formRef.current) {
       return;
@@ -237,6 +340,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     }
 
     setMarkdown(localDraft.bodyMarkdown);
+    setTitle(localDraft.title);
     setIsDirty(true);
     setLocalDraftMessage('已恢复本地草稿，保存后会清除本地副本。');
   }
@@ -256,13 +360,14 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     const response = await fetch(request.url, request.init);
 
     if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
+      throw new Error(await readAdminContentErrorMessage(response, `请求失败，服务器返回 ${response.status}。`));
     }
 
     return response.json().catch(() => null);
   }
 
   async function save(formData: FormData): Promise<string | undefined> {
+    ensureDraftSlug(formData);
     const payload = buildContentPayloadFromFormData(formData);
     const request =
       mode === 'edit' && initialValue?.id
@@ -304,14 +409,23 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       setIsDirty(false);
       setState('success');
       setMessage(lifecycle === 'publish' ? '已保存并发布。' : lifecycle === 'archive' ? '已归档。' : lifecycle === 'restore-draft' ? '已恢复为草稿。' : '已保存草稿。');
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('保存失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且 API 服务可用。');
+    }
+  }
+
+  function ensureDraftSlug(formData: FormData) {
+    const slug = String(formData.get('slug') ?? '').trim();
+    const title = String(formData.get('title') ?? '').trim();
+
+    if (!slug && title) {
+      formData.set('slug', title);
     }
   }
 
   async function runDelete() {
-    if (!initialValue?.id || !window.confirm('Permanently delete this archived content?')) {
+    if (!initialValue?.id || !window.confirm('确认永久删除这篇已归档内容吗？')) {
       return;
     }
 
@@ -322,9 +436,9 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       await send(buildDeleteContentRequest(initialValue.id));
       setState('success');
       setMessage('已永久删除。');
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('删除失败，请先确认内容已归档且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '删除失败，请先确认内容已归档且 API 服务可用。');
     }
   }
 
@@ -352,6 +466,25 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     });
   }
 
+  function applySelectedCoverAsset() {
+    if (!selectedCoverAssetId) {
+      setAssetMessage('请选择一个封面素材。');
+      return;
+    }
+
+    const selectedCover = coverAssets.find((asset) => asset.id === selectedCoverAssetId);
+
+    if (!selectedCover) {
+      setAssetMessage('选择的封面素材不可用，请刷新素材列表。');
+      return;
+    }
+
+    setCoverAssetId(selectedCover.id);
+    setIsDirty(true);
+    window.requestAnimationFrame(() => saveLocalDraft());
+    setAssetMessage('已设置为内容封面。');
+  }
+
   return (
     <form ref={formRef} className="content-form" action={(formData) => runSave(formData)} onInput={markDirtyAndSaveLocalDraft}>
       {localDraft ? (
@@ -368,212 +501,146 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
           ) : null}
         </div>
       ) : null}
-      {localDraftMessage ? <p className="local-draft-note">{localDraftMessage}</p> : null}
-      <div className="form-grid">
-        <label>
+      {localDraftMessage ? <p className="local-draft-note" role="status" aria-live="polite">{localDraftMessage}</p> : null}
+      <section className="writing-workbench" aria-label="文章写作区">
+        <label className="writing-title-field">
           标题
-          <input name="title" defaultValue={initialValue?.title ?? ''} placeholder="例如：一次系统重构记录" required />
-        </label>
-        <label>
-          Slug
-          <input name="slug" defaultValue={initialValue?.slug ?? ''} placeholder="system-refactor-notes" required />
-        </label>
-        <label>
-          类型
-          <select
-            name="type"
-            value={contentType}
-            onChange={(event) => {
-              setContentType(event.target.value as ContentType);
-              markDirtyAndSaveLocalDraft();
-            }}
-          >
-            <option value="post">文章</option>
-            <option value="note">笔记</option>
-            <option value="moment">日常</option>
-            <option value="project">项目</option>
-            <option value="page">页面</option>
-          </select>
-        </label>
-        <label>
-          状态
-          <input value={initialValue?.status ?? 'draft'} readOnly />
-        </label>
-        <label>
-          可见性
-          <select name="visibility" defaultValue={initialValue?.visibility ?? 'public'}>
-            <option value="public">公开</option>
-            <option value="private">仅自己可见</option>
-          </select>
-        </label>
-      </div>
-      <label>
-        摘要
-        <textarea name="summary" rows={3} defaultValue={initialValue?.summary ?? ''} placeholder="用于列表页、SEO 和 RSS 的短摘要" />
-      </label>
-      <div className="form-grid">
-        <label>
-          SEO 标题
-          <input name="seoTitle" defaultValue={initialValue?.seoTitle ?? ''} placeholder="留空则使用内容标题" />
-        </label>
-        <label>
-          SEO 描述
-          <textarea name="seoDescription" rows={2} defaultValue={initialValue?.seoDescription ?? ''} placeholder="留空则使用摘要或站点描述" />
-        </label>
-      </div>
-      <div className="form-grid">
-        <label>
-          来源
-          <select name="sourceType" defaultValue={initialValue?.sourceType ?? 'original'}>
-            <option value="original">原创</option>
-            <option value="repost">转载</option>
-          </select>
-        </label>
-        <label>
-          原文链接
-          <input name="sourceUrl" defaultValue={initialValue?.sourceUrl ?? ''} placeholder="https://example.com/original" />
-        </label>
-        <label>
-          封面资产 ID
-          <input name="coverAssetId" defaultValue={initialValue?.coverAssetId ?? ''} placeholder="上传封面后填入资产 ID" />
-        </label>
-      </div>
-      {initialValue?.coverImageUrl ? (
-        <a className="cover-preview" href={initialValue.coverImageUrl} target="_blank" rel="noreferrer">
-          <img src={initialValue.coverImageUrl} alt={initialValue.coverAltText || initialValue.title || '内容封面'} />
-          <span>查看当前封面</span>
-        </a>
-      ) : null}
-      <div className="form-grid">
-        <label>
-          分类
-          <input name="categories" defaultValue={(initialValue?.categories ?? []).join(', ')} placeholder="Writing, Platform" />
-        </label>
-        <label>
-          标签
-          <input name="tags" defaultValue={(initialValue?.tags ?? []).join(', ')} placeholder="Markdown, Next.js" />
-        </label>
-        <label>
-          系列
-          <input name="series" defaultValue={(initialValue?.series ?? []).join(', ')} placeholder="Platform Journal" />
-        </label>
-      </div>
-      {contentType === 'project' ? (
-        <section className="project-fields" aria-label="项目信息">
-          <div className="section-heading section-heading--row">
-            <div>
-              <p className="eyebrow">项目</p>
-              <h2>项目信息</h2>
-            </div>
-          </div>
-          <div className="form-grid">
-            <label>
-              项目状态
-              <select name="projectStatus" defaultValue={initialValue?.project?.status ?? ''}>
-                <option value="">未设置</option>
-                <option value="active">进行中</option>
-                <option value="paused">暂停</option>
-                <option value="completed">已完成</option>
-                <option value="archived">已归档</option>
-              </select>
-            </label>
-            <label>
-              技术栈
-              <input name="projectStack" defaultValue={(initialValue?.project?.stack ?? []).join(', ')} placeholder="Next.js, PostgreSQL" />
-            </label>
-            <label>
-              开始日期
-              <input name="projectStartedAt" type="date" defaultValue={initialValue?.project?.startedAt ?? ''} />
-            </label>
-            <label>
-              结束日期
-              <input name="projectEndedAt" type="date" defaultValue={initialValue?.project?.endedAt ?? ''} />
-            </label>
-            <label>
-              官网
-              <input name="projectWebsiteUrl" defaultValue={initialValue?.project?.links?.website ?? ''} placeholder="https://example.com" />
-            </label>
-            <label>
-              代码仓库
-              <input name="projectRepositoryUrl" defaultValue={initialValue?.project?.links?.repository ?? ''} placeholder="https://github.com/me/project" />
-            </label>
-            <label>
-              演示地址
-              <input name="projectDemoUrl" defaultValue={initialValue?.project?.links?.demo ?? ''} placeholder="https://demo.example.com" />
-            </label>
-            <label>
-              相关文章
-              <input name="projectArticleUrl" defaultValue={initialValue?.project?.links?.article ?? ''} placeholder="https://example.com/writeup" />
-            </label>
-          </div>
-        </section>
-      ) : null}
-      <div className="form-options">
-        <label>
-          <input name="allowComments" type="checkbox" defaultChecked={initialValue?.allowComments ?? true} />
-          允许评论
-        </label>
-        <label>
-          <input name="featured" type="checkbox" defaultChecked={initialValue?.featured ?? false} />
-          首页精选
-        </label>
-        <label>
-          <input name="pinned" type="checkbox" defaultChecked={initialValue?.pinned ?? false} />
-          置顶
-        </label>
-      </div>
-      <div className="editor-grid">
-        <section className="editor-pane">
-          <div className="editor-toolbar">
-            <label htmlFor="markdown-body">Markdown</label>
-            <div className="asset-insert-controls">
-              <select
-                value={selectedAssetId}
-                onChange={(event) => setSelectedAssetId(event.target.value)}
-                aria-label="选择要插入的素材"
-                disabled={assetState === 'loading' || authoringAssets.length === 0}
-              >
-                {authoringAssets.length > 0 ? (
-                  authoringAssets.map((asset) => (
-                    <option key={asset.id || asset.storageKey} value={asset.id}>
-                      {formatAssetOptionLabel(asset)}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">{assetState === 'loading' ? '加载素材中' : '暂无可插入素材'}</option>
-                )}
-              </select>
-              <button type="button" onClick={insertSelectedAsset} disabled={assetState === 'loading' || authoringAssets.length === 0}>
-                插入素材
-              </button>
-            </div>
-          </div>
-          {assetMessage ? <p className={`asset-insert-message asset-insert-message--${assetState}`}>{assetMessage}</p> : null}
-          <textarea
-            ref={markdownTextareaRef}
-            id="markdown-body"
-            name="bodyMarkdown"
-            value={markdown}
-            onChange={(event) => {
-              setMarkdown(event.target.value);
-              markDirtyAndSaveLocalDraft();
-            }}
-            rows={18}
+          <input
+            name="title"
+            defaultValue={initialValue?.title ?? ''}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="例如：一次系统重构记录"
+            required
           />
-        </section>
-        <section className="preview-pane" aria-live="polite">
-          <p className="eyebrow">预览</p>
-          <h2>{preview.title}</h2>
-          <p>{preview.excerpt}</p>
-          <span>{preview.wordCount} 字</span>
-        </section>
-      </div>
+        </label>
+        <div className="editor-grid">
+          <section className="editor-pane">
+            <div className="editor-pane__header">
+              <div>
+                <label htmlFor="markdown-body">Markdown</label>
+                <span>正文编辑</span>
+              </div>
+              <div className="editor-toolbar">
+                <div className="markdown-format-controls" aria-label="Markdown 格式工具">
+                  <button type="button" onClick={undoMarkdownCommand} title="撤销" aria-label="撤销">
+                    ↶
+                  </button>
+                  <button type="button" onClick={redoMarkdownCommand} title="重做" aria-label="重做">
+                    ↷
+                  </button>
+                  {markdownToolbarCommands.map((item) => (
+                    <button
+                      key={item.command}
+                      type="button"
+                      onClick={() => runMarkdownCommand(item.command)}
+                      title={item.label}
+                      aria-label={item.label}
+                    >
+                      {item.icon}
+                    </button>
+                  ))}
+                </div>
+                <div className="asset-insert-controls">
+                  <select
+                    value={selectedAssetId}
+                    onChange={(event) => setSelectedAssetId(event.target.value)}
+                    aria-label="选择要插入的素材"
+                    disabled={assetState === 'loading' || authoringAssets.length === 0}
+                  >
+                    {authoringAssets.length > 0 ? (
+                      authoringAssets.map((asset) => (
+                        <option key={asset.id || asset.storageKey} value={asset.id}>
+                          {formatAssetOptionLabel(asset)}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">{assetState === 'loading' ? '加载素材中' : '暂无可插入素材'}</option>
+                    )}
+                  </select>
+                  <button type="button" onClick={insertSelectedAsset} disabled={assetState === 'loading' || authoringAssets.length === 0}>
+                    插入素材
+                  </button>
+                </div>
+              </div>
+              {assetMessage ? (
+                <p className={`asset-insert-message asset-insert-message--${assetState}`} role="status" aria-live="polite">
+                  {assetMessage}
+                </p>
+              ) : null}
+            </div>
+            <textarea
+              ref={markdownTextareaRef}
+              id="markdown-body"
+              name="bodyMarkdown"
+              value={markdown}
+              onChange={(event) => {
+                setMarkdown(event.target.value);
+                markDirtyAndSaveLocalDraft();
+              }}
+              rows={18}
+            />
+          </section>
+          <section className="preview-pane" aria-live="polite">
+            <div className="preview-pane__header">
+              <div>
+                <p className="eyebrow">预览</p>
+                <h2>{preview.title}</h2>
+                <p>{preview.excerpt}</p>
+              </div>
+            </div>
+            <div className="admin-markdown-preview detail__body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <dl className="editor-stats">
+              <div>
+                <dt>字数</dt>
+                <dd>{preview.wordCount}</dd>
+              </div>
+              <div>
+                <dt>行数</dt>
+                <dd>{editorStats.lineCount}</dd>
+              </div>
+              <div>
+                <dt>字符</dt>
+                <dd>{editorStats.characterCount}</dd>
+              </div>
+              <div>
+                <dt>阅读</dt>
+                <dd>{editorStats.readingTime}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </section>
+      <AdminPublishSettingsPanel
+        isOpen={publishSettingsOpen}
+        initialValue={initialValue}
+        contentType={contentType}
+        publishTitle={title}
+        bodyWordCount={preview.wordCount}
+        onContentTypeChange={(nextContentType) => {
+          setContentType(nextContentType);
+          markDirtyAndSaveLocalDraft();
+        }}
+        onClose={() => setPublishSettingsOpen(false)}
+        coverAssetId={coverAssetId}
+        onCoverAssetIdChange={(nextCoverAssetId) => {
+          setCoverAssetId(nextCoverAssetId);
+          setIsDirty(true);
+          window.requestAnimationFrame(() => saveLocalDraft());
+        }}
+        selectedCoverAssetId={selectedCoverAssetId}
+        onSelectedCoverAssetIdChange={setSelectedCoverAssetId}
+        coverAssets={coverAssets}
+        assetState={assetState}
+        onApplySelectedCoverAsset={applySelectedCoverAsset}
+        saveState={state}
+        onPublish={(formData) => runSave(formData, 'publish')}
+      />
       <div className="admin-actions">
         <button type="submit" disabled={state === 'submitting'}>
           {state === 'submitting' ? '保存中' : '保存草稿'}
         </button>
-        <button type="submit" formAction={(formData) => runSave(formData, 'publish')} disabled={state === 'submitting'}>
-          发布
+        <button type="button" onClick={() => setPublishSettingsOpen(true)} disabled={state === 'submitting'}>
+          打开发布设置
         </button>
         {mode === 'edit' ? (
           <>
@@ -591,7 +658,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
           </>
         ) : null}
       </div>
-      {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
+      {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
     </form>
   );
 }

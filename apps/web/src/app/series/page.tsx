@@ -21,7 +21,7 @@ export default async function SeriesPage() {
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">Series</p>
+          <p className="eyebrow">系列</p>
           <h1>系列</h1>
           <p>把连续写作、项目日志和长期主题串起来，方便按一条线索回看完整上下文。</p>
         </div>
@@ -30,7 +30,7 @@ export default async function SeriesPage() {
             <section key={group.key} className="category-section" aria-labelledby={`series-${group.key}`}>
               <div className="category-section__heading">
                 <h2 id={`series-${group.key}`}>{group.label}</h2>
-                <span>{group.items.length} items</span>
+                <span>{group.items.length} 篇内容</span>
               </div>
               <div className="content-grid">
                 {group.items.map((item) => (
@@ -40,7 +40,7 @@ export default async function SeriesPage() {
             </section>
           ))}
         </div>
-        <p className="archive-total">{total} series links in total</p>
+        <p className="archive-total">共 {total} 条系列关联</p>
       </main>
     </SiteShell>
   );

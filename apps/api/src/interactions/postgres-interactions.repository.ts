@@ -21,6 +21,12 @@ export interface CommentRow {
   author_name: string;
   body: string;
   status: ModerationStatus;
+  anchor_text?: string | null;
+  anchor_prefix?: string | null;
+  anchor_suffix?: string | null;
+  anchor_start?: number | null;
+  anchor_end?: number | null;
+  anchor_hash?: string | null;
   ip_hash?: string | null;
   user_agent?: string | null;
   created_at: Date;
@@ -55,6 +61,7 @@ export function mapCommentRow(row: CommentRow): CommentRecord {
     authorName: row.author_name,
     body: row.body,
     status: row.status,
+    ...mapCommentAnchor(row),
     ...mapModerationMetadata(row),
     createdAt: row.created_at.toISOString(),
   };
@@ -71,6 +78,18 @@ export function mapGuestbookRow(row: GuestbookEntryRow): GuestbookEntryRecord {
   };
 }
 
+export function mapPublicCommentRow(row: CommentRow): CommentRecord {
+  const { ipHash: _ipHash, userAgent: _userAgent, ...record } = mapCommentRow(row);
+
+  return record;
+}
+
+export function mapPublicGuestbookRow(row: GuestbookEntryRow): GuestbookEntryRecord {
+  const { ipHash: _ipHash, userAgent: _userAgent, ...record } = mapGuestbookRow(row);
+
+  return record;
+}
+
 export function buildCommentInsert(input: CreateCommentInput): SqlStatement {
   return {
     sql: `
@@ -79,13 +98,34 @@ export function buildCommentInsert(input: CreateCommentInput): SqlStatement {
         target_id,
         author_name,
         body,
+        status,
         ip_hash,
-        user_agent
+        user_agent,
+        anchor_text,
+        anchor_prefix,
+        anchor_suffix,
+        anchor_start,
+        anchor_end,
+        anchor_hash
       )
-      values ($1, $2, $3, $4, $5, $6)
+      values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       returning *
     `,
-    values: [input.targetType, input.targetId, input.authorName, input.body, input.ipHash ?? null, input.userAgent ?? null],
+    values: [
+      input.targetType,
+      input.targetId,
+      input.authorName,
+      input.body,
+      'approved',
+      input.ipHash ?? null,
+      input.userAgent ?? null,
+      input.anchor?.text ?? null,
+      input.anchor?.prefix ?? null,
+      input.anchor?.suffix ?? null,
+      input.anchor?.start ?? null,
+      input.anchor?.end ?? null,
+      input.anchor?.hash ?? null,
+    ],
   };
 }
 
@@ -95,13 +135,14 @@ export function buildGuestbookInsert(input: CreateGuestbookEntryInput): SqlState
       insert into guestbook_entries (
         author_name,
         body,
+        status,
         ip_hash,
         user_agent
       )
-      values ($1, $2, $3, $4)
+      values ($1, $2, $3, $4, $5)
       returning *
     `,
-    values: [input.authorName, input.body, input.ipHash ?? null, input.userAgent ?? null],
+    values: [input.authorName, input.body, 'approved', input.ipHash ?? null, input.userAgent ?? null],
   };
 }
 
@@ -236,7 +277,7 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
       values,
     );
 
-    return result.rows.map(stripModerationMetadataFromCommentRow);
+    return result.rows.map(mapCommentRow);
   }
 
   async listApprovedComments(targetType: CommentRecord['targetType'], targetId: string): Promise<CommentRecord[]> {
@@ -252,7 +293,7 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
       [targetType, targetId],
     );
 
-    return result.rows.map(mapCommentRow);
+    return result.rows.map(mapPublicCommentRow);
   }
 
   async likeContent(targetType: ContentType, targetId: string, actorHash?: string): Promise<number> {
@@ -342,7 +383,7 @@ export class PostgresInteractionsRepository implements InteractionsRepository {
       `,
     );
 
-    return result.rows.map(stripModerationMetadataFromGuestbookRow);
+    return result.rows.map(mapPublicGuestbookRow);
   }
 }
 
@@ -350,21 +391,33 @@ function resolveActorHash(actorHashOrCreate: string | (() => string)): string {
   return typeof actorHashOrCreate === 'function' ? actorHashOrCreate() : actorHashOrCreate;
 }
 
+function mapCommentAnchor(row: CommentRow): Pick<CommentRecord, 'anchor'> {
+  if (
+    !row.anchor_text ||
+    row.anchor_start === null ||
+    row.anchor_start === undefined ||
+    row.anchor_end === null ||
+    row.anchor_end === undefined ||
+    !row.anchor_hash
+  ) {
+    return {};
+  }
+
+  return {
+    anchor: {
+      text: row.anchor_text,
+      prefix: row.anchor_prefix ?? '',
+      suffix: row.anchor_suffix ?? '',
+      start: row.anchor_start,
+      end: row.anchor_end,
+      hash: row.anchor_hash,
+    },
+  };
+}
+
 function mapModerationMetadata(row: { ip_hash?: string | null; user_agent?: string | null }): Pick<CommentRecord, 'ipHash' | 'userAgent'> {
   return {
     ...(row.ip_hash ? { ipHash: row.ip_hash } : {}),
     ...(row.user_agent ? { userAgent: row.user_agent } : {}),
   };
-}
-
-function stripModerationMetadataFromCommentRow(row: CommentRow): CommentRecord {
-  const { ipHash: _ipHash, userAgent: _userAgent, ...record } = mapCommentRow(row);
-
-  return record;
-}
-
-function stripModerationMetadataFromGuestbookRow(row: GuestbookEntryRow): GuestbookEntryRecord {
-  const { ipHash: _ipHash, userAgent: _userAgent, ...record } = mapGuestbookRow(row);
-
-  return record;
 }

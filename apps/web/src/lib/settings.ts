@@ -1,3 +1,5 @@
+import { PUBLIC_OWNER_NAME } from './public-identity';
+
 export interface SiteProfileSettings {
   title: string;
   ownerName: string;
@@ -46,20 +48,21 @@ export interface PublicSettingsLoadOptions extends PublicSettingsRequestOptions 
 export const defaultSettings: SiteSettings = {
   profile: {
     title: 'Starry Summer',
-    ownerName: 'Owner',
-    description: 'A personal content platform.',
+    ownerName: 'Aster.H',
+    description:
+      '我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。',
     socialLinks: [],
   },
   hero: {
-    tagline: 'Writing, notes, daily traces, and projects in one long-lived home.',
+    tagline: '把技术探索、项目实践和日常思考长期沉淀成一个可回看的个人知识系统。',
     backgroundImageUrl: '/hero-workspace.png',
-    motto: 'Build a public trail of private work.',
+    motto: 'Stay curious. Keep building.',
     quotes: [
-      'Build a public trail of private work.',
-      'Small notes compound into a life you can revisit.',
+      '用代码解决问题，用文字留下路径。',
+      '把每一次实践沉淀成未来可以复用的认知。',
     ],
   },
-  navigation: ['posts', 'notes', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'],
+  navigation: ['search', 'posts', 'moments', 'projects'],
   updatedAt: '',
 };
 
@@ -67,7 +70,7 @@ export function normalizeSiteSettings(input: Partial<SiteSettings>): SiteSetting
   return {
     profile: {
       title: input.profile?.title ?? defaultSettings.profile.title,
-      ownerName: input.profile?.ownerName ?? defaultSettings.profile.ownerName,
+      ownerName: PUBLIC_OWNER_NAME,
       description: input.profile?.description ?? defaultSettings.profile.description,
       socialLinks: normalizeSocialLinks(input.profile?.socialLinks),
     },
@@ -150,15 +153,20 @@ export function buildGetPublicSettingsRequest(options: PublicSettingsRequestOpti
 }
 
 export async function loadPublicSettings(
-  fetcher: (url: string, init: RequestInit) => Promise<Response> = (url, init) => fetch(url, init),
+  fetcher?: (url: string, init: RequestInit) => Promise<Response>,
   options: PublicSettingsLoadOptions = {},
 ): Promise<SiteSettings> {
+  if (!fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+    return defaultSettings;
+  }
+
   const request = buildGetPublicSettingsRequest(options);
+  const activeFetcher = fetcher ?? ((url: string, init: RequestInit) => fetch(url, init));
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
 
   try {
-    const response = await fetcher(request.url, { ...request.init, signal: controller.signal });
+    const response = await activeFetcher(request.url, { ...request.init, signal: controller.signal });
 
     if (!response.ok) {
       return defaultSettings;
@@ -194,4 +202,35 @@ export function buildUpdateSettingsRequest(input: UpdateSiteSettingsInput): Sett
       body: JSON.stringify(input),
     },
   };
+}
+
+export async function readSettingsErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const contentType = response.headers.get('content-type') ?? '';
+
+    if (contentType.includes('application/json')) {
+      const data = (await response.json()) as { message?: unknown; error?: unknown };
+      const message = normalizeSettingsErrorMessage(data.message) || normalizeSettingsErrorMessage(data.error);
+
+      return message || fallback;
+    }
+
+    const text = (await response.text()).trim();
+
+    return text || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeSettingsErrorMessage(value: unknown): string {
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).join('；');
+  }
+
+  return '';
 }

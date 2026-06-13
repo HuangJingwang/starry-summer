@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
+  defaultSiteSettings,
   SETTINGS_REPOSITORY,
   type SettingsRepository,
   type SiteHeroSettings,
@@ -19,6 +20,18 @@ export class SettingsService {
 
   getSettings(): Promise<SiteSettings> {
     return this.repository.get();
+  }
+
+  async getPublicSettings(): Promise<SiteSettings> {
+    const settings = await this.repository.get();
+
+    return {
+      ...settings,
+      profile: {
+        ...settings.profile,
+        ownerName: defaultSiteSettings.profile.ownerName,
+      },
+    };
   }
 
   updateSettings(input: UpdateSiteSettingsInput): Promise<SiteSettings> {

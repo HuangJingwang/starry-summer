@@ -30,6 +30,7 @@ services:
       PORT: 4000
       PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost}
       WEB_ORIGIN: ${PUBLIC_SITE_URL:-http://localhost}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
       DATABASE_URL: ${DATABASE_URL:-postgresql://starry:starry@postgres:5432/starry_summer}
       CONTENT_REPOSITORY_DRIVER: ${CONTENT_REPOSITORY_DRIVER:-postgres}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
@@ -47,6 +48,7 @@ services:
       INTERACTION_HASH_SECRET: ${INTERACTION_HASH_SECRET:-change-me-before-production}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-owner@example.com}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-replace-with-scrypt-hash}
       RELEASE_VERSION: ${RELEASE_VERSION:-development}

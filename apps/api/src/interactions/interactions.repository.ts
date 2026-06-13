@@ -28,6 +28,11 @@ export interface InteractionsRepository {
 
 export const INTERACTIONS_REPOSITORY = Symbol('INTERACTIONS_REPOSITORY');
 
+export interface InMemoryInteractionsSeed {
+  comments?: CommentRecord[];
+  guestbookEntries?: GuestbookEntryRecord[];
+}
+
 export class InMemoryInteractionsRepository implements InteractionsRepository {
   private readonly comments = new Map<string, CommentRecord>();
   private readonly guestbookEntries = new Map<string, GuestbookEntryRecord>();
@@ -38,7 +43,18 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
   private nextCommentId = 1;
   private nextGuestbookId = 1;
 
-  constructor(private readonly now: () => string = () => new Date().toISOString()) {}
+  constructor(
+    private readonly now: () => string = () => new Date().toISOString(),
+    seed: InMemoryInteractionsSeed = {},
+  ) {
+    for (const comment of seed.comments ?? []) {
+      this.comments.set(comment.id, { ...comment });
+    }
+
+    for (const entry of seed.guestbookEntries ?? []) {
+      this.guestbookEntries.set(entry.id, { ...entry });
+    }
+  }
 
   async createComment(input: CreateCommentInput): Promise<CommentRecord> {
     const comment: CommentRecord = {
@@ -47,8 +63,9 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
       targetId: input.targetId,
       authorName: input.authorName,
       body: input.body,
-      status: 'pending',
+      status: 'approved',
       createdAt: this.now(),
+      ...(input.anchor ? { anchor: { ...input.anchor } } : {}),
       ...buildModerationMetadata(input),
     };
 
@@ -137,7 +154,7 @@ export class InMemoryInteractionsRepository implements InteractionsRepository {
       id: String(this.nextGuestbookId++),
       authorName: input.authorName,
       body: input.body,
-      status: 'pending',
+      status: 'approved',
       createdAt: this.now(),
       ...buildModerationMetadata(input),
     };

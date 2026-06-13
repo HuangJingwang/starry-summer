@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { buildSiteMetadata, normalizePublicSiteUrl } from '@/lib/seo';
 import { loadPublicSettings } from '@/lib/settings';
 import './styles.css';
+import './styles/admin.css';
+import './styles/responsive.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await loadPublicSettings(undefined, {

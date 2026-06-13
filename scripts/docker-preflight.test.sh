@@ -26,7 +26,12 @@ if [[ "$1" == "compose" && "$2" == "version" ]]; then
   exit 0
 fi
 
-if [[ "$1" == "compose" && "$2" == "config" && "$3" == "--quiet" ]]; then
+if [[ "$1" == "compose" && "$2" == "config" && "${3:-}" == "--quiet" ]]; then
+  exit 0
+fi
+
+if [[ "$1" == "compose" && "$2" == "config" && "$#" -eq 2 ]]; then
+  printf '%s\n' 'services:' '  api:' '    environment:' '      TRUST_PROXY: "true"'
   exit 0
 fi
 
@@ -72,6 +77,12 @@ fi
 
 if ! grep -q 'compose config --quiet' "$DOCKER_PREFLIGHT_TEST_LOG"; then
   echo "Docker preflight did not validate Compose config."
+  cat "$DOCKER_PREFLIGHT_TEST_LOG"
+  exit 1
+fi
+
+if ! grep -q 'compose config$' "$DOCKER_PREFLIGHT_TEST_LOG"; then
+  echo "Docker preflight did not inspect Compose config values."
   cat "$DOCKER_PREFLIGHT_TEST_LOG"
   exit 1
 fi

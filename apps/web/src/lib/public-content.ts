@@ -1,6 +1,6 @@
 import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
 
-import { getPublicContent, searchContent, seedContent, type ContentSort, type SiteContentItem } from './content';
+import { getPublicContent, searchContent, seedContent, type ContentSort, type PublicContentKind, type SiteContentItem } from './content';
 
 export interface PublicContentApiRecord {
   id: string;
@@ -34,7 +34,7 @@ export interface PublicContentApiRecord {
 
 export interface PublicContentListRequestOptions {
   apiBaseUrl?: string;
-  type?: ContentType;
+  type?: PublicContentKind;
   sort?: ContentSort;
   query?: string;
 }
@@ -46,6 +46,7 @@ export interface PublicContentRequest {
 
 export interface PublicContentLoadOptions extends PublicContentListRequestOptions {
   fetcher?: (url: string, init: RequestInit) => Promise<Response>;
+  timeoutMs?: number;
 }
 
 export interface PublicContentLoadResult {
@@ -68,7 +69,7 @@ export function buildPublicContentListRequest(options: PublicContentListRequestO
   const baseUrl = (options.apiBaseUrl ?? getDefaultApiBaseUrl()).replace(/\/$/, '');
   const params = new URLSearchParams();
 
-  if (options.type) {
+  if (options.type && options.type !== 'article') {
     params.set('type', options.type);
   }
 
@@ -193,11 +194,17 @@ export async function loadPublicContentItems(
   fallbackItems: SiteContentItem[],
   options: PublicContentLoadOptions = {},
 ): Promise<PublicContentLoadResult> {
+  if (!options.fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+    return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
+  }
+
   const request = buildPublicContentListRequest(options);
   const fetcher = options.fetcher ?? fetch;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
 
   try {
-    const response = await fetcher(request.url, request.init);
+    const response = await fetcher(request.url, { ...request.init, signal: controller.signal });
 
     if (!response.ok) {
       return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
@@ -211,10 +218,12 @@ export async function loadPublicContentItems(
 
     return {
       source: 'api',
-      items: data.map((item) => normalizePublicContentItem(item as PublicContentApiRecord)),
+      items: getPublicContent(data.map((item) => normalizePublicContentItem(item as PublicContentApiRecord)), options.type, options.sort),
     };
   } catch {
     return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -225,6 +234,6 @@ function getFallbackPublicContent(items: SiteContentItem[], options: PublicConte
   return query ? searchContent(publicItems, query) : publicItems;
 }
 
-export async function loadSiteContent(type?: ContentType, sort?: ContentSort, query?: string): Promise<SiteContentItem[]> {
+export async function loadSiteContent(type?: PublicContentKind, sort?: ContentSort, query?: string): Promise<SiteContentItem[]> {
   return (await loadPublicContentItems(seedContent, { type, sort, query })).items;
 }

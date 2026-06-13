@@ -2,7 +2,8 @@ import { BadRequestException, Body, Controller, Delete, Get, Header, Inject, Par
 import type { ContentStatus, ContentType, ContentVisibility } from '@starry-summer/shared';
 
 import { AdminAuthGuard } from '../auth/admin-auth.guard.js';
-import { ContentService, type CreateDraftInput, type UpdateContentInput } from './content.service.js';
+import { ContentService } from './content.service.js';
+import type { CreateDraftInput, UpdateContentInput } from './content.types.js';
 
 @Controller('admin/content')
 @UseGuards(AdminAuthGuard)

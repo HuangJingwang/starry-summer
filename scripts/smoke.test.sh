@@ -15,12 +15,25 @@ cat >"$tmp_dir/curl" <<'SH'
 set -euo pipefail
 
 header_file=""
+method="GET"
 write_out=""
 output_file=""
 url=""
+data=""
 
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
+    --request | -X)
+      method="$2"
+      shift 2
+      ;;
+    --header | -H)
+      shift 2
+      ;;
+    --data | --data-raw | --data-binary)
+      data="$2"
+      shift 2
+      ;;
     --dump-header)
       header_file="$2"
       shift 2
@@ -46,6 +59,8 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
+printf '%s %s\n' "$method" "$url" >>"${SMOKE_TEST_LOG:?}"
+
 if [[ -n "$header_file" && "$url" != */admin/content ]]; then
   printf '%b' "${FAKE_SECURITY_HEADERS:-HTTP/1.1 200 OK\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains; preload\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nReferrer-Policy: strict-origin-when-cross-origin\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\n\r\n}" >"$header_file"
 fi
@@ -59,6 +74,37 @@ emit_body() {
 }
 
 case "$url" in
+  */api/content\?type=post)
+    if [[ -n "${FAKE_POST_CONTENT_BODY:-}" ]]; then
+      emit_body "$FAKE_POST_CONTENT_BODY"
+    else
+      emit_body '[{"id":"11111111-1111-4111-8111-111111111111","type":"post","title":"Smoke post"}]'
+    fi
+    ;;
+  */api/likes/post/11111111-1111-4111-8111-111111111111)
+    if [[ -n "$write_out" ]]; then
+      printf '%s' "${FAKE_LIKE_STATUS:-200}"
+      exit 0
+    else
+      emit_body '{"count":1}'
+    fi
+    ;;
+  */api/likes/post/smoke-post)
+    if [[ -n "$write_out" ]]; then
+      printf '%s' "${FAKE_LIKE_STATUS:-200}"
+      exit 0
+    else
+      emit_body '{"count":1}'
+    fi
+    ;;
+  */api/comments)
+    if [[ -n "$write_out" ]]; then
+      printf '%s' "${FAKE_COMMENT_SUBMIT_STATUS:-401}"
+      exit 0
+    else
+      emit_body '{"message":"GitHub login is required to comment or leave a guestbook message","statusCode":401}'
+    fi
+    ;;
   */api/admin/content)
     if [[ -n "$write_out" ]]; then
       printf '%s' "${FAKE_ADMIN_API_STATUS:-401}"
@@ -74,19 +120,34 @@ case "$url" in
     if [[ -n "${FAKE_API_HEALTH_BODY:-}" ]]; then
       emit_body "$FAKE_API_HEALTH_BODY"
     else
-      emit_body '{"status":"ok","service":"starry-summer-api","release":{"version":"20260611091500","revision":"abc1234"},"components":{"api":{"status":"ok"},"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}'
+      emit_body '{"status":"ok","service":"starry-summer-api","release":{"version":"20260611091500","revision":"abc1234"},"components":{"api":{"status":"ok"},"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"},"storage":{"status":"ok","driver":"local"}}}'
     fi
     ;;
   */api/settings)
-    emit_body "${FAKE_SETTINGS_BODY:-{\"siteTitle\":\"Starry Summer\",\"siteDescription\":\"Personal blog\"}}"
+    if [[ -n "${FAKE_SETTINGS_BODY:-}" ]]; then
+      emit_body "$FAKE_SETTINGS_BODY"
+    else
+      emit_body '{"profile":{"title":"Starry Summer","ownerName":"Aster.H","description":"Personal content platform","socialLinks":[]},"hero":{"tagline":"Personal archive","backgroundImageUrl":"/hero-workspace.png","motto":"Stay curious. Keep building.","quotes":["Stay curious. Keep building."]},"navigation":["search","posts","moments","projects","series","guestbook"],"updatedAt":"2026-06-10T00:00:00.000Z"}'
+    fi
     ;;
   */api/content\?q=starry)
     emit_body "${FAKE_CONTENT_SEARCH_BODY:-[]}"
     ;;
   */api/guestbook)
+    if [[ "$method" == "POST" ]]; then
+      if [[ -n "$write_out" ]]; then
+        printf '%s' "${FAKE_GUESTBOOK_SUBMIT_STATUS:-401}"
+      else
+        emit_body '{"message":"GitHub login is required to comment or leave a guestbook message","statusCode":401}'
+      fi
+      exit 0
+    fi
     emit_body "${FAKE_GUESTBOOK_BODY:-[]}"
     ;;
   */api/comments/post/smoke-post)
+    emit_body "${FAKE_COMMENTS_BODY:-[]}"
+    ;;
+  */api/comments/post/11111111-1111-4111-8111-111111111111)
     emit_body "${FAKE_COMMENTS_BODY:-[]}"
     ;;
   */api/assets/random\?usage=background)
@@ -120,11 +181,55 @@ SH
 chmod +x "$tmp_dir/curl"
 
 echo "Running smoke script tests"
+export SMOKE_TEST_LOG="$tmp_dir/smoke-calls.log"
 PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/smoke.sh" "https://example.com"
+
+if ! grep -q 'GET https://example.com/api/content?type=post' "$SMOKE_TEST_LOG"; then
+  echo "Smoke script did not discover a real public post before checking likes."
+  cat "$SMOKE_TEST_LOG"
+  exit 1
+fi
+
+if ! grep -q 'GET https://example.com/api/comments/post/11111111-1111-4111-8111-111111111111' "$SMOKE_TEST_LOG"; then
+  echo "Smoke script did not check comments against the discovered public post."
+  cat "$SMOKE_TEST_LOG"
+  exit 1
+fi
+
+if ! grep -q 'POST https://example.com/api/likes/post/11111111-1111-4111-8111-111111111111' "$SMOKE_TEST_LOG"; then
+  echo "Smoke script did not check anonymous public like submission against the discovered post."
+  cat "$SMOKE_TEST_LOG"
+  exit 1
+fi
+
+if ! grep -q 'POST https://example.com/api/comments' "$SMOKE_TEST_LOG"; then
+  echo "Smoke script did not check unauthenticated comment submission rejection."
+  cat "$SMOKE_TEST_LOG"
+  exit 1
+fi
+
+if ! grep -q 'POST https://example.com/api/guestbook' "$SMOKE_TEST_LOG"; then
+  echo "Smoke script did not check unauthenticated guestbook submission rejection."
+  cat "$SMOKE_TEST_LOG"
+  exit 1
+fi
 
 PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{
   "components": {
     "redis": { "driver": "redis", "status": "ok" },
+    "storage": { "driver": "local", "status": "ok" },
+    "database": { "driver": "postgres", "status": "ok" },
+    "api": { "status": "ok" }
+  },
+  "service": "starry-summer-api",
+  "release": { "version": "20260611091500", "revision": "abc1234" },
+  "status": "ok"
+}' bash "$repo_root/scripts/smoke.sh" "https://example.com"
+
+PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{
+  "components": {
+    "redis": { "driver": "redis", "status": "ok" },
+    "storage": { "driver": "s3", "status": "ok" },
     "database": { "driver": "postgres", "status": "ok" },
     "api": { "status": "ok" }
   },
@@ -163,7 +268,25 @@ if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-
   exit 1
 fi
 
-if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","components":{"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-api-release.log" 2>&1; then
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","release":{"version":"20260611091500","revision":"abc1234"},"components":{"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-storage-health.log" 2>&1; then
+  echo "Smoke script accepted missing storage health."
+  cat "$tmp_dir/missing-storage-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","release":{"version":"20260611091500","revision":"abc1234"},"components":{"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"},"storage":{"status":"error","driver":"s3"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/degraded-storage-health.log" 2>&1; then
+  echo "Smoke script accepted degraded storage health."
+  cat "$tmp_dir/degraded-storage-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","release":{"version":"20260611091500","revision":"abc1234"},"components":{"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"},"storage":{"status":"ok","driver":"ftp"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/unknown-storage-health.log" 2>&1; then
+  echo "Smoke script accepted unknown storage driver health."
+  cat "$tmp_dir/unknown-storage-health.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_API_HEALTH_BODY='{"status":"ok","service":"starry-summer-api","components":{"database":{"status":"ok","driver":"postgres"},"redis":{"status":"ok","driver":"redis"},"storage":{"status":"ok","driver":"local"}}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/missing-api-release.log" 2>&1; then
   echo "Smoke script accepted missing API release metadata."
   cat "$tmp_dir/missing-api-release.log"
   exit 1
@@ -172,6 +295,17 @@ fi
 if PATH="$tmp_dir:$PATH" FAKE_SETTINGS_BODY='<html>not json</html>' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/non-json-settings.log" 2>&1; then
   echo "Smoke script accepted a non-JSON settings response."
   cat "$tmp_dir/non-json-settings.log"
+  exit 1
+fi
+
+if PATH="$tmp_dir:$PATH" FAKE_SETTINGS_BODY='{"profile":{"ownerName":"Private Owner"}}' bash "$repo_root/scripts/smoke.sh" "https://example.com" >"$tmp_dir/private-owner-settings.log" 2>&1; then
+  echo "Smoke script accepted a public settings response without the Aster.H owner alias."
+  cat "$tmp_dir/private-owner-settings.log"
+  exit 1
+fi
+if ! grep -q 'Settings API endpoint did not return the public owner alias.' "$tmp_dir/private-owner-settings.log"; then
+  echo "Smoke script rejected private owner settings for the wrong reason."
+  cat "$tmp_dir/private-owner-settings.log"
   exit 1
 fi
 

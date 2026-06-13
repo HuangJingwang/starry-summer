@@ -1,4 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
 import pg from 'pg';
 
 const { Pool } = pg;
@@ -6,6 +10,7 @@ const { Pool } = pg;
 export type HealthStatus = 'ok' | 'degraded';
 export type DatabaseHealthStatus = 'ok' | 'skipped' | 'missing' | 'error';
 export type RedisHealthStatus = 'ok' | 'error';
+export type StorageHealthStatus = 'ok' | 'skipped' | 'missing' | 'error';
 
 export interface ComponentHealth {
   status: string;
@@ -24,6 +29,7 @@ export interface HealthReport {
     api: ComponentHealth;
     database: ComponentHealth & { status: DatabaseHealthStatus };
     redis?: ComponentHealth & { status: RedisHealthStatus };
+    storage?: ComponentHealth & { status: StorageHealthStatus };
   };
 }
 
@@ -33,6 +39,16 @@ export interface HealthServiceOptions {
   pingDatabase?: (databaseUrl: string) => Promise<void>;
   redisUrl?: string;
   pingRedis?: (redisUrl: string) => Promise<void>;
+  storageDriver?: string;
+  localUploadDir?: string;
+  pingLocalUploadDir?: (uploadDir: string) => Promise<void>;
+  s3Bucket?: string;
+  s3Endpoint?: string;
+  s3Region?: string;
+  s3AccessKey?: string;
+  s3SecretKey?: string;
+  s3ForcePathStyle?: string;
+  pingS3Bucket?: (bucket: string) => Promise<void>;
   releaseVersion?: string;
   gitRevision?: string;
 }
@@ -44,6 +60,11 @@ export class HealthService {
   private readonly pingDatabase: (databaseUrl: string) => Promise<void>;
   private readonly redisUrl?: string;
   private readonly pingRedis: (redisUrl: string) => Promise<void>;
+  private readonly storageDriver?: string;
+  private readonly localUploadDir?: string;
+  private readonly pingLocalUploadDir: (uploadDir: string) => Promise<void>;
+  private readonly s3Bucket?: string;
+  private readonly pingS3Bucket: (bucket: string) => Promise<void>;
   private readonly releaseVersion: string;
   private readonly gitRevision: string;
 
@@ -53,6 +74,19 @@ export class HealthService {
     this.pingDatabase = options.pingDatabase ?? pingPostgres;
     this.redisUrl = options.redisUrl ?? process.env.REDIS_URL;
     this.pingRedis = options.pingRedis ?? pingRedis;
+    this.storageDriver = options.storageDriver ?? process.env.STORAGE_DRIVER;
+    this.localUploadDir = options.localUploadDir ?? process.env.LOCAL_UPLOAD_DIR;
+    this.pingLocalUploadDir = options.pingLocalUploadDir ?? pingLocalUploadDir;
+    this.s3Bucket = options.s3Bucket ?? process.env.S3_BUCKET;
+    this.pingS3Bucket =
+      options.pingS3Bucket ??
+      createS3BucketPing({
+        endpoint: options.s3Endpoint ?? process.env.S3_ENDPOINT,
+        region: options.s3Region ?? process.env.S3_REGION,
+        accessKeyId: options.s3AccessKey ?? process.env.S3_ACCESS_KEY,
+        secretAccessKey: options.s3SecretKey ?? process.env.S3_SECRET_KEY,
+        forcePathStyle: parseBoolean(options.s3ForcePathStyle ?? process.env.S3_FORCE_PATH_STYLE),
+      });
     this.releaseVersion = options.releaseVersion ?? process.env.RELEASE_VERSION ?? 'development';
     this.gitRevision = options.gitRevision ?? process.env.GIT_REVISION ?? 'unknown';
   }
@@ -60,8 +94,11 @@ export class HealthService {
   async check(): Promise<HealthReport> {
     const database = await this.checkDatabase();
     const redis = await this.checkRedis();
+    const storage = await this.checkStorage();
     const status: HealthStatus =
-      (database.status === 'ok' || database.status === 'skipped') && (!redis || redis.status === 'ok')
+      (database.status === 'ok' || database.status === 'skipped') &&
+      (!redis || redis.status === 'ok') &&
+      (!storage || storage.status === 'ok' || storage.status === 'skipped')
         ? 'ok'
         : 'degraded';
 
@@ -76,6 +113,7 @@ export class HealthService {
         api: { status: 'ok' },
         database,
         ...(redis ? { redis } : {}),
+        ...(storage ? { storage } : {}),
       },
     };
   }
@@ -132,6 +170,71 @@ export class HealthService {
       };
     }
   }
+
+  private async checkStorage(): Promise<HealthReport['components']['storage'] | undefined> {
+    if (!this.storageDriver) {
+      return undefined;
+    }
+
+    if (this.storageDriver === 's3') {
+      return this.checkS3Storage();
+    }
+
+    if (this.storageDriver !== 'local') {
+      return {
+        status: 'skipped',
+        driver: this.storageDriver,
+      };
+    }
+
+    if (!this.localUploadDir) {
+      return {
+        status: 'missing',
+        driver: 'local',
+        message: 'LOCAL_UPLOAD_DIR is required when STORAGE_DRIVER=local',
+      };
+    }
+
+    try {
+      await this.pingLocalUploadDir(this.localUploadDir);
+
+      return {
+        status: 'ok',
+        driver: 'local',
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        driver: 'local',
+        message: error instanceof Error ? error.message : 'Unknown local upload storage error',
+      };
+    }
+  }
+
+  private async checkS3Storage(): Promise<HealthReport['components']['storage']> {
+    if (!this.s3Bucket) {
+      return {
+        status: 'missing',
+        driver: 's3',
+        message: 'S3_BUCKET is required when STORAGE_DRIVER=s3',
+      };
+    }
+
+    try {
+      await this.pingS3Bucket(this.s3Bucket);
+
+      return {
+        status: 'ok',
+        driver: 's3',
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        driver: 's3',
+        message: error instanceof Error ? error.message : 'Unknown S3 storage error',
+      };
+    }
+  }
 }
 
 async function pingPostgres(databaseUrl: string): Promise<void> {
@@ -160,4 +263,49 @@ async function pingRedis(redisUrl: string): Promise<void> {
       await client.quit();
     }
   }
+}
+
+async function pingLocalUploadDir(uploadDir: string): Promise<void> {
+  await mkdir(uploadDir, { recursive: true });
+
+  const probePath = join(uploadDir, `.health-${randomUUID()}`);
+
+  try {
+    await writeFile(probePath, 'ok');
+  } finally {
+    await rm(probePath, { force: true });
+  }
+}
+
+function createS3BucketPing(options: {
+  endpoint?: string;
+  region?: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+  forcePathStyle?: boolean;
+}): (bucket: string) => Promise<void> {
+  const client = new S3Client({
+    endpoint: options.endpoint,
+    region: options.region ?? 'us-east-1',
+    forcePathStyle: options.forcePathStyle ?? true,
+    credentials:
+      options.accessKeyId && options.secretAccessKey
+        ? {
+            accessKeyId: options.accessKeyId,
+            secretAccessKey: options.secretAccessKey,
+          }
+        : undefined,
+  });
+
+  return async (bucket: string) => {
+    await client.send(new HeadBucketCommand({ Bucket: bucket }));
+  };
+}
+
+function parseBoolean(value: string | undefined): boolean | undefined {
+  if (value === undefined || value === '') {
+    return undefined;
+  }
+
+  return value.toLowerCase() === 'true';
 }

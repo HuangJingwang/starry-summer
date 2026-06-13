@@ -18,7 +18,7 @@ export default async function MomentsPage() {
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">Moments</p>
+          <p className="eyebrow">日常</p>
           <h1>日常</h1>
         </div>
         <div className="content-grid">

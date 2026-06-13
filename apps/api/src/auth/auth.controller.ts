@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 
-import { BadRequestException, Body, Controller, Get, Inject, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Post, Query, Req, Res, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 
 import { AdminAuthGuard } from './admin-auth.guard.js';
 import {
@@ -82,7 +82,7 @@ export class AuthController {
       state,
       redirectUri,
     });
-    authorizeUrl.searchParams.set('state', `${state}.${encodeURIComponent(getSafeReaderRedirectPath(next))}`);
+    authorizeUrl.searchParams.set('state', this.authService.createReaderLoginState(state, getSafeReaderRedirectPath(next)));
 
     response.cookie('ss_oauth_state', state, {
       httpOnly: true,
@@ -103,16 +103,16 @@ export class AuthController {
     @Req() request: CookieRequest,
     @Res({ passthrough: true }) response: CookieResponse,
   ) {
-    const [stateToken, encodedNext = ''] = (state ?? '').split('.');
+    const readerLoginState = this.authService.verifyReaderLoginState(state);
     const expectedState = readCookieToken(request.headers.cookie, 'ss_oauth_state');
 
-    if (!code || !stateToken || stateToken !== expectedState) {
+    if (!code || !readerLoginState || readerLoginState.stateToken !== expectedState) {
       throw new BadRequestException('Invalid GitHub login callback');
     }
 
     const profile = await this.authService.loadGithubReaderProfile(code, buildGithubCallbackUrl(request));
     const session = this.authService.createReaderSession(profile);
-    const nextPath = getSafeReaderRedirectPath(decodeURIComponent(encodedNext));
+    const nextPath = getSafeReaderRedirectPath(decodeURIComponent(readerLoginState.encodedNext));
 
     response.cookie('ss_reader', session.token, {
       httpOnly: true,
@@ -195,14 +195,63 @@ function toPublicReaderSession(session: ReaderSessionPayload) {
 }
 
 function buildGithubCallbackUrl(request: CookieRequest): string {
-  const siteUrl = (
-    process.env.PUBLIC_SITE_URL ??
-    process.env.WEB_ORIGIN ??
-    firstHeaderValue(request.headers.origin) ??
-    'http://localhost:3000'
-  ).replace(/\/+$/, '');
+  const configuredCallbackUrl = process.env.GITHUB_CALLBACK_URL?.trim();
+
+  if (configuredCallbackUrl) {
+    return normalizeConfiguredGithubCallbackUrl(configuredCallbackUrl);
+  }
+
+  const configuredSiteUrl = process.env.PUBLIC_SITE_URL ?? process.env.WEB_ORIGIN;
+
+  if (process.env.NODE_ENV === 'production' && !configuredSiteUrl) {
+    throw new ServiceUnavailableException('GITHUB_CALLBACK_URL, PUBLIC_SITE_URL, or WEB_ORIGIN is required for GitHub login in production');
+  }
+
+  const siteUrl = (configuredSiteUrl ?? firstHeaderValue(request.headers.origin) ?? 'http://localhost:3000').replace(/\/+$/, '');
 
   return `${siteUrl}/api/auth/github/callback`;
+}
+
+function normalizeConfiguredGithubCallbackUrl(value: string): string {
+  let url: URL;
+
+  try {
+    url = new URL(value);
+  } catch {
+    throw new ServiceUnavailableException('GITHUB_CALLBACK_URL must be a valid URL');
+  }
+
+  if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
+    throw new ServiceUnavailableException('GITHUB_CALLBACK_URL must be an https URL in production');
+  }
+
+  if (url.pathname.replace(/\/+$/, '') !== '/api/auth/github/callback') {
+    throw new ServiceUnavailableException('GITHUB_CALLBACK_URL must end with /api/auth/github/callback');
+  }
+
+  if (url.search || url.hash) {
+    throw new ServiceUnavailableException('GITHUB_CALLBACK_URL must not include query parameters or a hash');
+  }
+
+  const configuredSiteUrl = process.env.PUBLIC_SITE_URL?.trim();
+
+  if (configuredSiteUrl) {
+    try {
+      const siteUrl = new URL(configuredSiteUrl);
+
+      if (url.origin !== siteUrl.origin) {
+        throw new ServiceUnavailableException('GITHUB_CALLBACK_URL origin must match PUBLIC_SITE_URL');
+      }
+    } catch (error) {
+      if (error instanceof ServiceUnavailableException) {
+        throw error;
+      }
+
+      throw new ServiceUnavailableException('PUBLIC_SITE_URL must be a valid URL when GITHUB_CALLBACK_URL is configured');
+    }
+  }
+
+  return url.toString().replace(/\/+$/, '');
 }
 
 function getSafeReaderRedirectPath(value: string | undefined): string {
@@ -213,7 +262,7 @@ function getSafeReaderRedirectPath(value: string | undefined): string {
   try {
     const url = new URL(value, 'http://localhost');
 
-    if (url.origin !== 'http://localhost' || url.pathname !== '/guestbook') {
+    if (url.origin !== 'http://localhost' || !isAllowedReaderRedirectPath(url.pathname)) {
       return '/guestbook';
     }
 
@@ -221,6 +270,15 @@ function getSafeReaderRedirectPath(value: string | undefined): string {
   } catch {
     return '/guestbook';
   }
+}
+
+function isAllowedReaderRedirectPath(pathname: string): boolean {
+  return (
+    pathname === '/guestbook' ||
+    pathname.startsWith('/posts/') ||
+    pathname.startsWith('/notes/') ||
+    pathname.startsWith('/projects/')
+  );
 }
 
 function firstHeaderValue(value: string | string[] | undefined): string | undefined {

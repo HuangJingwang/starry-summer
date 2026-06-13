@@ -1,4 +1,5 @@
 import { getPublicContent, getSiteStats, type SiteContentItem, type SiteStats } from './content';
+import { PUBLIC_OWNER_NAME } from './public-identity';
 import type { SiteSettings } from './settings';
 
 export interface HomeProfileModel {
@@ -17,7 +18,7 @@ export function buildHomeProfileModel(
   randomNumber: () => number = Math.random,
 ): HomeProfileModel {
   return {
-    ownerName: settings.profile.ownerName,
+    ownerName: PUBLIC_OWNER_NAME,
     title: settings.profile.title,
     description: settings.profile.description,
     motto: selectHomeQuote(settings, randomNumber),

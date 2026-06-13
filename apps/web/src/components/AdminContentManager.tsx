@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-import { buildAdminContentDashboard, loadAdminContentItems, type AdminContentLoadResult } from '@/lib/admin-content';
+import {
+  buildAdminContentDashboard,
+  buildAdminContentSourceNotice,
+  loadAdminContentItems,
+  type AdminContentLoadResult,
+} from '@/lib/admin-content';
 import type { SiteContentItem } from '@/lib/content';
 
 import { AdminContentTable } from './AdminContentTable';
@@ -65,15 +70,16 @@ export function AdminContentManager({
   }, [fallbackItems, query, status, type, category, tag, series]);
 
   const dashboard = buildAdminContentDashboard(result.items, { query, status, type, category, tag, series }, { basePath });
+  const sourceNotice = buildAdminContentSourceNotice({
+    loading,
+    source: result.source,
+    count: result.items.length,
+  });
 
   return (
     <div className="admin-content-manager">
-      <p className="admin-data-note">
-        {loading
-          ? '正在读取后台内容...'
-          : result.source === 'api'
-            ? `已加载 ${result.items.length} 条后台内容。`
-            : '当前显示本地样例内容。'}
+      <p className={`admin-data-note admin-data-note--${sourceNotice.tone}`}>
+        {sourceNotice.text}
       </p>
       <div className="admin-status-grid" aria-label="内容状态概览">
         {dashboard.statusCards.map((card) => (

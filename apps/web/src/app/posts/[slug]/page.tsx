@@ -10,7 +10,7 @@ import { loadPublicSettings } from '@/lib/settings';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const content = await loadSiteContent();
-  const item = getContentBySlug(content, 'post', slug);
+  const item = getContentBySlug(content, 'article', slug);
 
   if (!item) {
     return {};
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const content = await loadSiteContent();
-  const item = getContentBySlug(content, 'post', slug);
+  const item = getContentBySlug(content, 'article', slug);
 
   if (!item) {
     notFound();

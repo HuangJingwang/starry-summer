@@ -164,12 +164,30 @@ describe('SEO helpers', () => {
     });
   });
 
+  test('uses the generated default article cover in social metadata when posts have no cover', () => {
+    expect(buildContentMetadata(content, defaultSettings, 'https://example.com/')).toMatchObject({
+      openGraph: {
+        images: [
+          {
+            url: 'https://example.com/images/default-post-cover.png',
+            alt: 'Public Post 默认文章封面',
+          },
+        ],
+      },
+      twitter: {
+        images: ['https://example.com/images/default-post-cover.png'],
+      },
+    });
+  });
+
   test('builds RSS XML from site settings and public content', () => {
     const xml = buildRssXml(defaultSettings, 'https://example.com', [{ ...content, updatedAt: '2026-06-11' }]);
 
     expect(xml).toContain('<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">');
     expect(xml).toContain('<title><![CDATA[Starry Summer]]></title>');
-    expect(xml).toContain('<description><![CDATA[A personal content platform.]]></description>');
+    expect(xml).toContain(
+      '<description><![CDATA[我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。]]></description>',
+    );
     expect(xml).toContain('<link>https://example.com</link>');
     expect(xml).toContain('<atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml" />');
     expect(xml).toContain(`<lastBuildDate>${new Date('2026-06-11').toUTCString()}</lastBuildDate>`);
@@ -191,6 +209,7 @@ describe('SEO helpers', () => {
 
     expect(xml).toContain('<loc>https://example.com</loc>');
     expect(xml).toContain('<loc>https://example.com/series</loc>');
+    expect(xml).not.toContain('<loc>https://example.com/guestbook</loc>');
     expect(xml).toContain('<loc>https://example.com/categories/writing-notes</loc>');
     expect(xml).toContain('<loc>https://example.com/tags</loc>');
     expect(xml).toContain('<loc>https://example.com/posts/public-post</loc>');

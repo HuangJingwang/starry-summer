@@ -1,12 +1,17 @@
 import { renderMarkdown } from '@starry-summer/markdown';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
-import { canShowComments, estimateReadingTime, getContentHref, getContentTaxonomyLinkGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { canShowComments, estimateReadingTime, formatPublicContentType, getContentHref, getContentTaxonomyLinkGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { getContentCover } from '@/lib/content-cover';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
-import { loadApprovedComments } from '@/lib/public-comments';
+import { loadApprovedComments, type PublicComment } from '@/lib/public-comments';
+import { loadReaderSession } from '@/lib/reader-auth';
+import { splitAnchoredComments } from '@/lib/selection-comments';
 import { CodeCopyEnhancer } from './CodeCopyEnhancer';
 import { CommentForm } from './CommentForm';
+import { InlineCommentLayer } from './InlineCommentLayer';
 import { LikeButton } from './LikeButton';
 import { ViewTracker } from './ViewTracker';
 
@@ -21,23 +26,36 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const readingTime = estimateReadingTime(markdown);
   const updatedAt = item.updatedAt && item.updatedAt !== item.publishedAt ? item.updatedAt : undefined;
   const taxonomyGroups = getContentTaxonomyLinkGroups(item);
+  const cover = getContentCover(item);
+  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
+  const cookieHeader = (await cookies()).toString();
+  const readerSession = await loadReaderSession({ apiBaseUrl, cookieHeader });
+  const approvedComments = isCommentTargetType(item.type) && canShowComments(item)
+    ? await loadApprovedComments(item.type, item.id)
+    : [];
+  const { anchored: anchoredComments, regular: regularComments } = splitAnchoredComments(approvedComments);
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="评论">
       <h2>评论</h2>
-      <CommentList targetType={item.type} targetId={item.id} />
-      <CommentForm targetType={item.type} targetId={item.id} />
+      <CommentList comments={regularComments} />
+      <CommentForm
+        targetType={item.type}
+        targetId={item.id}
+        reader={readerSession.authenticated ? readerSession : null}
+        loginNextPath={`${getContentHref(item)}#comments`}
+      />
     </section>
   ) : null;
 
   return (
     <article className="detail">
       <ViewTracker targetType={item.type} targetId={item.id} />
-      <p className="eyebrow">{item.type}</p>
+      <p className="eyebrow">{formatPublicContentType(item.type)}</p>
       <h1>{item.title}</h1>
       <p className="detail__summary">{item.summary}</p>
-      {item.coverImageUrl ? (
+      {cover ? (
         <figure className="detail-cover">
-          <img src={item.coverImageUrl} alt={item.coverAltText || item.title} />
+          <img src={cover.imageUrl} alt={cover.altText} />
         </figure>
       ) : null}
       <div className="detail__meta">
@@ -54,7 +72,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
       </div>
       {item.series && item.series.length > 0 ? (
-        <div className="detail-taxonomy" aria-label="Series">
+        <div className="detail-taxonomy" aria-label="所属系列">
           <span>系列</span>
           {item.series.map((series) => (
             <Link key={series} href={getSeriesHref(series)}>
@@ -88,8 +106,17 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       ) : null}
       <CodeCopyEnhancer />
       <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      {isCommentTargetType(item.type) && canShowComments(item) ? (
+        <InlineCommentLayer
+          targetType={item.type}
+          targetId={item.id}
+          reader={readerSession.authenticated ? readerSession : null}
+          loginNextPath={`${getContentHref(item)}#comments`}
+          comments={anchoredComments}
+        />
+      ) : null}
       {adjacent ? (
-        <nav className="adjacent-content" aria-label="Adjacent content">
+        <nav className="adjacent-content" aria-label="相邻内容">
           {adjacent.previous ? (
             <a href={getContentHref(adjacent.previous)}>
               <span>上一篇</span>
@@ -178,9 +205,7 @@ function formatProjectStatus(status: NonNullable<SiteContentItem['project']>['st
   return labels[String(status ?? 'active')] ?? String(status ?? 'active');
 }
 
-async function CommentList({ targetType, targetId }: { targetType: CommentTargetType; targetId: string }) {
-  const comments = await loadApprovedComments(targetType, targetId);
-
+function CommentList({ comments }: { comments: PublicComment[] }) {
   return comments.length > 0 ? (
     <ol className="detail-comments__list">
       {comments.map((comment) => (

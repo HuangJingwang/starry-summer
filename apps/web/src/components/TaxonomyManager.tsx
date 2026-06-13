@@ -8,6 +8,7 @@ import {
   buildListTaxonomyTermsRequest,
   buildTaxonomyPayloadFromFormData,
   normalizeTaxonomyTerm,
+  readTaxonomyErrorMessage,
   type TaxonomyTerm,
   type TaxonomyType,
 } from '@/lib/taxonomy';
@@ -34,12 +35,13 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
   const [message, setMessage] = useState('');
   const [terms, setTerms] = useState<TaxonomyTerm[]>([]);
   const copy = taxonomyCopy[type];
+  const taxonomyBusy = state === 'submitting';
 
-  async function send(request: { url: string; init: RequestInit }) {
+  async function send(request: { url: string; init: RequestInit }, fallback: string) {
     const response = await fetch(request.url, request.init);
 
     if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
+      throw new Error(await readTaxonomyErrorMessage(response, fallback));
     }
 
     return response.json().catch(() => null);
@@ -49,13 +51,13 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
     setState((current) => (current === 'submitting' ? current : 'loading'));
 
     try {
-      const data = await send(buildListTaxonomyTermsRequest(type));
+      const data = await send(buildListTaxonomyTermsRequest(type), '读取列表失败，请确认 API 服务可用。');
       const nextTerms = Array.isArray(data) ? data.map((item) => normalizeTaxonomyTerm(item)) : [];
       setTerms(nextTerms);
       setState('idle');
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('读取列表失败，请确认 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '读取列表失败，请确认 API 服务可用。');
     }
   }
 
@@ -70,14 +72,14 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
     const request = buildCreateTaxonomyTermRequest(type, buildTaxonomyPayloadFromFormData(formData));
 
     try {
-      await send(request);
+      await send(request, '保存失败，请确认已登录且 API 服务可用。');
       await loadTerms();
 
       setState('success');
       setMessage('已保存。');
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('保存失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且 API 服务可用。');
     }
   }
 
@@ -86,21 +88,27 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
     setMessage('');
 
     try {
-      await send(buildDeleteTaxonomyTermRequest(type, id));
+      await send(buildDeleteTaxonomyTermRequest(type, id), '删除失败，请确认已登录且 API 服务可用。');
       await loadTerms();
       setState('success');
       setMessage('已删除。');
-    } catch {
+    } catch (error) {
       setState('error');
-      setMessage('删除失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '删除失败，请确认已登录且 API 服务可用。');
     }
   }
 
   return (
-    <section>
-      <h2>{copy.title}</h2>
+    <section className="taxonomy-panel">
+      <div className="taxonomy-panel__header">
+        <div>
+          <span>术语管理</span>
+          <h2>{copy.title}</h2>
+        </div>
+        <strong>{terms.length}</strong>
+      </div>
       <div className="taxonomy-list" aria-label={`${copy.title}列表`}>
-        {state === 'loading' ? <p>加载中...</p> : null}
+        {state === 'loading' ? <p className="empty-state">加载中...</p> : null}
         {terms.length === 0 && state !== 'loading' ? <p className="empty-state">暂无条目</p> : null}
         {terms.map((term) => (
           <article key={term.id} className="taxonomy-term">
@@ -108,20 +116,20 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
               <strong>{term.name}</strong>
               <span>{term.parentId ? `${term.slug} / 父级 ${parentLabel(terms, term.parentId)}` : term.slug}</span>
             </div>
-            <button type="button" onClick={() => deleteTerm(term.id)} disabled={state === 'submitting'}>
+            <button type="button" onClick={() => deleteTerm(term.id)} disabled={taxonomyBusy} aria-disabled={taxonomyBusy}>
               删除
             </button>
           </article>
         ))}
       </div>
-      <form className="taxonomy-form" action={create}>
+      <form className="taxonomy-form" action={create} aria-busy={taxonomyBusy}>
         <label>
           名称
           <input name="name" placeholder={copy.placeholder} required />
         </label>
         <label>
           Slug
-          <input name="slug" placeholder="leave blank to auto-generate" />
+          <input name="slug" placeholder="自动生成，可手动填写" />
         </label>
         <label>
           描述
@@ -144,10 +152,10 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
           排序
           <input name="sortOrder" type="number" defaultValue={0} />
         </label>
-        <button type="submit" disabled={state === 'submitting'}>
-          {state === 'submitting' ? '保存中' : '保存'}
+        <button type="submit" disabled={taxonomyBusy} aria-disabled={taxonomyBusy}>
+          {taxonomyBusy ? '保存中' : '保存'}
         </button>
-        {message ? <p className={`form-message form-message--${state}`}>{message}</p> : null}
+        {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
       </form>
     </section>
   );

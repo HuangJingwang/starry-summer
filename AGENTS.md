@@ -7,6 +7,8 @@ These instructions apply to the entire repository.
 - Starry Summer is a single-owner personal content platform for long-term public writing, notes, moments, projects, comments, guestbook entries, assets, and deployment.
 - The public site should feel like a dark cyber archive: quiet, personal, atmospheric, readable, and content-first.
 - Admin surfaces should be fully Chinese, practical, dense, and work-focused.
+- The public owner display name is `Aster.H`. Do not expose, seed, test for, or render the owner's real name on public webpages, RSS metadata, default settings, or database migrations.
+- Public profile copy should describe Starry Summer as a personal content platform, not as an AI product/design portfolio.
 
 ## Visual Design Guardrails
 

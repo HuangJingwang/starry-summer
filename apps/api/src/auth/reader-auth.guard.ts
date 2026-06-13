@@ -19,7 +19,7 @@ export class ReaderAuthGuard implements CanActivate {
     const session = token ? this.authService.verifyReaderSession(token) : null;
 
     if (!session) {
-      throw new UnauthorizedException('GitHub login is required to leave a guestbook message');
+      throw new UnauthorizedException('GitHub login is required to comment or leave a guestbook message');
     }
 
     if (this.isUnsafeMethod(request.method)) {
@@ -55,16 +55,19 @@ export class ReaderAuthGuard implements CanActivate {
 
   private assertAllowedOrigin(value: string | string[] | undefined): void {
     const origin = Array.isArray(value) ? value[0] : value;
-    const allowedOrigins = [
-      process.env.WEB_ORIGIN,
-      process.env.PUBLIC_SITE_URL,
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-    ]
+    const allowedOrigins = [process.env.WEB_ORIGIN, process.env.PUBLIC_SITE_URL]
       .map((item) => item?.trim().replace(/\/+$/, ''))
       .filter(Boolean);
 
-    if (origin && !allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
+    if (allowedOrigins.length === 0) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new ForbiddenException('Reader request origin is not configured for production');
+      }
+
+      allowedOrigins.push('http://localhost:3000', 'http://127.0.0.1:3000');
+    }
+
+    if (!origin || !allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
       throw new ForbiddenException('Reader request origin is not allowed');
     }
   }

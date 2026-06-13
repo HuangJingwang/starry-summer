@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createHmac } from 'node:crypto';
 
-import { AuthService, READER_SESSION_MAX_AGE_MS } from './auth.service';
+import { AuthService, DEFAULT_ADMIN_ACCOUNT, READER_SESSION_MAX_AGE_MS } from './auth.service';
 import { createPasswordHash } from './password';
 
 describe('AuthService', () => {
@@ -23,6 +23,20 @@ describe('AuthService', () => {
 
     expect(session.email).toBe('owner@example.com');
     expect(service.verifySession(session.token)?.email).toBe('owner@example.com');
+  });
+
+  test('does not provide an open-source default admin password', async () => {
+    vi.stubEnv('ADMIN_EMAIL', undefined);
+    vi.stubEnv('ADMIN_PASSWORD_HASH', undefined);
+
+    const service = new AuthService({
+      sessionSecret: 'test-session-secret',
+    });
+
+    await expect(service.login({
+      account: DEFAULT_ADMIN_ACCOUNT,
+      password: '123456',
+    })).rejects.toThrow('Invalid email or password');
   });
 
   test('rejects unknown email addresses', async () => {

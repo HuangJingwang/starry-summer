@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ContentCard } from '@/components/ContentCard';
 import { HomeHeroBackground } from '@/components/HomeHeroBackground';
 import { SiteShell } from '@/components/SiteShell';
+import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 import { loadPublicAssets } from '@/lib/assets';
 import { getContentHref, getFeaturedContent, getPopularContent } from '@/lib/content';
 import { buildHomeProfileModel } from '@/lib/home-profile';
@@ -10,7 +11,7 @@ import { loadSiteContent } from '@/lib/public-content';
 import { loadPublicSettings } from '@/lib/settings';
 
 export default async function HomePage() {
-  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
+  const apiBaseUrl = process.env.API_BASE_URL;
   const [content, settings, backgroundAssets] = await Promise.all([
     loadSiteContent(),
     loadPublicSettings(undefined, { apiBaseUrl }),
@@ -36,89 +37,82 @@ export default async function HomePage() {
             alt: '首页默认背景图',
           },
         ];
+  const ownerPortrait = {
+    url: '/images/aster-profile.png',
+    alt: `${profile.ownerName} 的个人照片`,
+  };
 
   return (
     <SiteShell>
-      <main className="cyber-home">
-        <div className="cyber-firefly-field" aria-hidden="true">
-          <span className="cyber-firefly cyber-firefly--one" />
-          <span className="cyber-firefly cyber-firefly--two" />
-          <span className="cyber-firefly cyber-firefly--three" />
-          <span className="cyber-firefly cyber-firefly--four" />
-          <span className="cyber-firefly cyber-firefly--five" />
-        </div>
-
-        <section className="cyber-hero" id="about">
+      <main className="portfolio-home">
+        <section className="portfolio-hero" id="about" aria-label="Starry Summer 首页">
           <HomeHeroBackground backgrounds={heroBackgrounds} />
-          <div className="cyber-hero__shade" />
-          <div className="cyber-home__container cyber-hero__grid">
-            <article className="author-bio-card">
-              <p className="eyebrow">夏夜数字档案</p>
-              <h1>Hi，我是 {profile.ownerName}</h1>
-              <p className="author-bio-card__lead">{profile.description}</p>
-              <p className="author-bio-card__motto">{profile.motto || settings.hero.tagline}</p>
+          <StarrySkyCanvas className="portfolio-hero__canvas" />
+          <div className="portfolio-hero__shade" />
 
-              <div className="author-bio-card__meta">
-                <div>
-                  <span>站点</span>
-                  <strong>{profile.title}</strong>
-                </div>
-                <div>
-                  <span>方向</span>
-                  <strong>写作 / 笔记 / 项目 / 日常</strong>
-                </div>
-                <div>
-                  <span>最近更新</span>
-                  <strong>{profile.stats.lastPublishedAt || '持续构建中'}</strong>
-                </div>
+          <div className="portfolio-hero__content cyber-home__container">
+            <div className="portfolio-hero__copy">
+              <p className="portfolio-hero__badge">个人内容平台</p>
+              <div className="portfolio-hero__title">
+                <h1 className="portfolio-hero__name">{profile.ownerName}</h1>
+                <span className="portfolio-hero__outline" aria-hidden="true">
+                  PORTFOLIO
+                </span>
               </div>
+              <p className="portfolio-hero__role">Content Builder</p>
+              <p className="portfolio-hero__lead">{profile.description}</p>
+              <p className="portfolio-hero__motto">{profile.motto || settings.hero.tagline}</p>
 
-              <div className="author-bio-card__actions" aria-label="快捷入口">
-                <Link href="/posts">阅读文章</Link>
-                <Link href="/notes">翻看笔记</Link>
-                <Link href="/guestbook">给我留言</Link>
-              </div>
-            </article>
-
-            <aside
-              className="author-profile-card"
-              style={{ backgroundImage: `url("${heroBackgrounds[0]?.url}")` }}
-              aria-label="站点概览"
-            >
-              <div className="author-profile-card__glass">
-                <span className="author-profile-card__avatar">{profile.ownerName.slice(0, 1) || 'S'}</span>
+              <dl className="portfolio-hero__stats" aria-label="站点数据">
                 <div>
-                  <p>{profile.title}</p>
-                  <strong>{profile.ownerName}</strong>
-                </div>
-              </div>
-              <dl className="author-profile-card__stats">
-                <div>
-                  <dt>Collection</dt>
+                  <dt>内容资产</dt>
                   <dd>{formatNumber(stats.publicCount)}</dd>
                 </div>
                 <div>
-                  <dt>Total Views</dt>
+                  <dt>累计浏览</dt>
                   <dd>{formatNumber(stats.totalViews)}</dd>
                 </div>
                 <div>
-                  <dt>Likes</dt>
+                  <dt>收到喜欢</dt>
                   <dd>{formatNumber(stats.totalLikes)}</dd>
                 </div>
+                <div>
+                  <dt>最近更新</dt>
+                  <dd>{stats.lastPublishedAt || '持续构建'}</dd>
+                </div>
               </dl>
-            </aside>
-          </div>
-        </section>
 
-        <nav className="content-filter-rail cyber-home__container" aria-label="内容索引">
-          <span>内容索引</span>
-          <Link href="/posts">文章</Link>
-          <Link href="/notes">笔记</Link>
-          <Link href="/moments">日常</Link>
-          <Link href="/projects">项目</Link>
-          <Link href="/series">专题</Link>
-          <Link href="/search">搜索</Link>
-        </nav>
+              <div className="portfolio-hero__actions" aria-label="首页快捷入口">
+                <Link className="portfolio-hero__primary" href="/posts">
+                  阅读文章
+                </Link>
+                <Link className="portfolio-hero__secondary" href="/archives">
+                  浏览索引
+                </Link>
+                <a className="portfolio-hero__social" href="https://github.com/Aster-H">
+                  <GitHubIcon />
+                  GitHub
+                </a>
+                <a className="portfolio-hero__social" href="https://juejin.cn/user/959206842703773">
+                  <JuejinIcon />
+                  掘金
+                </a>
+              </div>
+            </div>
+
+            <figure className="portfolio-hero__portrait">
+              <img src={ownerPortrait.url} alt={ownerPortrait.alt} />
+              <figcaption>
+                <span>站主</span>
+                <strong>{profile.ownerName}</strong>
+              </figcaption>
+            </figure>
+          </div>
+
+          <span className="portfolio-hero__scroll" aria-hidden="true">
+            SCROLL TO ENTER
+          </span>
+        </section>
 
         <section className="home-dashboard cyber-home__container" id="advantage" aria-label="个人优势">
           <div className="home-profile">
@@ -194,6 +188,27 @@ export default async function HomePage() {
         ) : null}
       </main>
     </SiteShell>
+  );
+}
+
+function GitHubIcon() {
+  return (
+    <svg className="portfolio-hero__social-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.1.68-.22.68-.49v-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.71 0 0 .84-.28 2.75 1.05A9.36 9.36 0 0 1 12 6.98c.85 0 1.7.12 2.5.34 1.9-1.33 2.74-1.05 2.74-1.05.55 1.4.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9v2.81c0 .27.18.59.69.49A10.13 10.13 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+    </svg>
+  );
+}
+
+function JuejinIcon() {
+  return (
+    <svg
+      className="portfolio-hero__social-icon portfolio-hero__social-icon--juejin"
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M12 3 3.5 8.16l2.03 1.22L12 5.45l6.47 3.93 2.03-1.22L12 3Zm0 5.1-8.5 5.16L12 18.42l8.5-5.16L12 8.1Zm-4.42 5.16L12 10.58l4.42 2.68L12 15.94l-4.42-2.68ZM3.5 15.84 12 21l8.5-5.16-2.03-1.22L12 18.55l-6.47-3.93-2.03 1.22Z" />
+    </svg>
   );
 }
 

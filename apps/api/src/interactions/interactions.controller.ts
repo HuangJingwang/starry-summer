@@ -17,7 +17,7 @@ import {
   type CreateGuestbookEntryInput,
 } from './interactions.service.js';
 
-type CreateCommentRequest = Omit<CreateCommentInput, 'targetType'> & { targetType: string };
+type CreateCommentRequest = Omit<CreateCommentInput, 'targetType' | 'authorName'> & { targetType: string };
 type CreateGuestbookRequest = Pick<CreateGuestbookEntryInput, 'body'>;
 type ReaderPublicClientRequest = PublicClientRequest & ReaderAuthenticatedRequest;
 
@@ -26,18 +26,25 @@ export class InteractionsController {
   constructor(@Inject(InteractionsService) private readonly interactionsService: InteractionsService) {}
 
   @Post('comments')
-  @UseGuards(PublicInteractionRateLimitGuard)
-  createComment(@Body() input: CreateCommentRequest, @Req() request: PublicClientRequest) {
+  @UseGuards(ReaderAuthGuard, PublicInteractionRateLimitGuard)
+  createComment(@Body() input: CreateCommentRequest, @Req() request: ReaderPublicClientRequest) {
+    const reader = request.readerSession;
+
     return this.interactionsService.createComment({
       ...input,
       targetType: parseCommentTargetType(input.targetType),
+      targetId: parsePublicInteractionTargetId(input.targetId),
+      authorName: reader?.displayName || reader?.login || 'GitHub 用户',
       ...createPublicSubmissionMetadata(request),
     });
   }
 
   @Get('comments/:targetType/:targetId')
   listApprovedComments(@Param('targetType') targetType: string, @Param('targetId') targetId: string) {
-    return this.interactionsService.listApprovedComments(parseCommentTargetType(targetType), targetId);
+    return this.interactionsService.listApprovedComments(
+      parseCommentTargetType(targetType),
+      parsePublicInteractionTargetId(targetId),
+    );
   }
 
   @Patch('admin/comments/:id/moderate')
@@ -65,7 +72,11 @@ export class InteractionsController {
     @Param('targetId') targetId: string,
     @Req() request: PublicClientRequest,
   ) {
-    return this.interactionsService.likeContent(parseContentType(targetType), targetId, createPublicActorHash(request));
+    return this.interactionsService.likeContent(
+      parseContentType(targetType),
+      parsePublicInteractionTargetId(targetId),
+      createPublicActorHash(request),
+    );
   }
 
   @Post('views/:targetType/:targetId')
@@ -75,7 +86,11 @@ export class InteractionsController {
     @Param('targetId') targetId: string,
     @Req() request: PublicClientRequest,
   ) {
-    return this.interactionsService.recordView(parseContentType(targetType), targetId, createPublicActorHash(request));
+    return this.interactionsService.recordView(
+      parseContentType(targetType),
+      parsePublicInteractionTargetId(targetId),
+      createPublicActorHash(request),
+    );
   }
 
   @Post('guestbook')
@@ -150,10 +165,18 @@ function parseOptionalModerationStatus(value: string | undefined): ModerationSta
   return parseModerationStatus(value);
 }
 
+function parsePublicInteractionTargetId(value: string): string {
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(value)) {
+    throw new BadRequestException('Public interaction target id is invalid');
+  }
+
+  return value;
+}
+
 function createPublicActorHash(request: PublicClientRequest): string {
   const ip = resolvePublicClientAddress(request);
   const userAgent = resolvePublicUserAgent(request);
-  const secret = process.env.INTERACTION_HASH_SECRET ?? process.env.SESSION_SECRET ?? 'development-interaction-secret';
+  const secret = resolveInteractionHashSecret();
 
   assertProductionInteractionHashSecret(secret);
 
@@ -165,6 +188,18 @@ function createPublicSubmissionMetadata(request: PublicClientRequest): { ipHash:
     ipHash: createPublicActorHash(request),
     userAgent: resolvePublicUserAgent(request),
   };
+}
+
+function resolveInteractionHashSecret(): string {
+  if (process.env.INTERACTION_HASH_SECRET) {
+    return process.env.INTERACTION_HASH_SECRET;
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('INTERACTION_HASH_SECRET must be configured separately in production');
+  }
+
+  return process.env.SESSION_SECRET ?? 'development-interaction-secret';
 }
 
 function assertProductionInteractionHashSecret(secret: string): void {

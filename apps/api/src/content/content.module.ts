@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module.js';
+import { createDemoContentRecords } from '../demo/demo-data.js';
 import { AdminContentController } from './admin-content.controller.js';
 import { ContentController } from './content.controller.js';
 import { CONTENT_REPOSITORY, InMemoryContentRepository, type ContentRepository } from './content.repository.js';
@@ -18,7 +19,7 @@ function createContentRepository(): ContentRepository {
     return new PostgresContentRepository(databaseUrl);
   }
 
-  return new InMemoryContentRepository();
+  return new InMemoryContentRepository(undefined, createDemoContentRecords());
 }
 
 @Module({

@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: `${group.label} | Starry Summer`,
-    description: `Series archive for ${group.label}.`,
+    description: `${group.label} 系列归档。`,
   };
 }
 
@@ -33,7 +33,7 @@ export default async function SeriesDetailPage({ params }: { params: Promise<{ s
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">Series</p>
+          <p className="eyebrow">系列</p>
           <h1>{group.label}</h1>
           <p>{group.items.length} 篇内容沿着这个系列持续沉淀。</p>
         </div>

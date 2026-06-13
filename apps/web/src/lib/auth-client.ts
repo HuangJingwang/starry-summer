@@ -1,5 +1,5 @@
 export interface LoginInput {
-  email: string;
+  account: string;
   password: string;
 }
 
@@ -10,7 +10,7 @@ export interface LoginRequest {
 
 export function normalizeLoginInput(input: LoginInput): LoginInput {
   return {
-    email: input.email.trim().toLowerCase(),
+    account: input.account.trim().toLowerCase(),
     password: input.password,
   };
 }

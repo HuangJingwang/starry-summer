@@ -45,6 +45,9 @@ describe('public content API helpers', () => {
     expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post', sort: 'popular' }).url).toBe(
       'https://api.example.com/content?type=post&sort=popular',
     );
+    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'article' }).url).toBe(
+      'https://api.example.com/content',
+    );
     expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', query: ' cloud backup ' }).url).toBe(
       'https://api.example.com/content?q=cloud+backup',
     );
@@ -131,8 +134,10 @@ describe('public content API helpers', () => {
   test('loads public content records from the API', async () => {
     const result = await loadPublicContentItems(fallbackItems, {
       apiBaseUrl: 'https://api.example.com',
-      fetcher: async () =>
-        new Response(
+      fetcher: async (_url, init) => {
+        expect(init.signal).toBeInstanceOf(AbortSignal);
+
+        return new Response(
           JSON.stringify([
             {
               id: 'api-note',
@@ -144,11 +149,43 @@ describe('public content API helpers', () => {
               updatedAt: '2026-06-10T00:00:00.000Z',
             },
           ]),
-        ),
+        );
+      },
     });
 
     expect(result.source).toBe('api');
     expect(result.items.map((item) => item.id)).toEqual(['api-note']);
+  });
+
+  test('uses fallback content during server render when no API base URL is configured', async () => {
+    const result = await loadPublicContentItems(fallbackItems);
+
+    expect(result).toEqual({
+      source: 'fallback',
+      items: fallbackItems,
+    });
+  });
+
+  test('loads article fallback content from both posts and notes', async () => {
+    const result = await loadPublicContentItems(fallbackItems, { type: 'article' });
+
+    expect(result.items.map((item) => item.id)).toEqual(['post-1', 'note-1']);
+  });
+
+  test('falls back when a public content request times out', async () => {
+    const result = await loadPublicContentItems(fallbackItems, {
+      apiBaseUrl: 'https://api.example.com',
+      timeoutMs: 1,
+      fetcher: (_url, init) =>
+        new Promise<Response>((resolve) => {
+          init.signal?.addEventListener('abort', () => resolve(new Response('Aborted', { status: 408 })));
+        }),
+    });
+
+    expect(result).toEqual({
+      source: 'fallback',
+      items: fallbackItems,
+    });
   });
 
   test('falls back to public seed content when the API is unavailable', async () => {

@@ -48,7 +48,7 @@ export class AssetsService {
     const bytes = decodeBase64Payload(input.base64);
     const optimized = await this.optimizeUpload({
       filename: input.filename,
-      mimeType: input.mimeType,
+      mimeType: normalizeUploadMimeType(input.mimeType, input.filename),
       bytes,
     });
     const stored = await this.storage.save(optimized);
@@ -145,6 +145,50 @@ function assertUploadInput(input: UploadAssetInput): void {
   ) {
     throw new BadRequestException('Asset upload filename, mimeType, and base64 must be strings');
   }
+}
+
+function normalizeUploadMimeType(mimeType: string, filename: string): string {
+  const normalized = mimeType.trim().toLowerCase();
+
+  if (normalized === 'image/jpg') {
+    return 'image/jpeg';
+  }
+
+  if (normalized && normalized !== 'application/octet-stream') {
+    return normalized;
+  }
+
+  const extension = filename.split('.').pop()?.toLowerCase();
+
+  if (extension === 'jpg' || extension === 'jpeg') {
+    return 'image/jpeg';
+  }
+
+  if (extension === 'png') {
+    return 'image/png';
+  }
+
+  if (extension === 'webp') {
+    return 'image/webp';
+  }
+
+  if (extension === 'gif') {
+    return 'image/gif';
+  }
+
+  if (extension === 'pdf') {
+    return 'application/pdf';
+  }
+
+  if (extension === 'md' || extension === 'markdown') {
+    return 'text/markdown';
+  }
+
+  if (extension === 'txt') {
+    return 'text/plain';
+  }
+
+  return normalized;
 }
 
 function decodeBase64Payload(value: string): Buffer {
