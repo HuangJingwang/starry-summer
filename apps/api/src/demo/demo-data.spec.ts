@@ -3,12 +3,16 @@ import { describe, expect, test } from 'vitest';
 import { createDemoContentRecords } from './demo-data';
 
 describe('demo data', () => {
-  test('uses the default post cover instead of the home workspace image for seeded covers', () => {
+  test('uses approved article covers instead of the home workspace image for seeded covers', () => {
     const contentWithCovers = createDemoContentRecords().filter((item) => item.coverImageUrl);
+    const introPost = createDemoContentRecords().find((item) => item.id === 'demo-post-summer-archive');
 
-    expect(contentWithCovers.map((item) => item.coverImageUrl)).toEqual(
-      contentWithCovers.map(() => '/images/default-post-cover.png'),
-    );
+    expect(introPost?.coverImageUrl).toBe('/images/starry-summer-night.png');
+    expect(
+      contentWithCovers
+        .filter((item) => item.id !== 'demo-post-summer-archive')
+        .map((item) => item.coverImageUrl),
+    ).toEqual(contentWithCovers.filter((item) => item.id !== 'demo-post-summer-archive').map(() => '/images/default-post-cover.png'));
     expect(contentWithCovers.some((item) => item.coverImageUrl === '/hero-workspace.png')).toBe(false);
   });
 

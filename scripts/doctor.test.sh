@@ -17,8 +17,6 @@ write_valid_env() {
 NODE_ENV=production
 DOMAIN=blog.aster.test
 PUBLIC_SITE_URL=https://blog.aster.test
-API_BASE_URL=http://api:4000
-TRUST_PROXY=true
 ACME_EMAIL=admin@aster.test
 ADMIN_EMAIL=owner@aster.test
 ADMIN_PASSWORD_HASH=scrypt:test-placeholder
@@ -27,14 +25,6 @@ INTERACTION_HASH_SECRET=123456abcdefghijklmnopqrstuvwxyz
 GITHUB_CLIENT_ID=github-oauth-client-id
 GITHUB_CLIENT_SECRET=github-oauth-client-secret
 GITHUB_CALLBACK_URL=https://blog.aster.test/api/auth/github/callback
-POSTGRES_DB=starry_summer
-POSTGRES_USER=starry
-POSTGRES_PASSWORD=strong-postgres-password
-DATABASE_URL=postgresql://starry:strong-postgres-password@postgres:5432/starry_summer
-CONTENT_REPOSITORY_DRIVER=postgres
-REDIS_URL=redis://redis:6379
-STORAGE_DRIVER=local
-LOCAL_UPLOAD_PUBLIC_URL=/uploads
 ENV
 }
 

@@ -79,7 +79,23 @@ describe('asset client helpers', () => {
     expect(optimizerCalls).toBe(0);
   });
 
-  test('builds an authenticated asset upload request', () => {
+  test('does not build local database asset requests when the asset Worker is not configured', async () => {
+    const { buildAdminAssetListRequest, buildPublicAssetListRequest, buildRandomAssetRequest } = await import('./assets');
+
+    expect(buildAssetUploadRequest({
+      filename: 'cover.png',
+      mimeType: 'image/png',
+      base64: 'aGVsbG8=',
+      usage: 'cover',
+      altText: 'Cover image',
+    })).toBeNull();
+    expect(buildAdminAssetListRequest({ usage: 'background' })).toBeNull();
+    expect(buildPublicAssetListRequest({ usage: 'background' })).toBeNull();
+    expect(buildRandomAssetRequest({ usage: 'background' })).toBeNull();
+    expect(buildAssetDeleteRequest('asset-1')).toBeNull();
+  });
+
+  test('builds an authenticated asset upload request for the asset Worker', () => {
     expect(
       buildAssetUploadRequest({
         filename: 'cover.png',
@@ -87,9 +103,9 @@ describe('asset client helpers', () => {
         base64: 'aGVsbG8=',
         usage: 'cover',
         altText: 'Cover image',
-      }),
+      }, { assetBaseUrl: 'https://assets.example.workers.dev' }),
     ).toEqual({
-      url: '/api/admin/assets',
+      url: 'https://assets.example.workers.dev/admin/assets',
       init: {
         method: 'POST',
         credentials: 'include',
@@ -133,14 +149,15 @@ describe('asset client helpers', () => {
     await expect(readAssetErrorMessage(new Response('', { status: 500 }), '上传失败。')).resolves.toBe('上传失败。');
   });
 
-  test('builds gallery list and random image requests', async () => {
+  test('builds gallery list and random image requests for the asset Worker', async () => {
     const { buildAdminAssetListRequest, buildPublicAssetListRequest, buildRandomAssetRequest } = await import('./assets');
+    const assetBaseUrl = 'https://assets.example.workers.dev';
 
-    expect(buildAdminAssetListRequest({ usage: 'background' }).url).toBe('/api/admin/assets?usage=background');
-    expect(buildPublicAssetListRequest({ usage: 'background' }).url).toBe('/api/assets?usage=background');
-    expect(buildRandomAssetRequest({ usage: 'background' }).url).toBe('/api/assets/random?usage=background');
-    expect(buildAssetDeleteRequest('asset-1')).toEqual({
-      url: '/api/admin/assets/asset-1',
+    expect(buildAdminAssetListRequest({ usage: 'background', assetBaseUrl })?.url).toBe('https://assets.example.workers.dev/admin/assets?usage=background');
+    expect(buildPublicAssetListRequest({ usage: 'background', assetBaseUrl })?.url).toBe('https://assets.example.workers.dev/assets?usage=background');
+    expect(buildRandomAssetRequest({ usage: 'background', assetBaseUrl })?.url).toBe('https://assets.example.workers.dev/assets/random?usage=background');
+    expect(buildAssetDeleteRequest('asset-1', { assetBaseUrl })).toEqual({
+      url: 'https://assets.example.workers.dev/admin/assets/asset-1',
       init: {
         method: 'DELETE',
         credentials: 'include',
@@ -148,12 +165,31 @@ describe('asset client helpers', () => {
     });
   });
 
+  test('routes asset requests to a database-free asset service when configured', async () => {
+    const { buildAdminAssetListRequest, buildAssetDeleteRequest, buildAssetUploadRequest, buildPublicAssetListRequest, buildRandomAssetRequest } =
+      await import('./assets');
+
+    const assetBaseUrl = 'https://assets.example.workers.dev/';
+
+    expect(buildAssetUploadRequest({ filename: 'cover.png', mimeType: 'image/png', base64: 'aGVsbG8=' }, { assetBaseUrl })?.url).toBe(
+      'https://assets.example.workers.dev/admin/assets',
+    );
+    expect(buildAdminAssetListRequest({ usage: 'cover', assetBaseUrl })?.url).toBe('https://assets.example.workers.dev/admin/assets?usage=cover');
+    expect(buildPublicAssetListRequest({ usage: 'background', assetBaseUrl })?.url).toBe(
+      'https://assets.example.workers.dev/assets?usage=background',
+    );
+    expect(buildRandomAssetRequest({ usage: 'background', assetBaseUrl })?.url).toBe(
+      'https://assets.example.workers.dev/assets/random?usage=background',
+    );
+    expect(buildAssetDeleteRequest('asset-1', { assetBaseUrl })?.url).toBe('https://assets.example.workers.dev/admin/assets/asset-1');
+  });
+
   test('loads uploaded background assets for the home hero rotation', async () => {
     await expect(
       loadPublicAssets(
-        { usage: 'background', apiBaseUrl: 'https://api.example.com/' },
+        { usage: 'background', assetBaseUrl: 'https://assets.example.workers.dev/' },
         async (url, init) => {
-          expect(url).toBe('https://api.example.com/assets?usage=background');
+          expect(url).toBe('https://assets.example.workers.dev/assets?usage=background');
           expect(init).toMatchObject({
             method: 'GET',
             next: {
@@ -186,7 +222,7 @@ describe('asset client helpers', () => {
     await expect(loadPublicAssets({ usage: 'background' }, async () => new Response('Not found', { status: 404 }))).resolves.toEqual([]);
   });
 
-  test('uses an empty asset list during server render when no API base URL is configured', async () => {
+  test('uses an empty asset list during server render when no asset Worker is configured', async () => {
     await expect(loadPublicAssets({ usage: 'background' })).resolves.toEqual([]);
   });
 
@@ -216,9 +252,9 @@ describe('asset client helpers', () => {
   test('loads a random background asset with fallback when unavailable', async () => {
     await expect(
       loadRandomAsset(
-        { usage: 'background', apiBaseUrl: 'https://api.example.com/' },
+        { usage: 'background', assetBaseUrl: 'https://assets.example.workers.dev/' },
         async (url, init) => {
-          expect(url).toBe('https://api.example.com/assets/random?usage=background');
+          expect(url).toBe('https://assets.example.workers.dev/assets/random?usage=background');
           expect(init).toMatchObject({
             method: 'GET',
             next: {
@@ -245,7 +281,7 @@ describe('asset client helpers', () => {
     await expect(loadRandomAsset({ usage: 'background' }, async () => new Response('Not found', { status: 404 }))).resolves.toBeNull();
   });
 
-  test('uses null random assets during server render when no API base URL is configured', async () => {
+  test('uses null random assets during server render when no asset Worker is configured', async () => {
     await expect(loadRandomAsset({ usage: 'background' })).resolves.toBeNull();
   });
 

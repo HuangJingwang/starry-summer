@@ -8,14 +8,21 @@ import {
   normalizePublicComment,
 } from './public-comments';
 
+const workerBaseUrl = 'https://interactions.example.workers.dev';
+
 describe('public comment helpers', () => {
-  test('builds approved comment list requests', () => {
+  test('does not build approved comment or guestbook requests without a Worker endpoint', () => {
+    expect(buildApprovedCommentsRequest('post', 'post-1')).toBeNull();
+    expect(buildApprovedGuestbookRequest()).toBeNull();
+  });
+
+  test('builds approved comment list requests against the interaction Worker', () => {
     expect(
       buildApprovedCommentsRequest('post', 'post-1', {
-        apiBaseUrl: 'https://api.example.com/',
+        interactionBaseUrl: `${workerBaseUrl}/`,
       }),
     ).toEqual({
-      url: 'https://api.example.com/comments/post/post-1',
+      url: `${workerBaseUrl}/comments/post/post-1`,
       init: {
         method: 'GET',
         next: {
@@ -25,9 +32,9 @@ describe('public comment helpers', () => {
     });
   });
 
-  test('builds approved guestbook list requests', () => {
-    expect(buildApprovedGuestbookRequest({ apiBaseUrl: 'https://api.example.com/' })).toEqual({
-      url: 'https://api.example.com/guestbook',
+  test('builds approved guestbook list requests against the interaction Worker', () => {
+    expect(buildApprovedGuestbookRequest({ interactionBaseUrl: workerBaseUrl })).toEqual({
+      url: `${workerBaseUrl}/guestbook`,
       init: {
         method: 'GET',
         next: {
@@ -85,9 +92,9 @@ describe('public comment helpers', () => {
     });
   });
 
-  test('loads approved comments from the API', async () => {
+  test('loads approved comments from the interaction Worker', async () => {
     const comments = await loadApprovedComments('post', 'post-1', {
-      apiBaseUrl: 'https://api.example.com',
+      interactionBaseUrl: workerBaseUrl,
       fetcher: async () =>
         new Response(
           JSON.stringify([
@@ -111,9 +118,9 @@ describe('public comment helpers', () => {
     ]);
   });
 
-  test('loads approved guestbook entries from the API', async () => {
+  test('loads approved guestbook entries from the interaction Worker', async () => {
     const entries = await loadApprovedGuestbookEntries({
-      apiBaseUrl: 'https://api.example.com',
+      interactionBaseUrl: workerBaseUrl,
       fetcher: async () =>
         new Response(
           JSON.stringify([
@@ -137,17 +144,21 @@ describe('public comment helpers', () => {
     ]);
   });
 
-  test('returns no comments when the comments API is unavailable', async () => {
+  test('returns no comments when the interaction Worker is absent or unavailable', async () => {
+    await expect(loadApprovedComments('post', 'post-1')).resolves.toEqual([]);
     await expect(
       loadApprovedComments('post', 'post-1', {
+        interactionBaseUrl: workerBaseUrl,
         fetcher: async () => new Response('Unavailable', { status: 503 }),
       }),
     ).resolves.toEqual([]);
   });
 
-  test('returns no guestbook entries when the guestbook API is unavailable', async () => {
+  test('returns no guestbook entries when the interaction Worker is absent or unavailable', async () => {
+    await expect(loadApprovedGuestbookEntries()).resolves.toEqual([]);
     await expect(
       loadApprovedGuestbookEntries({
+        interactionBaseUrl: workerBaseUrl,
         fetcher: async () => new Response('Unavailable', { status: 503 }),
       }),
     ).resolves.toEqual([]);

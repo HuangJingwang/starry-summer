@@ -38,4 +38,13 @@ describe('content cover components', () => {
     expect(source).toContain('src={cover.imageUrl}');
     expect(source).toContain('alt={cover.altText}');
   });
+
+  test('renders the content table of contents beside the reader body', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/ContentDetail.tsx'), 'utf8');
+
+    expect(source).toContain('const tableOfContentsNav = tableOfContents.length > 0');
+    expect(source).toContain('className={`detail-reader ${tableOfContentsNav ?');
+    expect(source).toContain('{tableOfContentsNav}');
+    expect(source).toContain('<div className="detail-reader__main">');
+  });
 });

@@ -63,7 +63,6 @@ echo "Release version: $RELEASE_VERSION"
 echo "Git revision: $GIT_REVISION"
 
 docker compose --env-file "$env_file" build
-docker compose --env-file "$env_file" run --rm migrate
 docker compose --env-file "$env_file" up -d
 
 npm run ops:smoke -- "$site_url"

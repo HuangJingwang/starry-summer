@@ -273,7 +273,7 @@ function ProjectMetadataFields({ project }: { project?: ProjectMetadata }) {
         </label>
         <label>
           技术栈
-          <input name="projectStack" defaultValue={(project?.stack ?? []).join(', ')} placeholder="Next.js, PostgreSQL" />
+          <input name="projectStack" defaultValue={(project?.stack ?? []).join(', ')} placeholder="Next.js, Markdown, Cloudflare Workers" />
         </label>
         <label>
           开始日期

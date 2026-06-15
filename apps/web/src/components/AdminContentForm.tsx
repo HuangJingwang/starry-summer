@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { renderMarkdown } from '@starry-summer/markdown';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,12 +12,8 @@ import {
   type StoredAsset,
 } from '@/lib/assets';
 import {
-  buildAdminContentActionRequest,
   buildContentPayloadFromFormData,
-  buildCreateDraftRequest,
-  buildDeleteContentRequest,
-  buildSetContentVisibilityRequest,
-  buildUpdateContentRequest,
+  buildRepositoryContentPublishRequest,
   createMarkdownPreview,
   getContentDraftStorageKey,
   getUnsavedContentWarning,
@@ -72,12 +68,12 @@ const markdownToolbarCommands: Array<{ command: MarkdownEditorCommand; label: st
   { command: 'heading', label: '标题', icon: 'H' },
   { command: 'bold', label: '加粗', icon: 'B' },
   { command: 'italic', label: '斜体', icon: 'I' },
-  { command: 'link', label: '链接', icon: '↗' },
-  { command: 'quote', label: '引用', icon: '“' },
-  { command: 'unordered-list', label: '无序列表', icon: '•' },
+  { command: 'link', label: '链接', icon: '->' },
+  { command: 'quote', label: '引用', icon: '>' },
+  { command: 'unordered-list', label: '无序列表', icon: '-' },
   { command: 'ordered-list', label: '有序列表', icon: '1.' },
   { command: 'code-block', label: '代码', icon: '</>' },
-  { command: 'divider', label: '分割线', icon: '—' },
+  { command: 'divider', label: '分割线', icon: '---' },
 ];
 
 export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) {
@@ -147,6 +143,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
         const responses = await Promise.all(
           authoringAssetUsages.map((usage) => {
             const request = buildAdminAssetListRequest({ usage });
+
+            if (!request) {
+              return Promise.resolve(new Response(JSON.stringify([])));
+            }
 
             return fetch(request.url, request.init);
           }),
@@ -366,21 +366,15 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     return response.json().catch(() => null);
   }
 
-  async function save(formData: FormData): Promise<string | undefined> {
+  async function saveToRepository(formData: FormData, lifecycle?: 'publish' | 'archive' | 'restore-draft'): Promise<string | undefined> {
     ensureDraftSlug(formData);
     const payload = buildContentPayloadFromFormData(formData);
-    const request =
-      mode === 'edit' && initialValue?.id
-        ? buildUpdateContentRequest(initialValue.id, payload)
-        : buildCreateDraftRequest(payload);
-    const result = await send(request);
+    const result = await send(buildRepositoryContentPublishRequest(payload, {
+      contentId: initialValue?.id,
+      action: lifecycle === 'restore-draft' ? 'restore-draft' : lifecycle ?? 'save',
+    }));
 
     return typeof result?.id === 'string' ? result.id : initialValue?.id;
-  }
-
-  async function syncVisibility(contentId: string, formData: FormData) {
-    const visibility = formData.get('visibility') === 'private' ? 'private' : 'public';
-    await send(buildSetContentVisibilityRequest(contentId, visibility));
   }
 
   async function runSave(formData: FormData, lifecycle?: 'publish' | 'archive' | 'restore-draft') {
@@ -388,31 +382,42 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     setMessage('');
 
     try {
-      const contentId = lifecycle === 'archive' || lifecycle === 'restore-draft' ? initialValue?.id : await save(formData);
-
-      if (contentId && lifecycle !== 'archive' && lifecycle !== 'restore-draft') {
-        await syncVisibility(contentId, formData);
-      }
-
-      if (lifecycle && contentId) {
-        await send(buildAdminContentActionRequest(contentId, lifecycle));
-      }
-
-      try {
-        window.localStorage.removeItem(draftStorageKey);
-      } catch {
-        // Ignore localStorage cleanup errors after a successful remote save.
-      }
-
-      setLocalDraft(null);
-      setLocalDraftMessage('');
-      setIsDirty(false);
-      setState('success');
-      setMessage(lifecycle === 'publish' ? '已保存并发布。' : lifecycle === 'archive' ? '已归档。' : lifecycle === 'restore-draft' ? '已恢复为草稿。' : '已保存草稿。');
+      await saveToRepository(formData, lifecycle);
+      clearSuccessfulSaveState(lifecycle);
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且仓库发布服务可用。');
     }
+  }
+
+  function clearSuccessfulSaveState(lifecycle?: 'publish' | 'archive' | 'restore-draft') {
+    try {
+      window.localStorage.removeItem(draftStorageKey);
+    } catch {
+      // Ignore localStorage cleanup errors after a successful remote save.
+    }
+
+    setLocalDraft(null);
+    setLocalDraftMessage('');
+    setIsDirty(false);
+    setState('success');
+    setMessage(getSaveSuccessMessage(lifecycle));
+  }
+
+  function getSaveSuccessMessage(lifecycle?: 'publish' | 'archive' | 'restore-draft') {
+    if (lifecycle === 'publish') {
+      return '已保存并发布。';
+    }
+
+    if (lifecycle === 'archive') {
+      return '已归档。';
+    }
+
+    if (lifecycle === 'restore-draft') {
+      return '已恢复为草稿。';
+    }
+
+    return '已保存草稿。';
   }
 
   function ensureDraftSlug(formData: FormData) {
@@ -429,17 +434,8 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       return;
     }
 
-    setState('submitting');
-    setMessage('');
-
-    try {
-      await send(buildDeleteContentRequest(initialValue.id));
-      setState('success');
-      setMessage('已永久删除。');
-    } catch (error) {
-      setState('error');
-      setMessage(error instanceof Error ? error.message : '删除失败，请先确认内容已归档且 API 服务可用。');
-    }
+    setState('error');
+    setMessage('仓库模式下不会执行数据库删除，请通过仓库内容文件删除并提交。');
   }
 
   function insertSelectedAsset() {
@@ -523,10 +519,10 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
               <div className="editor-toolbar">
                 <div className="markdown-format-controls" aria-label="Markdown 格式工具">
                   <button type="button" onClick={undoMarkdownCommand} title="撤销" aria-label="撤销">
-                    ↶
+                    撤销
                   </button>
                   <button type="button" onClick={redoMarkdownCommand} title="重做" aria-label="重做">
-                    ↷
+                    重做
                   </button>
                   {markdownToolbarCommands.map((item) => (
                     <button
@@ -591,19 +587,19 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
             <div className="admin-markdown-preview detail__body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
             <dl className="editor-stats">
               <div>
-                <dt>字数</dt>
+                <dt>瀛楁暟</dt>
                 <dd>{preview.wordCount}</dd>
               </div>
               <div>
-                <dt>行数</dt>
+                <dt>琛屾暟</dt>
                 <dd>{editorStats.lineCount}</dd>
               </div>
               <div>
-                <dt>字符</dt>
+                <dt>瀛楃</dt>
                 <dd>{editorStats.characterCount}</dd>
               </div>
               <div>
-                <dt>阅读</dt>
+                <dt>闃呰</dt>
                 <dd>{editorStats.readingTime}</dd>
               </div>
             </dl>
@@ -684,5 +680,5 @@ function dedupeAssets(assets: StoredAsset[]): StoredAsset[] {
 function formatAssetOptionLabel(asset: StoredAsset): string {
   const label = asset.altText || asset.storageKey.split('/').filter(Boolean).at(-1) || asset.publicUrl;
 
-  return `${label} · ${asset.usage}`;
+  return `${label} 路 ${asset.usage}`;
 }

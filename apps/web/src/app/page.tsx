@@ -1,231 +1,287 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import { FileText, Heart } from 'lucide-react';
 
-import { ContentCard } from '@/components/ContentCard';
+import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
+import { HomeCardNav } from '@/components/HomeCardNav';
+import { HomeContactButton } from '@/components/HomeContactButton';
 import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
-import { getContentHref, getFeaturedContent, getPopularContent } from '@/lib/content';
+import { getContentHref } from '@/lib/content';
+import { getContentCover } from '@/lib/content-cover';
 import { buildHomeProfileModel } from '@/lib/home-profile';
 import { loadSiteContent } from '@/lib/public-content';
-import { loadPublicSettings } from '@/lib/settings';
+import { loadSiteSettings } from '@/lib/settings-repository';
 
 export default async function HomePage() {
-  const apiBaseUrl = process.env.API_BASE_URL;
   const [content, settings] = await Promise.all([
     loadSiteContent(),
-    loadPublicSettings(undefined, { apiBaseUrl }),
+    loadSiteSettings(),
   ]);
-  const featured = getFeaturedContent(content).slice(0, 3);
-  const popular = getPopularContent(content, {
-    excludeIds: featured.map((item) => item.id),
-    limit: 3,
-  });
-  const projectCount = content.filter((item) => item.type === 'project').length;
   const profile = buildHomeProfileModel(settings, content);
   const stats = profile.stats;
+  const heroLead = '这里主要存放技术文章、工程实践和一些偶尔出现的照片与思考。';
+  const heroMotto = profile.motto || '写技术文章，也记录一些生活里的光。';
+  const latestArticle = profile.latestArticle;
+  const latestArticleCover = latestArticle ? getContentCover(latestArticle) : null;
+  const homeNow = new Date();
+  const calendarDays = buildHomeCalendarDays(homeNow);
 
   return (
-    <SiteShell>
+    <SiteShell hideHeader>
       <main className="portfolio-home">
         <section className="portfolio-hero" id="about" aria-label="Starry Summer 首页">
+          <BlurredBubblesCanvas className="portfolio-hero__bubbles" />
           <StarrySkyCanvas className="portfolio-hero__canvas" />
           <div className="portfolio-hero__shade" />
 
           <div className="portfolio-hero__content cyber-home__container">
-            <div className="portfolio-hero__copy">
-              <p className="portfolio-hero__badge">个人内容平台</p>
-              <div className="portfolio-hero__title">
-                <h1 className="portfolio-hero__name">{profile.ownerName}</h1>
-                <span className="portfolio-hero__outline" aria-hidden="true">
-                  PORTFOLIO
-                </span>
-              </div>
-              <p className="portfolio-hero__role">Content Builder</p>
-              <p className="portfolio-hero__lead">{profile.description}</p>
-              <p className="portfolio-hero__motto">{profile.motto || settings.hero.tagline}</p>
+            <div className="portfolio-hero__left-stack">
+              <HomeCardNav />
+              <aside className="portfolio-hero__latest-card" aria-label="最新文章">
+                <span>最新文章</span>
+                {latestArticle ? (
+                  <a href={getContentHref(latestArticle)}>
+                    {latestArticleCover ? (
+                      <img src={latestArticleCover.imageUrl} alt={latestArticleCover.altText} />
+                    ) : (
+                      <span className="portfolio-hero__latest-cover" aria-hidden="true">
+                        <FileText size={24} />
+                      </span>
+                    )}
+                    <strong>{latestArticle.title}</strong>
+                    <small>{latestArticle.summary}</small>
+                    <time dateTime={latestArticle.publishedAt}>{formatHomeDate(latestArticle.publishedAt)}</time>
+                  </a>
+                ) : (
+                  <p>正在整理新的文章。</p>
+                )}
+              </aside>
+            </div>
 
-              <dl className="portfolio-hero__stats" aria-label="站点数据">
-                <div>
-                  <dt>内容资产</dt>
-                  <dd>{formatNumber(stats.publicCount)}</dd>
+              <aside className="portfolio-hero__sky-card" aria-label="Starry Summer atmosphere">
+                <span>STARRY SUMMER</span>
+                <strong>Daylight notes, open archive.</strong>
+              </aside>
+
+            <div className="portfolio-hero__center-stack">
+              <div className="portfolio-hero__intro-card">
+                <p className="portfolio-hero__badge">技术写作 / 笔记 / 日常</p>
+                <div className="portfolio-hero__title">
+                  <h1 className="portfolio-hero__name">{profile.ownerName}</h1>
+                  <span className="portfolio-hero__outline" aria-hidden="true">
+                    WRITING
+                  </span>
                 </div>
-                <div>
-                  <dt>累计浏览</dt>
-                  <dd>{formatNumber(stats.totalViews)}</dd>
-                </div>
-                <div>
-                  <dt>收到喜欢</dt>
-                  <dd>{formatNumber(stats.totalLikes)}</dd>
-                </div>
-                <div>
-                  <dt>最近更新</dt>
-                  <dd>{stats.lastPublishedAt || '持续构建'}</dd>
-                </div>
-              </dl>
+                <p className="portfolio-hero__role">Technical Notes & Summer Moments</p>
+                <p className="portfolio-hero__lead">{heroLead}</p>
+                <p className="portfolio-hero__motto">{heroMotto}</p>
+              </div>
 
               <div className="portfolio-hero__actions" aria-label="首页快捷入口">
-                <Link className="portfolio-hero__primary" href="/posts">
-                  阅读文章
-                </Link>
-                <Link className="portfolio-hero__secondary" href="/archives">
-                  浏览索引
-                </Link>
-                <a className="portfolio-hero__social" href="https://github.com/Aster-H">
-                  <GitHubIcon />
-                  GitHub
-                </a>
-                <a className="portfolio-hero__social" href="https://juejin.cn/user/959206842703773">
-                  <JuejinIcon />
-                  掘金
-                </a>
+                <div className="portfolio-hero__action-row portfolio-hero__action-row--primary">
+                  <a
+                    className="portfolio-hero__social portfolio-hero__social--github"
+                    href="https://github.com/HuangJingwang"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="打开 GitHub（新标签页）"
+                  >
+                    <GitHubIcon />
+                    <span>Github</span>
+                  </a>
+                  <a
+                    className="portfolio-hero__social portfolio-hero__social--juejin"
+                    href="https://juejin.cn/user/959206842703773"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="打开掘金主页（新标签页）"
+                  >
+                    <JuejinIcon />
+                    <span>稀土掘金</span>
+                  </a>
+                </div>
+                <div className="portfolio-hero__action-row portfolio-hero__action-row--secondary">
+                  <HomeContactButton
+                    className="portfolio-hero__social portfolio-hero__social--guestbook"
+                    href="/guestbook"
+                    ariaLabel="打开留言板"
+                  >
+                    <EmailIcon />
+                  </HomeContactButton>
+                  <div className="portfolio-hero__like-row">
+                    <div className="portfolio-hero__like-card" aria-label={`收到 ${formatNumber(stats.totalLikes)} 个喜欢`}>
+                      <span>{formatNumber(stats.totalLikes)}</span>
+                      <Heart size={28} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <figure className="portfolio-hero__portrait">
-              <Image
-                className="portfolio-hero__night-avatar"
-                src="/images/aster-profile.png"
-                alt="Aster.H 的夜晚头像"
-                width={1254}
-                height={1254}
-                priority
-              />
-              <Image
-                className="portfolio-hero__day-avatar"
-                src="/images/aster-day-profile.png"
-                alt="Aster.H 的夏日头像"
-                width={1254}
-                height={1254}
-                priority
-              />
-              <div className="portfolio-hero__signal" aria-hidden="true">
-                <strong>Starry Summer</strong>
-                <span />
-                <span />
-                <span />
-              </div>
-              <figcaption>
-                <span>站主</span>
-                <strong>{profile.ownerName}</strong>
-              </figcaption>
-            </figure>
-          </div>
+            <aside className="portfolio-hero__clock-card" aria-label="Current archive time">
+              <span>LOCAL TIME</span>
+              <strong>{formatHomeClock(homeNow)}</strong>
+            </aside>
 
-          <span className="portfolio-hero__scroll" aria-hidden="true">
-            SCROLL TO ENTER
-          </span>
-        </section>
-
-        <section className="home-dashboard cyber-home__container" id="advantage" aria-label="个人优势">
-          <div className="summer-detail-field summer-detail-field--dashboard" aria-hidden="true">
-            <span className="summer-detail summer-detail--cola" />
-            <span className="summer-detail summer-detail--lemon" />
-          </div>
-          <div className="home-profile">
-            <p className="eyebrow">Creative System</p>
-            <h2>把生活、项目和知识长期整理成可回看的系统</h2>
-            <p>{settings.hero.tagline}</p>
-            {profile.motto ? <blockquote>{profile.motto}</blockquote> : null}
-            <dl>
+            <aside className="portfolio-hero__calendar-card" aria-label="Calendar">
               <div>
-                <dt>内容资产</dt>
-                <dd>{formatNumber(stats.publicCount)}</dd>
+                <span>{formatHomeDateHeading(homeNow)}</span>
+                <strong>{formatHomeWeekday(homeNow)}</strong>
               </div>
-              <div>
-                <dt>项目实践</dt>
-                <dd>{formatNumber(projectCount)}</dd>
-              </div>
-            </dl>
-          </div>
-          <div className="home-focus">
-            {profile.latestProject ? (
-              <Link href={getContentHref(profile.latestProject)}>
-                <span>最近项目</span>
-                <strong>{profile.latestProject.title}</strong>
-                <small>{profile.latestProject.summary}</small>
-              </Link>
-            ) : null}
-            {profile.latestMoment ? (
-              <Link href={getContentHref(profile.latestMoment)}>
-                <span>最近日常</span>
-                <strong>{profile.latestMoment.title}</strong>
-                <small>{profile.latestMoment.summary}</small>
-              </Link>
-            ) : null}
+              <ol>
+                {homeCalendarWeekdays.map((weekday) => (
+                  <li className="portfolio-hero__calendar-weekday" key={weekday}>
+                    {weekday}
+                  </li>
+                ))}
+                {calendarDays.map((day, index) => (
+                  <li
+                    key={`${day.empty ? 'empty' : day.label}-${index}`}
+                    data-current={day.current ? 'true' : undefined}
+                    data-empty={day.empty ? 'true' : undefined}
+                  >
+                    {day.label}
+                  </li>
+                ))}
+              </ol>
+            </aside>
+
+            <div className="portfolio-hero__visual">
+              <figure className="portfolio-hero__portrait">
+                <Image
+                  className="portfolio-hero__night-avatar"
+                  src="/images/aster-profile.png"
+                  alt="Aster.H 的夜晚头像"
+                  width={1254}
+                  height={1254}
+                  priority
+                />
+                <Image
+                  className="portfolio-hero__day-avatar"
+                  src="/images/aster-day-profile-v2.png"
+                  alt="Aster.H 的夏日头像"
+                  width={1254}
+                  height={1254}
+                  priority
+                />
+                <div className="portfolio-hero__signal" aria-hidden="true">
+                  <strong>Starry Summer</strong>
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              </figure>
+            </div>
+
           </div>
         </section>
-
-        <section className="content-section cyber-home__container" id="work">
-          <div className="summer-detail-field summer-detail-field--featured" aria-hidden="true">
-            <span className="summer-detail summer-detail--surfboard" />
-            <span className="summer-detail summer-detail--ice" />
-          </div>
-          <div className="section-heading">
-            <p className="eyebrow">Featured Notes</p>
-            <h2>最近沉淀</h2>
-          </div>
-          {featured.length > 0 ? (
-            <div className="content-grid">
-              {featured.map((item) => (
-                <ContentCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="content-empty-card">
-              <span>EMPTY COLLECTION</span>
-              <strong>还没有发布内容</strong>
-              <p>去后台发布第一篇文章、笔记、日常或项目后，这里会自动变成首页内容卡片。</p>
-              <Link href="/posts">查看内容库</Link>
-            </div>
-          )}
-        </section>
-
-        {popular.length > 0 ? (
-          <section className="content-section content-section--subtle cyber-home__container">
-            <div className="summer-detail-field summer-detail-field--popular" aria-hidden="true">
-              <span className="summer-detail summer-detail--sun-glass" />
-              <span className="summer-detail summer-detail--lemon" />
-            </div>
-            <div className="section-heading section-heading--row">
-              <div>
-                <p className="eyebrow">Popular Signals</p>
-                <h2>热门内容</h2>
-              </div>
-              <Link href="/posts?sort=popular">查看热门文章</Link>
-            </div>
-            <div className="content-grid">
-              {popular.map((item) => (
-                <ContentCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        ) : null}
       </main>
     </SiteShell>
   );
 }
 
 function GitHubIcon() {
-  return (
-    <svg className="portfolio-hero__social-icon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.1.68-.22.68-.49v-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.71 0 0 .84-.28 2.75 1.05A9.36 9.36 0 0 1 12 6.98c.85 0 1.7.12 2.5.34 1.9-1.33 2.74-1.05 2.74-1.05.55 1.4.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9v2.81c0 .27.18.59.69.49A10.13 10.13 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
-    </svg>
-  );
+  return <img className="portfolio-hero__social-icon" src="/images/reference-social/github.svg" alt="" aria-hidden="true" />;
 }
 
 function JuejinIcon() {
   return (
-    <svg
+    <img
       className="portfolio-hero__social-icon portfolio-hero__social-icon--juejin"
+      src="/images/reference-social/juejin.svg"
+      alt=""
       aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
-      <path d="M12 3 3.5 8.16l2.03 1.22L12 5.45l6.47 3.93 2.03-1.22L12 3Zm0 5.1-8.5 5.16L12 18.42l8.5-5.16L12 8.1Zm-4.42 5.16L12 10.58l4.42 2.68L12 15.94l-4.42-2.68ZM3.5 15.84 12 21l8.5-5.16-2.03-1.22L12 18.55l-6.47-3.93-2.03 1.22Z" />
+    />
+  );
+}
+
+function EmailIcon() {
+  return (
+    <svg className="portfolio-hero__social-icon portfolio-hero__social-icon--email" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path
+        d="M1.81799 11.0067V20.7854C1.81799 23.8347 4.24999 26.3934 7.43733 26.6807C13.1113 27.1934 18.824 27.1934 24.4973 26.6807C27.6853 26.3934 30.1167 23.8347 30.1167 20.7854V11.0067C30.1167 7.95735 27.6853 5.39869 24.498 5.11135C18.8226 4.59936 13.1127 4.59936 7.43733 5.11135C4.24999 5.39869 1.81799 7.95735 1.81799 11.0067Z"
+        fill="var(--color-brand)"
+        fillOpacity="0.8"
+      />
+      <path
+        d="M28.4446 7.95602C28.704 7.67602 28.7086 7.23602 28.442 6.96336C27.3896 5.89595 25.9908 5.23922 24.4973 5.11136C18.824 4.59936 13.1113 4.59936 7.4373 5.11136C5.8153 5.25802 4.39197 5.99469 3.3833 7.08469C3.12197 7.36602 3.1433 7.80869 3.41463 8.08069L11.4766 16.1427C13.6333 18.2987 17.1613 18.3887 19.6186 16.338C22.7373 13.736 25.686 10.9347 28.4446 7.95602Z"
+        fill="var(--color-border)"
+        fillOpacity="0.8"
+      />
     </svg>
   );
 }
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat('zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+}
+
+function formatHomeDate(value: string): string {
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(value));
+}
+
+function formatHomeClock(value: Date): string {
+  return new Intl.DateTimeFormat('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Shanghai',
+  }).format(value);
+}
+
+function formatHomeDateHeading(value: Date): string {
+  const parts = getHomeDateParts(value);
+
+  return `${parts.year}/${parts.month}/${parts.day}`;
+}
+
+function formatHomeWeekday(value: Date): string {
+  return new Intl.DateTimeFormat('zh-CN', {
+    weekday: 'short',
+    timeZone: 'Asia/Shanghai',
+  }).format(value);
+}
+
+const homeCalendarWeekdays = ['一', '二', '三', '四', '五', '六', '日'];
+
+function buildHomeCalendarDays(value: Date): Array<{ label: string; current: boolean; empty?: boolean }> {
+  const parts = getHomeDateParts(value);
+  const daysInMonth = new Date(parts.year, parts.month, 0).getDate();
+  const firstWeekday = new Date(parts.year, parts.month - 1, 1).getDay();
+  const mondayOffset = (firstWeekday + 6) % 7;
+  const leadingDays = Array.from({ length: mondayOffset }, (_, index) => ({
+    label: '',
+    current: false,
+    empty: true,
+  }));
+
+  const monthDays = Array.from({ length: daysInMonth }, (_, index) => {
+    const day = index + 1;
+
+    return {
+      label: String(day),
+      current: day === parts.day,
+    };
+  });
+
+  return [...leadingDays, ...monthDays];
+}
+
+function getHomeDateParts(value: Date): { year: number; month: number; day: number } {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+    timeZone: 'Asia/Shanghai',
+  }).formatToParts(value);
+
+  return {
+    day: Number(parts.find((part) => part.type === 'day')?.value ?? '1'),
+    month: Number(parts.find((part) => part.type === 'month')?.value ?? '1'),
+    year: Number(parts.find((part) => part.type === 'year')?.value ?? '1970'),
+  };
 }

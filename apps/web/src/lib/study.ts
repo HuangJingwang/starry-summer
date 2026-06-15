@@ -22,7 +22,7 @@ export interface PublicStudyLoadOptions extends PublicStudyRequestOptions {
 }
 
 export interface StudyLoadResult {
-  source: 'api' | 'fallback';
+  source: 'api' | 'repository-file' | 'fallback';
   dashboard: StudyDashboard;
 }
 
@@ -60,12 +60,14 @@ const fallbackStudyDashboard = normalizeStudyDashboard({
   recentNotes: fallbackStudyProblems.filter((problem) => problem.notes).slice(0, 4),
 });
 
-function getDefaultApiBaseUrl(): string {
-  return process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
-}
+export function buildPublicStudyRequest(options: PublicStudyRequestOptions = {}): StudyRequest | null {
+  const configuredBaseUrl = options.apiBaseUrl?.trim();
 
-export function buildPublicStudyRequest(options: PublicStudyRequestOptions = {}): StudyRequest {
-  const baseUrl = (options.apiBaseUrl ?? getDefaultApiBaseUrl()).replace(/\/$/, '');
+  if (!configuredBaseUrl) {
+    return null;
+  }
+
+  const baseUrl = configuredBaseUrl.replace(/\/$/, '');
 
   return {
     url: `${baseUrl}/study`,
@@ -175,6 +177,11 @@ export async function loadPublicStudyDashboard(options: PublicStudyLoadOptions =
   }
 
   const request = buildPublicStudyRequest(options);
+
+  if (!request) {
+    return { source: 'fallback', dashboard: fallbackStudyDashboard };
+  }
+
   const fetcher = options.fetcher ?? fetch;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);

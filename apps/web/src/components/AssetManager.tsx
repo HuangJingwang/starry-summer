@@ -59,6 +59,11 @@ export function AssetManager() {
         altText: String(formData.get('altText') ?? ''),
       };
       const request = buildAssetUploadRequest(payload);
+
+      if (!request) {
+        throw new Error('素材 Worker 未配置，暂时不能上传素材。');
+      }
+
       const response = await fetch(request.url, request.init);
 
       if (!response.ok) {
@@ -81,10 +86,18 @@ export function AssetManager() {
 
     try {
       const request = buildAdminAssetListRequest({ usage: nextUsage });
+
+      if (!request) {
+        setAssets([]);
+        setState('error');
+        setMessage('素材 Worker 未配置，暂时不能读取素材库。');
+        return;
+      }
+
       const response = await fetch(request.url, request.init);
 
       if (!response.ok) {
-        throw new Error(await readAssetErrorMessage(response, '读取图库失败，请确认已登录且 API 服务可用。'));
+        throw new Error(await readAssetErrorMessage(response, '读取图库失败，请确认已登录且素材 Worker 可用。'));
       }
 
       const data: unknown = await response.json();
@@ -93,7 +106,7 @@ export function AssetManager() {
       setMessage('图库已更新。');
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '读取图库失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '读取图库失败，请确认已登录且素材 Worker 可用。');
     }
   }
 
@@ -107,10 +120,15 @@ export function AssetManager() {
 
     try {
       const request = buildAssetDeleteRequest(asset.id);
+
+      if (!request) {
+        throw new Error('素材 Worker 未配置，暂时不能删除素材。');
+      }
+
       const response = await fetch(request.url, request.init);
 
       if (!response.ok) {
-        throw new Error(await readAssetErrorMessage(response, '删除失败，请确认已登录且 API 服务可用。'));
+        throw new Error(await readAssetErrorMessage(response, '删除失败，请确认已登录且素材 Worker 可用。'));
       }
 
       setAssets((current) => current.filter((item) => item.id !== asset.id));
@@ -118,7 +136,7 @@ export function AssetManager() {
       setMessage('资源已删除。');
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '删除失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '删除失败，请确认已登录且素材 Worker 可用。');
     }
   }
 

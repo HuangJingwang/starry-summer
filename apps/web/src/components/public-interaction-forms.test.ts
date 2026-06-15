@@ -26,7 +26,13 @@ describe('public interaction forms', () => {
     expect(contentDetail).toContain('reader={readerSession.authenticated ? readerSession : null}');
     expect(existsSync(loginGatePath)).toBe(true);
     expect(commentForm).toContain("import { PublicGitHubLoginGate } from '@/components/PublicGitHubLoginGate';");
+    expect(commentForm).toContain("import { useId, useState } from 'react';");
+    expect(commentForm).toContain('const [loginGateOpen, setLoginGateOpen] = useState(false);');
     expect(commentForm).toContain('reader: AuthenticatedReaderSession | null');
+    expect(commentForm).toContain('className="comment-login-entry__button"');
+    expect(commentForm).toContain('onClick={() => setLoginGateOpen(true)}');
+    expect(commentForm).toContain('{loginGateOpen ? (');
+    expect(commentForm).toContain('className="comment-login-modal"');
     expect(commentForm).toContain('<PublicGitHubLoginGate');
     expect(commentForm).toContain('nextPath={loginNextPath}');
     expect(commentForm).toContain('GitHub 登录后评论');

@@ -55,9 +55,24 @@ describe('home profile model', () => {
         totalLikes: 1,
         lastPublishedAt: '2026-06-09',
       },
+      latestArticle: expect.objectContaining({ id: 'post' }),
       latestProject: expect.objectContaining({ id: 'latest-project' }),
       latestMoment: expect.objectContaining({ id: 'moment' }),
     });
+  });
+
+  test('uses the newest regular article on the home latest card instead of a pinned article', () => {
+    const model = buildHomeProfileModel(
+      settings,
+      [
+        { ...baseContent, id: 'pinned-newest', title: 'Pinned Newest', publishedAt: '2026-06-14', pinned: true },
+        { ...baseContent, id: 'new-post', title: 'New Post', publishedAt: '2026-06-12' },
+        { ...baseContent, id: 'new-note', type: 'note', title: 'New Note', publishedAt: '2026-06-13' },
+      ],
+      () => 0,
+    );
+
+    expect(model.latestArticle).toEqual(expect.objectContaining({ id: 'new-note' }));
   });
 
   test('falls back to the single motto when no quote list is configured', () => {

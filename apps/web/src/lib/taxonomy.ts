@@ -22,6 +22,12 @@ export interface TaxonomyTerm {
 
 export type TaxonomyTermGroups = Record<TaxonomyType, TaxonomyTerm[]>;
 
+export interface TaxonomyContentSource {
+  categories?: string[];
+  tags?: string[];
+  series?: string[];
+}
+
 export type RawTaxonomyTerm = Partial<Omit<TaxonomyTerm, 'description' | 'sortOrder'>> & {
   id: string;
   type: TaxonomyType;
@@ -113,6 +119,16 @@ export function groupTaxonomyTermsByType(terms: TaxonomyTerm[]): TaxonomyTermGro
   return groups;
 }
 
+export function buildTaxonomyTermsFromContent(items: TaxonomyContentSource[], now = ''): TaxonomyTermGroups {
+  const groups: TaxonomyTermGroups = {
+    category: buildTermsForType('category', items.flatMap((item) => item.categories ?? []), now),
+    tag: buildTermsForType('tag', items.flatMap((item) => item.tags ?? []), now),
+    series: buildTermsForType('series', items.flatMap((item) => item.series ?? []), now),
+  };
+
+  return groups;
+}
+
 export function buildListTaxonomyTermsRequest(type: TaxonomyType): TaxonomyRequest {
   return {
     url: `/api/admin/taxonomy/${type}`,
@@ -170,4 +186,35 @@ function normalizeTaxonomyErrorMessage(value: unknown): string {
   }
 
   return '';
+}
+
+function buildTermsForType(type: TaxonomyType, names: string[], now: string): TaxonomyTerm[] {
+  const seen = new Map<string, TaxonomyTerm>();
+
+  for (const rawName of names) {
+    const name = rawName.trim();
+
+    if (!name) {
+      continue;
+    }
+
+    const slug = normalizeSlug(name) || encodeURIComponent(name);
+
+    if (seen.has(slug)) {
+      continue;
+    }
+
+    seen.set(slug, {
+      id: `${type}-${slug}`,
+      type,
+      name,
+      slug,
+      description: '',
+      sortOrder: seen.size,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  return [...seen.values()].sort((left, right) => left.name.localeCompare(right.name, 'zh-CN'));
 }

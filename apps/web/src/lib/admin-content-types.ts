@@ -172,12 +172,12 @@ export interface AdminContentRequest {
 }
 
 export interface AdminContentLoadResult {
-  source: 'api' | 'fallback';
+  source: 'api' | 'repository-file' | 'fallback';
   items: SiteContentItem[];
 }
 
 export interface AdminContentItemLoadResult {
-  source: 'api' | 'fallback';
+  source: 'api' | 'repository-file' | 'fallback';
   item: SiteContentItem | null;
 }
 

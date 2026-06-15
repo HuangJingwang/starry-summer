@@ -1,87 +1,47 @@
 # Deployment Guide
 
-This project targets a self-managed cloud server using Docker Compose, Caddy, PostgreSQL, Redis, and MinIO or an S3-compatible object store.
+Starry Summer now targets a database-free web deployment. The default Docker Compose stack runs only the Next.js web app and Caddy. Public content and settings are read from repository files, while admin publishing writes back through repository commits.
 
 ## 1. Server Prerequisites
 
 - A Linux cloud server with Docker and Docker Compose.
 - A domain pointing to the server public IP.
 - Ports `80` and `443` open.
-- At least 2 GB RAM for the first deployment.
+- Node.js 22 and npm 10 for local verification.
 
 ## 2. Environment Setup
 
-For local Docker previews, generate `.env` with a local admin password:
+Generate `.env` with a local admin password:
 
 ```bash
 npm run ops:init-env -- "your local admin password"
 ```
 
-The initializer copies `.env.example`, replaces the admin password hash, `SESSION_SECRET`, and `INTERACTION_HASH_SECRET`, and refuses to overwrite an existing `.env` unless `INIT_ENV_OVERWRITE=YES` is set.
-
-For production, copy `.env.example` to `.env` and change production values:
-
-```bash
-cp .env.example .env
-```
-
-Required production changes:
+For production, copy `.env.example` to `.env` and change these values:
 
 - `DOMAIN`: your public domain, for example `blog.your-domain.com`.
-- `PUBLIC_SITE_URL`: `https://blog.your-domain.com`. This value is used by `robots.txt`, `sitemap.xml`, RSS, canonical links, and Open Graph metadata.
-- `TRUST_PROXY=true`: trust Caddy forwarded client IP headers for rate limiting.
+- `PUBLIC_SITE_URL`: `https://blog.your-domain.com`.
 - `ACME_EMAIL`: email used by Caddy for HTTPS certificates.
-- `SESSION_SECRET`: a long random string.
-- `INTERACTION_HASH_SECRET`: a long random string used to anonymize and deduplicate public likes/views.
-- `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`: GitHub OAuth App credentials used for reader login before guestbook submissions.
 - `ADMIN_EMAIL`: owner login account.
-- `ADMIN_PASSWORD_HASH`: a strong password hash generated before first real login.
-- `POSTGRES_PASSWORD`: a strong database password.
-- `S3_ACCESS_KEY` and `S3_SECRET_KEY`: strong MinIO credentials when self-hosting MinIO.
-- `STORAGE_DRIVER`: use `local` for single-server disk uploads or `s3` for MinIO/S3-compatible object storage.
-- `S3_PUBLIC_BASE_URL`: public asset base URL when `STORAGE_DRIVER=s3`, for example `https://assets.your-domain.com/starry-summer` or a CDN URL.
-- `S3_FORCE_PATH_STYLE`: keep `true` for self-hosted MinIO and most S3-compatible services; set `false` only for providers that require virtual-hosted bucket URLs.
-- RELEASE_VERSION and GIT_REVISION are returned by `/health` and `/api/health` so you can confirm which release is live after deployment.
+- `ADMIN_PASSWORD_HASH`: generated with `npm run auth:hash-password -- "your strong password"`.
+- `SESSION_SECRET`: generated with `npm run auth:secret`.
+- `INTERACTION_HASH_SECRET`: generated with `npm run auth:interaction-secret`.
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_CALLBACK_URL`: GitHub OAuth App values for reader login.
+- `RELEASE_VERSION` and `GIT_REVISION`: optional release metadata returned by `/health`.
 
-Check the production environment before first boot:
+Check the environment before boot:
 
 ```bash
 npm run ops:doctor
 ```
 
-Generate the admin password hash locally, then paste the printed value into `.env`:
-
-```bash
-npm run auth:hash-password -- "your strong password"
-```
-
-Generate a session secret the same way:
-
-```bash
-npm run auth:secret
-```
-
-Generate the public interaction hash secret separately:
-
-```bash
-npm run auth:interaction-secret
-```
-
-Create a GitHub OAuth App for reader login:
-
-- Homepage URL: the same value as `PUBLIC_SITE_URL`.
-- Authorization callback URL: `https://blog.your-domain.com/api/auth/github/callback`.
-- Paste the Client ID and Client Secret into `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
-- Set `GITHUB_CALLBACK_URL` to the exact callback URL registered in GitHub. It must equal `PUBLIC_SITE_URL` plus `/api/auth/github/callback`.
-
 ## 3. First Boot
 
-Build the images and run migrations first:
+Build and start the web stack:
 
 ```bash
 npm run ops:docker-preflight
 docker compose build
-docker compose run --rm migrate
 docker compose up -d
 ```
 
@@ -89,17 +49,14 @@ Check service status:
 
 ```bash
 docker compose ps
-docker compose logs -f web api caddy
+docker compose logs -f web caddy
 ```
 
 Verify:
 
 - `https://$DOMAIN` opens the public site.
-- `https://$DOMAIN/health` returns Web health through Caddy.
+- `https://$DOMAIN/health` returns the web health response.
 - `https://$DOMAIN/admin/login` opens the admin login screen.
-- `https://$DOMAIN/api/health` returns API health through Caddy.
-
-API health also verifies PostgreSQL and Redis when production drivers are configured.
 
 Run the public smoke check after DNS and HTTPS are ready:
 
@@ -107,28 +64,28 @@ Run the public smoke check after DNS and HTTPS are ready:
 npm run ops:smoke -- https://blog.your-domain.com
 ```
 
-For later schema changes, rerun migrations before restarting the API:
+## 4. Repository Publishing
 
-```bash
-docker compose run --rm migrate
-```
+Admin content and settings publishing use Next-owned repository routes:
 
-Production Docker Compose uses `CONTENT_REPOSITORY_DRIVER=postgres`. Local development can set `CONTENT_REPOSITORY_DRIVER=memory` until PostgreSQL is running.
+- `/api/repository/content`
+- `/api/repository/settings`
 
-## 4. Backup
+Configure the GitHub repository publishing environment used by `apps/web/src/lib/github-content-commit.ts` before relying on production admin publishing. The public site continues to render existing repository files when publishing is not configured.
 
-Create a timestamped operational backup:
+## 5. Backup
+
+Create a timestamped static backup:
 
 ```bash
 npm run ops:backup
 ```
 
-This writes a directory such as `backups/starry-summer-2026-06-11-030000` containing:
+The backup contains:
 
-- `postgres.sql`: PostgreSQL dump.
-- `api-uploads.tar.gz`: uploaded files when using local uploads.
-- `minio-data.tar.gz`: self-hosted MinIO data when the local Compose volume exists.
-- `manifest.txt`: timestamp, Compose project name, SHA-256 checksums, and git revision.
+- `web-content.tar.gz`: `apps/web/content`.
+- `public-images.tar.gz`: `apps/web/public/images`.
+- `manifest.txt`: timestamp, SHA-256 checksums, and git revision.
 
 You can pass a fixed output directory:
 
@@ -136,76 +93,36 @@ You can pass a fixed output directory:
 npm run ops:backup -- backups/starry-summer-before-upgrade
 ```
 
-For cloud S3/OSS, also enable provider lifecycle and backup policies.
+## 6. Restore
 
-Markdown export:
-
-- Use `/admin/export` to export all content as a portable Markdown archive.
-- Keep exports outside the server as a portable content archive.
-- Use the same `/admin/export` screen to import a Starry Summer Markdown archive back into the platform. Imported content is restored as drafts first, while public/private visibility from the archive is preserved.
-
-## 5. Restore
-
-Restore from an operational backup:
+Restore from a static backup:
 
 ```bash
-RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD
+RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-static-YYYY-MM-DD
 ```
 
-The restore script imports `postgres.sql` into PostgreSQL and restores `api-uploads` and `minio-data` archives when those files are present.
-It also checks the backup manifest's Compose project name before restoring. For an intentional cross-project restore, rerun with `RESTORE_ALLOW_PROJECT_MISMATCH=YES`.
+The restore script verifies archives and checksums before replacing `apps/web/content` and `apps/web/public/images`.
 
-After restore, run:
+## 7. Updates
 
-```bash
-docker compose up -d
-docker compose ps
-```
-
-Then confirm uploaded images load from public pages.
-
-Restore from Markdown when you do not want to restore the whole database:
-
-- Log in to `/admin/export`.
-- Paste the full archive exported by `Export all`.
-- Use `Import archive` to recreate every content item as a draft, then review and publish from `/admin/content`.
-
-## 6. Updates
-
-Pull the latest code, rebuild, migrate, restart, and run smoke checks in one step:
+Pull the latest code, rebuild, restart, and run smoke checks in one step:
 
 ```bash
 git pull
 npm run ops:deploy -- https://blog.your-domain.com
 ```
 
-The deploy script runs `ops:doctor`, exports release metadata for `/health` and `/api/health`, builds images, runs migrations, starts the stack, and then runs `ops:smoke`.
+The deploy script runs `ops:doctor`, validates Compose, exports release metadata for `/health`, builds images, starts the web stack, and then runs `ops:smoke`.
 
-By default, the deploy script refuses to run with uncommitted local changes so the live `GIT_REVISION` remains traceable. For an intentional emergency deploy from a dirty worktree, use:
+By default, deploy refuses to run with uncommitted local changes. For an intentional emergency deploy from a dirty worktree:
 
 ```bash
 ALLOW_DIRTY_DEPLOY=true npm run ops:deploy -- https://blog.your-domain.com
 ```
 
-You can also run the underlying commands manually:
+## 8. Production Notes
 
-```bash
-git pull
-docker compose build
-docker compose run --rm migrate
-docker compose up -d
-```
-
-Check logs after deployment:
-
-```bash
-docker compose logs -f web api caddy
-```
-
-## 7. Production Notes
-
-- Do not use default MinIO, PostgreSQL, or session credentials.
 - Keep `.env` out of git.
-- Run `npm run db:migrate` after schema changes and before deploying API code that depends on them.
-- Use an external managed object store if the server has limited disk space.
-- Keep regular off-server backups.
+- Do not add PostgreSQL, Redis, MinIO, or the old Nest API back to the default Compose path.
+- Use Cloudflare Workers, KV/D1, R2, or similar hosted services for interactions, LeetCode sync, and asset uploads when static files are not enough.
+- Keep regular off-server backups of repository content and public images.

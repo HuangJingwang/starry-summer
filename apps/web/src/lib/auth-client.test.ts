@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { buildAdminLoginRedirectPath, buildLoginRequest, buildLogoutRequest, buildSessionRequest, getSafeAdminRedirectPath, normalizeLoginInput } from './auth-client';
 
@@ -42,6 +44,18 @@ describe('auth client helpers', () => {
         credentials: 'include',
       },
     });
+  });
+
+  test('serves admin auth routes from the web app instead of the old backend API', () => {
+    const routePaths = [
+      'src/app/api/auth/login/route.ts',
+      'src/app/api/auth/me/route.ts',
+      'src/app/api/auth/logout/route.ts',
+    ];
+
+    for (const routePath of routePaths) {
+      expect(readFileSync(join(process.cwd(), routePath), 'utf8')).toContain("export const runtime = 'nodejs';");
+    }
   });
 
   test('normalizes login redirects to safe admin paths', () => {

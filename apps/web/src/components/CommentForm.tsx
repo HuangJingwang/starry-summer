@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 
 import { buildCommentRequest, type CommentTargetType } from '@/lib/interaction-client';
 import type { AuthenticatedReaderSession } from '@/lib/reader-auth';
@@ -22,6 +22,7 @@ export function CommentForm({
   loginNextPath: string;
 }) {
   const bodyCounterId = useId();
+  const [loginGateOpen, setLoginGateOpen] = useState(false);
   const {
     body,
     formRef,
@@ -45,9 +46,40 @@ export function CommentForm({
 
   if (!reader) {
     return (
-      <PublicGitHubLoginGate actionLabel="GitHub 登录后评论" nextPath={loginNextPath}>
-        为了避免匿名刷屏和垃圾评论，请先用 GitHub 登录。
-      </PublicGitHubLoginGate>
+      <div className="comment-login-entry">
+        <button
+          type="button"
+          className="comment-login-entry__button"
+          aria-haspopup="dialog"
+          aria-expanded={loginGateOpen}
+          onClick={() => setLoginGateOpen(true)}
+        >
+          写评论
+        </button>
+        {loginGateOpen ? (
+          <div className="comment-login-modal" role="dialog" aria-modal="true" aria-label="GitHub 登录后评论">
+            <button
+              type="button"
+              className="comment-login-modal__backdrop"
+              aria-label="关闭登录提示"
+              onClick={() => setLoginGateOpen(false)}
+            />
+            <div className="comment-login-modal__panel">
+              <button
+                type="button"
+                className="comment-login-modal__close"
+                aria-label="关闭登录提示"
+                onClick={() => setLoginGateOpen(false)}
+              >
+                ×
+              </button>
+              <PublicGitHubLoginGate actionLabel="GitHub 登录后评论" nextPath={loginNextPath}>
+                为了避免匿名刷屏和垃圾评论，请先用 GitHub 登录。
+              </PublicGitHubLoginGate>
+            </div>
+          </div>
+        ) : null}
+      </div>
     );
   }
 

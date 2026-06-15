@@ -12,7 +12,7 @@ export interface PublicComment {
 export type PublicGuestbookEntry = PublicComment;
 
 export interface PublicCommentRequestOptions {
-  apiBaseUrl?: string;
+  interactionBaseUrl?: string;
 }
 
 export interface PublicCommentLoadOptions extends PublicCommentRequestOptions {
@@ -24,16 +24,26 @@ export interface PublicCommentRequest {
   init: RequestInit & { next?: { revalidate: number } };
 }
 
-function getDefaultApiBaseUrl(): string {
-  return process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
+function getDefaultInteractionBaseUrl(): string {
+  return process.env.INTERACTION_BASE_URL ?? process.env.NEXT_PUBLIC_INTERACTION_BASE_URL ?? '';
+}
+
+function getPublicCommentBaseUrl(options: PublicCommentRequestOptions): string | null {
+  const interactionBaseUrl = (options.interactionBaseUrl ?? getDefaultInteractionBaseUrl()).trim();
+
+  return interactionBaseUrl ? interactionBaseUrl.replace(/\/$/, '') : null;
 }
 
 export function buildApprovedCommentsRequest(
   targetType: CommentTargetType,
   targetId: string,
   options: PublicCommentRequestOptions = {},
-): PublicCommentRequest {
-  const baseUrl = (options.apiBaseUrl ?? getDefaultApiBaseUrl()).replace(/\/$/, '');
+): PublicCommentRequest | null {
+  const baseUrl = getPublicCommentBaseUrl(options);
+
+  if (!baseUrl) {
+    return null;
+  }
 
   return {
     url: `${baseUrl}/comments/${targetType}/${targetId}`,
@@ -48,8 +58,12 @@ export function buildApprovedCommentsRequest(
 
 export function buildApprovedGuestbookRequest(
   options: PublicCommentRequestOptions = {},
-): PublicCommentRequest {
-  const baseUrl = (options.apiBaseUrl ?? getDefaultApiBaseUrl()).replace(/\/$/, '');
+): PublicCommentRequest | null {
+  const baseUrl = getPublicCommentBaseUrl(options);
+
+  if (!baseUrl) {
+    return null;
+  }
 
   return {
     url: `${baseUrl}/guestbook`,
@@ -80,6 +94,10 @@ export async function loadApprovedComments(
   const request = buildApprovedCommentsRequest(targetType, targetId, options);
   const fetcher = options.fetcher ?? fetch;
 
+  if (!request) {
+    return [];
+  }
+
   try {
     const response = await fetcher(request.url, request.init);
 
@@ -104,6 +122,10 @@ export async function loadApprovedGuestbookEntries(
 ): Promise<PublicGuestbookEntry[]> {
   const request = buildApprovedGuestbookRequest(options);
   const fetcher = options.fetcher ?? fetch;
+
+  if (!request) {
+    return [];
+  }
 
   try {
     const response = await fetcher(request.url, request.init);

@@ -24,11 +24,6 @@ export function buildSiteFooterModel(settings: SiteSettings): SiteFooterModel {
         href: link.href,
         external: true,
       })),
-      {
-        label: 'RSS',
-        href: '/rss.xml',
-        external: false,
-      },
     ],
   };
 }

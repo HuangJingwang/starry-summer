@@ -45,7 +45,11 @@ function moderationStatusTabId(status: ModerationStatus | ''): string {
   return `moderation-status-${status || 'all'}`;
 }
 
-async function send(request: { url: string; init: RequestInit }) {
+async function send(request: { url: string; init: RequestInit } | null) {
+  if (!request) {
+    throw new Error('互动 Worker 未配置，暂时不能管理评论和留言。');
+  }
+
   const response = await fetch(request.url, request.init);
 
   if (!response.ok) {
@@ -73,7 +77,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
       setState('idle');
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '读取失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '读取失败，请确认已登录且互动 Worker 可用。');
     }
   }
 
@@ -90,7 +94,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
       await load(status);
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '状态更新失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '状态更新失败，请确认已登录且互动 Worker 可用。');
     }
   }
 
@@ -107,7 +111,7 @@ export function ModerationManager({ resource, emptyText }: ModerationManagerProp
       await load(status);
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '删除失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '删除失败，请确认已登录且互动 Worker 可用。');
     }
   }
 

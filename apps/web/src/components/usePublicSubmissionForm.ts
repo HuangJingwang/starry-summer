@@ -15,7 +15,7 @@ export function usePublicSubmissionForm({
   onSuccess,
   successMessage,
 }: {
-  buildRequest: (formData: FormData) => PublicSubmissionRequest;
+  buildRequest: (formData: FormData) => PublicSubmissionRequest | null;
   failureMessage: string;
   onSuccess?: () => void;
   successMessage: string;
@@ -40,6 +40,13 @@ export function usePublicSubmissionForm({
 
     try {
       const request = buildRequest(formData);
+
+      if (!request) {
+        setStatus('error');
+        setMessage('互动服务未配置，暂时不能提交。');
+        return;
+      }
+
       const response = await fetch(request.url, request.init);
       if (response.ok) {
         formRef.current?.reset();
@@ -54,7 +61,7 @@ export function usePublicSubmissionForm({
       }
     } catch {
       setStatus('error');
-      setMessage('API 暂不可用，稍后再试。');
+      setMessage('互动服务暂不可用，稍后再试。');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { buildReaderSessionRequest, loadReaderSession } from './reader-auth';
 
@@ -41,5 +41,14 @@ describe('reader auth helpers', () => {
         fetcher: async () => new Response('Unauthorized', { status: 401 }),
       }),
     ).resolves.toEqual({ authenticated: false });
+  });
+
+  test('does not fetch reader auth from an implicit local API during server render', async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+
+    await expect(loadReaderSession()).resolves.toEqual({ authenticated: false });
+    expect(fetcher).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 });

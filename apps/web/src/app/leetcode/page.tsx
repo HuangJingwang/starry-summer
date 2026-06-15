@@ -4,12 +4,11 @@ import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
 import { getPublicContent } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
-import { loadPublicStudyDashboard } from '@/lib/study';
+import { loadRepositoryStudyDashboard } from '@/lib/study-repository';
 
 export default async function LeetCodeArchivePage() {
-  const apiBaseUrl = process.env.API_BASE_URL;
   const [{ dashboard }, content] = await Promise.all([
-    loadPublicStudyDashboard({ apiBaseUrl }),
+    loadRepositoryStudyDashboard(),
     loadSiteContent(),
   ]);
   const recentReviews = getPublicContent(content)

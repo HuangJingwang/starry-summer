@@ -5,7 +5,7 @@ import { SiteShell } from '@/components/SiteShell';
 import { getAdjacentContent, getContentBySlug } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
 import { buildContentMetadata, normalizePublicSiteUrl } from '@/lib/seo';
-import { loadPublicSettings } from '@/lib/settings';
+import { loadSiteSettings } from '@/lib/settings-repository';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -16,9 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {};
   }
 
-  const settings = await loadPublicSettings(undefined, {
-    apiBaseUrl: process.env.API_BASE_URL,
-  });
+  const settings = await loadSiteSettings();
 
   return buildContentMetadata(item, settings, normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL));
 }

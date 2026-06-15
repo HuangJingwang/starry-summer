@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+﻿import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
@@ -35,7 +35,6 @@ describe('admin Chinese localization', () => {
     expect(source).not.toMatch(/'All'|'Drafts'|'Published'|'Private'|'Archived'|'Never'/);
     expect(source).not.toMatch(/`Search:|`Type:|`Status:|`Category:|`Tag:|`Series:/);
   });
-
   test('marks the active admin navigation item for orientation', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/AdminShell.tsx'), 'utf8');
 

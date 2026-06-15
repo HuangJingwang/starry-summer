@@ -10,70 +10,37 @@ cleanup() {
 
 trap cleanup EXIT
 
-cat >"$tmp_dir/docker" <<'SH'
-#!/usr/bin/env bash
-set -euo pipefail
-
-printf '%s\n' "$*" >>"${RESTORE_TEST_DOCKER_LOG:?}"
-
-if [[ "$1" == "compose" && "$2" == "up" && "$3" == "-d" && "$4" == "postgres" ]]; then
-  exit 0
-fi
-
-if [[ "$1" == "compose" && "$2" == "exec" && "$5" == "psql" ]]; then
-  cat >/dev/null
-  exit 0
-fi
-
-if [[ "$1" == "volume" && "$2" == "create" ]]; then
-  exit 0
-fi
-
-if [[ "$1" == "run" ]]; then
-  exit 0
-fi
-
-printf 'unexpected docker invocation: %s\n' "$*" >&2
-exit 1
-SH
-chmod +x "$tmp_dir/docker"
-
 backup_dir="$tmp_dir/backup"
 missing_manifest_dir="$tmp_dir/missing-manifest"
-empty_postgres_dir="$tmp_dir/empty-postgres"
-missing_project_manifest_dir="$tmp_dir/missing-project-manifest"
-wrong_project_dir="$tmp_dir/wrong-project"
 corrupt_archive_dir="$tmp_dir/corrupt-archive"
 tampered_checksum_dir="$tmp_dir/tampered-checksum"
-mkdir -p "$backup_dir"
-mkdir -p "$missing_manifest_dir"
-mkdir -p "$empty_postgres_dir"
-mkdir -p "$missing_project_manifest_dir"
-mkdir -p "$wrong_project_dir"
-mkdir -p "$corrupt_archive_dir"
-mkdir -p "$tampered_checksum_dir"
-printf '%s\n' '-- fake postgres dump --' >"$backup_dir/postgres.sql"
-mkdir -p "$tmp_dir/archive-source"
-printf '%s\n' 'fake upload archive' >"$tmp_dir/archive-source/file.txt"
-LC_ALL=C tar czf "$backup_dir/api-uploads.tar.gz" -C "$tmp_dir/archive-source" .
-printf '%s\n' '-- fake postgres dump --' >"$missing_manifest_dir/postgres.sql"
-: >"$empty_postgres_dir/postgres.sql"
-printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$empty_postgres_dir/manifest.txt"
-printf '%s\n' '-- fake postgres dump --' >"$missing_project_manifest_dir/postgres.sql"
-printf '%s\n' 'created_at=2026-06-11-093300' 'git_revision=abc1234' >"$missing_project_manifest_dir/manifest.txt"
-printf '%s\n' '-- fake postgres dump --' >"$wrong_project_dir/postgres.sql"
-printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=other-site' 'git_revision=abc1234' >"$wrong_project_dir/manifest.txt"
-printf '%s\n' '-- fake postgres dump --' >"$corrupt_archive_dir/postgres.sql"
-printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$corrupt_archive_dir/manifest.txt"
-printf '%s\n' 'not a gzip archive' >"$corrupt_archive_dir/api-uploads.tar.gz"
-printf '%s\n' '-- fake postgres dump --' >"$tampered_checksum_dir/postgres.sql"
-printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'postgres_sha256=0000000000000000000000000000000000000000000000000000000000000000' 'git_revision=abc1234' >"$tampered_checksum_dir/manifest.txt"
-
-export RESTORE_TEST_DOCKER_LOG="$tmp_dir/docker.log"
+restore_content_dir="$tmp_dir/restore-content"
+restore_images_dir="$tmp_dir/restore-images"
+mkdir -p "$backup_dir" "$missing_manifest_dir" "$corrupt_archive_dir" "$tampered_checksum_dir"
+mkdir -p "$tmp_dir/content-source" "$tmp_dir/image-source"
+printf '%s\n' '{"items":[]}' >"$tmp_dir/content-source/public-content.json"
+printf '%s\n' 'fake image' >"$tmp_dir/image-source/profile.txt"
+LC_ALL=C tar czf "$backup_dir/web-content.tar.gz" -C "$tmp_dir/content-source" .
+LC_ALL=C tar czf "$backup_dir/public-images.tar.gz" -C "$tmp_dir/image-source" .
+web_content_sha="$(sha256sum "$backup_dir/web-content.tar.gz" | awk '{ print $1 }')"
+public_images_sha="$(sha256sum "$backup_dir/public-images.tar.gz" | awk '{ print $1 }')"
+printf '%s\n' \
+  'created_at=2026-06-11-093300' \
+  "web_content_sha256=$web_content_sha" \
+  "public_images_sha256=$public_images_sha" \
+  'git_revision=abc1234' \
+  >"$backup_dir/manifest.txt"
+printf '%s\n' 'not a gzip archive' >"$corrupt_archive_dir/web-content.tar.gz"
+printf '%s\n' 'created_at=2026-06-11-093300' >"$corrupt_archive_dir/manifest.txt"
+cp "$backup_dir/web-content.tar.gz" "$tampered_checksum_dir/web-content.tar.gz"
+printf '%s\n' \
+  'created_at=2026-06-11-093300' \
+  'web_content_sha256=0000000000000000000000000000000000000000000000000000000000000000' \
+  >"$tampered_checksum_dir/manifest.txt"
 
 echo "Running restore script tests"
 
-if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$missing_manifest_dir" >"$tmp_dir/missing-manifest.log" 2>&1; then
+if RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$missing_manifest_dir" >"$tmp_dir/missing-manifest.log" 2>&1; then
   echo "Restore script accepted a directory without a manifest."
   cat "$tmp_dir/missing-manifest.log"
   exit 1
@@ -85,49 +52,7 @@ if ! grep -q 'Backup manifest not found' "$tmp_dir/missing-manifest.log"; then
   exit 1
 fi
 
-if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$empty_postgres_dir" >"$tmp_dir/empty-postgres.log" 2>&1; then
-  echo "Restore script accepted an empty PostgreSQL dump."
-  cat "$tmp_dir/empty-postgres.log"
-  exit 1
-fi
-
-if ! grep -q 'PostgreSQL dump is empty' "$tmp_dir/empty-postgres.log"; then
-  echo "Restore script did not explain empty PostgreSQL dump refusal."
-  cat "$tmp_dir/empty-postgres.log"
-  exit 1
-fi
-
-if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
-  echo "Restore script touched PostgreSQL before rejecting the empty dump."
-  cat "$RESTORE_TEST_DOCKER_LOG"
-  exit 1
-fi
-
-if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$missing_project_manifest_dir" >"$tmp_dir/missing-project-manifest.log" 2>&1; then
-  echo "Restore script accepted a manifest without a Compose project name."
-  cat "$tmp_dir/missing-project-manifest.log"
-  exit 1
-fi
-
-if ! grep -q 'Backup manifest does not include compose_project_name.' "$tmp_dir/missing-project-manifest.log"; then
-  echo "Restore script did not explain missing Compose project name refusal."
-  cat "$tmp_dir/missing-project-manifest.log"
-  exit 1
-fi
-
-if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$wrong_project_dir" >"$tmp_dir/wrong-project.log" 2>&1; then
-  echo "Restore script accepted a backup from a different Compose project."
-  cat "$tmp_dir/wrong-project.log"
-  exit 1
-fi
-
-if ! grep -q 'Backup Compose project does not match the current Compose project.' "$tmp_dir/wrong-project.log"; then
-  echo "Restore script did not explain Compose project mismatch refusal."
-  cat "$tmp_dir/wrong-project.log"
-  exit 1
-fi
-
-if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$corrupt_archive_dir" >"$tmp_dir/corrupt-archive.log" 2>&1; then
+if RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$corrupt_archive_dir" >"$tmp_dir/corrupt-archive.log" 2>&1; then
   echo "Restore script accepted a corrupt backup archive."
   cat "$tmp_dir/corrupt-archive.log"
   exit 1
@@ -139,42 +64,37 @@ if ! grep -q 'Backup archive is not a valid tar.gz' "$tmp_dir/corrupt-archive.lo
   exit 1
 fi
 
-if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
-  echo "Restore script touched PostgreSQL before rejecting the corrupt archive."
-  cat "$RESTORE_TEST_DOCKER_LOG"
-  exit 1
-fi
-
-if PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$tampered_checksum_dir" >"$tmp_dir/tampered-checksum.log" 2>&1; then
-  echo "Restore script accepted a backup with a mismatched PostgreSQL checksum."
+if RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$tampered_checksum_dir" >"$tmp_dir/tampered-checksum.log" 2>&1; then
+  echo "Restore script accepted a backup with a mismatched checksum."
   cat "$tmp_dir/tampered-checksum.log"
   exit 1
 fi
 
 if ! grep -q 'Backup checksum does not match' "$tmp_dir/tampered-checksum.log"; then
-  echo "Restore script did not explain PostgreSQL checksum mismatch refusal."
+  echo "Restore script did not explain checksum mismatch refusal."
   cat "$tmp_dir/tampered-checksum.log"
   exit 1
 fi
 
-if [[ -f "$RESTORE_TEST_DOCKER_LOG" ]] && grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
-  echo "Restore script touched PostgreSQL before rejecting the checksum mismatch."
-  cat "$RESTORE_TEST_DOCKER_LOG"
+RESTORE_CONFIRM=YES \
+RESTORE_CONTENT_DIR="$restore_content_dir" \
+RESTORE_IMAGES_DIR="$restore_images_dir" \
+bash "$repo_root/scripts/restore.sh" "$backup_dir"
+
+if ! grep -Fq '{"items":[]}' "$restore_content_dir/public-content.json"; then
+  echo "Restore script did not restore web content to the target directory."
+  find "$restore_content_dir" -maxdepth 2 -type f -print
   exit 1
 fi
 
-printf '%s\n' 'created_at=2026-06-11-093300' 'compose_project_name=starry-summer' 'git_revision=abc1234' >"$backup_dir/manifest.txt"
-PATH="$tmp_dir:$PATH" RESTORE_CONFIRM=YES bash "$repo_root/scripts/restore.sh" "$backup_dir"
-
-if ! grep -q -- '-v ON_ERROR_STOP=1' "$RESTORE_TEST_DOCKER_LOG"; then
-  echo "Expected restore psql invocation to include ON_ERROR_STOP=1."
-  cat "$RESTORE_TEST_DOCKER_LOG"
+if ! grep -q 'fake image' "$restore_images_dir/profile.txt"; then
+  echo "Restore script did not restore public images to the target directory."
+  find "$restore_images_dir" -maxdepth 2 -type f -print
   exit 1
 fi
 
-if ! grep -q -- 'volume create starry-summer_api-uploads' "$RESTORE_TEST_DOCKER_LOG"; then
-  echo "Expected restore script to recreate the api uploads volume when an archive is present."
-  cat "$RESTORE_TEST_DOCKER_LOG"
+if grep -q 'docker\|postgres\|psql' "$repo_root/scripts/restore.sh"; then
+  echo "Restore script still contains Docker or PostgreSQL restore commands."
   exit 1
 fi
 

@@ -11,25 +11,6 @@ interface Star {
   color: string;
 }
 
-interface LightDust {
-  x: number;
-  y: number;
-  baseX: number;
-  baseY: number;
-  radius: number;
-  phase: number;
-  speed: number;
-  color: string;
-}
-
-interface MistLayer {
-  x: number;
-  y: number;
-  radius: number;
-  speed: number;
-  opacity: number;
-}
-
 interface ShootingStar {
   x: number;
   y: number;
@@ -52,8 +33,6 @@ export function StarrySkyCanvas({ className = '' }: { className?: string }) {
 
     let animationId = 0;
     let stars: Star[] = [];
-    let dust: LightDust[] = [];
-    let mist: MistLayer[] = [];
     let time = 0;
     const shootingStar: ShootingStar = {
       active: false,
@@ -77,7 +56,7 @@ export function StarrySkyCanvas({ className = '' }: { className?: string }) {
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
 
       const density = Math.min(1, width / 1280);
-      stars = Array.from({ length: Math.floor(145 * density) + 45 }, () => ({
+      stars = Array.from({ length: Math.floor(190 * density) + 70 }, () => ({
         color: pickColor(),
         phase: Math.random() * Math.PI * 2,
         radius: Math.random() * 1.45 + 0.35,
@@ -86,29 +65,6 @@ export function StarrySkyCanvas({ className = '' }: { className?: string }) {
         y: Math.random() * height * 0.92,
       }));
 
-      dust = Array.from({ length: Math.floor(22 * density) + 8 }, () => {
-        const x = Math.random() * width;
-        const y = Math.random() * height;
-
-        return {
-          baseX: x,
-          baseY: y,
-          color: pickColor(),
-          phase: Math.random() * Math.PI * 2,
-          radius: Math.random() * 2.2 + 1,
-          speed: 0.006 + Math.random() * 0.018,
-          x,
-          y,
-        };
-      });
-
-      mist = Array.from({ length: 8 }, () => ({
-        opacity: 0.08 + Math.random() * 0.09,
-        radius: Math.random() * 180 + 130,
-        speed: 0.035 + Math.random() * 0.045,
-        x: Math.random() * width,
-        y: height * (0.28 + Math.random() * 0.5),
-      }));
     };
 
     const triggerShootingStar = () => {
@@ -131,31 +87,6 @@ export function StarrySkyCanvas({ className = '' }: { className?: string }) {
 
       context.clearRect(0, 0, width, height);
 
-      const skyGradient = context.createRadialGradient(width * 0.62, height * 0.38, 0, width * 0.55, height * 0.45, width * 0.75);
-      skyGradient.addColorStop(0, 'rgba(34, 211, 238, 0.16)');
-      skyGradient.addColorStop(0.34, 'rgba(45, 212, 191, 0.07)');
-      skyGradient.addColorStop(0.72, 'rgba(15, 23, 42, 0.18)');
-      skyGradient.addColorStop(1, 'rgba(4, 6, 14, 0)');
-      context.fillStyle = skyGradient;
-      context.fillRect(0, 0, width, height);
-
-      mist.forEach((layer) => {
-        layer.x += layer.speed;
-
-        if (layer.x - layer.radius > width) {
-          layer.x = -layer.radius;
-        }
-
-        const gradient = context.createRadialGradient(layer.x, layer.y, 0, layer.x, layer.y, layer.radius);
-        gradient.addColorStop(0, `rgba(34, 211, 238, ${layer.opacity})`);
-        gradient.addColorStop(0.42, `rgba(167, 139, 250, ${layer.opacity * 0.42})`);
-        gradient.addColorStop(1, 'rgba(4, 6, 14, 0)');
-        context.fillStyle = gradient;
-        context.beginPath();
-        context.ellipse(layer.x, layer.y, layer.radius, layer.radius * 0.34, -0.12, 0, Math.PI * 2);
-        context.fill();
-      });
-
       stars.forEach((star) => {
         const opacity = 0.35 + Math.sin(time * star.speed + star.phase) * 0.26 + 0.28;
         context.globalAlpha = Math.max(0.18, Math.min(1, opacity));
@@ -166,23 +97,7 @@ export function StarrySkyCanvas({ className = '' }: { className?: string }) {
       });
       context.globalAlpha = 1;
 
-      dust.forEach((particle) => {
-        particle.phase += particle.speed;
-        particle.x = particle.baseX + Math.sin(particle.phase * 1.7) * 22;
-        particle.y = particle.baseY + Math.cos(particle.phase) * 16;
-
-        const glow = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.radius * 8);
-        glow.addColorStop(0, particle.color);
-        glow.addColorStop(1, 'rgba(4, 6, 14, 0)');
-        context.globalAlpha = 0.36 + Math.sin(particle.phase) * 0.2;
-        context.fillStyle = glow;
-        context.beginPath();
-        context.arc(particle.x, particle.y, particle.radius * 8, 0, Math.PI * 2);
-        context.fill();
-      });
-      context.globalAlpha = 1;
-
-      if (time % 280 === 0 && Math.random() > 0.35) {
+      if (time % 150 === 0 && Math.random() > 0.18) {
         triggerShootingStar();
       }
 

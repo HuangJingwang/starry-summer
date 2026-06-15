@@ -32,17 +32,17 @@ export interface UpdateSiteSettingsInput {
   navigation?: string[];
 }
 
+export interface RepositorySettingsPublishPayload {
+  settings: SiteSettings;
+  files: Array<{
+    path: string;
+    content: string;
+  }>;
+}
+
 export interface SettingsRequest {
   url: string;
   init: RequestInit & { next?: { revalidate: number } };
-}
-
-export interface PublicSettingsRequestOptions {
-  apiBaseUrl?: string;
-}
-
-export interface PublicSettingsLoadOptions extends PublicSettingsRequestOptions {
-  timeoutMs?: number;
 }
 
 export const defaultSettings: SiteSettings = {
@@ -136,71 +136,34 @@ function normalizeHeroQuotes(quotes: string[] | undefined): string[] {
   return normalized.length > 0 ? normalized : [defaultSettings.hero.motto];
 }
 
-export function buildGetPublicSettingsRequest(options: PublicSettingsRequestOptions = {}): SettingsRequest {
-  const url = options.apiBaseUrl
-    ? `${options.apiBaseUrl.replace(/\/$/, '')}/settings`
-    : '/api/settings';
-
+export function buildRepositorySettingsPublishRequest(input: UpdateSiteSettingsInput): SettingsRequest {
   return {
-    url,
+    url: '/api/repository/settings',
     init: {
-      method: 'GET',
-      next: {
-        revalidate: 60,
-      },
-    },
-  };
-}
-
-export async function loadPublicSettings(
-  fetcher?: (url: string, init: RequestInit) => Promise<Response>,
-  options: PublicSettingsLoadOptions = {},
-): Promise<SiteSettings> {
-  if (!fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
-    return defaultSettings;
-  }
-
-  const request = buildGetPublicSettingsRequest(options);
-  const activeFetcher = fetcher ?? ((url: string, init: RequestInit) => fetch(url, init));
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
-
-  try {
-    const response = await activeFetcher(request.url, { ...request.init, signal: controller.signal });
-
-    if (!response.ok) {
-      return defaultSettings;
-    }
-
-    return normalizeSiteSettings((await response.json()) as Partial<SiteSettings>);
-  } catch {
-    return defaultSettings;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-export function buildGetAdminSettingsRequest(): SettingsRequest {
-  return {
-    url: '/api/admin/settings',
-    init: {
-      method: 'GET',
-      credentials: 'include',
-    },
-  };
-}
-
-export function buildUpdateSettingsRequest(input: UpdateSiteSettingsInput): SettingsRequest {
-  return {
-    url: '/api/admin/settings',
-    init: {
-      method: 'PATCH',
+      method: 'POST',
       credentials: 'include',
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify(input),
+      body: JSON.stringify(buildRepositorySettingsPublishPayload(input)),
     },
+  };
+}
+
+export function buildRepositorySettingsPublishPayload(input: UpdateSiteSettingsInput): RepositorySettingsPublishPayload {
+  const settings = normalizeSiteSettings({
+    ...input,
+    updatedAt: new Date().toISOString(),
+  });
+
+  return {
+    settings,
+    files: [
+      {
+        path: 'apps/web/content/site-settings.json',
+        content: `${JSON.stringify(settings, null, 2)}\n`,
+      },
+    ],
   };
 }
 

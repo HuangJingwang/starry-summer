@@ -28,14 +28,18 @@ describe('asset manager upload panel', () => {
     expect(source).toContain('复制 Markdown');
   });
 
-  test('surfaces specific API errors when loading and deleting assets', () => {
+  test('surfaces specific Worker errors when loading and deleting assets', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/AssetManager.tsx'), 'utf8');
 
     expect(source).toContain('readAssetErrorMessage');
-    expect(source).toContain("readAssetErrorMessage(response, '读取图库失败，请确认已登录且 API 服务可用。')");
-    expect(source).toContain("readAssetErrorMessage(response, '删除失败，请确认已登录且 API 服务可用。')");
+    expect(source).toContain("readAssetErrorMessage(response, '读取图库失败，请确认已登录且素材 Worker 可用。')");
+    expect(source).toContain("readAssetErrorMessage(response, '删除失败，请确认已登录且素材 Worker 可用。')");
+    expect(source).toContain('素材 Worker 未配置，暂时不能上传素材。');
+    expect(source).toContain('素材 Worker 未配置，暂时不能读取素材库。');
+    expect(source).toContain('素材 Worker 未配置，暂时不能删除素材。');
     expect(source).toContain('error instanceof Error ? error.message');
     expect(source).not.toContain('throw new Error(`Request failed with ${response.status}`)');
+    expect(source).not.toContain('API 服务可用');
   });
 
   test('announces asset operation feedback accessibly', () => {

@@ -39,6 +39,10 @@ export function buildReaderSessionRequest(options: ReaderSessionRequestOptions =
 }
 
 export async function loadReaderSession(options: LoadReaderSessionOptions = {}): Promise<ReaderSession> {
+  if (!options.fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+    return { authenticated: false };
+  }
+
   const request = buildReaderSessionRequest(options);
   const fetcher = options.fetcher ?? fetch;
 

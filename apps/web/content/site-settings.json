@@ -1,0 +1,28 @@
+{
+  "profile": {
+    "title": "Starry Summer",
+    "ownerName": "Aster.H",
+    "description": "我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。",
+    "socialLinks": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/HuangJingwang"
+      },
+      {
+        "label": "掘金",
+        "href": "https://juejin.cn/user/959206842703773"
+      }
+    ]
+  },
+  "hero": {
+    "tagline": "把技术探索、项目实践和日常思考长期沉淀成一个可回看的个人知识系统。",
+    "backgroundImageUrl": "",
+    "motto": "Stay curious. Keep building.",
+    "quotes": [
+      "用代码解决问题，用文字留下路径。",
+      "把每一次实践沉淀成未来可以复用的认知。"
+    ]
+  },
+  "navigation": ["search", "posts", "moments", "projects"],
+  "updatedAt": "2026-06-14"
+}

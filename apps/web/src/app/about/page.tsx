@@ -1,6 +1,6 @@
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
-import { loadPublicSettings } from '@/lib/settings';
+import { loadSiteSettings } from '@/lib/settings-repository';
 
 export function generateMetadata() {
   return loadPublicPageMetadata({
@@ -11,8 +11,7 @@ export function generateMetadata() {
 }
 
 export default async function AboutPage() {
-  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
-  const settings = await loadPublicSettings(undefined, { apiBaseUrl });
+  const settings = await loadSiteSettings();
 
   return (
     <SiteShell>

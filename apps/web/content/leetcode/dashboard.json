@@ -1,0 +1,86 @@
+{
+  "settings": {
+    "leetcodeUsername": "",
+    "activeListId": "hot100",
+    "roundCount": 5,
+    "reviewIntervals": [1, 3, 7, 14],
+    "dailyNew": 3,
+    "dailyReview": 5,
+    "deadline": "",
+    "updatedAt": "2026-06-14"
+  },
+  "summary": {
+    "totalProblems": 3,
+    "startedProblems": 3,
+    "completedProblems": 1,
+    "doneRounds": 5,
+    "totalRounds": 15,
+    "completionRate": 33.3,
+    "streak": 2,
+    "totalDays": 4,
+    "lastActivityDate": "2026-06-14"
+  },
+  "categories": [
+    {
+      "name": "Hash Table",
+      "total": 1,
+      "started": 1,
+      "completed": 1,
+      "rate": 100
+    },
+    {
+      "name": "Sliding Window",
+      "total": 1,
+      "started": 1,
+      "completed": 0,
+      "rate": 50
+    },
+    {
+      "name": "Stack",
+      "total": 1,
+      "started": 1,
+      "completed": 0,
+      "rate": 50
+    }
+  ],
+  "problems": [],
+  "todayFocus": [
+    {
+      "slug": "two-sum",
+      "title": "Two Sum",
+      "difficulty": "绠€鍗?",
+      "category": "Hash Table"
+    }
+  ],
+  "reviewDue": [],
+  "heatmap": [
+    {
+      "date": "2026-06-11",
+      "count": 1
+    },
+    {
+      "date": "2026-06-12",
+      "count": 2
+    },
+    {
+      "date": "2026-06-13",
+      "count": 0
+    },
+    {
+      "date": "2026-06-14",
+      "count": 2
+    }
+  ],
+  "recentSubmissions": [
+    {
+      "title": "Two Sum",
+      "titleSlug": "two-sum",
+      "status": "Accepted",
+      "language": "TypeScript",
+      "submittedAt": "2026-06-14T08:20:00.000Z",
+      "submittedAtLabel": "2026-06-14",
+      "problemUrl": "https://leetcode.com/problems/two-sum/"
+    }
+  ],
+  "recentNotes": []
+}

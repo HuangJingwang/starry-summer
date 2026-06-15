@@ -1,65 +1,65 @@
 # Starry Summer
 
-Starry Summer 是一个面向单人长期使用的个人内容平台。它把公开阅读站点和私有创作后台放在同一个系统里，用来沉淀文章、笔记、日常、项目、评论、留言、素材和部署资料。
+Starry Summer 是 Aster.H 的单人长期内容平台，用来公开沉淀文章、笔记、日常片段、项目、留言互动和站点资产。
 
-这个项目的目标不是做一个短期博客模板，而是做一套可以长期维护、可备份、可迁移、可部署到云服务器的个人内容基础设施。公开页面保持深色、安静、内容优先；后台则以中文、实用、紧凑和高效为主。
+公开站点偏向深色 cyber archive：安静、个人、可阅读、内容优先。后台管理界面保持中文、紧凑、实用，服务于持续写作和发布，而不是一次性的作品展示。
 
-## 界面预览
+## 当前方向
 
-公开首页以深色 cyber archive 风格承载个人介绍、内容入口和近期数据。
+项目正在从传统全栈内容系统收敛为静态友好、仓库驱动的个人站点：
 
-![Starry Summer 公开首页](docs/screenshots/home.png)
+- 公开内容、站点设置、LeetCode 仪表盘和资源索引存放在 `apps/web/content`。
+- Next.js Web 应用负责公开页面、后台界面、认证路由和仓库发布路由。
+- 后台发布会把内容和设置写回 Git 仓库，方便版本管理和迁移。
+- 默认 Docker Compose 只运行 `web` 与 `caddy`。
+- 评论、留言、点赞、浏览、资产上传等动态能力预留给 Worker、KV/D1、R2 或类似托管服务。
+- 旧式数据库/API 组件不再是默认本地开发和部署路径。
 
-| 内容列表 | 后台写作 |
-| --- | --- |
-| ![文章列表页面](docs/screenshots/posts.png) | ![后台写作页面](docs/screenshots/admin-writing.png) |
+## 功能范围
 
-## 项目特点
-
-- 公开站点：文章、笔记、日常、项目、归档、标签、分类、系列、搜索、留言板、RSS、站点地图和关于页。
-- 创作后台：内容管理、项目管理、素材管理、评论审核、留言审核、分类标签、站点设置、Markdown 导入导出。
-- 内容生命周期：草稿、发布、私密、归档、恢复草稿、永久删除，以及评论、点赞和浏览统计。
-- 写作体验：Markdown 编辑、实时预览、本地草稿、素材插入、封面选择和发布前设置。
-- 互动边界：公开可读，评论和留言写入需要读者登录，并进入后台审核队列。
-- 内容所有权：支持 Markdown 全量导出和归档导入，方便长期保存和迁移。
-- 部署运维：支持 Docker Compose、Caddy、PostgreSQL、Redis、MinIO/S3 兼容存储、备份恢复和烟雾测试。
+- 文章、笔记、片刻、项目和归档页面
+- 分类、标签、系列等内容组织方式
+- 公开搜索、RSS、留言板和互动入口
+- 中文后台内容管理、发布设置、分类管理和学习仪表盘
+- Markdown 内容渲染与静态内容导入
+- GitHub OAuth 读者登录与后台会话
+- Docker + Caddy 生产预览和部署脚本
+- 静态内容备份、恢复、健康检查和部署前检查
 
 ## 技术栈
 
-- Web：Next.js、React、TypeScript
-- API：NestJS、TypeScript
-- 数据库：PostgreSQL
-- 缓存与健康检查：Redis
-- 文件存储：本地上传、MinIO 或 S3 兼容对象存储
-- 部署：Docker Compose、Caddy
-- Monorepo：npm workspaces，共享领域类型、数据库迁移和 Markdown 渲染能力
+- Web: Next.js, React, TypeScript
+- 内容: JSON, Markdown, repository files
+- UI: public cyber archive theme, Chinese admin workbench
+- Workspace: npm workspaces
+- Packages: `@starry-summer/shared`, `@starry-summer/markdown`
+- Ops: Docker Compose, Caddy, shell smoke checks
 
 ## 目录结构
 
 ```text
 apps/
-  web/  公开站点和后台界面
-  api/  后端 API 服务
+  web/                 Next.js public site, admin UI, route handlers
+  web/content/         repository-backed public content and settings
+  web/public/          images and static assets
 packages/
-  shared/    共享领域类型和契约
-  markdown/  Markdown 解析、渲染和导入导出辅助能力
-  database/  数据库迁移、部署配置检查和数据结构测试
+  shared/              shared domain types and helpers
+  markdown/            Markdown parsing and rendering helpers
+workers/
+  assets-worker/       optional hosted asset worker
+  interactions-worker/ optional hosted interaction worker
 infra/
-  caddy/     Caddy 反向代理配置
-scripts/    备份、恢复、部署、体检、烟雾测试和环境初始化脚本
-docs/
-  deployment.md  部署和运维手册
-  security.md    安全说明
-  superpowers/   设计与实现计划记录
+  caddy/               Caddy reverse proxy config
+scripts/               env, deploy, smoke, backup, restore, hygiene checks
+docs/                  deployment, security, migration notes, screenshots
 ```
 
 ## 本地开发
 
 环境要求：
 
-- Node.js 22 或更新版本
-- npm 10 或更新版本
-- Docker 和 Docker Compose，用于运行接近生产环境的完整栈
+- Node.js 22+
+- npm 10+
 
 安装依赖：
 
@@ -67,33 +67,34 @@ docs/
 npm install
 ```
 
-分别启动 Web 和 API：
+启动 Web：
+
+```bash
+npm run dev
+```
+
+默认地址：
+
+- Web: `http://127.0.0.1:3000`
+
+常用脚本：
 
 ```bash
 npm run dev:web
-npm run dev:api
+npm run build
+npm test
+npm run typecheck
 ```
-
-默认开发地址：
-
-- Web：http://127.0.0.1:3000
-- API：http://127.0.0.1:4000
 
 ## 环境配置
 
-首次本地 Docker 预览时，可以用脚本生成 `.env`、后台密码哈希和会话密钥：
+生成本地 `.env`、后台密码 hash 和会话密钥：
 
 ```bash
 npm run ops:init-env -- "your local admin password"
 ```
 
-脚本会拒绝覆盖已有 `.env`。如果确实需要覆盖，显式设置：
-
-```bash
-INIT_ENV_OVERWRITE=YES npm run ops:init-env -- "your local admin password"
-```
-
-也可以单独生成密钥或密码哈希：
+单独生成密钥：
 
 ```bash
 npm run auth:secret
@@ -101,79 +102,73 @@ npm run auth:interaction-secret
 npm run auth:hash-password -- "your strong password"
 ```
 
-留言和评论的读者登录依赖 GitHub OAuth App。需要配置：
+GitHub OAuth 用于读者登录：
 
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
 - `GITHUB_CALLBACK_URL`
 
-OAuth 回调地址是你的公开站点域名下的 `/api/auth/github/callback`。
+生产部署还需要至少设置：
 
-如果需要在首页展示最近的 LeetCode 记录，可以设置：
+- `PUBLIC_SITE_URL`
+- `SESSION_SECRET`
+- `DOMAIN`
+- `ACME_EMAIL`
 
-- `LEETCODE_USERNAME`
-- `LEETCODE_RECENT_LIMIT`
+## 内容与发布
+
+仓库内容入口：
+
+```text
+apps/web/content/public-content.json
+apps/web/content/site-settings.json
+apps/web/content/assets.json
+apps/web/content/leetcode/dashboard.json
+```
+
+后台发布相关 route handlers 位于：
+
+```text
+apps/web/src/app/api/repository/content/route.ts
+apps/web/src/app/api/repository/settings/route.ts
+```
+
+导入掘金内容：
+
+```bash
+npm run import:juejin
+```
 
 ## Docker 预览
-
-启动接近生产环境的本地栈：
 
 ```bash
 npm run ops:docker-preflight
 docker compose build
-docker compose run --rm migrate
 docker compose up -d
 ```
 
-常用检查：
+查看状态和日志：
 
 ```bash
 docker compose ps
-docker compose logs -f web api
+docker compose logs -f web caddy
 ```
 
-## 验证命令
-
-提交或部署前建议运行：
+校验 Compose 配置：
 
 ```bash
-npm test
-npm run typecheck
-npm run build
-npm run ops:docker-preflight
 docker compose config --quiet
 ```
 
-运维脚本测试：
-
-```bash
-npm run test:ops
-```
-
-## 开源与贡献
-
-Starry Summer 使用 MIT License。开源协作前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [SECURITY.md](SECURITY.md)。
-
-请不要提交真实账号、密码哈希、OAuth 密钥、生产数据、私有姓名、上传素材或本地参考导入目录。`.env.example` 只能保留占位值；本地 `.env` 请用 `npm run ops:init-env` 生成。
-
 ## 部署与运维
 
-生产路径面向自托管云服务器，核心组件包括 Docker Compose、Caddy、PostgreSQL、Redis，以及本地或 S3 兼容对象存储。
-
-部署前检查：
-
-```bash
-npm run ops:doctor
-npm run ops:docker-preflight
-```
-
-执行部署：
+部署：
 
 ```bash
 npm run ops:deploy -- https://blog.your-domain.com
 ```
 
-备份：
+备份静态内容和图片：
 
 ```bash
 npm run ops:backup
@@ -182,15 +177,47 @@ npm run ops:backup
 恢复：
 
 ```bash
-RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD
+RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-static-YYYY-MM-DD
 ```
 
-备份清单会记录 Docker Compose 项目标识和 SHA-256 校验值；恢复脚本会在写入 PostgreSQL 或 Docker volume 前做校验。
+健康和烟雾检查：
 
-完整服务器配置、环境变量、Caddy 路由、备份恢复和上线流程见 [docs/deployment.md](docs/deployment.md)。
+```bash
+npm run ops:doctor
+npm run ops:smoke
+```
 
-## 当前状态
+更多说明见：
 
-Starry Summer 仍在积极开发中。当前重点是完善 V1：稳定的公开个人站点、私有后台、Markdown 内容所有权、读者互动边界、素材管理和可重复部署流程。
+- [部署说明](docs/deployment.md)
+- [安全说明](docs/security.md)
+- [静态托管迁移记录](docs/static-hosting-migration.md)
 
-已批准的产品设计记录在 [docs/superpowers/specs/2026-06-10-personal-content-platform-design.md](docs/superpowers/specs/2026-06-10-personal-content-platform-design.md)。
+## 提交前检查
+
+常规检查：
+
+```bash
+npm test
+npm run typecheck
+npm run build
+docker compose config --quiet
+```
+
+较窄的前端样式回归可运行：
+
+```bash
+npm test --workspace @starry-summer/web -- styles.test.ts
+```
+
+## 安全边界
+
+- 不提交真实账号、密码 hash、OAuth 密钥、生产数据或私人素材。
+- 不在公开页面、RSS 元数据、默认设置或迁移数据里暴露站主真实姓名。
+- 公开展示名使用 `Aster.H`。
+- 后台界面默认面向单人维护，不作为多租户 CMS 设计。
+- 动态互动能力应优先通过托管 Worker/KV/R2 等边界接入，不把生产私密状态混进仓库内容。
+
+## License
+
+MIT

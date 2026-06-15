@@ -34,7 +34,7 @@ export interface AssetRequest {
 
 export interface AssetRequestOptions {
   usage?: AssetUsage;
-  apiBaseUrl?: string;
+  assetBaseUrl?: string;
   timeoutMs?: number;
 }
 
@@ -59,9 +59,15 @@ export async function buildAssetUploadPayload(file: File, options: AssetUploadPa
   };
 }
 
-export function buildAssetUploadRequest(payload: AssetUploadPayload): AssetRequest {
+export function buildAssetUploadRequest(payload: AssetUploadPayload, options: AssetRequestOptions = {}): AssetRequest | null {
+  const url = buildAssetUrl('/api/admin/assets', options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: '/api/admin/assets',
+    url,
     init: {
       method: 'POST',
       credentials: 'include',
@@ -73,9 +79,15 @@ export function buildAssetUploadRequest(payload: AssetUploadPayload): AssetReque
   };
 }
 
-export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): AssetRequest {
+export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): AssetRequest | null {
+  const url = buildAssetUrl('/api/admin/assets', options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: buildAssetUrl('/api/admin/assets', options),
+    url,
     init: {
       method: 'GET',
       credentials: 'include',
@@ -83,9 +95,15 @@ export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): A
   };
 }
 
-export function buildPublicAssetListRequest(options: AssetRequestOptions = {}): AssetRequest {
+export function buildPublicAssetListRequest(options: AssetRequestOptions = {}): AssetRequest | null {
+  const url = buildAssetUrl('/api/assets', options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: buildAssetUrl('/api/assets', options),
+    url,
     init: {
       method: 'GET',
       next: {
@@ -95,9 +113,15 @@ export function buildPublicAssetListRequest(options: AssetRequestOptions = {}): 
   };
 }
 
-export function buildAssetDeleteRequest(id: string): AssetRequest {
+export function buildAssetDeleteRequest(id: string, options: AssetRequestOptions = {}): AssetRequest | null {
+  const url = buildAssetUrl(`/api/admin/assets/${id}`, options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: `/api/admin/assets/${id}`,
+    url,
     init: {
       method: 'DELETE',
       credentials: 'include',
@@ -124,9 +148,15 @@ export async function readAssetErrorMessage(response: Response, fallback: string
   }
 }
 
-export function buildRandomAssetRequest(options: AssetRequestOptions = {}): AssetRequest {
+export function buildRandomAssetRequest(options: AssetRequestOptions = {}): AssetRequest | null {
+  const url = buildAssetUrl('/api/assets/random', options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: buildAssetUrl('/api/assets/random', options),
+    url,
     init: {
       method: 'GET',
       next: {
@@ -183,11 +213,16 @@ export async function loadRandomAsset(
   options: AssetRequestOptions = {},
   fetcher?: (url: string, init: RequestInit) => Promise<Response>,
 ): Promise<StoredAsset | null> {
-  if (!fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+  if (!fetcher && !getConfiguredAssetBaseUrl(options) && typeof window === 'undefined') {
     return null;
   }
 
   const request = buildRandomAssetRequest(options);
+
+  if (!request) {
+    return null;
+  }
+
   const activeFetcher = fetcher ?? ((url: string, init: RequestInit) => fetch(url, init));
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
@@ -217,11 +252,16 @@ export async function loadPublicAssets(
   options: AssetRequestOptions = {},
   fetcher?: (url: string, init: RequestInit) => Promise<Response>,
 ): Promise<StoredAsset[]> {
-  if (!fetcher && !options.apiBaseUrl && typeof window === 'undefined') {
+  if (!fetcher && !getConfiguredAssetBaseUrl(options) && typeof window === 'undefined') {
     return [];
   }
 
   const request = buildPublicAssetListRequest(options);
+
+  if (!request) {
+    return [];
+  }
+
   const activeFetcher = fetcher ?? ((url: string, init: RequestInit) => fetch(url, init));
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
@@ -247,9 +287,13 @@ export async function loadPublicAssets(
   }
 }
 
-function buildAssetUrl(path: string, options: AssetRequestOptions): string {
-  const baseUrl = options.apiBaseUrl ? options.apiBaseUrl.replace(/\/$/, '') : '';
-  const apiPath = baseUrl ? path.replace(/^\/api/, '') : path;
+function buildAssetUrl(path: string, options: AssetRequestOptions): string | null {
+  const baseUrl = getConfiguredAssetBaseUrl(options).replace(/\/$/, '');
+  if (!baseUrl) {
+    return null;
+  }
+
+  const apiPath = path.replace(/^\/api/, '');
 
   if (!options.usage) {
     return `${baseUrl}${apiPath}`;
@@ -258,6 +302,16 @@ function buildAssetUrl(path: string, options: AssetRequestOptions): string {
   const params = new URLSearchParams({ usage: options.usage });
 
   return `${baseUrl}${apiPath}?${params.toString()}`;
+}
+
+function getConfiguredAssetBaseUrl(options: AssetRequestOptions): string {
+  const configuredAssetBaseUrl =
+    options.assetBaseUrl ||
+    process.env.NEXT_PUBLIC_ASSET_BASE_URL ||
+    (typeof window === 'undefined' ? process.env.ASSET_BASE_URL : '') ||
+    '';
+
+  return configuredAssetBaseUrl.trim();
 }
 
 function normalizeErrorMessage(value: unknown): string {

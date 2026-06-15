@@ -33,7 +33,7 @@ export interface InteractionSeenStorage {
 }
 
 export interface AdminInteractionRequestOptions {
-  apiBaseUrl?: string;
+  interactionBaseUrl?: string;
   cookieHeader?: string;
 }
 
@@ -61,9 +61,43 @@ const jsonHeaders = {
 };
 const seenInteractionsStorageKey = 'starry-summer:seen-interactions';
 
-export function buildLikeRequest(targetType: ContentType, targetId: string): InteractionRequest {
+export interface PublicInteractionRequestOptions {
+  interactionBaseUrl?: string;
+}
+
+function getDefaultPublicInteractionBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_INTERACTION_BASE_URL ?? '';
+}
+
+function buildPublicInteractionUrl(path: string, options: PublicInteractionRequestOptions = {}): string | null {
+  const baseUrl = (options.interactionBaseUrl ?? getDefaultPublicInteractionBaseUrl()).trim().replace(/\/$/, '');
+
+  if (!baseUrl) {
+    return null;
+  }
+
+  return `${baseUrl}${path.replace(/^\/api/, '')}`;
+}
+
+function getAdminInteractionBaseUrl(options: AdminInteractionRequestOptions): string | null {
+  const baseUrl = (options.interactionBaseUrl ?? process.env.NEXT_PUBLIC_INTERACTION_BASE_URL ?? '').trim();
+
+  return baseUrl ? baseUrl.replace(/\/$/, '') : null;
+}
+
+export function buildLikeRequest(
+  targetType: ContentType,
+  targetId: string,
+  options: PublicInteractionRequestOptions = {},
+): InteractionRequest | null {
+  const url = buildPublicInteractionUrl(`/api/likes/${targetType}/${targetId}`, options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: `/api/likes/${targetType}/${targetId}`,
+    url,
     init: {
       method: 'POST',
       headers: jsonHeaders,
@@ -71,9 +105,19 @@ export function buildLikeRequest(targetType: ContentType, targetId: string): Int
   };
 }
 
-export function buildViewRequest(targetType: ContentType, targetId: string): InteractionRequest {
+export function buildViewRequest(
+  targetType: ContentType,
+  targetId: string,
+  options: PublicInteractionRequestOptions = {},
+): InteractionRequest | null {
+  const url = buildPublicInteractionUrl(`/api/views/${targetType}/${targetId}`, options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: `/api/views/${targetType}/${targetId}`,
+    url,
     init: {
       method: 'POST',
       headers: jsonHeaders,
@@ -85,16 +129,18 @@ export function buildDedupedViewRequest(
   targetType: ContentType,
   targetId: string,
   seen: InteractionSeenStore,
+  options: PublicInteractionRequestOptions = {},
 ): InteractionRequest | null {
-  return buildDedupedInteractionRequest('view', targetType, targetId, seen, () => buildViewRequest(targetType, targetId));
+  return buildDedupedInteractionRequest('view', targetType, targetId, seen, () => buildViewRequest(targetType, targetId, options));
 }
 
 export function buildDedupedLikeRequest(
   targetType: ContentType,
   targetId: string,
   seen: InteractionSeenStore,
+  options: PublicInteractionRequestOptions = {},
 ): InteractionRequest | null {
-  return buildDedupedInteractionRequest('like', targetType, targetId, seen, () => buildLikeRequest(targetType, targetId));
+  return buildDedupedInteractionRequest('like', targetType, targetId, seen, () => buildLikeRequest(targetType, targetId, options));
 }
 
 export function createPersistentInteractionSeenStore(
@@ -115,9 +161,18 @@ export function createPersistentInteractionSeenStore(
   };
 }
 
-export function buildCommentRequest(input: CommentInput): InteractionRequest {
+export function buildCommentRequest(
+  input: CommentInput,
+  options: PublicInteractionRequestOptions = {},
+): InteractionRequest | null {
+  const url = buildPublicInteractionUrl('/api/comments', options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: '/api/comments',
+    url,
     init: {
       method: 'POST',
       credentials: 'include',
@@ -137,7 +192,7 @@ function buildDedupedInteractionRequest(
   targetType: ContentType,
   targetId: string,
   seen: InteractionSeenStore,
-  build: () => InteractionRequest,
+  build: () => InteractionRequest | null,
 ): InteractionRequest | null {
   const key = `${kind}:${targetType}:${targetId}`;
 
@@ -145,9 +200,15 @@ function buildDedupedInteractionRequest(
     return null;
   }
 
+  const request = build();
+
+  if (!request) {
+    return null;
+  }
+
   seen.add(key);
 
-  return build();
+  return request;
 }
 
 function getBrowserInteractionStorage(): InteractionSeenStorage | null {
@@ -185,9 +246,18 @@ function writeSeenInteractions(storage: InteractionSeenStorage | null, seen: Set
   }
 }
 
-export function buildGuestbookRequest(input: GuestbookInput): InteractionRequest {
+export function buildGuestbookRequest(
+  input: GuestbookInput,
+  options: PublicInteractionRequestOptions = {},
+): InteractionRequest | null {
+  const url = buildPublicInteractionUrl('/api/guestbook', options);
+
+  if (!url) {
+    return null;
+  }
+
   return {
-    url: '/api/guestbook',
+    url,
     init: {
       method: 'POST',
       credentials: 'include',
@@ -203,13 +273,16 @@ export function buildAdminModerationListRequest(
   resource: ModerationResource,
   status?: ModerationStatus,
   options: AdminInteractionRequestOptions = {},
-): InteractionRequest {
+): InteractionRequest | null {
   const query = status ? `?status=${encodeURIComponent(status)}` : '';
   const path = `/api/admin/${resource}${query}`;
-  const url = options.apiBaseUrl
-    ? `${options.apiBaseUrl.replace(/\/$/, '')}${path.replace(/^\/api/, '')}`
-    : path;
+  const baseUrl = getAdminInteractionBaseUrl(options);
+  const url = baseUrl ? `${baseUrl}${path.replace(/^\/api/, '')}` : null;
   const headers = options.cookieHeader ? { cookie: options.cookieHeader } : undefined;
+
+  if (!url) {
+    return null;
+  }
 
   return {
     url,
@@ -228,6 +301,10 @@ export async function loadAdminModerationCount(
 ): Promise<number> {
   const request = buildAdminModerationListRequest(resource, status, options);
   const fetcher = options.fetcher ?? fetch;
+
+  if (!request) {
+    return 0;
+  }
 
   try {
     const response = await fetcher(request.url, request.init);
@@ -248,9 +325,17 @@ export function buildModerationActionRequest(
   resource: ModerationResource,
   id: string,
   status: ModerationStatus,
-): InteractionRequest {
+  options: AdminInteractionRequestOptions = {},
+): InteractionRequest | null {
+  const path = `/api/admin/${resource}/${id}/moderate`;
+  const baseUrl = getAdminInteractionBaseUrl(options);
+
+  if (!baseUrl) {
+    return null;
+  }
+
   return {
-    url: `/api/admin/${resource}/${id}/moderate`,
+    url: `${baseUrl}${path.replace(/^\/api/, '')}`,
     init: {
       method: 'PATCH',
       credentials: 'include',
@@ -260,9 +345,20 @@ export function buildModerationActionRequest(
   };
 }
 
-export function buildModerationDeleteRequest(resource: ModerationResource, id: string): InteractionRequest {
+export function buildModerationDeleteRequest(
+  resource: ModerationResource,
+  id: string,
+  options: AdminInteractionRequestOptions = {},
+): InteractionRequest | null {
+  const path = `/api/admin/${resource}/${id}`;
+  const baseUrl = getAdminInteractionBaseUrl(options);
+
+  if (!baseUrl) {
+    return null;
+  }
+
   return {
-    url: `/api/admin/${resource}/${id}`,
+    url: `${baseUrl}${path.replace(/^\/api/, '')}`,
     init: {
       method: 'DELETE',
       credentials: 'include',
