@@ -4,6 +4,20 @@ Starry Summer 是 Aster.H 的单人长期内容平台，用来公开沉淀文章
 
 公开站点偏向深色 cyber archive：安静、个人、可阅读、内容优先。后台管理界面保持中文、紧凑、实用，服务于持续写作和发布，而不是一次性的作品展示。
 
+## 界面预览
+
+首页：
+
+![Starry Summer 首页](docs/screenshots/home.png)
+
+内容列表：
+
+![Starry Summer 内容列表](docs/screenshots/posts.png)
+
+后台写作：
+
+![Starry Summer 后台写作](docs/screenshots/admin-writing.png)
+
 ## 当前方向
 
 项目正在从传统全栈内容系统收敛为静态友好、仓库驱动的个人站点：
