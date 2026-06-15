@@ -6,7 +6,6 @@ import Link from 'next/link';
 import {
   buildAdminContentDashboard,
   buildAdminContentSourceNotice,
-  loadAdminContentItems,
   type AdminContentLoadResult,
 } from '@/lib/admin-content';
 import type { SiteContentItem } from '@/lib/content';
@@ -15,6 +14,8 @@ import { AdminContentTable } from './AdminContentTable';
 
 interface AdminContentManagerProps {
   fallbackItems: SiteContentItem[];
+  initialResult?: AdminContentLoadResult;
+  repositoryMode?: boolean;
   query?: string;
   status?: SiteContentItem['status'];
   type?: SiteContentItem['type'];
@@ -26,6 +27,8 @@ interface AdminContentManagerProps {
 
 export function AdminContentManager({
   fallbackItems,
+  initialResult,
+  repositoryMode = true,
   query = '',
   status,
   type,
@@ -34,40 +37,16 @@ export function AdminContentManager({
   series,
   basePath = '/admin/content',
 }: AdminContentManagerProps) {
-  const [result, setResult] = useState<AdminContentLoadResult>({
+  const [result, setResult] = useState<AdminContentLoadResult>(initialResult ?? {
     source: 'fallback',
     items: fallbackItems,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let active = true;
-
-    async function load() {
-      setLoading(true);
-      const nextResult = await loadAdminContentItems(fallbackItems, undefined, {
-        filters: {
-          q: query,
-          status,
-          type,
-          category,
-          tag,
-          series,
-        },
-      });
-
-      if (active) {
-        setResult(nextResult);
-        setLoading(false);
-      }
-    }
-
-    void load();
-
-    return () => {
-      active = false;
-    };
-  }, [fallbackItems, query, status, type, category, tag, series]);
+    setResult(initialResult ?? { source: 'fallback', items: fallbackItems });
+    setLoading(false);
+  }, [fallbackItems, initialResult, query, status, type, category, tag, series]);
 
   const dashboard = buildAdminContentDashboard(result.items, { query, status, type, category, tag, series }, { basePath });
   const sourceNotice = buildAdminContentSourceNotice({
@@ -110,7 +89,16 @@ export function AdminContentManager({
           )}
         </div>
       </div>
-      <AdminContentTable items={result.items} query={query} status={status} type={type} category={category} tag={tag} series={series} />
+      <AdminContentTable
+        items={result.items}
+        repositoryMode={repositoryMode}
+        query={query}
+        status={status}
+        type={type}
+        category={category}
+        tag={tag}
+        series={series}
+      />
     </div>
   );
 }

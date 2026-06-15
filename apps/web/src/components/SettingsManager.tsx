@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
-  buildGetAdminSettingsRequest,
+  buildRepositorySettingsPublishRequest,
   buildSettingsFormKey,
-  buildUpdateSettingsRequest,
   formatHeroQuotesText,
   formatSocialLinksText,
   normalizeSiteSettings,
@@ -28,47 +27,17 @@ const navigationOptions = [
   { key: 'archives', label: '归档', description: '按时间回看内容' },
 ];
 
-export function SettingsManager() {
-  const [settings, setSettings] = useState<SiteSettings>(fallbackSettings);
-  const [state, setState] = useState<SaveState>('loading');
+export function SettingsManager({ initialSettings = fallbackSettings }: { initialSettings?: SiteSettings }) {
+  const [settings, setSettings] = useState<SiteSettings>(initialSettings);
+  const [state, setState] = useState<SaveState>('idle');
   const [message, setMessage] = useState('');
   const settingsBusy = state === 'loading' || state === 'submitting';
-
-  useEffect(() => {
-    let active = true;
-    const request = buildGetAdminSettingsRequest();
-
-    fetch(request.url, request.init)
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(await readSettingsErrorMessage(response, `读取设置失败，服务器返回 ${response.status}。`));
-        }
-
-        return normalizeSiteSettings((await response.json()) as Partial<SiteSettings>);
-      })
-      .then((nextSettings) => {
-        if (active) {
-          setSettings(nextSettings);
-          setState('idle');
-        }
-      })
-      .catch((error) => {
-        if (active) {
-          setState('error');
-          setMessage(error instanceof Error ? error.message : '读取设置失败，请确认已登录且 API 服务可用。');
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   async function save(formData: FormData) {
     setState('submitting');
     setMessage('');
 
-    const request = buildUpdateSettingsRequest({
+    const input = {
       profile: {
         title: String(formData.get('title') ?? ''),
         ownerName: String(formData.get('ownerName') ?? ''),
@@ -82,7 +51,8 @@ export function SettingsManager() {
         quotes: parseHeroQuotesText(String(formData.get('quotes') ?? '')),
       },
       navigation: formData.getAll('navigation').map(String),
-    });
+    };
+    const request = buildRepositorySettingsPublishRequest(input);
 
     try {
       const response = await fetch(request.url, request.init);
@@ -91,12 +61,13 @@ export function SettingsManager() {
         throw new Error(await readSettingsErrorMessage(response, `保存失败，服务器返回 ${response.status}。`));
       }
 
-      setSettings(normalizeSiteSettings((await response.json()) as Partial<SiteSettings>));
+      const data = (await response.json()) as Partial<SiteSettings> & { settings?: Partial<SiteSettings> };
+      setSettings(normalizeSiteSettings(data.settings ?? data));
       setState('success');
-      setMessage('设置已保存。');
+      setMessage('设置已提交到仓库。');
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且 API 服务可用。');
+      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且仓库发布已配置。');
     }
   }
 

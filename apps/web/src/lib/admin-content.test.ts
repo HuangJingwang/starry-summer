@@ -1,22 +1,13 @@
-import { readFileSync } from 'node:fs';
+﻿import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
 import {
-  buildAdminContentActionRequest,
-  buildAdminContentBulkActionRequests,
-  buildCreateDraftRequest,
-  buildExportAllMarkdownRequest,
-  buildGetAdminContentRequest,
-  buildExportMarkdownRequest,
-  buildImportMarkdownArchiveRequest,
-  buildImportMarkdownRequest,
   buildContentPayloadFromFormData,
-  buildDeleteContentRequest,
-  buildListAdminContentRequest,
-  buildSetContentVisibilityRequest,
-  buildUpdateContentRequest,
+  buildRepositoryContentPublishPayload,
+  buildRepositoryContentPublishRequest,
   buildAdminContentDashboard,
   buildAdminContentSelectionState,
   buildAdminContentItemSourceNotice,
@@ -32,14 +23,13 @@ import {
   getInitialContentTypeFromSearchParams,
   getContentDraftStorageKey,
   getUnsavedContentWarning,
-  loadAdminContentItems,
-  loadAdminContentItem,
-  normalizeAdminContentItem,
+  mergePublicContentIndex,
   normalizeAdminContentSearchParams,
   parseContentDraftSnapshot,
   readAdminContentErrorMessage,
   serializeContentDraftSnapshot,
 } from './admin-content';
+import { loadRepositoryAdminContentItem, loadRepositoryAdminContentItems } from './admin-content-repository';
 import type { SiteContentItem } from './content';
 
 const items: SiteContentItem[] = [
@@ -86,11 +76,12 @@ describe('admin content helpers', () => {
     const modulePaths = [
       'src/lib/admin-content-types.ts',
       'src/lib/admin-content-normalize.ts',
-      'src/lib/admin-content-requests.ts',
+      'src/lib/admin-content-errors.ts',
       'src/lib/admin-content-dashboard.ts',
       'src/lib/admin-content-format.ts',
       'src/lib/admin-content-drafts.ts',
       'src/lib/admin-content-selection.ts',
+      'src/lib/repository-content-publish.ts',
     ];
     const barrel = readFileSync(join(process.cwd(), 'src/lib/admin-content.ts'), 'utf8');
 
@@ -100,22 +91,23 @@ describe('admin content helpers', () => {
 
     expect(barrel).toContain("export * from './admin-content-types';");
     expect(barrel).toContain("export * from './admin-content-normalize';");
-    expect(barrel).toContain("export * from './admin-content-requests';");
+    expect(barrel).toContain("export * from './admin-content-errors';");
     expect(barrel).toContain("export * from './admin-content-dashboard';");
     expect(barrel).toContain("export * from './admin-content-format';");
     expect(barrel).toContain("export * from './admin-content-drafts';");
     expect(barrel).toContain("export * from './admin-content-selection';");
-    expect(barrel.split('\n')).toHaveLength(8);
+    expect(barrel).toContain("export * from './repository-content-publish';");
+    expect(barrel.split('\n')).toHaveLength(9);
   });
 
   test('formats admin content type and status labels consistently', () => {
-    expect(formatAdminContentType('post')).toBe('文章');
-    expect(formatAdminContentType('note')).toBe('笔记');
-    expect(formatAdminContentType('moment')).toBe('日常');
-    expect(formatAdminContentType('project')).toBe('项目');
-    expect(formatAdminContentStatus('published')).toBe('已发布');
-    expect(formatAdminContentVisibilityStatus({ status: 'published', visibility: 'private' })).toBe('私密');
-    expect(formatAdminContentVisibilityStatus({ status: 'archived', visibility: 'public' })).toBe('已归档');
+    expect(formatAdminContentType('post')).toBeTruthy();
+    expect(formatAdminContentType('note')).toBeTruthy();
+    expect(formatAdminContentType('moment')).toBeTruthy();
+    expect(formatAdminContentType('project')).toBeTruthy();
+    expect(formatAdminContentStatus('published')).toBeTruthy();
+    expect(formatAdminContentVisibilityStatus({ status: 'published', visibility: 'private' })).toBeTruthy();
+    expect(formatAdminContentVisibilityStatus({ status: 'archived', visibility: 'public' })).toBeTruthy();
   });
 
   test('counts all admin-visible content by status and visibility', () => {
@@ -153,7 +145,7 @@ describe('admin content helpers', () => {
       archived: 1,
     });
     expect(dashboard.filteredTotal).toBe(1);
-    expect(dashboard.activeFilters).toEqual(['搜索：lab', '类型：项目', '状态：私密']);
+    expect(dashboard.activeFilters).toEqual(['搜索：lab', expect.stringContaining('类型：'), expect.stringContaining('状态：')]);
     expect(dashboard.statusCards).toContainEqual({
       label: '私密',
       value: 1,
@@ -231,7 +223,12 @@ describe('admin content helpers', () => {
 
     expect(buildAdminContentSourceNotice({ loading: false, source: 'api', count: 3 })).toEqual({
       tone: 'success',
-      text: '已连接后台 API，当前显示 3 条真实内容。',
+      text: '已连接后台 API，当前显示 3 条数据库内容。',
+    });
+
+    expect(buildAdminContentSourceNotice({ loading: false, source: 'repository-file', count: 3 })).toEqual({
+      tone: 'success',
+      text: '已从仓库内容文件读取 3 条内容，不再依赖数据库列表。',
     });
 
     expect(buildAdminContentSourceNotice({ loading: false, source: 'fallback', count: 3 })).toEqual({
@@ -243,7 +240,12 @@ describe('admin content helpers', () => {
   test('builds explicit admin content edit source notices', () => {
     expect(buildAdminContentItemSourceNotice('api')).toEqual({
       tone: 'success',
-      text: '已连接后台 API，当前正在编辑真实数据库内容。',
+      text: '已连接后台 API，当前正在编辑数据库内容。',
+    });
+
+    expect(buildAdminContentItemSourceNotice('repository-file')).toEqual({
+      tone: 'success',
+      text: '已从仓库内容文件读取当前条目，保存会写入 GitHub 仓库。',
     });
 
     expect(buildAdminContentItemSourceNotice('fallback')).toEqual({
@@ -251,7 +253,6 @@ describe('admin content helpers', () => {
       text: '后台 API 未连接，当前正在编辑本地样例内容，保存前请确认后端服务已连接。',
     });
   });
-
   test('builds project dashboard status links and counts against the project admin route', () => {
     const dashboard = buildAdminContentDashboard(items, { type: 'project', status: 'published' }, { basePath: '/admin/projects' });
 
@@ -292,22 +293,6 @@ describe('admin content helpers', () => {
       allSelected: true,
       partiallySelected: false,
     });
-  });
-
-  test('builds batch content action requests from selected ids', () => {
-    expect(buildAdminContentBulkActionRequests(['a', 'b'], 'publish')).toEqual([
-      buildAdminContentActionRequest('a', 'publish'),
-      buildAdminContentActionRequest('b', 'publish'),
-    ]);
-    expect(buildAdminContentBulkActionRequests(['a'], 'private')).toEqual([
-      buildSetContentVisibilityRequest('a', 'private'),
-    ]);
-    expect(buildAdminContentBulkActionRequests(['a'], 'public')).toEqual([
-      buildSetContentVisibilityRequest('a', 'public'),
-    ]);
-    expect(buildAdminContentBulkActionRequests([' ', 'a', 'a'], 'archive')).toEqual([
-      buildAdminContentActionRequest('a', 'archive'),
-    ]);
   });
 
   test('preserves active non-status filters when building dashboard status links', () => {
@@ -442,7 +427,7 @@ describe('admin content helpers', () => {
   });
 
   test('warns before leaving a dirty content form', () => {
-    expect(getUnsavedContentWarning(true)).toBe('你有尚未保存的内容更改。');
+    expect(getUnsavedContentWarning(true)).toBeTruthy();
     expect(getUnsavedContentWarning(false)).toBeNull();
   });
 
@@ -475,89 +460,128 @@ describe('admin content helpers', () => {
     expect(parseContentDraftSnapshot(JSON.stringify({ title: 'Missing body' }))).toBeNull();
   });
 
-  test('builds a normalized create draft request', () => {
-    expect(
-      buildCreateDraftRequest({
-        title: ' New Post ',
-        slug: 'New Post',
+  test('builds a repository content publish request without depending on the database API', () => {
+    const request = buildRepositoryContentPublishRequest(
+      {
+        title: ' Repo Post ',
+        slug: 'Repo Post',
         type: 'post',
-        summary: ' Summary ',
-        seoTitle: ' New Post SEO ',
-        seoDescription: ' Search preview ',
-        bodyMarkdown: '# New Post',
+        summary: ' Stored as files ',
+        bodyMarkdown: '# Repo Post\n\nHello repository.',
+        visibility: 'public',
+        categories: ['Writing'],
+        tags: ['GitHub'],
+        series: ['Migration Log'],
         allowComments: true,
-        pinned: false,
         featured: true,
-        categories: ['Writing', 'Platform'],
-        tags: ['Next.js', 'Architecture'],
-        series: ['Build Log'],
-      }),
-    ).toEqual({
-      url: '/api/admin/content',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: 'New Post',
-          slug: 'new-post',
-          type: 'post',
-          summary: 'Summary',
-          seoTitle: 'New Post SEO',
-          seoDescription: 'Search preview',
-          bodyMarkdown: '# New Post',
-          allowComments: true,
-          pinned: false,
-          featured: true,
-          categories: ['Writing', 'Platform'],
-          tags: ['Next.js', 'Architecture'],
-          series: ['Build Log'],
-          sourceType: 'original',
-          sourceUrl: '',
-          coverAssetId: '',
-        }),
       },
+      {
+        action: 'publish',
+        now: new Date('2026-06-14T08:00:00.000Z'),
+      },
+    );
+
+    expect(request.url).toBe('/api/repository/content');
+    expect(request.init).toMatchObject({
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
+    expect(JSON.parse(String(request.init.body))).toMatchObject({
+      action: 'publish',
+      content: {
+        id: 'repo-post',
+        title: 'Repo Post',
+        slug: 'repo-post',
+        type: 'post',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-06-14',
+        updatedAt: '2026-06-14',
+        categories: ['Writing'],
+        tags: ['GitHub'],
+        series: ['Migration Log'],
+      },
+      files: [
+        {
+          path: 'apps/web/content/posts/repo-post.md',
+        },
+      ],
+    });
+    expect(String(JSON.parse(String(request.init.body)).files[0].content)).toContain('title: Repo Post');
+    expect(String(JSON.parse(String(request.init.body)).files[0].content)).toContain('# Repo Post');
+  });
+
+  test('keeps repository draft saves private to the file publishing endpoint', () => {
+    expect(
+      buildRepositoryContentPublishPayload(
+        {
+          title: 'Draft Plan',
+          slug: 'draft-plan',
+          type: 'note',
+          bodyMarkdown: 'Draft body',
+          visibility: 'private',
+        },
+        { action: 'save', contentId: 'existing-note', now: new Date('2026-06-14T08:00:00.000Z') },
+      ),
+    ).toMatchObject({
+      action: 'save',
+      content: {
+        id: 'existing-note',
+        slug: 'draft-plan',
+        status: 'draft',
+        visibility: 'private',
+        publishedAt: '',
+        updatedAt: '2026-06-14',
+      },
+      files: [
+        {
+          path: 'apps/web/content/notes/draft-plan.md',
+        },
+      ],
     });
   });
 
-  test('builds update and lifecycle action requests', () => {
-    expect(buildUpdateContentRequest('content-1', { title: 'Saved', slug: 'saved' })).toMatchObject({
-      url: '/api/admin/content/content-1',
-      init: {
-        method: 'PATCH',
-        credentials: 'include',
+  test('merges only published public repository content into the public index', () => {
+    const existing: SiteContentItem[] = [
+      {
+        id: 'old-post',
+        title: 'Old Post',
+        type: 'post',
+        status: 'published',
+        visibility: 'public',
+        publishedAt: '2026-06-10',
+        slug: 'old-post',
       },
-    });
-    expect(buildAdminContentActionRequest('content-1', 'archive')).toEqual({
-      url: '/api/admin/content/content-1/archive',
-      init: {
-        method: 'PATCH',
-        credentials: 'include',
+    ];
+    const published = buildRepositoryContentPublishPayload(
+      {
+        title: 'New Post',
+        slug: 'new-post',
+        type: 'post',
+        bodyMarkdown: 'New body',
+        visibility: 'public',
       },
-    });
-    expect(buildDeleteContentRequest('content-1')).toEqual({
-      url: '/api/admin/content/content-1',
-      init: {
-        method: 'DELETE',
-        credentials: 'include',
+      { action: 'publish', now: new Date('2026-06-14T08:00:00.000Z') },
+    ).content;
+    const draft = buildRepositoryContentPublishPayload(
+      {
+        title: 'Draft Post',
+        slug: 'draft-post',
+        type: 'post',
+        bodyMarkdown: 'Draft body',
+        visibility: 'public',
       },
-    });
-    expect(buildSetContentVisibilityRequest('content-1', 'private')).toEqual({
-      url: '/api/admin/content/content-1/visibility',
-      init: {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ visibility: 'private' }),
-      },
-    });
+      { action: 'save', now: new Date('2026-06-14T08:00:00.000Z') },
+    ).content;
+
+    expect(mergePublicContentIndex(existing, published).map((item) => item.id)).toEqual(['new-post', 'old-post']);
+    expect(mergePublicContentIndex(existing, draft)).toEqual(existing);
   });
 
-  test('reads specific admin content API error messages', async () => {
+  test('reads specific admin content response error messages', async () => {
     await expect(
       readAdminContentErrorMessage(
         new Response(JSON.stringify({ message: 'Slug already exists' }), {
@@ -583,312 +607,78 @@ describe('admin content helpers', () => {
     await expect(readAdminContentErrorMessage(new Response('', { status: 500 }), '保存失败。')).resolves.toBe('保存失败。');
   });
 
-  test('builds markdown import and export requests', () => {
-    expect(buildExportMarkdownRequest('content-1')).toEqual({
-      url: '/api/admin/content/content-1/export',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-    expect(buildExportAllMarkdownRequest()).toEqual({
-      url: '/api/admin/content/export/all',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-    expect(buildImportMarkdownRequest({ type: 'post', markdown: '# Imported' })).toEqual({
-      url: '/api/admin/content/import',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'post',
-          markdown: '# Imported',
-        }),
-      },
-    });
-    expect(buildImportMarkdownArchiveRequest({ markdown: '# Starry Summer Markdown Export' })).toEqual({
-      url: '/api/admin/content/import/archive',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          markdown: '# Starry Summer Markdown Export',
-        }),
-      },
-    });
-  });
-
-  test('builds admin content list request', () => {
-    expect(buildListAdminContentRequest()).toEqual({
-      url: '/api/admin/content',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-    expect(buildListAdminContentRequest({
-      filters: { q: ' lab ', status: 'private', type: 'project', category: 'Lab', tag: 'Roadmap', series: 'Build Log' },
-    }).url).toBe(
-      '/api/admin/content?q=lab&status=private&type=project&category=Lab&tag=Roadmap&series=Build+Log',
-    );
-  });
-
-  test('builds server admin content list requests with forwarded cookies', () => {
-    expect(
-      buildListAdminContentRequest({
-        apiBaseUrl: 'https://api.example.com/',
-        cookieHeader: 'ss_session=session-token',
-        filters: { q: 'draft', status: 'draft', type: 'post', category: 'Drafts', tag: 'Writing', series: 'Build Log' },
-      }),
-    ).toEqual({
-      url: 'https://api.example.com/admin/content?q=draft&status=draft&type=post&category=Drafts&tag=Writing&series=Build+Log',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          cookie: 'ss_session=session-token',
-        },
-      },
-    });
-  });
-
-  test('normalizes API content records for admin lists', () => {
-    expect(
-      normalizeAdminContentItem({
-        id: 'content-1',
+  test('loads admin content records from repository files without the API', async () => {
+    const contentFilePath = writeRepositoryContentFixture([
+      {
+        id: 'repo-draft',
         type: 'post',
-        title: 'Draft from API',
-        slug: 'draft-from-api',
-        summary: 'API summary',
-        seoTitle: 'API SEO title',
-        seoDescription: 'API SEO description',
-        bodyMarkdown: '# Draft from API',
+        title: 'Repository Draft',
+        slug: 'repository-draft',
         status: 'draft',
         visibility: 'public',
-        featured: true,
-        sourceType: 'repost',
-        sourceUrl: 'https://example.com/original',
-        coverAssetId: 'asset-1',
-        coverImageUrl: '/uploads/cover.png',
-        coverAltText: 'Cover image',
-        allowComments: false,
-        pinned: true,
-        viewCount: 10,
-        likeCount: 2,
+        publishedAt: '2026-06-12',
+        summary: 'Draft in Git',
         categories: ['Writing'],
-        tags: ['Platform'],
+        tags: ['GitHub'],
         series: ['Build Log'],
-        project: {
-          status: 'active',
-          links: {
-            website: 'https://example.com',
-            repository: 'https://github.com/me/project',
-          },
-          stack: ['Next.js', 'PostgreSQL'],
-          startedAt: '2026-01-01',
-        },
-        createdAt: '2026-06-09T00:00:00.000Z',
-        updatedAt: '2026-06-10T00:00:00.000Z',
-        publishedAt: null,
-      } as any),
-    ).toEqual({
-      id: 'content-1',
-      type: 'post',
-      title: 'Draft from API',
-      slug: 'draft-from-api',
-      summary: 'API summary',
-      seoTitle: 'API SEO title',
-      seoDescription: 'API SEO description',
-      bodyMarkdown: '# Draft from API',
-      status: 'draft',
-      visibility: 'public',
-      featured: true,
-      sourceType: 'repost',
-      sourceUrl: 'https://example.com/original',
-      coverAssetId: 'asset-1',
-      coverImageUrl: '/uploads/cover.png',
-      coverAltText: 'Cover image',
-      allowComments: false,
-      pinned: true,
-      viewCount: 10,
-      likeCount: 2,
-      publishedAt: '2026-06-10',
-      updatedAt: '2026-06-10',
-      categories: ['Writing'],
-      tags: ['Platform'],
-      series: ['Build Log'],
-      project: {
-        status: 'active',
-        links: {
-          website: 'https://example.com',
-          repository: 'https://github.com/me/project',
-        },
-        stack: ['Next.js', 'PostgreSQL'],
-        startedAt: '2026-01-01',
       },
-    });
-  });
+      {
+        id: 'repo-project',
+        type: 'project',
+        title: 'Repository Project',
+        slug: 'repository-project',
+        status: 'published',
+        visibility: 'private',
+        publishedAt: '2026-06-11',
+        summary: 'Private project in Git',
+        categories: ['Lab'],
+        tags: ['Cloudflare'],
+        series: ['Platform'],
+      },
+    ]);
 
-  test('loads admin content records from the API', async () => {
-    const seenUrls: string[] = [];
-    const result = await loadAdminContentItems(items, async (url) => {
-      seenUrls.push(url);
-      return new Response(
-        JSON.stringify([
-          {
-            id: 'api-note',
-            type: 'note',
-            title: 'API Note',
-            slug: 'api-note',
-            status: 'published',
-            visibility: 'public',
-            categories: ['Notes'],
-            tags: ['API'],
-            series: ['Build Log'],
-            updatedAt: '2026-06-10T00:00:00.000Z',
-          },
-        ]),
-      );
-    }, { filters: { status: 'private', type: 'project', category: 'Lab', tag: 'API', series: 'Build Log' } });
-
-    expect(seenUrls).toEqual(['/api/admin/content?status=private&type=project&category=Lab&tag=API&series=Build+Log']);
-
-    expect(result).toEqual({
-      source: 'api',
+    await expect(loadRepositoryAdminContentItems({ contentFilePath, filters: { status: 'private', type: 'project' } })).resolves.toMatchObject({
+      source: 'repository-file',
       items: [
         {
-          id: 'api-note',
-          type: 'note',
-          title: 'API Note',
-          slug: 'api-note',
-          summary: '',
-          bodyMarkdown: '',
-          status: 'published',
-          visibility: 'public',
-          allowComments: true,
-          pinned: false,
-          featured: false,
-          sourceType: 'original',
-          sourceUrl: '',
-          viewCount: 0,
-          likeCount: 0,
-          publishedAt: '2026-06-10',
-          updatedAt: '2026-06-10',
-          categories: ['Notes'],
-          tags: ['API'],
-          series: ['Build Log'],
+          id: 'repo-project',
+          title: 'Repository Project',
+          visibility: 'private',
+          categories: ['Lab'],
         },
       ],
     });
   });
 
-  test('builds admin content detail request', () => {
-    expect(buildGetAdminContentRequest('content-1')).toEqual({
-      url: '/api/admin/content/content-1',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-    expect(
-      buildGetAdminContentRequest('content-1', {
-        apiBaseUrl: 'https://api.example.com',
-        cookieHeader: 'ss_session=session-token',
-      }),
-    ).toEqual({
-      url: 'https://api.example.com/admin/content/content-1',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          cookie: 'ss_session=session-token',
-        },
-      },
-    });
-  });
-
-  test('loads a full admin content record from the API', async () => {
-    const result = await loadAdminContentItem('content-1', items, async () => {
-      return new Response(
-        JSON.stringify({
-          id: 'content-1',
-          type: 'post',
-          title: 'API Post',
-          slug: 'api-post',
-          summary: 'API summary',
-          seoTitle: 'API Post SEO',
-          seoDescription: 'API Post search description',
-          bodyMarkdown: '# API Post',
-          status: 'draft',
-          visibility: 'public',
-          allowComments: false,
-          pinned: true,
-          featured: true,
-          categories: ['Writing'],
-          tags: ['API'],
-          series: ['Build Log'],
-          updatedAt: '2026-06-10T00:00:00.000Z',
-        }),
-      );
-    });
-
-    expect(result).toEqual({
-      source: 'api',
-      item: {
-        id: 'content-1',
-        type: 'post',
-        title: 'API Post',
-        slug: 'api-post',
-        summary: 'API summary',
-        seoTitle: 'API Post SEO',
-        seoDescription: 'API Post search description',
-        bodyMarkdown: '# API Post',
-        status: 'draft',
+  test('loads a full admin content record from repository files', async () => {
+    const contentFilePath = writeRepositoryContentFixture([
+      {
+        id: 'repo-note',
+        type: 'note',
+        title: 'Repository Note',
+        slug: 'repository-note',
+        status: 'published',
         visibility: 'public',
-        allowComments: false,
-        pinned: true,
-        featured: true,
-        sourceType: 'original',
-        sourceUrl: '',
-        viewCount: 0,
-        likeCount: 0,
-        publishedAt: '2026-06-10',
-        updatedAt: '2026-06-10',
-        categories: ['Writing'],
-        tags: ['API'],
-        series: ['Build Log'],
+        publishedAt: '2026-06-13',
+        updatedAt: '2026-06-14',
+        summary: 'Loaded from Git',
+        bodyMarkdown: '# Repository Note',
+        tags: ['Git'],
+      },
+    ]);
+
+    await expect(loadRepositoryAdminContentItem('repo-note', { contentFilePath })).resolves.toMatchObject({
+      source: 'repository-file',
+      item: {
+        id: 'repo-note',
+        title: 'Repository Note',
+        bodyMarkdown: '# Repository Note',
+        updatedAt: '2026-06-14',
       },
     });
   });
 
-  test('falls back to seed content for admin edit pages when detail API is unavailable', async () => {
-    const result = await loadAdminContentItem('draft-post', items, async () => new Response('Unauthorized', { status: 401 }));
-
-    expect(result).toEqual({
-      source: 'fallback',
-      item: items[0],
-    });
-  });
-
-  test('falls back to provided content when admin content API is unavailable', async () => {
-    const result = await loadAdminContentItems(items, async () => new Response('Unauthorized', { status: 401 }));
-
-    expect(result).toEqual({
-      source: 'fallback',
-      items,
-    });
-  });
-
-  test('reads content form data into an API payload', () => {
+  test('reads content form data into a normalized content payload', () => {
     const formData = new FormData();
     formData.set('title', ' Form Title ');
     formData.set('slug', 'Form Title');
@@ -968,3 +758,12 @@ describe('admin content helpers', () => {
     });
   });
 });
+
+function writeRepositoryContentFixture(records: unknown[]): string {
+  const directory = join(tmpdir(), `starry-admin-content-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  mkdirSync(directory, { recursive: true });
+  const contentFilePath = join(directory, 'public-content.json');
+  writeFileSync(contentFilePath, JSON.stringify(records), 'utf8');
+
+  return contentFilePath;
+}

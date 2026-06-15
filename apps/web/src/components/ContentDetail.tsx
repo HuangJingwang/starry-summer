@@ -27,13 +27,24 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const updatedAt = item.updatedAt && item.updatedAt !== item.publishedAt ? item.updatedAt : undefined;
   const taxonomyGroups = getContentTaxonomyLinkGroups(item);
   const cover = getContentCover(item);
-  const apiBaseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
   const cookieHeader = (await cookies()).toString();
-  const readerSession = await loadReaderSession({ apiBaseUrl, cookieHeader });
+  const readerSession = await loadReaderSession({ cookieHeader });
   const approvedComments = isCommentTargetType(item.type) && canShowComments(item)
     ? await loadApprovedComments(item.type, item.id)
     : [];
   const { anchored: anchoredComments, regular: regularComments } = splitAnchoredComments(approvedComments);
+  const tableOfContentsNav = tableOfContents.length > 0 ? (
+    <nav className="detail-toc" aria-label="文章目录">
+      <p className="eyebrow">目录</p>
+      <ol>
+        {tableOfContents.map((heading) => (
+          <li key={heading.slug} className={`detail-toc__item detail-toc__item--depth-${heading.depth}`}>
+            <a href={`#${heading.slug}`}>{heading.text}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  ) : null;
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="评论">
       <h2>评论</h2>
@@ -92,29 +103,22 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         </div>
       ))}
       {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
-      {tableOfContents.length > 0 ? (
-        <nav className="detail-toc" aria-label="文章目录">
-          <p className="eyebrow">目录</p>
-          <ol>
-            {tableOfContents.map((heading) => (
-              <li key={heading.slug} className={`detail-toc__item detail-toc__item--depth-${heading.depth}`}>
-                <a href={`#${heading.slug}`}>{heading.text}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      ) : null}
-      <CodeCopyEnhancer />
-      <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-      {isCommentTargetType(item.type) && canShowComments(item) ? (
-        <InlineCommentLayer
-          targetType={item.type}
-          targetId={item.id}
-          reader={readerSession.authenticated ? readerSession : null}
-          loginNextPath={`${getContentHref(item)}#comments`}
-          comments={anchoredComments}
-        />
-      ) : null}
+      <div className={`detail-reader ${tableOfContentsNav ? 'detail-reader--with-toc' : 'detail-reader--no-toc'}`}>
+        {tableOfContentsNav}
+        <div className="detail-reader__main">
+          <CodeCopyEnhancer />
+          <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+          {isCommentTargetType(item.type) && canShowComments(item) ? (
+            <InlineCommentLayer
+              targetType={item.type}
+              targetId={item.id}
+              reader={readerSession.authenticated ? readerSession : null}
+              loginNextPath={`${getContentHref(item)}#comments`}
+              comments={anchoredComments}
+            />
+          ) : null}
+        </div>
+      </div>
       {adjacent ? (
         <nav className="adjacent-content" aria-label="相邻内容">
           {adjacent.previous ? (

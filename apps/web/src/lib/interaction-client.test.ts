@@ -3,31 +3,43 @@ import { describe, expect, test } from 'vitest';
 import {
   buildAdminModerationListRequest,
   buildCommentRequest,
-  buildGuestbookRequest,
   buildDedupedLikeRequest,
   buildDedupedViewRequest,
-  createPersistentInteractionSeenStore,
+  buildGuestbookRequest,
   buildLikeRequest,
   buildModerationActionRequest,
   buildModerationDeleteRequest,
   buildViewRequest,
+  createPersistentInteractionSeenStore,
   loadAdminModerationCount,
   normalizeModerationRecord,
   PUBLIC_SUBMISSION_LIMITS,
   readInteractionErrorMessage,
 } from './interaction-client';
 
+const workerBaseUrl = 'https://interactions.example.workers.dev';
+
 describe('interaction client helpers', () => {
-  test('exposes public submission field limits that match the API validation contract', () => {
+  test('exposes public submission field limits that match the Worker validation contract', () => {
     expect(PUBLIC_SUBMISSION_LIMITS).toEqual({
       authorName: 80,
       body: 2000,
     });
   });
 
-  test('builds like request', () => {
-    expect(buildLikeRequest('post', 'post-1')).toEqual({
-      url: '/api/likes/post/post-1',
+  test('does not build local database API requests when the interaction Worker is not configured', () => {
+    expect(buildLikeRequest('post', 'post-1')).toBeNull();
+    expect(buildViewRequest('post', 'post-1')).toBeNull();
+    expect(buildCommentRequest({ targetType: 'post', targetId: 'post-1', body: 'Nice' })).toBeNull();
+    expect(buildGuestbookRequest({ body: 'Hello' })).toBeNull();
+    expect(buildAdminModerationListRequest('comments')).toBeNull();
+    expect(buildModerationActionRequest('comments', 'comment-1', 'approved')).toBeNull();
+    expect(buildModerationDeleteRequest('comments', 'comment-1')).toBeNull();
+  });
+
+  test('builds public interaction requests against the Worker endpoint', () => {
+    expect(buildLikeRequest('post', 'post-1', { interactionBaseUrl: workerBaseUrl })).toEqual({
+      url: `${workerBaseUrl}/likes/post/post-1`,
       init: {
         method: 'POST',
         headers: {
@@ -35,37 +47,29 @@ describe('interaction client helpers', () => {
         },
       },
     });
+    expect(buildViewRequest('post', 'post-1', { interactionBaseUrl: `${workerBaseUrl}/` })?.url).toBe(
+      `${workerBaseUrl}/views/post/post-1`,
+    );
+    expect(buildCommentRequest({ targetType: 'post', targetId: 'post-1', body: 'Nice' }, { interactionBaseUrl: workerBaseUrl })?.url).toBe(
+      `${workerBaseUrl}/comments`,
+    );
+    expect(buildGuestbookRequest({ body: 'Hello' }, { interactionBaseUrl: workerBaseUrl })?.url).toBe(
+      `${workerBaseUrl}/guestbook`,
+    );
   });
 
-  test('builds view request', () => {
-    expect(buildViewRequest('post', 'post-1')).toEqual({
-      url: '/api/views/post/post-1',
-      init: {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-        },
-      },
-    });
+  test('builds view and like requests only once per local target when a Worker is configured', () => {
+    const seenViews = new Set<string>();
+    const seenLikes = new Set<string>();
+    const options = { interactionBaseUrl: workerBaseUrl };
+
+    expect(buildDedupedViewRequest('post', 'post-1', seenViews, options)).toEqual(buildViewRequest('post', 'post-1', options));
+    expect(buildDedupedViewRequest('post', 'post-1', seenViews, options)).toBeNull();
+    expect(buildDedupedLikeRequest('post', 'post-1', seenLikes, options)).toEqual(buildLikeRequest('post', 'post-1', options));
+    expect(buildDedupedLikeRequest('post', 'post-1', seenLikes, options)).toBeNull();
   });
 
-  test('builds view requests only once per local target', () => {
-    const seen = new Set<string>();
-
-    expect(buildDedupedViewRequest('post', 'post-1', seen)).toEqual(buildViewRequest('post', 'post-1'));
-    expect(buildDedupedViewRequest('post', 'post-1', seen)).toBeNull();
-    expect(buildDedupedViewRequest('note', 'note-1', seen)).toEqual(buildViewRequest('note', 'note-1'));
-  });
-
-  test('builds like requests only once per local target', () => {
-    const seen = new Set<string>();
-
-    expect(buildDedupedLikeRequest('post', 'post-1', seen)).toEqual(buildLikeRequest('post', 'post-1'));
-    expect(buildDedupedLikeRequest('post', 'post-1', seen)).toBeNull();
-    expect(buildDedupedLikeRequest('post', 'post-2', seen)).toEqual(buildLikeRequest('post', 'post-2'));
-  });
-
-  test('persists seen likes across browser reloads', () => {
+  test('does not mark seen interactions when no Worker request can be built', () => {
     const writes: string[] = [];
     const storage = {
       getItem: (key: string) =>
@@ -77,19 +81,40 @@ describe('interaction client helpers', () => {
     const seen = createPersistentInteractionSeenStore(new Set<string>(), storage);
 
     expect(buildDedupedLikeRequest('post', 'post-1', seen)).toBeNull();
-    expect(buildDedupedLikeRequest('post', 'post-2', seen)).toEqual(buildLikeRequest('post', 'post-2'));
+    expect(buildDedupedLikeRequest('post', 'post-2', seen)).toBeNull();
+    expect(writes).toEqual([]);
+  });
+
+  test('persists seen likes across browser reloads after a Worker request is built', () => {
+    const writes: string[] = [];
+    const storage = {
+      getItem: (key: string) =>
+        key === 'starry-summer:seen-interactions' ? JSON.stringify(['like:post:post-1']) : null,
+      setItem: (_key: string, value: string) => {
+        writes.push(value);
+      },
+    };
+    const seen = createPersistentInteractionSeenStore(new Set<string>(), storage);
+
+    expect(buildDedupedLikeRequest('post', 'post-1', seen, { interactionBaseUrl: workerBaseUrl })).toBeNull();
+    expect(buildDedupedLikeRequest('post', 'post-2', seen, { interactionBaseUrl: workerBaseUrl })).toEqual(
+      buildLikeRequest('post', 'post-2', { interactionBaseUrl: workerBaseUrl }),
+    );
     expect(JSON.parse(writes.at(-1) ?? '[]')).toEqual(['like:post:post-1', 'like:post:post-2']);
   });
 
-  test('builds comment request', () => {
+  test('builds comment and guestbook request bodies for the Worker', () => {
     expect(
-      buildCommentRequest({
-        targetType: 'post',
-        targetId: 'post-1',
-        body: ' Nice post. ',
-      }),
+      buildCommentRequest(
+        {
+          targetType: 'post',
+          targetId: 'post-1',
+          body: ' Nice post. ',
+        },
+        { interactionBaseUrl: workerBaseUrl },
+      ),
     ).toEqual({
-      url: '/api/comments',
+      url: `${workerBaseUrl}/comments`,
       init: {
         method: 'POST',
         credentials: 'include',
@@ -103,30 +128,31 @@ describe('interaction client helpers', () => {
         }),
       },
     });
-    expect(buildCommentRequest({ targetType: 'post', targetId: 'post-1', body: ' Nice post. ' }).init.body).toBe(
+    expect(buildGuestbookRequest({ body: ' Hello. ' }, { interactionBaseUrl: workerBaseUrl })?.init.body).toBe(
       JSON.stringify({
-        targetType: 'post',
-        targetId: 'post-1',
-        body: 'Nice post.',
+        body: 'Hello.',
       }),
     );
   });
 
-  test('builds anchored inline comment request', () => {
+  test('builds anchored inline comment request bodies', () => {
     expect(
-      buildCommentRequest({
-        targetType: 'post',
-        targetId: 'post-1',
-        body: ' Inline note. ',
-        anchor: {
-          text: 'selected passage',
-          prefix: 'before',
-          suffix: 'after',
-          start: 12,
-          end: 28,
-          hash: 'a'.repeat(64),
+      buildCommentRequest(
+        {
+          targetType: 'post',
+          targetId: 'post-1',
+          body: ' Inline note. ',
+          anchor: {
+            text: 'selected passage',
+            prefix: 'before',
+            suffix: 'after',
+            start: 12,
+            end: 28,
+            hash: 'a'.repeat(64),
+          },
         },
-      }).init.body,
+        { interactionBaseUrl: workerBaseUrl },
+      )?.init.body,
     ).toBe(
       JSON.stringify({
         targetType: 'post',
@@ -144,43 +170,14 @@ describe('interaction client helpers', () => {
     );
   });
 
-  test('builds credentialed guestbook request without accepting a forged author name', () => {
-    expect(buildGuestbookRequest({ body: ' Hello. ' })).toEqual({
-      url: '/api/guestbook',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          body: 'Hello.',
-        }),
-      },
-    });
-    expect(buildGuestbookRequest({ body: ' Hello. ' }).init.body).toBe(
-      JSON.stringify({
-        body: 'Hello.',
-      }),
-    );
-  });
-
-  test('builds admin moderation list requests', () => {
-    expect(buildAdminModerationListRequest('comments')).toEqual({
-      url: '/api/admin/comments',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-    expect(buildAdminModerationListRequest('guestbook', 'pending').url).toBe('/api/admin/guestbook?status=pending');
+  test('builds admin moderation requests against the Worker endpoint', () => {
     expect(
       buildAdminModerationListRequest('comments', 'pending', {
-        apiBaseUrl: 'https://api.example.com/',
+        interactionBaseUrl: `${workerBaseUrl}/`,
         cookieHeader: 'ss_session=session-token',
       }),
     ).toEqual({
-      url: 'https://api.example.com/admin/comments?status=pending',
+      url: `${workerBaseUrl}/admin/comments?status=pending`,
       init: {
         method: 'GET',
         credentials: 'include',
@@ -189,11 +186,22 @@ describe('interaction client helpers', () => {
         },
       },
     });
+    expect(buildAdminModerationListRequest('guestbook', 'pending', { interactionBaseUrl: workerBaseUrl })?.url).toBe(
+      `${workerBaseUrl}/admin/guestbook?status=pending`,
+    );
+    expect(buildModerationActionRequest('comments', 'comment-1', 'approved', { interactionBaseUrl: workerBaseUrl })?.url).toBe(
+      `${workerBaseUrl}/admin/comments/comment-1/moderate`,
+    );
+    expect(buildModerationDeleteRequest('guestbook', 'entry-1', { interactionBaseUrl: workerBaseUrl })?.url).toBe(
+      `${workerBaseUrl}/admin/guestbook/entry-1`,
+    );
   });
 
-  test('loads moderation counts with fallback on API failure', async () => {
+  test('loads moderation counts with fallback when the Worker is absent or unavailable', async () => {
+    await expect(loadAdminModerationCount('comments', 'pending')).resolves.toBe(0);
     await expect(
       loadAdminModerationCount('comments', 'pending', {
+        interactionBaseUrl: workerBaseUrl,
         fetcher: async () =>
           new Response(
             JSON.stringify([
@@ -206,38 +214,13 @@ describe('interaction client helpers', () => {
 
     await expect(
       loadAdminModerationCount('guestbook', 'pending', {
+        interactionBaseUrl: workerBaseUrl,
         fetcher: async () => new Response('Unauthorized', { status: 401 }),
       }),
     ).resolves.toBe(0);
   });
 
-  test('builds moderation action requests', () => {
-    expect(buildModerationActionRequest('comments', 'comment-1', 'approved')).toEqual({
-      url: '/api/admin/comments/comment-1/moderate',
-      init: {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'approved' }),
-      },
-    });
-    expect(buildModerationActionRequest('guestbook', 'entry-1', 'rejected').url).toBe('/api/admin/guestbook/entry-1/moderate');
-  });
-
-  test('builds moderation delete requests', () => {
-    expect(buildModerationDeleteRequest('comments', 'comment-1')).toEqual({
-      url: '/api/admin/comments/comment-1',
-      init: {
-        method: 'DELETE',
-        credentials: 'include',
-      },
-    });
-    expect(buildModerationDeleteRequest('guestbook', 'entry-1').url).toBe('/api/admin/guestbook/entry-1');
-  });
-
-  test('reads specific interaction API error messages', async () => {
+  test('reads specific interaction Worker error messages', async () => {
     await expect(
       readInteractionErrorMessage(
         new Response(JSON.stringify({ message: 'Comment was already moderated' }), {

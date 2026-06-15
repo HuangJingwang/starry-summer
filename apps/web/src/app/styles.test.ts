@@ -20,6 +20,7 @@ describe('global styles', () => {
     const adminCss = readStylesheet('src/app/styles/admin.css');
     const responsiveCss = readStylesheet('src/app/styles/responsive.css');
 
+    expect(baseCss.charCodeAt(0)).not.toBe(0xfeff);
     expect(rootLayout).toContain("import './styles.css';");
     expect(rootLayout).toContain("import './styles/admin.css';");
     expect(rootLayout).toContain("import './styles/responsive.css';");
@@ -29,6 +30,21 @@ describe('global styles', () => {
     expect(adminCss).toContain('.admin-primary-nav a[aria-current="page"]');
     expect(responsiveCss).toContain('@media (max-width: 820px)');
     expect(responsiveCss).toContain('.admin-layout,');
+  });
+
+  test('loads Averia only for public display typography', () => {
+    const rootLayout = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
+    const css = readGlobalStyles();
+
+    expect(rootLayout).toContain('family=Averia+Gruesa+Libre&display=swap');
+    expect(rootLayout).not.toContain('family=Noto+Serif+SC');
+    expect(css).toContain('--font-display: "Averia Gruesa Libre", Arial, Helvetica, sans-serif;');
+    expect(css).toContain('--font-nav: "PingFang SC", -apple-system, system-ui');
+    expect(css).toContain('.brand span:last-child');
+    expect(css).toContain('.portfolio-hero__name');
+    expect(css).toContain('.portfolio-hero__role');
+    expect(css).toContain('font-family: var(--font-display);');
+    expect(readStylesheet('src/app/styles/admin.css')).not.toContain('Averia Gruesa Libre');
   });
 
   test('defines a system dark mode palette for public and admin surfaces', () => {
@@ -104,42 +120,224 @@ describe('global styles', () => {
 
   test('defines the README screenshot portfolio hero without the abandoned landing system', () => {
     const css = readGlobalStyles();
+    const latestCardBlock = css.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const likeCardBlock = css.match(/\.portfolio-hero__like-card\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const likeCardBadgeBlock = css.match(/\.portfolio-hero__like-card span\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayHomeBodyBlock =
+      css.match(/:root\[data-theme='summer-day'\] body:has\(\.portfolio-home\)\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayPortfolioHomeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-home\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayPortfolioHomeBeforeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-home::before\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHeroBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const heroBlock = css.match(/^\.portfolio-hero\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const dayHeroBeforeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero::before\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHeroShadeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__shade\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const heroShadeBlock = css.match(/^\.portfolio-hero__shade\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const heroShadeBeforeBlock =
+      css.match(/^\.portfolio-hero__shade::before\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const heroShadeAfterBlock =
+      [...css.matchAll(/^\.portfolio-hero__shade::after\s*{(?<body>[\s\S]*?)\n}/gm)]
+        .map((match) => match.groups?.body ?? '')
+        .find((block) => block.includes('night-milky-dust')) ?? '';
+    const dayHeroShadeBeforeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__shade::before\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHeroShadeAfterBlock =
+      [...css.matchAll(/:root\[data-theme='summer-day'\] \.portfolio-hero__shade::after\s*{(?<body>[\s\S]*?)\n}/g)]
+        .at(-1)
+        ?.groups?.body ?? '';
+    const nightBackgroundVarBlock = css.match(/--public-home-background:\s*(?<body>[^;]+);/)?.groups?.body ?? '';
+    const heroAfterBlock =
+      [...css.matchAll(/^\.portfolio-hero::after\s*{(?<body>[\s\S]*?)\n}/gm)]
+        .map((match) => match.groups?.body ?? '')
+        .find((block) => block.includes('animation: none;')) ?? '';
 
     expect(css).toContain('.portfolio-home');
     expect(css).toContain('.portfolio-hero');
     expect(css).toContain('.portfolio-hero__content');
+    expect(css).toContain('.portfolio-hero__left-stack');
+    expect(css).toContain('.portfolio-hero__center-stack');
+    expect(css).toContain('.portfolio-hero__intro-card');
+    expect(css).toContain('.portfolio-hero__latest-card');
+    expect(css).toContain('grid-area: nav;');
+    expect(css).toContain('grid-area: latest;');
+    expect(css).toContain('grid-area: intro;');
+    expect(css).toContain('grid-area: actions;');
+    expect(css).toContain('grid-area: portrait;');
+    expect(css).not.toContain('grid-area: pulse;');
+    expect(latestCardBlock).toContain('border-radius: 32px;');
+    expect(latestCardBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(latestCardBlock).toContain('align-self: stretch;');
+    expect(latestCardBlock).toContain('justify-self: stretch;');
+    expect(latestCardBlock).toContain('width: 100%;');
+    expect(latestCardBlock).toContain('translate: var(--portfolio-left-stack-offset) -12px;');
+    expect(css).toContain('.portfolio-hero__latest-card img');
+    expect(css).toContain('.portfolio-hero__latest-cover');
+    expect(css).toContain('-webkit-line-clamp: 1;');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__latest-card");
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__intro-card");
+    expect(css).toContain('.portfolio-hero__like-card');
+    expect(css).toContain('.portfolio-hero__like-row');
+    expect(likeCardBlock).toContain('border: 1px solid rgba(255, 255, 255, 0.2);');
+    expect(likeCardBlock).toContain('border-radius: 999px;');
+    expect(likeCardBlock).toContain('height: 48px;');
+    expect(likeCardBlock).toContain('width: 48px;');
+    expect(likeCardBlock).toContain('padding: 9px;');
+    expect(likeCardBlock).toContain('overflow: visible;');
+    expect(css).toContain('.portfolio-hero__like-card span');
+    expect(likeCardBadgeBlock).toContain('min-width: 28px;');
+    expect(likeCardBadgeBlock).toContain('left: 28px;');
+    expect(likeCardBadgeBlock).toContain('top: -8px;');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__like-card");
     expect(css).toContain('.portfolio-hero__name');
     expect(css).toContain('.portfolio-hero__role');
-    expect(css).toContain('.portfolio-hero__stats');
-    expect(css).toContain('grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));');
-    expect(css).toContain('.portfolio-hero__stats div');
-    expect(css).toContain('min-width: 0;');
-    expect(css).toContain('.portfolio-hero__stats dd');
-    expect(css).toContain('max-width: 100%;');
-    expect(css).toContain('overflow-wrap: anywhere;');
-    expect(css).not.toContain('.portfolio-hero__stats dd {\n  color: #fff;\n  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;\n  font-size: clamp(1.18rem, 2vw, 1.6rem);\n  font-weight: 900;\n  margin: 0;\n  white-space: nowrap;\n}');
+    expect(css).not.toContain('.portfolio-hero__info-panel');
+    expect(css).not.toContain('.portfolio-hero__stats');
+    expect(css).not.toContain('.portfolio-hero__stat-icon');
     expect(css).toContain('.portfolio-hero__actions');
+    expect(css).toContain('border-top: 1px solid rgba(148, 163, 184, 0.1);');
+    expect(css).toContain('.portfolio-hero__visual');
     expect(css).toContain('.portfolio-hero__portrait');
+    expect(css).not.toContain('.portfolio-hero__status-card');
     expect(css).toContain('.portfolio-hero__night-avatar');
     expect(css).toContain('.portfolio-hero__day-avatar');
+    expect(css).toContain('.portfolio-hero__shade::before');
+    expect(css).toContain('.portfolio-hero__shade::after');
+    expect(heroShadeBeforeBlock).toContain('animation: night-milky-way-drift 34s');
+    expect(heroShadeBeforeBlock).toContain('rgba(248, 250, 252, 0.18)');
+    expect(heroShadeBeforeBlock).toContain('filter: blur(18px);');
+    expect(heroShadeBeforeBlock).toContain('mix-blend-mode: screen;');
+    expect(heroShadeBeforeBlock).toContain('transform: rotate(-13deg) translate3d(-20px, 0, 0);');
+    expect(heroShadeAfterBlock).toContain('animation: night-milky-dust 18s');
+    expect(heroShadeAfterBlock).toContain('radial-gradient(circle at 26% 48%, rgba(255, 255, 255, 0.36) 0 1px, transparent 2px)');
+    expect(heroShadeAfterBlock).toContain('mix-blend-mode: screen;');
+    expect(css).toContain('@keyframes night-milky-way-drift');
+    expect(css).toContain('@keyframes night-milky-dust');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__actions");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__night-avatar");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__day-avatar");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__signal");
     expect(css).toContain('.portfolio-hero__scroll');
+    expect(css).toContain(".portfolio-home[data-scroll-locked='true'] .portfolio-hero__scroll");
+    expect(css).toContain('.portfolio-home .content-section[data-anchor-active=\'true\']');
+    expect(css).toContain('animation: home-anchor-rise 760ms cubic-bezier(0.16, 1, 0.3, 1);');
+    expect(css).toContain('@keyframes home-anchor-rise');
+    expect(css).toContain('position: fixed;');
+    expect(css).toContain('.portfolio-hero__scroll-orb');
+    expect(css).toContain('.portfolio-hero__scroll-star');
+    expect(css).toContain('.portfolio-hero__scroll-tide');
+    expect(css).toContain('.portfolio-hero__wave-svg');
+    expect(css).toContain('.portfolio-hero__wave-layer');
+    expect(css).toContain('.portfolio-hero__wave-layer--back');
+    expect(css).toContain('.portfolio-hero__wave-layer--mid');
+    expect(css).toContain('.portfolio-hero__wave-layer--wash');
+    expect(css).toContain('.portfolio-hero__wave-layer--front');
+    expect(css).toContain('.portfolio-hero__wave-layer--foam');
+    expect(css).toContain('.portfolio-hero__wave-layer--lace');
+    expect(css).toContain('.portfolio-hero__shore-surge');
+    expect(css).toContain('.portfolio-hero__shore-surge--wash');
+    expect(css).toContain('.portfolio-hero__shore-surge--foam');
+    expect(css).toContain('.portfolio-hero__scroll-label');
+    expect(css).toContain('.portfolio-hero__scroll-arrow');
+    expect(css).toContain('.portfolio-hero__scroll-arrow--one');
+    expect(css).toContain('.portfolio-hero__scroll-arrow--two');
+    expect(css).toContain('.portfolio-hero__scroll-arrow--three');
+    expect(css).toContain('animation: scroll-entry-breathe');
+    expect(css).toContain('animation: scroll-arrow-drop');
+    expect(css).toContain('animation: scroll-star-fall');
+    expect(css).toContain('animation: scroll-wave-drift');
+    expect(css).toContain('animation: shore-wave-runup');
+    expect(css).toContain('animation: shore-foam-runup');
+    expect(css).toContain('animation: shore-crest-sweep');
+    expect(css).toContain('animation: shore-surge-wash');
+    expect(css).toContain('animation: shore-surge-foam');
+    expect(css).toContain('@keyframes scroll-entry-breathe');
+    expect(css).toContain('@keyframes scroll-arrow-drop');
+    expect(css).toContain('@keyframes scroll-star-fall');
+    expect(css).toContain('@keyframes scroll-wave-drift');
+    expect(css).toContain('@keyframes shore-wave-runup');
+    expect(css).toContain('@keyframes shore-wave-return');
+    expect(css).toContain('@keyframes shore-foam-runup');
+    expect(css).toContain('@keyframes shore-wet-sheen');
+    expect(css).toContain('@keyframes shore-crest-sweep');
+    expect(css).toContain('@keyframes shore-surge-wash');
+    expect(css).toContain('@keyframes shore-surge-foam');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__scroll {");
+    expect(css).toContain('min-height: 104px;');
+    expect(css).toContain('background: transparent;');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__scroll-orb");
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__scroll-tide");
+    expect(css).toContain('display: none;');
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(css).toContain(".portfolio-home .content-section[data-anchor-active='true']");
+    expect(readStylesheet('src/app/page.tsx')).toContain('BlurredBubblesCanvas');
+    expect(css).toContain('.portfolio-hero__bubbles');
+    expect(css).toContain('filter: blur(50px) saturate(1.12);');
+    expect(css).toContain('opacity: 0;');
     expect(css).toContain('.portfolio-hero__canvas');
     expect(css).toContain('min-height: 100vh;');
     expect(css).toContain('.theme-toggle');
+    expect(css).toContain('.portfolio-hero::before');
+    expect(css).toContain('.portfolio-hero::after');
+    expect(css).toContain('animation: night-sky-drift');
+    expect(css).toContain('@keyframes night-sky-drift');
+    expect(nightBackgroundVarBlock.trim()).toBe('#02040b');
+    expect(heroBlock).toContain('background: #02040b;');
+    expect(heroAfterBlock).toContain('animation: none;');
+    expect(heroAfterBlock).toContain('background: transparent;');
+    expect(heroAfterBlock).toContain('opacity: 0;');
+    expect(heroShadeBlock).toContain('background: transparent;');
+    expect(heroShadeBlock).not.toContain('linear-gradient');
+    expect(heroShadeBlock).not.toContain('radial-gradient');
     expect(css).toContain(':root[data-theme=\'summer-day\'] .portfolio-home');
-    expect(css).toContain('rgba(255, 213, 105');
+    expect(css).toContain('#cfe8f2');
+    expect(dayHomeBodyBlock).toContain('linear-gradient(135deg, #cfe8f2 0%, #ddf3f4 52%, #edf8e8 100%)');
+    expect(dayPortfolioHomeBlock).toContain('linear-gradient(135deg, #cfe8f2 0%, #ddf3f4 52%, #edf8e8 100%)');
+    expect(dayHeroBlock).toContain('background: transparent;');
+    expect(dayHomeBodyBlock).toContain('radial-gradient(circle at 48% 0%');
+    expect(dayPortfolioHomeBlock).toContain('radial-gradient(circle at 48% 0%');
+    expect(dayHeroBlock).not.toContain('linear-gradient');
+    expect(dayHeroBlock).not.toContain('radial-gradient');
     expect(css).toContain('--summer-sky');
     expect(css).toContain('--summer-cloud');
     expect(css).toContain('--summer-sea');
-    expect(css).toContain('summer-breeze');
-    expect(css).toContain('summer-cloud-drift');
-    expect(css).toContain('summer-shore-breath');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const bottomBandStart = 0.8;');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const targetFrameMs = 1000 / 6;');
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-home::before");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-home::after");
+    expect(dayPortfolioHomeBeforeBlock).toContain('height: 0;');
+    expect(dayPortfolioHomeBeforeBlock).toContain('opacity: 0;');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__bubbles");
+    expect(css).toContain('filter: blur(50px);');
+    expect(css).toContain('opacity: 1;');
     expect(css).toContain(':root[data-theme=\'summer-day\'] .portfolio-hero__canvas');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('Math.floor(190 * density) + 70');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % 150 === 0');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('createRadialGradient');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('LightDust');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('MistLayer');
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__shade::before");
+    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__shade::after");
+    expect(dayHeroBeforeBlock).toContain('background: transparent;');
+    expect(dayHeroBeforeBlock).toContain('opacity: 0;');
+    expect(dayHeroShadeBlock).toContain('background: transparent;');
+    expect(dayHeroShadeBeforeBlock).toContain('animation: none;');
+    expect(dayHeroShadeBeforeBlock).toContain('background: transparent;');
+    expect(dayHeroShadeBeforeBlock).toContain('opacity: 0;');
+    expect(dayHeroShadeAfterBlock).toContain('animation: none;');
+    expect(dayHeroShadeAfterBlock).toContain('background: transparent;');
+    expect(dayHeroShadeAfterBlock).toContain('opacity: 0;');
     expect(css).not.toContain('.home-landing');
     expect(css).not.toContain('.home-overview');
     expect(css).not.toContain('animation: home-scroll-float');
@@ -153,15 +351,17 @@ describe('global styles', () => {
   test('keeps a distinct avatar for the summer night and day home themes', () => {
     const css = readGlobalStyles();
     const nightAvatarBlock = css.match(/\.portfolio-hero__night-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const summerDayHiddenNightBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__night-avatar,\s*:root\[data-theme='summer-day'\] \.portfolio-hero__signal\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
     const summerDayAvatarBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__day-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
 
     expect(nightAvatarBlock).toContain('display: block;');
-    expect(css).toContain('.portfolio-hero__day-avatar {\n  display: none;\n}');
-    expect(css).toContain(
-      ":root[data-theme='summer-day'] .portfolio-hero__night-avatar,\n:root[data-theme='summer-day'] .portfolio-hero__signal {\n  display: none;\n}",
-    );
+    expect(css).toMatch(/\.portfolio-hero__day-avatar\s*{\s*display: none;\s*}/);
+    expect(summerDayHiddenNightBlock).toContain('display: none;');
     expect(summerDayAvatarBlock).toContain('display: block;');
   });
 
@@ -198,10 +398,39 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .home-dashboard");
     expect(css).toContain(":root[data-theme='summer-day'] .home-profile h2");
     expect(css).toContain(":root[data-theme='summer-day'] .home-focus a");
-    expect(dayDashboardBlock).toContain('rgba(255, 255, 244');
+    expect(dayDashboardBlock).toContain('rgba(250, 255, 239');
+    expect(dayDashboardBlock).toContain('var(--summer-archive-grid)');
+    expect(dayDashboardBlock).toContain('background-size: 160% 100%');
     expect(dayDashboardBlock).not.toContain('#07100f');
-    expect(dayFocusCardBlock).toContain('rgba(255, 255, 244');
-    expect(dayHomeHeadingBlock).toContain('#17343a');
+    expect(dayFocusCardBlock).toContain('var(--summer-panel)');
+    expect(dayFocusCardBlock).toContain('var(--summer-panel-sheen)');
+    expect(dayFocusCardBlock).toContain('var(--summer-glint)');
+    expect(dayHomeHeadingBlock).toContain('var(--summer-ink)');
+  });
+
+  test('styles the home writing, notes, moments, and archive modules as lightweight personal-site sections', () => {
+    const css = readGlobalStyles();
+    const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+    const journalItemBlock = css.match(/\.home-journal-list a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayJournalBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.home-journal-list a,[\s\S]*?\.home-archive-links a\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+
+    expect(css).toContain('.home-journal-list');
+    expect(css).toContain('.home-moment-strip');
+    expect(css).toContain('.home-archive-links');
+    expect(css).toContain('.content-section--journal');
+    expect(css).toContain('.content-section--moments');
+    expect(css).toContain('.content-section--archive');
+    expect(journalItemBlock).toContain('grid-template-columns: minmax(90px, 0.18fr) minmax(160px, 0.32fr) minmax(0, 1fr);');
+    expect(journalItemBlock).toContain('min-height: 84px;');
+    expect(css).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
+    expect(dayJournalBlock).toContain('rgba(255, 255, 244');
+    expect(dayJournalBlock).toContain('var(--summer-line)');
+    expect(responsiveCss).toContain('.home-journal-list a');
+    expect(responsiveCss).toContain('.home-moment-strip');
+    expect(responsiveCss).toContain('.home-archive-links');
   });
 
   test('adds non-interactive summer details across the day home sections', () => {
@@ -229,13 +458,20 @@ describe('global styles', () => {
 
   test('keeps the portfolio home navigation visible while preserving the full-screen hero', () => {
     const css = readGlobalStyles();
-    const heroBlock = css.match(/\.portfolio-hero\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const heroBlock = css.match(/\n\.portfolio-hero\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const portfolioHomeBlock = css.match(/\.portfolio-home,[\s\S]*?\.portfolio-about-panel\s*{(?<body>[\s\S]*?)\n}/)?.groups
       ?.body ?? '';
 
     expect(heroBlock).toContain('min-height: 100vh;');
     expect(portfolioHomeBlock).toContain('color: var(--cyber-ink);');
-    expect(css).toContain('body:has(.portfolio-home) .site-header');
+    expect(css).toContain('--home-header-height: 67px;');
+    expect(css).toContain('body:has(.portfolio-home) .portfolio-hero {');
+    expect(css).toContain('min-height: 100svh;');
+    expect(css).toContain('body:has(.portfolio-home) .portfolio-hero .cyber-home__container');
+    expect(css).toContain('.portfolio-hero__card-nav');
+    expect(css).toContain('.portfolio-hero__nav-card');
+    expect(css).toContain('.portfolio-hero__nav-brand');
+    expect(css).toContain('.portfolio-hero__nav-links');
     expect(css).not.toContain('body:has(.portfolio-home) .site-footer');
   });
 
@@ -253,6 +489,10 @@ describe('global styles', () => {
   test('styles the shared navigation as a reference-style floating nav card', () => {
     const css = readGlobalStyles();
     const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+    const siteHeaderBlock = css.match(/^\.site-header\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const siteNavItemsBlocks = [...css.matchAll(/^\.site-nav__items\s*{(?<body>[\s\S]*?)\n}/gm)];
+    const siteNavItemsBlock = siteNavItemsBlocks.at(-1)?.groups?.body ?? '';
+    const siteNavHoverBlock = css.match(/\.site-nav__hover\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteNavLinkBlock = css.match(/\.site-nav a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const mobileSiteNavItemsBlock =
       responsiveCss.match(/\.site-nav__items\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
@@ -260,57 +500,443 @@ describe('global styles', () => {
     expect(css).toContain('.site-header');
     expect(css).toContain('.site-nav-card');
     expect(css).toContain('.site-nav-card__brand');
-    expect(css).toContain('.site-nav-card__group-label');
+    expect(css).toContain('.brand-avatar');
     expect(css).toContain('.site-nav__items');
     expect(css).toContain('.site-nav');
-    expect(css).toContain('.site-search');
-    expect(css).toContain('.site-search input');
-    expect(css).toContain('width: min(100% - 32px, 760px);');
-    expect(css).toContain('border-radius: 22px;');
-    expect(siteNavLinkBlock).toContain('min-height: 34px;');
-    expect(siteNavLinkBlock).toContain('padding: 0 12px;');
+    expect(siteHeaderBlock).toContain('display: flex;');
+    expect(siteHeaderBlock).toContain('width: 340px;');
+    expect(siteHeaderBlock).toContain('border-radius: 24px;');
+    expect(siteHeaderBlock).toContain('min-height: 64px;');
+    expect(siteHeaderBlock).toContain('gap: 24px;');
+    expect(siteHeaderBlock).toContain('padding: 12px;');
+    expect(siteHeaderBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(css).toContain('.site-nav__icon');
+    expect(css).toContain('.site-nav__icon::before');
+    expect(css).toContain('.site-nav__icon::after');
+    expect(css).toContain('.site-nav__label');
+    expect(css).toContain('.site-nav__hover');
+    expect(css).toContain(".site-nav a[aria-current='page']");
+    expect(siteNavItemsBlock).toContain('--nav-hover-extra: 8px;');
+    expect(siteNavItemsBlock).toContain('--nav-hover-size: calc(var(--nav-item-size) + var(--nav-hover-extra) * 2);');
+    expect(siteNavItemsBlock).toContain('--nav-item-gap: 24px;');
+    expect(siteNavItemsBlock).toContain('--nav-item-size: 28px;');
+    expect(siteNavItemsBlock).toContain('display: flex;');
+    expect(siteNavItemsBlock).toContain('position: relative;');
+    expect(siteNavHoverBlock).toContain('height: var(--nav-hover-size);');
+    expect(siteNavHoverBlock).toContain('width: var(--nav-hover-size);');
+    expect(siteNavHoverBlock).toContain('top: calc(var(--nav-hover-extra) * -1);');
+    expect(siteNavHoverBlock).toContain('transform: translate3d(calc(var(--hover-index, var(--active-index, 0)) * (var(--nav-item-size) + var(--nav-item-gap)) - var(--nav-hover-extra)), 0, 0);');
+    expect(siteNavHoverBlock).toContain('transition:');
+    expect(siteNavHoverBlock).toContain('cubic-bezier(0.22, 1.12, 0.32, 1)');
+    expect(siteNavHoverBlock).toContain('pointer-events: none;');
+    expect(siteNavLinkBlock).toContain('font-family: var(--font-nav);');
+    expect(siteNavLinkBlock).toContain('font-weight: 400;');
+    expect(siteNavLinkBlock).toContain('letter-spacing: 0;');
+    expect(siteNavLinkBlock).toContain('min-height: var(--nav-item-size);');
+    expect(siteNavLinkBlock).toContain('width: var(--nav-item-size);');
+    expect(siteNavLinkBlock).toContain('padding: 0;');
     expect(siteNavLinkBlock).toContain('display: inline-flex;');
-    expect(responsiveCss).toContain('.site-nav-card__group-label');
-    expect(responsiveCss).toContain('display: none;');
+    expect(siteNavLinkBlock).toContain('z-index: 1;');
+    expect(responsiveCss).toContain('--nav-item-size: 28px;');
+    expect(responsiveCss).toContain('--nav-item-gap: 24px;');
     expect(mobileSiteNavItemsBlock).toContain('overflow-x: auto;');
     expect(mobileSiteNavItemsBlock).toContain('scrollbar-width: none;');
-    expect(css).not.toContain('.portfolio-hero__nav');
+    expect(css).toContain('.portfolio-hero__card-nav');
   });
 
-  test('uses a full-width README-style top bar on the portfolio home page', () => {
+  test('uses a single card navigation on the portfolio home page while keeping the night skin dark', () => {
     const css = readGlobalStyles();
-    const portfolioHeaderBlock =
-      css.match(/body:has\(\.portfolio-home\) \.site-header\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
-    const portfolioGroupLabelBlock =
-      css.match(/body:has\(\.portfolio-home\) \.site-nav-card__group-label\s*{(?<body>[\s\S]*?)\n}/)?.groups
+    const homeNavBlock = css.match(/^\.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeNavLinksBlock = css.match(/\.portfolio-hero__nav-links\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeNavLinkBlock = css.match(/\.portfolio-hero__nav-links a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeNavBrandBlock = css.match(/\.portfolio-hero__nav-brand strong\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeNavFooterBlock = css.match(/\.portfolio-hero__nav-footer\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeNavThemeBlock = css.match(/\.portfolio-hero__nav-theme\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeNavAvatarDayBlock =
+      css.match(/\.portfolio-hero__nav-brand \.portfolio-hero__nav-avatar--day\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
-    const portfolioSearchBlock =
-      css.match(/body:has\(\.portfolio-home\) \.site-search\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayHomeNavAvatarNightBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__nav-brand \.portfolio-hero__nav-avatar--night\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const dayHomeNavAvatarDayBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__nav-brand \.portfolio-hero__nav-avatar--day\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const homeNavKickerBlock = css.match(/^\.portfolio-hero__nav-kicker\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHeroContentBlock = css.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeCalendarBlock =
+      [...css.matchAll(/^\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/gm)]
+        .map((match) => match.groups?.body ?? '')
+        .find((block) => block.includes('grid-area: calendar;')) ?? '';
+    const dayHomeNavBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayHomeNavLinkBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__nav-links a\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHomeNavActiveBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__nav-links a\[data-active='true'\],[\s\S]*?:root\[data-theme='summer-day'\] \.portfolio-hero__nav-links a:focus-visible\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const dayHomeNavFooterBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__nav-footer\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayHomeNavThemeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__nav-theme\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayCalendarBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayCalendarCurrentBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__calendar-card li\[data-current='true'\]\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
 
-    expect(portfolioHeaderBlock).toContain('border-radius: 0;');
-    expect(portfolioHeaderBlock).toContain('grid-template-columns: auto minmax(0, 1fr) minmax(220px, 260px);');
-    expect(portfolioHeaderBlock).toContain('margin: 0;');
-    expect(portfolioHeaderBlock).toContain('top: 0;');
-    expect(portfolioHeaderBlock).toContain('width: 100%;');
-    expect(portfolioGroupLabelBlock).toContain('display: none;');
-    expect(portfolioSearchBlock).toContain('justify-self: end;');
-    expect(portfolioSearchBlock).toContain('width: min(100%, 260px);');
+    expect(css).toContain('.portfolio-hero__card-nav');
+    expect(homeHeroContentBlock).toContain('grid-template-areas:');
+    expect(homeHeroContentBlock).toContain('"nav . sky . portrait"');
+    expect(homeHeroContentBlock).toContain('"nav . intro . clock"');
+    expect(homeHeroContentBlock).toContain('"nav . intro . calendar"');
+    expect(homeHeroContentBlock).toContain('"latest . actions . calendar"');
+    expect(homeHeroContentBlock).toContain('--portfolio-left-stack-offset: 38px;');
+    expect(homeHeroContentBlock).toContain('grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);');
+    expect(homeHeroContentBlock).toContain('--portfolio-right-stack-offset: 0px;');
+    expect(homeHeroContentBlock).toContain('align-content: center;');
+    expect(homeHeroContentBlock).toContain('align-items: stretch;');
+    expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 180px 138px;');
+    expect(homeHeroContentBlock).toContain('gap: 22px 0;');
+    expect(css).toContain('translate: var(--portfolio-left-stack-offset) 0;');
+    expect(homeNavBlock).toContain('display: grid;');
+    expect(homeNavBlock).toContain('gap: 0;');
+    expect(homeNavBlock).toContain('align-content: start;');
+    expect(homeNavBlock).toContain('border-radius: 40px;');
+    expect(homeNavBlock).toContain('backdrop-filter: blur(4px);');
+    expect(homeNavBlock).toContain('padding: 24px;');
+    expect(homeNavBlock).toContain('rgba(4, 6, 14, 0.6)');
+    expect(homeNavBlock).not.toContain('rgba(232, 246, 249, 0.86)');
+    expect(dayHomeNavBlock).toContain('var(--summer-panel-sheen)');
+    expect(dayHomeNavBlock).toContain('var(--summer-panel)');
+    expect(dayHomeNavBlock).toContain('border-radius: 40px;');
+    expect(dayHomeNavBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
+    expect(dayHomeNavBlock).toContain('0 40px 50px -32px rgba(0, 0, 0, 0.05)');
+    expect(dayHomeNavBlock).not.toContain('rgba(4, 6, 14, 0.6)');
+    expect(dayHomeNavLinkBlock).toContain('color: rgba(91, 66, 63, 0.68);');
+    expect(dayHomeNavActiveBlock).toContain('linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%)');
+    expect(dayHomeNavActiveBlock).toContain('color: var(--summer-ink);');
+    expect(dayHomeNavActiveBlock).not.toContain('rgba(53, 191, 171, 0.16)');
+    expect(homeNavLinksBlock).toContain('display: grid;');
+    expect(homeNavLinksBlock).toContain('grid-template-columns: 1fr;');
+    expect(homeNavLinksBlock).toContain('width: 100%;');
+    expect(homeNavLinkBlock).toContain('font-family: var(--font-nav);');
+    expect(homeNavLinkBlock).toContain('font-weight: 400;');
+    expect(homeNavLinkBlock).toContain('letter-spacing: 0;');
+    expect(homeNavLinkBlock).toContain('line-height: 1.5;');
+    expect(homeNavLinkBlock).toContain('min-height: 52px;');
+    expect(homeNavLinkBlock).toContain('padding: 0 20px;');
+    expect(homeNavBrandBlock).toContain('font-family: var(--font-display);');
+    expect(homeNavBrandBlock).toContain('font-weight: 500;');
+    expect(homeNavBrandBlock).toContain('line-height: 1;');
+    expect(homeNavKickerBlock).toContain('font-family: var(--font-nav);');
+    expect(homeNavKickerBlock).toContain('margin: 24px 0 0;');
+    expect(homeNavKickerBlock).toContain('text-transform: uppercase;');
+    expect(css).toContain('.portfolio-hero__nav-icon');
+    expect(css).toContain('--nav-icon-outline');
+    expect(css).toContain('--nav-icon-filled');
+    expect(css).toContain(".portfolio-hero__nav-links a[data-active='true'] .portfolio-hero__nav-icon::after");
+    expect(css).toContain('.portfolio-hero__nav-brand img');
+    expect(css).toContain('height: 40px;');
+    expect(css).toContain('width: 40px;');
+    expect(css).toContain('.portfolio-hero__nav-avatar--day');
+    expect(homeNavAvatarDayBlock).toContain('display: none;');
+    expect(dayHomeNavAvatarNightBlock).toContain('display: none;');
+    expect(dayHomeNavAvatarDayBlock).toContain('display: block;');
+    expect(css).toContain('.portfolio-hero__nav-kicker');
+    expect(css).toContain(".portfolio-hero__nav-links a[data-active='true']");
+    expect(css).toContain('.portfolio-hero__nav-footer');
+    expect(css).toContain('.portfolio-hero__nav-theme');
+    expect(homeNavFooterBlock).toContain('border-top: 1px solid rgba(148, 163, 184, 0.14);');
+    expect(homeNavFooterBlock).toContain('justify-content: space-between;');
+    expect(homeNavFooterBlock).toContain('margin-top: 24px;');
+    expect(homeNavThemeBlock).toContain('height: 44px;');
+    expect(homeNavThemeBlock).toContain('width: 44px;');
+    expect(dayHomeNavFooterBlock).toContain('rgba(102, 169, 176, 0.18)');
+    expect(dayHomeNavThemeBlock).toContain('rgba(255, 255, 255, 0.86)');
+    expect(css).not.toContain('.portfolio-hero__nav-card .theme-toggle');
+    expect(css).toContain('.portfolio-hero__nav-links::before');
+    expect(css).toContain('.portfolio-hero__nav-links a');
+    expect(css).not.toContain('.portfolio-hero__pulse-card');
+    expect(css).toContain('.portfolio-hero__sky-card');
+    expect(css).toContain('.portfolio-hero__clock-card');
+    expect(css).toContain('.portfolio-hero__calendar-card');
+    expect(css).not.toContain('.portfolio-hero__recommend-card');
+    expect(css).toContain('@keyframes home-widget-enter');
+    expect(css).toContain('animation: home-widget-enter');
+    expect(css).toContain('grid-area: sky;');
+    expect(css).toContain('grid-area: clock;');
+    expect(css).toContain('grid-area: calendar;');
+    expect(dayCalendarBlock).toContain('rgba(255, 255, 255, 0.6)');
+    expect(dayCalendarBlock).toContain('backdrop-filter: blur(4px);');
+    expect(dayCalendarBlock).toContain('border-radius: 40px;');
+    expect(dayCalendarBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
+    expect(dayCalendarBlock).toContain('min-height: 286px;');
+    expect(dayCalendarBlock).toContain('padding: 24px;');
+    expect(dayCalendarBlock).toContain('justify-self: start;');
+    expect(dayCalendarBlock).toContain('width: 350px;');
+    expect(css).toContain('.portfolio-hero__calendar-weekday');
+    expect(css).toContain("li[data-empty='true']");
+    expect(css).toContain('height: 206px;');
+    expect(css).toContain('gap: 8px;');
+    expect(css).toContain('font-size: 0.875rem;');
+    expect(dayCalendarCurrentBlock).toContain('linear-gradient(to right bottom, #2fcbe7 0%, #eec25e)');
+    expect(dayCalendarCurrentBlock).toContain('border: 1px solid #ffffff;');
+    expect(dayCalendarCurrentBlock).toContain('color: #ffffff;');
+    expect(dayCalendarCurrentBlock).toContain('font-weight: 500;');
+    expect(homeVisualBlock).toContain('translate: 0 0;');
+    expect(homeVisualBlock).toContain('justify-self: start;');
+    expect(homeVisualBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
+    expect(homeClockBlock).toContain('justify-self: start;');
+    expect(homeClockBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
+    expect(homeClockBlock).toContain('translate: 0 0;');
+    expect(homeClockBlock).toContain('width: min(100%, 194px);');
+    expect(homeCalendarBlock).toContain('justify-self: start;');
+    expect(homeCalendarBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
+    expect(homeCalendarBlock).toContain('translate: 0 0;');
+    expect(homeCalendarBlock).toContain('width: min(100%, 350px);');
+    expect(css).not.toContain('grid-area: recommend;');
+    expect(css).not.toContain('grid-area: pulse;');
+    expect(css).not.toContain(":root[data-theme='summer-day'] .portfolio-hero__pulse-card");
+    expect(css).not.toContain(".portfolio-hero__nav-links[data-active='moments']::before");
   });
 
-  test('keeps the portfolio home theme switch inside the mobile header', () => {
-    const responsiveCss = readStylesheet('src/app/styles/responsive.css');
-    const mobilePortfolioToolsBlock =
-      responsiveCss.match(/body:has\(\.portfolio-home\) \.site-header__tools\s*{(?<body>[\s\S]*?)\n  }/)?.groups
+  test('keeps home card navigation clicks responsive while marking module arrivals', () => {
+    const css = readGlobalStyles();
+    const homeTransitionBlock =
+      css.match(/\.portfolio-hero__card-nav\[data-transitioning='true'\]\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
-    const mobilePortfolioSearchBlock =
-      responsiveCss.match(/body:has\(\.portfolio-home\) \.site-search\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ??
+    const transitionNavCardBlock =
+      css.match(
+        /\.portfolio-hero__card-nav\[data-transitioning='true'\] \.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const pendingLinkBlock =
+      css.match(/\.portfolio-hero__nav-links a\[data-pending='true'\]\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
       '';
+    const navLinkBlock = css.match(/\.portfolio-hero__nav-links a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const moduleArriveBlock =
+      css.match(/\.site-nav-card--from-home\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const reducedMotionBlock =
+      css.match(/@media \(prefers-reduced-motion: reduce\) \{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
-    expect(responsiveCss).toContain('body:has(.portfolio-home) .site-header__tools');
-    expect(mobilePortfolioToolsBlock).toContain('grid-template-columns: 1fr;');
-    expect(mobilePortfolioToolsBlock).toContain('justify-items: stretch;');
-    expect(mobilePortfolioSearchBlock).toContain('width: 100%;');
-    expect(mobilePortfolioSearchBlock).toContain('max-width: none;');
+    expect(homeTransitionBlock).toContain('pointer-events: none;');
+    expect(transitionNavCardBlock).toContain('animation: home-nav-card-press 180ms');
+    expect(pendingLinkBlock).toContain('animation: home-nav-pending-press 180ms');
+    expect(navLinkBlock).toContain('transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1)');
+    expect(moduleArriveBlock).toContain('animation: module-nav-arrive 620ms');
+    expect(css).toContain('@keyframes home-nav-card-press');
+    expect(css).toContain('@keyframes home-nav-pending-press');
+    expect(css).not.toContain('@keyframes home-card-nav-exit');
+    expect(css).not.toContain('@keyframes home-nav-card-compress');
+    expect(css).not.toContain('@keyframes home-nav-pending-pulse');
+    expect(css).toContain('@keyframes module-nav-arrive');
+    expect(css).toContain('@keyframes module-nav-focus');
+    expect(reducedMotionBlock).not.toContain('.site-nav-card--from-home');
+    expect(reducedMotionBlock).not.toContain('.portfolio-hero__card-nav[data-transitioning=\'true\']');
+  });
+
+  test('uses reference-style social buttons on the portfolio home page', () => {
+    const css = readGlobalStyles();
+    const actionsBlock = css.match(/\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const actionRowBlock = css.match(/\.portfolio-hero__action-row\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const secondaryActionRowBlock =
+      css.match(/\.portfolio-hero__action-row--secondary\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const socialBlock = css.match(/\.portfolio-hero__social\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const githubBlock = css.match(/\.portfolio-hero__social--github\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const juejinBlock = css.match(/\.portfolio-hero__social--juejin\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const guestbookBlock =
+      css.match(/\.portfolio-hero__social--guestbook\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const emailIconBlock =
+      css.match(/\.portfolio-hero__social-icon--email\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const dayGithubBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__social--github\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayJuejinBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__social--juejin\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayGuestbookBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__social--guestbook\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const nightJuejinBlock =
+      css.match(/:root\[data-theme='summer-night'\] \.portfolio-hero__social--juejin\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const nightJuejinAfterBlock =
+      css.match(
+        /:root\[data-theme='summer-night'\] \.portfolio-hero__social--juejin::after\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const nightGuestbookBlock =
+      css.match(/:root\[data-theme='summer-night'\] \.portfolio-hero__social--guestbook\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const nightGuestbookHoverBlock =
+      css.match(
+        /:root\[data-theme='summer-night'\] \.portfolio-hero__social--guestbook:hover\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const nightGuestbookAfterBlock =
+      css.match(
+        /:root\[data-theme='summer-night'\] \.portfolio-hero__social--guestbook::after\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+
+    expect(actionsBlock).toContain('align-items: center;');
+    expect(actionsBlock).toContain('align-self: start;');
+    expect(actionsBlock).toContain('flex-direction: column;');
+    expect(actionsBlock).toContain('gap: 18px;');
+    expect(actionsBlock).toContain('justify-content: center;');
+    expect(actionsBlock).toContain('margin-top: 46px;');
+    expect(actionsBlock).toContain('max-width: min(100%, 374px);');
+    expect(actionsBlock).not.toContain('border-top');
+    expect(actionRowBlock).toContain('display: flex;');
+    expect(actionRowBlock).toContain('flex-wrap: wrap;');
+    expect(actionRowBlock).toContain('gap: 12px;');
+    expect(actionRowBlock).toContain('justify-content: center;');
+    expect(secondaryActionRowBlock).toContain('gap: 10px;');
+    expect(socialBlock).toContain('gap: 8px;');
+    expect(socialBlock).toContain('min-height: auto;');
+    expect(socialBlock).toContain('overflow: hidden;');
+    expect(socialBlock).toContain('padding: 10px 12px;');
+    expect(socialBlock).toContain('text-decoration: none;');
+    expect(css).toContain('.portfolio-hero__social::before');
+    expect(css).toContain('.portfolio-hero__social span');
+    expect(githubBlock).toContain('background: #070707;');
+    expect(githubBlock).toContain('border-radius: 12px;');
+    expect(githubBlock).toContain('box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.4);');
+    expect(githubBlock).toContain('color: #ffffff;');
+    expect(githubBlock).toContain('font-family: "Averia Gruesa Libre", sans-serif !important;');
+    expect(githubBlock).toContain('font-size: 1.25rem;');
+    expect(githubBlock).toContain('padding: 6px 12px;');
+    expect(juejinBlock).toContain('backdrop-filter: blur(4px);');
+    expect(juejinBlock).toContain('background: rgba(255, 255, 255, 0.86);');
+    expect(juejinBlock).toContain('border-radius: 12px;');
+    expect(juejinBlock).toContain('0 26px 46px -30px rgba(255, 255, 255, 0.24)');
+    expect(juejinBlock).toContain('color: #173f45;');
+    expect(guestbookBlock).toContain('border-radius: 12px;');
+    expect(guestbookBlock).toContain('--color-brand: #2fcbe7;');
+    expect(guestbookBlock).toContain('--color-border: #ffffff;');
+    expect(guestbookBlock).toContain('color: #55c7df;');
+    expect(guestbookBlock).toContain('height: 46px;');
+    expect(guestbookBlock).toContain('overflow: visible;');
+    expect(guestbookBlock).toContain('transform-origin: center;');
+    expect(guestbookBlock).toContain('width: 46px;');
+    expect(guestbookBlock).toContain('padding: 0;');
+    expect(css).toContain('.portfolio-hero__social--guestbook::after');
+    expect(css).toContain("background: radial-gradient(circle, rgba(47, 203, 231, 0.24) 0%, rgba(47, 203, 231, 0.12) 48%, transparent 70%);");
+    expect(css).toContain('transform: scale(1.05);');
+    expect(css).toContain(".portfolio-hero__social--guestbook[data-clicked='true']");
+    expect(css).toContain('transform: scale(0.95);');
+    expect(css).toContain(".portfolio-hero__social--guestbook[data-clicked='true']::after");
+    expect(css).toContain('animation: contact-button-pop 420ms ease-out both;');
+    expect(css).toContain('@keyframes contact-button-pop');
+    expect(css).toContain('.portfolio-hero__social-icon--email');
+    expect(emailIconBlock).toContain('height: 32px;');
+    expect(emailIconBlock).toContain('width: 32px;');
+    expect(css).toContain('.portfolio-hero__social--github .portfolio-hero__social-icon');
+    expect(css).toContain('.portfolio-hero__social-icon--juejin');
+    expect(css).toContain(":root[data-theme='summer-night'] .portfolio-hero__nav-brand small");
+    expect(nightJuejinBlock).toContain('background-color: rgba(5, 12, 22, 0.78) !important;');
+    expect(nightJuejinBlock).toContain('background-image: linear-gradient(180deg, rgba(34, 211, 238, 0.14), rgba(15, 23, 42, 0.08)) !important;');
+    expect(nightJuejinBlock).toContain('border-color: rgba(34, 211, 238, 0.34) !important;');
+    expect(nightJuejinBlock).toContain('color: #d7faff !important;');
+    expect(nightJuejinBlock).not.toContain('background: rgba(255, 255, 255, 0.86);');
+    expect(nightJuejinAfterBlock).toContain('rgba(5, 12, 22, 0.86)');
+    expect(nightJuejinAfterBlock).toContain('box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.28);');
+    expect(nightJuejinAfterBlock).toContain('z-index: 0;');
+    expect(nightGuestbookBlock).toContain('--color-brand: #56dff5;');
+    expect(nightGuestbookBlock).toContain('--color-border: rgba(215, 250, 255, 0.94);');
+    expect(nightGuestbookBlock).toContain('background-color: rgba(5, 12, 22, 0.8) !important;');
+    expect(nightGuestbookBlock).toContain('border-color: rgba(34, 211, 238, 0.34) !important;');
+    expect(nightGuestbookBlock).toContain('color: #d7faff !important;');
+    expect(nightGuestbookBlock).not.toContain('background: rgba(255, 255, 255, 0.86);');
+    expect(nightGuestbookHoverBlock).toContain('background-color: rgba(7, 18, 30, 0.9) !important;');
+    expect(nightGuestbookAfterBlock).toContain('rgba(86, 223, 245, 0.26)');
+    expect(nightGuestbookAfterBlock).toContain('border-color: rgba(34, 211, 238, 0.42);');
+    expect(dayGithubBlock).toContain('background: #070707;');
+    expect(dayJuejinBlock).toContain('background: var(--summer-panel);');
+    expect(dayJuejinBlock).toContain('0 40px 50px -32px rgba(0, 0, 0, 0.05)');
+    expect(dayJuejinBlock).toContain('color: var(--summer-ink);');
+    expect(dayGuestbookBlock).toContain('background: var(--summer-panel);');
+    expect(dayGuestbookBlock).toContain('color: #55c7df;');
+  });
+
+  test('uses the same compact card navigation on public reader routes', () => {
+    const css = readGlobalStyles();
+    const readerHeaderBlock =
+      css.match(/body:has\(\.page-main\) \.site-header\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const readerNavBlock =
+      css.match(/body:has\(\.page-main\) \.site-nav\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const readerNavHoverBlock =
+      css.match(
+        /body:has\(\.page-main\) \.site-nav a:hover,[\s\S]*?body:has\(\.page-main\) \.site-nav a:focus-visible\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+
+    expect(readerHeaderBlock).toContain('margin-left: clamp(16px, 3vw, 32px);');
+    expect(readerHeaderBlock).not.toContain('width: 100%;');
+    expect(readerHeaderBlock).not.toContain('border-radius: 0;');
+    expect(readerNavBlock).toContain('justify-content: flex-start;');
+    expect(readerNavHoverBlock).toContain('background: transparent;');
+    expect(css).toContain('.brand-avatar');
+    expect(css).toContain('.site-nav__label');
+    expect(css).toContain(".site-nav a[aria-current='page']");
+  });
+
+  test('keeps the portfolio home card navigation usable on mobile', () => {
+    const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+    const mobileHomeNavBlock =
+      responsiveCss.match(/\.portfolio-hero__card-nav\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileHomeNavCardBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileHeroContentBlock =
+      responsiveCss.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLatestCardBlock =
+      responsiveCss.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileIntroCardBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)?.groups
+        ?.body ?? '';
+    const mobileActionsBlock =
+      responsiveCss.match(/\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLikeRowBlock =
+      responsiveCss.match(/\.portfolio-hero__like-row\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    expect(responsiveCss).toContain('.portfolio-hero__card-nav');
+    expect(responsiveCss).toContain('.portfolio-hero__visual');
+    expect(responsiveCss).not.toContain('.portfolio-hero__status-card');
+    expect(responsiveCss).not.toContain('.portfolio-hero__pulse-card');
+    expect(mobileHeroContentBlock).toContain('grid-template-areas:');
+    expect(mobileHeroContentBlock).toContain('"nav"');
+    expect(mobileHeroContentBlock).toContain('"intro"');
+    expect(mobileHomeNavBlock).toContain('max-width: 100%;');
+    expect(mobileHomeNavBlock).toContain('grid-area: auto;');
+    expect(mobileHomeNavBlock).toContain('width: 100%;');
+    expect(mobileHomeNavCardBlock).toContain('border-radius: 24px;');
+    expect(mobileHomeNavCardBlock).toContain('min-height: auto;');
+    expect(mobileIntroCardBlock).toContain('grid-area: auto;');
+    expect(mobileActionsBlock).toContain('grid-area: auto;');
+    expect(mobileLatestCardBlock).toContain('grid-area: auto;');
+    expect(mobileLatestCardBlock).toContain('margin-right: 0;');
+    expect(mobileLikeRowBlock).toContain('grid-area: auto;');
+    expect(mobileLikeRowBlock).toContain('translate: none;');
+    expect(responsiveCss).toContain('translate: none;');
+    expect(responsiveCss).toContain('.portfolio-hero__nav-links a');
+    expect(responsiveCss).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
+  });
+
+  test('keeps public reader route navigation in the reference icon capsule on mobile', () => {
+    const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+    const mobileReaderHeaderBlock =
+      responsiveCss.match(/body:has\(\.page-main\) \.site-header\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+
+    expect(mobileReaderHeaderBlock).toContain('width: 340px;');
+    expect(mobileReaderHeaderBlock).toContain('padding: 12px;');
+    expect(mobileReaderHeaderBlock).not.toContain('grid-template-columns: 1fr;');
+    expect(responsiveCss).toContain('--nav-item-size: 28px;');
+    expect(responsiveCss).toContain('--nav-item-gap: 24px;');
   });
 
   test('keeps the guestbook page inside the cyber glass visual system', () => {
@@ -331,7 +957,9 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .guestbook-page .guestbook-copy-card");
     expect(css).toContain(":root[data-theme='summer-day'] .guestbook-page .page-title h1");
     expect(css).toContain(":root[data-theme='summer-day'] .guestbook-disabled-actions a");
-    expect(dayGuestbookCardBlock).toContain('rgba(255, 255, 244');
+    expect(dayGuestbookCardBlock).toContain('var(--summer-panel)');
+    expect(dayGuestbookCardBlock).toContain('var(--summer-panel-sheen)');
+    expect(dayGuestbookCardBlock).toContain('var(--summer-glint)');
     expect(dayGuestbookCardBlock).not.toContain('var(--cyber-panel)');
   });
 
@@ -350,15 +978,58 @@ describe('global styles', () => {
 
   test('keeps public list pages inside the cyber glass visual system', () => {
     const css = readGlobalStyles();
+    const publicBodyBlock =
+      css.match(/body:has\(\.portfolio-home\),[\s\S]*?body:has\(\.page-main\)\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const homeBlock = css.match(/\.portfolio-home,[\s\S]*?\.portfolio-about-panel\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const pageMainBlock =
+      [...css.matchAll(/\.page-main\s*{(?<body>[\s\S]*?)\n}/g)]
+        .map((match) => match.groups?.body ?? '')
+        .find((block) => block.includes('background: #02040b;')) ?? '';
+    const pageMainBeforeBlock = css.match(/\.page-main::before\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const pageMainAfterBlock =
+      [...css.matchAll(/\.page-main::after\s*{(?<body>[\s\S]*?)\n}/g)]
+        .map((match) => match.groups?.body ?? '')
+        .find((block) => block.includes('night-meteor-shower')) ?? '';
     const contentCardTitleLinkBlock = css.match(/\.page-main \.content-card h3 a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const contentCardSeriesBlock =
+      css.match(/\.page-main \.content-card__series\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const contentCardSeriesLinkBlock =
+      css.match(/\.page-main \.content-card__series a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const searchTitleLinkBlock = css.match(/\.search-result-card h2 a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
+    expect(css).toContain('--public-home-background:');
+    expect(css).toContain('--public-home-star-field:');
+    expect(css).toContain('--public-night-sparkles:');
+    expect(publicBodyBlock).not.toContain('rgba(251, 191, 36');
+    expect(publicBodyBlock).toContain('background: #02040b;');
+    expect(homeBlock).toContain('background: #02040b;');
+    expect(pageMainBlock).toContain('background: #02040b;');
+    expect(pageMainBlock).toContain('isolation: isolate;');
+    expect(css).toContain('.page-main::before');
+    expect(css).toContain('.page-main::after');
+    expect(css).toContain('.page-main > *');
+    expect(pageMainBeforeBlock).toContain('var(--public-home-star-field)');
+    expect(pageMainBeforeBlock).toContain('var(--public-night-sparkles)');
+    expect(pageMainBeforeBlock).toContain('animation:');
+    expect(pageMainBeforeBlock).toContain('night-star-twinkle');
+    expect(pageMainAfterBlock).toContain('animation: night-meteor-shower');
+    expect(pageMainAfterBlock).toContain('linear-gradient(112deg');
+    expect(css).toContain('@keyframes night-star-twinkle');
+    expect(css).toContain('@keyframes night-meteor-shower');
+    expect(css).toContain('.page-main::after');
     expect(css).toContain('.page-main .content-card');
     expect(css).toContain('.page-main .category-section__heading');
     expect(css).toContain('.page-main .archive-list');
     expect(css).toContain('.page-main .content-card__series a');
     expect(contentCardTitleLinkBlock).toContain('min-height: 40px;');
     expect(contentCardTitleLinkBlock).toContain('display: inline-flex;');
+    expect(contentCardSeriesBlock).toContain('align-self: start;');
+    expect(contentCardSeriesBlock).toContain('justify-content: flex-start;');
+    expect(contentCardSeriesLinkBlock).toContain('min-height: 28px;');
+    expect(contentCardSeriesLinkBlock).toContain('padding: 0 11px;');
+    expect(contentCardSeriesLinkBlock).toContain('width: fit-content;');
+    expect(contentCardSeriesLinkBlock).not.toContain('min-height: 40px;');
     expect(searchTitleLinkBlock).toContain('min-height: 40px;');
     expect(searchTitleLinkBlock).toContain('display: inline-flex;');
     expect(css).toContain('.page-main .content-card h3 a:focus-visible');
@@ -377,13 +1048,44 @@ describe('global styles', () => {
 
   test('keeps public article detail surfaces inside the cyber glass visual system', () => {
     const css = readGlobalStyles();
-    const detailBodyBlock = css.match(/\.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const narrowBlock = css.match(/\.narrow\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailNarrowBlock = css.match(/\.page-main\.narrow:has\(\.detail\)\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailBlock = css.match(/\.detail\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailBodyBlock = css.match(/\.detail \.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailBodyImageBlock = css.match(/\.detail \.detail__body img\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailReaderDesktopBlock =
+      css.match(/\.detail-reader--with-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const detailReaderTocDesktopBlock =
+      css.match(/\.detail-reader--with-toc \.detail-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const commentEmptyBlock = css.match(/\.detail-comments__list li,[\s\S]*?\.detail-comments__empty\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const adjacentBlock = css.match(/\.adjacent-content a,[\s\S]*?\.adjacent-content__empty\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailLikeButtonBlock = css.match(/\.detail__meta \.like-button\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailTaxonomyLinkBlock = css.match(/\.page-main \.detail-taxonomy a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
-    expect(detailBodyBlock).toContain('background: rgba(4, 6, 14, 0.58);');
+    expect(narrowBlock).toContain('margin-inline: auto;');
+    expect(narrowBlock).toContain('width: min(100%, 820px);');
+    expect(detailNarrowBlock).toContain('max-width: 1140px;');
+    expect(detailNarrowBlock).toContain('padding-top: clamp(108px, 12vw, 140px);');
+    expect(detailNarrowBlock).toContain('width: min(100%, 1140px);');
+    expect(detailBlock).toContain('rgba(4, 6, 14, 0.62)');
+    expect(detailBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(detailBlock).toContain('border-radius: 24px;');
+    expect(detailBlock).toContain('max-width: 860px;');
+    expect(detailBodyBlock).toContain('background: transparent;');
+    expect(detailBodyBlock).toContain('border: 0;');
+    expect(detailBodyBlock).toContain('font-size: 15px;');
+    expect(detailBodyBlock).toContain('letter-spacing: 0.03em;');
+    expect(css).toContain('.detail-reader');
+    expect(css).toContain('@media (min-width: 1100px)');
+    expect(detailReaderDesktopBlock).toContain('grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);');
+    expect(detailReaderTocDesktopBlock).toContain('position: sticky;');
+    expect(detailReaderTocDesktopBlock).toContain('top: 92px;');
+    expect(css).toContain(".detail .detail__body h3::before");
+    expect(css).toContain("content: '## ';");
+    expect(detailBodyImageBlock).toContain('max-width: 40%;');
+    expect(detailBodyImageBlock).toContain('width: auto;');
+    expect(detailBodyImageBlock).toContain('height: auto;');
+    expect(detailBodyImageBlock).toContain('margin: 1.5em auto;');
     expect(commentEmptyBlock).toContain('background: rgba(4, 6, 14, 0.52);');
     expect(adjacentBlock).toContain('background: rgba(4, 6, 14, 0.52);');
     expect(detailLikeButtonBlock).toContain('min-height: 40px;');
@@ -404,40 +1106,100 @@ describe('global styles', () => {
     const dayHeaderBlock =
       css.match(/:root\[data-theme='summer-day'\] body:has\(\.page-main\) \.site-header\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
+    const dayDetailBodyPageBlock =
+      css.match(/:root\[data-theme='summer-day'\] body:has\(\.detail\)\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayDetailArticleBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.detail\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayDetailBodyBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+      css.match(/:root\[data-theme='summer-day'\] \.detail \.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayDetailPageMainBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.page-main:has\(\.detail\)\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayDetailPageMainBeforeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.page-main:has\(\.detail\)::before\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayDetailSurfacesBlocks = [
+      ...css.matchAll(
+        /:root\[data-theme='summer-day'\] \.detail-toc,[\s\S]*?:root\[data-theme='summer-day'\] \.adjacent-content__empty\s*{(?<body>[\s\S]*?)\n}/g,
+      ),
+    ];
+    const dayDetailSurfacesBlock = dayDetailSurfacesBlocks.at(-1)?.groups?.body ?? '';
 
     expect(css).toContain(":root[data-theme='summer-day'] .page-main");
+    expect(css).toContain(":root[data-theme='summer-day'] body:has(.detail)");
     expect(css).toContain(":root[data-theme='summer-day'] body:has(.page-main) .site-header");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main .content-card");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main .archive-list");
+    expect(css).toContain(":root[data-theme='summer-day'] .detail");
     expect(css).toContain(":root[data-theme='summer-day'] .detail__body");
-    expect(css).toContain(":root[data-theme='summer-day'] body:has(.page-main) .site-footer");
+    expect(css).toContain(":root[data-theme='summer-day'] .detail .detail__body");
+    expect(css).toContain(":root[data-theme='summer-day'] .page-main:has(.detail)");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main::before");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main::after");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main > *");
-    expect(dayPageMainBlock).toContain('#f4fbf0');
+    expect(dayPageMainBlock).toContain('radial-gradient(ellipse at 82% 86%, rgba(238, 194, 94, 0.34), transparent 42%)');
+    expect(dayPageMainBlock).toContain('radial-gradient(ellipse at 70% 96%, rgba(248, 221, 116, 0.24), transparent 38%)');
+    expect(dayPageMainBlock).toContain('linear-gradient(180deg, #d4e8f3 0%, #e9f7f5 48%, #f7fffb 100%)');
     expect(dayPageMainBlock).toContain('isolation: isolate;');
     expect(dayPageMainBlock).toContain('overflow: hidden;');
-    expect(css).toContain('animation: summer-cloud-drift');
-    expect(css).toContain('animation: summer-shore-breath');
     expect(css).toContain('pointer-events: none;');
-    expect(css).toContain('var(--summer-cloud)');
-    expect(css).toContain('var(--summer-sea)');
-    expect(dayHeaderBlock).toContain('rgba(255, 255, 244');
-    expect(dayDetailBodyBlock).toContain('rgba(255, 255, 244');
+    expect(css).toContain('var(--summer-panel-sheen)');
+    expect(css).toContain('var(--summer-hover-shadow)');
+    expect(css).toContain('var(--summer-glint)');
+    expect(dayHeaderBlock).toContain('rgba(255, 255, 244, 0.58)');
+    expect(dayHeaderBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(dayHeaderBlock).toContain('0 14px 38px rgba(44, 106, 116, 0.08)');
+    expect(dayDetailBodyPageBlock).toContain('radial-gradient(ellipse at 82% 86%, rgba(238, 194, 94, 0.34), transparent 42%)');
+    expect(dayDetailBodyPageBlock).toContain('linear-gradient(180deg, #d4e8f3 0%, #e9f7f5 48%, #f7fffb 100%)');
+    expect(dayDetailPageMainBlock).toContain('animation: none;');
+    expect(dayDetailPageMainBlock).toContain('overflow: visible;');
+    expect(dayDetailPageMainBeforeBlock).toContain('animation: none;');
+    expect(dayDetailPageMainBeforeBlock).toContain('rgba(247, 218, 57, 0.22)');
+    expect(dayDetailArticleBlock).toContain('rgba(255, 255, 255, 0.82)');
+    expect(dayDetailArticleBlock).toContain('backdrop-filter: blur(18px) saturate(1.06);');
+    expect(dayDetailArticleBlock).toContain('var(--summer-line)');
+    expect(dayDetailBodyBlock).toContain('background: transparent;');
+    expect(dayDetailBodyBlock).toContain('backdrop-filter: none;');
+    expect(dayDetailBodyBlock).toContain('border: 0;');
+    expect(dayDetailBodyBlock).toContain('box-shadow: none;');
+    expect(dayDetailSurfacesBlock).toContain('backdrop-filter: none;');
+    expect(dayDetailSurfacesBlock).toContain('#fbfffb');
   });
 
   test('keeps like feedback compact and readable in article metadata', () => {
     const css = readGlobalStyles();
     const likeWrapBlock = css.match(/\.like-button-wrap\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const likeButtonIconBlock = css.match(/\.like-button__icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const likeMessageBlock = css.match(/\.like-button__message\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
     expect(css).toContain('.like-button-wrap');
+    expect(css).toContain('.like-button__icon');
     expect(css).toContain('.like-button__message');
+    expect(likeButtonIconBlock).toContain('transition: fill 180ms ease');
+    expect(likeButtonIconBlock).toContain('opacity: 0.78;');
     expect(likeWrapBlock).toContain('display: inline-flex;');
     expect(likeWrapBlock).toContain('align-items: center;');
     expect(likeMessageBlock).toContain('color: var(--cyber-cyan);');
     expect(likeMessageBlock).not.toContain('background: #fff;');
+  });
+
+  test('shows the public comment login gate as a click-open modal overlay', () => {
+    const css = readGlobalStyles();
+    const entryBlock = css.match(/\.comment-login-entry\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const modalBlock = css.match(/\.comment-login-modal\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const backdropBlock = css.match(/\.comment-login-modal__backdrop\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const panelBlock = css.match(/\.comment-login-modal__panel\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+
+    expect(css).toContain('.comment-login-entry__button');
+    expect(entryBlock).toContain('display: flex;');
+    expect(modalBlock).toContain('position: fixed;');
+    expect(modalBlock).toContain('place-items: center;');
+    expect(modalBlock).toContain('z-index: 100;');
+    expect(backdropBlock).toContain('inset: 0;');
+    expect(backdropBlock).toContain('backdrop-filter: blur(10px) saturate(1.08);');
+    expect(panelBlock).toContain('animation: comment-login-panel-in');
+    expect(css).toContain(":root[data-theme='summer-day'] .comment-login-modal__backdrop");
   });
 });

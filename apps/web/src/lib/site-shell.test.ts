@@ -40,19 +40,29 @@ describe('site shell helpers', () => {
           href: 'https://github.com/Aster-H',
           external: true,
         },
-        {
-          label: 'RSS',
-          href: '/rss.xml',
-          external: false,
-        },
       ],
     });
   });
 
-  test('renders the public day night theme toggle in the shared shell', () => {
+  test('renders the shared public card navigation in the shell', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
 
-    expect(source).toContain("import { ThemeToggle } from '@/components/ThemeToggle';");
-    expect(source).toContain('<ThemeToggle />');
+    expect(source).toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
+    expect(source).toContain('<PublicCardNav title={settings.profile.title} navItems={navItems} />');
+  });
+
+  test('does not render a shared explanatory footer on public pages', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+
+    expect(source).not.toContain('hideFooter');
+    expect(source).not.toContain('<SiteFooter');
+    expect(source).not.toContain('className="site-footer"');
+  });
+
+  test('allows the home page to replace the shared top bar with card navigation', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+
+    expect(source).toContain('hideHeader = false');
+    expect(source).toContain('hideHeader ? null : <PublicCardNav');
   });
 });

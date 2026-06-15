@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  buildTaxonomyTermsFromContent,
   buildCreateTaxonomyTermRequest,
   buildDeleteTaxonomyTermRequest,
   buildListTaxonomyTermsRequest,
@@ -141,6 +142,29 @@ describe('taxonomy client helpers', () => {
       category: [expect.objectContaining({ id: '2' })],
       tag: [expect.objectContaining({ id: '1' })],
       series: [],
+    });
+  });
+
+  test('derives taxonomy terms from repository content metadata', () => {
+    expect(
+      buildTaxonomyTermsFromContent(
+        [
+          { categories: ['平台'], tags: ['Markdown', 'Git'], series: ['Starry Summer'] },
+          { categories: ['平台', '日常'], tags: ['Markdown', '部署'], series: ['Starry Summer'] },
+        ],
+        '2026-06-14T00:00:00.000Z',
+      ),
+    ).toEqual({
+      category: [
+        expect.objectContaining({ id: 'category-%E5%B9%B3%E5%8F%B0', name: '平台', slug: '%E5%B9%B3%E5%8F%B0' }),
+        expect.objectContaining({ id: 'category-%E6%97%A5%E5%B8%B8', name: '日常', slug: '%E6%97%A5%E5%B8%B8' }),
+      ],
+      tag: expect.arrayContaining([
+        expect.objectContaining({ id: 'tag-git', name: 'Git', slug: 'git' }),
+        expect.objectContaining({ id: 'tag-markdown', name: 'Markdown', slug: 'markdown' }),
+        expect.objectContaining({ id: 'tag-%E9%83%A8%E7%BD%B2', name: '部署', slug: '%E9%83%A8%E7%BD%B2' }),
+      ]),
+      series: [expect.objectContaining({ id: 'series-starry-summer', name: 'Starry Summer', slug: 'starry-summer' })],
     });
   });
 });

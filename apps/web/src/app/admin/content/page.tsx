@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { AdminContentManager } from '@/components/AdminContentManager';
 import { AdminShell } from '@/components/AdminShell';
 import { normalizeAdminContentSearchParams } from '@/lib/admin-content';
+import { loadRepositoryAdminContentItems } from '@/lib/admin-content-repository';
 import { seedContent } from '@/lib/content';
 
 export default async function AdminContentPage({
@@ -12,6 +13,7 @@ export default async function AdminContentPage({
 }) {
   const { q = '', status, type, category, tag, series } = await searchParams;
   const filters = normalizeAdminContentSearchParams({ q, status, type, category, tag, series });
+  const initialResult = await loadRepositoryAdminContentItems({ filters });
 
   return (
     <AdminShell>
@@ -65,6 +67,8 @@ export default async function AdminContentPage({
         </form>
         <AdminContentManager
           fallbackItems={seedContent}
+          initialResult={initialResult}
+          repositoryMode
           query={filters.query}
           status={filters.status}
           type={filters.type}

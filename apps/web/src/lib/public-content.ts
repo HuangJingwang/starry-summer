@@ -1,4 +1,6 @@
 import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { getPublicContent, searchContent, seedContent, type ContentSort, type PublicContentKind, type SiteContentItem } from './content';
 
@@ -32,11 +34,14 @@ export interface PublicContentApiRecord {
   publishedAt?: string | null;
 }
 
-export interface PublicContentListRequestOptions {
-  apiBaseUrl?: string;
+export interface PublicContentFilterOptions {
   type?: PublicContentKind;
   sort?: ContentSort;
   query?: string;
+}
+
+export interface PublicContentListRequestOptions extends PublicContentFilterOptions {
+  apiBaseUrl?: string;
 }
 
 export interface PublicContentRequest {
@@ -50,9 +55,15 @@ export interface PublicContentLoadOptions extends PublicContentListRequestOption
 }
 
 export interface PublicContentLoadResult {
-  source: 'api' | 'fallback';
+  source: 'api' | 'repository-file' | 'fallback';
   items: SiteContentItem[];
 }
+
+export interface RepositoryContentLoadOptions extends PublicContentFilterOptions {
+  contentFilePath?: string;
+}
+
+const defaultRepositoryContentPath = join(process.cwd(), 'content', 'public-content.json');
 
 function dateOnly(value: string | null | undefined): string {
   return value?.slice(0, 10) || '';
@@ -61,12 +72,14 @@ function dateOnly(value: string | null | undefined): string {
 const validProjectStatuses = new Set<ProjectStatus>(['active', 'paused', 'completed', 'archived']);
 const projectLinkKeys: Array<keyof ProjectLinks> = ['website', 'repository', 'demo', 'article'];
 
-function getDefaultApiBaseUrl(): string {
-  return process.env.API_BASE_URL ?? 'http://127.0.0.1:4000';
-}
+export function buildPublicContentListRequest(options: PublicContentListRequestOptions = {}): PublicContentRequest | null {
+  const configuredBaseUrl = options.apiBaseUrl?.trim();
 
-export function buildPublicContentListRequest(options: PublicContentListRequestOptions = {}): PublicContentRequest {
-  const baseUrl = (options.apiBaseUrl ?? getDefaultApiBaseUrl()).replace(/\/$/, '');
+  if (!configuredBaseUrl) {
+    return null;
+  }
+
+  const baseUrl = configuredBaseUrl.replace(/\/$/, '');
   const params = new URLSearchParams();
 
   if (options.type && options.type !== 'article') {
@@ -199,6 +212,11 @@ export async function loadPublicContentItems(
   }
 
   const request = buildPublicContentListRequest(options);
+
+  if (!request) {
+    return { source: 'fallback', items: getFallbackPublicContent(fallbackItems, options) };
+  }
+
   const fetcher = options.fetcher ?? fetch;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 1_500);
@@ -227,7 +245,37 @@ export async function loadPublicContentItems(
   }
 }
 
-function getFallbackPublicContent(items: SiteContentItem[], options: PublicContentListRequestOptions): SiteContentItem[] {
+export async function loadRepositoryContentItems(options: RepositoryContentLoadOptions = {}): Promise<PublicContentLoadResult> {
+  try {
+    const content = readRepositoryContentFile(options.contentFilePath ?? defaultRepositoryContentPath);
+
+    return {
+      source: 'repository-file',
+      items: filterPublicContent(content, options),
+    };
+  } catch {
+    return {
+      source: 'fallback',
+      items: getFallbackPublicContent(seedContent, options),
+    };
+  }
+}
+
+export function readRepositoryContentFile(contentFilePath = defaultRepositoryContentPath): SiteContentItem[] {
+  const data = JSON.parse(readFileSync(contentFilePath, 'utf8')) as unknown;
+
+  if (!Array.isArray(data)) {
+    throw new Error('Repository content file must contain an array of public content records.');
+  }
+
+  return data.map((item) => normalizeRepositoryContentItem(item));
+}
+
+function getFallbackPublicContent(items: SiteContentItem[], options: PublicContentFilterOptions): SiteContentItem[] {
+  return filterPublicContent(items, options);
+}
+
+function filterPublicContent(items: SiteContentItem[], options: PublicContentFilterOptions): SiteContentItem[] {
   const publicItems = getPublicContent(items, options.type, options.sort);
   const query = options.query?.trim();
 
@@ -235,5 +283,38 @@ function getFallbackPublicContent(items: SiteContentItem[], options: PublicConte
 }
 
 export async function loadSiteContent(type?: PublicContentKind, sort?: ContentSort, query?: string): Promise<SiteContentItem[]> {
-  return (await loadPublicContentItems(seedContent, { type, sort, query })).items;
+  return (await loadRepositoryContentItems({ type, sort, query })).items;
+}
+
+function normalizeRepositoryContentItem(record: unknown): SiteContentItem {
+  const item = record as Partial<SiteContentItem>;
+
+  if (!item.id || !item.title || !item.type || !item.status || !item.visibility || !item.publishedAt) {
+    throw new Error('Repository content records require id, title, type, status, visibility, and publishedAt.');
+  }
+
+  return {
+    ...item,
+    id: item.id,
+    title: item.title,
+    type: item.type,
+    status: item.status,
+    visibility: item.visibility,
+    publishedAt: dateOnly(item.publishedAt),
+    updatedAt: dateOnly(item.updatedAt),
+    summary: item.summary ?? '',
+    slug: item.slug ?? item.id,
+    bodyMarkdown: item.bodyMarkdown ?? '',
+    categories: item.categories ?? [],
+    tags: item.tags ?? [],
+    series: item.series ?? [],
+    allowComments: item.allowComments ?? true,
+    viewCount: item.viewCount ?? 0,
+    likeCount: item.likeCount ?? 0,
+    featured: item.featured ?? false,
+    pinned: item.pinned ?? false,
+    sourceType: item.sourceType ?? 'original',
+    sourceUrl: item.sourceUrl ?? '',
+    project: normalizeProjectMetadata(item.project),
+  };
 }

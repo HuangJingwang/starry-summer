@@ -11,12 +11,15 @@ describe('LikeButton', () => {
     expect(source).toContain('buildDedupedLikeRequest(targetType, targetId, createPersistentInteractionSeenStore(seenLikes))');
   });
 
-  test('announces like feedback and makes repeated likes understandable', () => {
+  test('announces like feedback and handles an unconfigured interaction Worker', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/LikeButton.tsx'), 'utf8');
 
     expect(source).toContain("const [liked, setLiked]");
+    expect(source).toContain("import { Heart } from 'lucide-react';");
+    expect(source).toContain('<Heart className="like-button__icon"');
+    expect(source).toContain("fill={liked ? 'currentColor' : 'none'}");
     expect(source).toContain("const [message, setMessage]");
-    expect(source).toContain("setMessage('已经记录过喜欢。')");
+    expect(source).toContain("setMessage('互动服务未配置，暂时不能记录喜欢。')");
     expect(source).toContain("setMessage('已记录喜欢。')");
     expect(source).toContain('aria-pressed={liked}');
     expect(source).toContain('aria-live="polite"');

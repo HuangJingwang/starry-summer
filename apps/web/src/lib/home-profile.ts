@@ -8,6 +8,7 @@ export interface HomeProfileModel {
   description: string;
   motto: string;
   stats: SiteStats;
+  latestArticle?: SiteContentItem;
   latestProject?: SiteContentItem;
   latestMoment?: SiteContentItem;
 }
@@ -23,9 +24,16 @@ export function buildHomeProfileModel(
     description: settings.profile.description,
     motto: selectHomeQuote(settings, randomNumber),
     stats: getSiteStats(content),
+    latestArticle: selectLatestHomeArticle(content),
     latestProject: getPublicContent(content, 'project')[0],
     latestMoment: getPublicContent(content, 'moment')[0],
   };
+}
+
+function selectLatestHomeArticle(content: SiteContentItem[]): SiteContentItem | undefined {
+  const articlesByDate = [...getPublicContent(content, 'article')].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+
+  return articlesByDate.find((item) => !item.pinned) ?? articlesByDate[0];
 }
 
 function selectHomeQuote(settings: SiteSettings, randomNumber: () => number): string {

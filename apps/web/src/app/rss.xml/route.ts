@@ -1,12 +1,10 @@
 import { loadSiteContent } from '@/lib/public-content';
 import { buildRssXml, normalizePublicSiteUrl } from '@/lib/seo';
-import { loadPublicSettings } from '@/lib/settings';
+import { loadSiteSettings } from '@/lib/settings-repository';
 
 export async function GET() {
   const siteUrl = normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL);
-  const settings = await loadPublicSettings(undefined, {
-    apiBaseUrl: process.env.API_BASE_URL,
-  });
+  const settings = await loadSiteSettings();
   const content = await loadSiteContent();
   const xml = buildRssXml(settings, siteUrl, content);
 

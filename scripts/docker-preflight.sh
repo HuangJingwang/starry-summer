@@ -6,11 +6,7 @@ cd "$repo_root"
 
 required_images=(
   "node:22-alpine"
-  "postgres:17-alpine"
-  "redis:8-alpine"
-  "minio/minio:RELEASE.2025-09-07T16-13-09Z"
   "caddy:2.10-alpine"
-  "alpine:3.20"
 )
 
 echo "Checking Docker CLI"
@@ -21,13 +17,6 @@ docker compose version >/dev/null
 
 echo "Checking Docker Compose configuration"
 docker compose config --quiet
-
-compose_config="$(docker compose config)"
-
-if ! grep -q 'TRUST_PROXY' <<<"$compose_config"; then
-  echo "Docker Compose API service must pass TRUST_PROXY for reverse-proxy client identity."
-  exit 1
-fi
 
 for image in "${required_images[@]}"; do
   echo "Checking Docker image: $image"

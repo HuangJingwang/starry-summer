@@ -4,14 +4,11 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  buildAdminContentBulkActionRequests,
   buildAdminContentSelectionState,
   filterAdminContent,
   formatAdminContentType,
   formatAdminContentVisibilityStatus,
   getAdminContentUpdatedLabel,
-  readAdminContentErrorMessage,
-  type AdminContentBulkAction,
 } from '@/lib/admin-content';
 import type { SiteContentItem } from '@/lib/content';
 
@@ -25,6 +22,7 @@ export function AdminContentTable({
   series,
 }: {
   items: SiteContentItem[];
+  repositoryMode?: boolean;
   query?: string;
   status?: SiteContentItem['status'];
   type?: SiteContentItem['type'];
@@ -33,8 +31,6 @@ export function AdminContentTable({
   series?: string;
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [bulkState, setBulkState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [bulkMessage, setBulkMessage] = useState('');
   const selectAllRef = useRef<HTMLInputElement>(null);
   const filtered = filterAdminContent(items, { query, status, type, category, tag, series });
   const selectionState = buildAdminContentSelectionState(filtered, selectedIds);
@@ -42,7 +38,6 @@ export function AdminContentTable({
   const selectedCount = selectionState.selectedCount;
   const allSelected = selectionState.allSelected;
   const partiallySelected = selectionState.partiallySelected;
-  const bulkActionDisabled = bulkState === 'submitting' || selectedCount === 0;
 
   useEffect(() => {
     if (selectAllRef.current) {
@@ -60,63 +55,17 @@ export function AdminContentTable({
     ));
   }
 
-  async function runBulkAction(action: AdminContentBulkAction) {
-    if (selectedCount === 0) {
-      setBulkState('error');
-      setBulkMessage('请先选择要处理的内容。');
-      return;
-    }
-
-    setBulkState('submitting');
-    setBulkMessage('');
-
-    try {
-      const requests = buildAdminContentBulkActionRequests(selectionState.selectedIds, action);
-
-      for (const request of requests) {
-        const response = await fetch(request.url, request.init);
-
-        if (!response.ok) {
-          throw new Error(await readAdminContentErrorMessage(response, `请求失败，服务器返回 ${response.status}。`));
-        }
-      }
-
-      setBulkState('success');
-      setBulkMessage(`已处理 ${requests.length} 条内容，正在刷新列表。`);
-      setSelectedIds([]);
-      window.setTimeout(() => window.location.reload(), 450);
-    } catch (error) {
-      setBulkState('error');
-      setBulkMessage(error instanceof Error ? error.message : '批量操作失败，请确认已登录且 API 服务可用。');
-    }
-  }
-
   return (
     <div className="admin-table-shell">
       <div className="admin-table-bulkbar" aria-label="批量操作">
         <div>
           <strong role="status" aria-live="polite">当前列表已选择 {selectedCount} 条</strong>
-          <span>批量处理发布状态和公开范围</span>
-        </div>
-        <div className="admin-table-bulkbar__actions">
-          <button type="button" onClick={() => runBulkAction('publish')} disabled={bulkActionDisabled}>
-            发布
-          </button>
-          <button type="button" onClick={() => runBulkAction('archive')} disabled={bulkActionDisabled}>
-            归档
-          </button>
-          <button type="button" onClick={() => runBulkAction('restore-draft')} disabled={bulkActionDisabled}>
-            恢复草稿
-          </button>
-          <button type="button" onClick={() => runBulkAction('private')} disabled={bulkActionDisabled}>
-            设为私密
-          </button>
-          <button type="button" onClick={() => runBulkAction('public')} disabled={bulkActionDisabled}>
-            设为公开
-          </button>
+          <span>批量数据库操作已停用，请进入单篇编辑页保存并提交 Git 变更。</span>
         </div>
       </div>
-      {bulkMessage ? <p className={`form-message form-message--${bulkState}`} role="status" aria-live="polite">{bulkMessage}</p> : null}
+      <p className="form-message form-message--idle" role="status" aria-live="polite">
+        当前内容列表由仓库文件驱动，不再发送批量数据库请求。
+      </p>
       <div className="admin-table" role="table" aria-label="内容列表">
         <div className="admin-table__row admin-table__head" role="row">
           <span className="admin-table-select">

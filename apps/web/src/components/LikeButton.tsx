@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { ContentType } from '@starry-summer/shared';
+import { Heart } from 'lucide-react';
 
 import { buildDedupedLikeRequest, createPersistentInteractionSeenStore } from '@/lib/interaction-client';
 
@@ -25,8 +26,7 @@ export function LikeButton({
     const request = buildDedupedLikeRequest(targetType, targetId, createPersistentInteractionSeenStore(seenLikes));
 
     if (!request) {
-      setLiked(true);
-      setMessage('已经记录过喜欢。');
+      setMessage('互动服务未配置，暂时不能记录喜欢。');
       return;
     }
 
@@ -51,7 +51,8 @@ export function LikeButton({
   return (
     <span className="like-button-wrap">
       <button className="like-button" type="button" onClick={like} disabled={pending} aria-pressed={liked}>
-        {pending ? '保存中' : liked ? '已喜欢' : '喜欢'} · {count}
+        <Heart className="like-button__icon" size={15} strokeWidth={2} fill={liked ? 'currentColor' : 'none'} aria-hidden="true" />
+        {pending ? '保存中' : liked ? '已喜欢' : '喜欢'} / {count}
       </button>
       {message ? (
         <span className="like-button__message" aria-live="polite">

@@ -1,9 +1,15 @@
-import { describe, expect, test } from 'vitest';
+﻿import { describe, expect, test } from 'vitest';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 
 import {
   buildPublicContentListRequest,
+  loadRepositoryContentItems,
   loadPublicContentItems,
+  loadSiteContent,
   normalizePublicContentItem,
+  readRepositoryContentFile,
 } from './public-content';
 import type { SiteContentItem } from './content';
 
@@ -30,6 +36,7 @@ const fallbackItems: SiteContentItem[] = [
 
 describe('public content API helpers', () => {
   test('builds public content list requests', () => {
+    expect(buildPublicContentListRequest()).toBeNull();
     expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com' })).toEqual({
       url: 'https://api.example.com/content',
       init: {
@@ -39,16 +46,16 @@ describe('public content API helpers', () => {
         },
       },
     });
-    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post' }).url).toBe(
+    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post' })?.url).toBe(
       'https://api.example.com/content?type=post',
     );
-    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post', sort: 'popular' }).url).toBe(
+    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'post', sort: 'popular' })?.url).toBe(
       'https://api.example.com/content?type=post&sort=popular',
     );
-    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'article' }).url).toBe(
+    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', type: 'article' })?.url).toBe(
       'https://api.example.com/content',
     );
-    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', query: ' cloud backup ' }).url).toBe(
+    expect(buildPublicContentListRequest({ apiBaseUrl: 'https://api.example.com/', query: ' cloud backup ' })?.url).toBe(
       'https://api.example.com/content?q=cloud+backup',
     );
   });
@@ -249,5 +256,75 @@ describe('public content API helpers', () => {
     );
 
     expect(result.items.map((item) => item.id)).toEqual(['match']);
+  });
+
+  test('loads public content from a repository-owned JSON file', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'starry-content-'));
+    const contentFilePath = join(directory, 'public-content.json');
+
+    writeFileSync(
+      contentFilePath,
+      JSON.stringify([
+        {
+          id: 'file-post',
+          title: 'File Post',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-12T08:00:00.000Z',
+          summary: 'Stored in Git-friendly JSON.',
+          slug: 'file-post',
+          tags: ['GitHub'],
+        },
+        {
+          id: 'draft-post',
+          title: 'Draft Post',
+          type: 'post',
+          status: 'draft',
+          visibility: 'private',
+          publishedAt: '2026-06-12',
+          slug: 'draft-post',
+        },
+      ]),
+      'utf8',
+    );
+
+    expect(readRepositoryContentFile(contentFilePath)).toEqual([
+      expect.objectContaining({
+        id: 'file-post',
+        publishedAt: '2026-06-12',
+        sourceType: 'original',
+        allowComments: true,
+        viewCount: 0,
+        likeCount: 0,
+      }),
+      expect.objectContaining({ id: 'draft-post' }),
+    ]);
+
+    await expect(loadRepositoryContentItems({ contentFilePath })).resolves.toEqual({
+      source: 'repository-file',
+      items: [expect.objectContaining({ id: 'file-post' })],
+    });
+  });
+
+  test('uses repository content as the default public site source', async () => {
+    const content = await loadSiteContent('article');
+    const introPost = content.find((item) => item.id === 'intro-post');
+
+    expect(introPost).toMatchObject({
+      id: 'intro-post',
+      status: 'published',
+      visibility: 'public',
+      sourceType: 'original',
+    });
+    expect(introPost?.bodyMarkdown).toContain('[Pigs-blog](https://github.com/HuangJingwang/Pigs-blog/tree/dev/server)');
+  });
+
+  test('does not keep a public API source switch for the site runtime', () => {
+    const source = readFileSync(__filename.replace(/\.test\.ts$/, '.ts'), 'utf8');
+
+    expect(source).not.toContain('PUBLIC_CONTENT_SOURCE');
+    expect(source).not.toContain('process.env.API_BASE_URL');
+    expect(source).toContain('loadRepositoryContentItems({ type, sort, query })');
   });
 });

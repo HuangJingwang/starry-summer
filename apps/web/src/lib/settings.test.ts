@@ -1,12 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-  buildGetAdminSettingsRequest,
-  buildGetPublicSettingsRequest,
+  buildRepositorySettingsPublishPayload,
+  buildRepositorySettingsPublishRequest,
   buildSettingsFormKey,
-  buildUpdateSettingsRequest,
   formatHeroQuotesText,
-  loadPublicSettings,
   normalizeSiteSettings,
   parseHeroQuotesText,
   readSettingsErrorMessage,
@@ -77,83 +75,49 @@ describe('settings client helpers', () => {
     expect(normalizeSiteSettings({}).navigation).not.toContain('about');
   });
 
-  test('uses default settings during server render when no API base URL is configured', async () => {
-    await expect(loadPublicSettings()).resolves.toMatchObject({
+  test('builds repository settings publish payloads for Git-backed settings', () => {
+    const request = buildRepositorySettingsPublishRequest({
       profile: {
-        ownerName: 'Aster.H',
-        description: defaultProfileDescription,
+        title: 'Repository Site',
+        ownerName: 'Private Owner',
+        description: 'Repository description',
+        socialLinks: [{ label: 'GitHub', href: 'https://github.com/example' }],
       },
+      hero: {
+        tagline: 'Repository tagline',
+        backgroundImageUrl: '',
+        motto: 'Repository motto',
+        quotes: ['Repository quote'],
+      },
+      navigation: ['posts', 'projects'],
     });
-  });
 
-  test('builds public and admin settings requests', () => {
-    expect(buildGetPublicSettingsRequest()).toEqual({
-      url: '/api/settings',
-      init: {
-        method: 'GET',
-        next: {
-          revalidate: 60,
-        },
+    expect(request.url).toBe('/api/repository/settings');
+    expect(request.init).toMatchObject({
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json',
       },
     });
-    expect(buildGetPublicSettingsRequest({ apiBaseUrl: 'https://api.example.com/' })).toEqual({
-      url: 'https://api.example.com/settings',
-      init: {
-        method: 'GET',
-        next: {
-          revalidate: 60,
-        },
-      },
-    });
-    expect(buildGetAdminSettingsRequest()).toEqual({
-      url: '/api/admin/settings',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-  });
-
-  test('builds credentialed settings update request', () => {
-    expect(
-      buildUpdateSettingsRequest({
+    expect(JSON.parse(String(request.init.body))).toMatchObject({
+      settings: {
         profile: {
-          title: 'My Blog',
-          ownerName: 'Owner',
-          description: 'Notes',
-          socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
+          title: 'Repository Site',
+          ownerName: 'Aster.H',
+          description: 'Repository description',
         },
-        hero: {
-          tagline: 'A personal operating base.',
-          backgroundImageUrl: '/cover.jpg',
-          motto: 'Stay curious, keep shipping.',
-          quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
-        },
-      }),
-    ).toEqual({
-      url: '/api/admin/settings',
-      init: {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          profile: {
-            title: 'My Blog',
-            ownerName: 'Owner',
-            description: 'Notes',
-            socialLinks: [{ label: 'GitHub', href: 'https://github.com/me' }],
-          },
-          hero: {
-            tagline: 'A personal operating base.',
-            backgroundImageUrl: '/cover.jpg',
-            motto: 'Stay curious, keep shipping.',
-            quotes: ['Stay curious, keep shipping.', 'Small notes compound.'],
-          },
-        }),
+        navigation: ['posts', 'projects'],
       },
+      files: [
+        {
+          path: 'apps/web/content/site-settings.json',
+        },
+      ],
     });
+
+    const payload = buildRepositorySettingsPublishPayload({ navigation: ['posts'] });
+    expect(payload.files[0]?.content).toContain('"navigation": [\n    "posts"\n  ]');
   });
 
   test('reads specific settings API error messages', async () => {
@@ -202,69 +166,6 @@ describe('settings client helpers', () => {
     });
 
     expect(buildSettingsFormKey(loaded)).not.toBe(buildSettingsFormKey(fallback));
-  });
-
-  test('loads public settings from the API with defaults on failure', async () => {
-    await expect(
-      loadPublicSettings(async () =>
-        new Response(
-          JSON.stringify({
-            profile: {
-              title: 'Public Blog',
-              ownerName: 'Private Owner',
-              description: 'Public description',
-              socialLinks: [{ label: 'GitHub', href: 'https://github.com/public-blog' }],
-            },
-            hero: {
-              tagline: 'A public note to the future.',
-              backgroundImageUrl: '/public-cover.jpg',
-              motto: 'Small notes compound.',
-              quotes: ['Small notes compound.', 'Keep a record.'],
-            },
-            navigation: ['posts'],
-            updatedAt: '2026-06-10T00:00:00.000Z',
-          }),
-        ),
-      ),
-    ).resolves.toEqual({
-      profile: {
-        title: 'Public Blog',
-        ownerName: 'Aster.H',
-        description: 'Public description',
-        socialLinks: [{ label: 'GitHub', href: 'https://github.com/public-blog' }],
-      },
-      hero: {
-        tagline: 'A public note to the future.',
-        backgroundImageUrl: '/public-cover.jpg',
-        motto: 'Small notes compound.',
-        quotes: ['Small notes compound.', 'Keep a record.'],
-      },
-      navigation: ['posts'],
-      updatedAt: '2026-06-10T00:00:00.000Z',
-    });
-
-    await expect(loadPublicSettings(async () => new Response('Unavailable', { status: 503 }))).resolves.toMatchObject({
-      profile: {
-        title: 'Starry Summer',
-        ownerName: 'Aster.H',
-      },
-    });
-  });
-
-  test('falls back when public settings request times out', async () => {
-    await expect(
-      loadPublicSettings(
-        () =>
-          new Promise<Response>((resolve) => {
-            setTimeout(() => resolve(new Response('{}')), 50);
-          }),
-        { timeoutMs: 1 },
-      ),
-    ).resolves.toMatchObject({
-      profile: {
-        title: 'Starry Summer',
-      },
-    });
   });
 
   test('parses and formats homepage quote lists', () => {

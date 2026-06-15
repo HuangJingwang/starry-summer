@@ -4,17 +4,9 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-if [[ -f .env ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source .env
-  set +a
-fi
-
 backup_dir="${1:-}"
-compose_project_name="${COMPOSE_PROJECT_NAME:-$(basename "$repo_root")}"
-postgres_user="${POSTGRES_USER:-starry}"
-postgres_db="${POSTGRES_DB:-starry_summer}"
+content_target_path="${RESTORE_CONTENT_DIR:-apps/web/content}"
+images_target_path="${RESTORE_IMAGES_DIR:-apps/web/public/images}"
 
 sha256_file() {
   local file_path="$1"
@@ -34,7 +26,7 @@ sha256_file() {
 }
 
 if [[ -z "$backup_dir" ]]; then
-  echo "Usage: RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-YYYY-MM-DD"
+  echo "Usage: RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-static-YYYY-MM-DD"
   exit 1
 fi
 
@@ -48,20 +40,9 @@ if [[ "${RESTORE_CONFIRM:-}" != "YES" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$backup_dir/postgres.sql" ]]; then
-  echo "PostgreSQL dump not found: $backup_dir/postgres.sql"
-  exit 1
-fi
-
-if [[ ! -s "$backup_dir/postgres.sql" ]]; then
-  echo "PostgreSQL dump is empty: $backup_dir/postgres.sql"
-  echo "Refusing to restore from an incomplete backup."
-  exit 1
-fi
-
 if [[ ! -f "$backup_dir/manifest.txt" ]]; then
   echo "Backup manifest not found: $backup_dir/manifest.txt"
-  echo "Refusing to restore from a directory that does not look like a Starry Summer backup."
+  echo "Refusing to restore from a directory that does not look like a Starry Summer static backup."
   exit 1
 fi
 
@@ -70,24 +51,6 @@ manifest_value() {
 
   awk -F= -v key="$key" '$1 == key { print $2; exit }' "$backup_dir/manifest.txt"
 }
-
-backup_compose_project_name="$(manifest_value "compose_project_name")"
-
-if [[ -z "$backup_compose_project_name" ]]; then
-  echo "Backup manifest does not include compose_project_name."
-  echo "Refusing to restore from a manifest that cannot be matched to this Compose project."
-  exit 1
-fi
-
-if [[ -n "$backup_compose_project_name" && "$backup_compose_project_name" != "$compose_project_name" && "${RESTORE_ALLOW_PROJECT_MISMATCH:-}" != "YES" ]]; then
-  echo "Backup Compose project does not match the current Compose project."
-  echo "Backup project: $backup_compose_project_name"
-  echo "Current project: $compose_project_name"
-  echo "Set RESTORE_ALLOW_PROJECT_MISMATCH=YES only if you intentionally want to restore across projects."
-  exit 1
-fi
-
-absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
 verify_archive() {
   local archive_name="$1"
@@ -98,7 +61,6 @@ verify_archive() {
 
   if ! LC_ALL=C tar tzf "$backup_dir/$archive_name" >/dev/null; then
     echo "Backup archive is not a valid tar.gz: $backup_dir/$archive_name"
-    echo "Refusing to restore before touching PostgreSQL or Docker volumes."
     exit 1
   fi
 }
@@ -111,13 +73,8 @@ verify_manifest_checksum() {
 
   expected_checksum="$(manifest_value "$manifest_key")"
 
-  if [[ -z "$expected_checksum" ]]; then
+  if [[ -z "$expected_checksum" || ! -f "$file_path" ]]; then
     return
-  fi
-
-  if [[ ! -f "$file_path" ]]; then
-    echo "Backup checksum target is missing: $file_path"
-    exit 1
   fi
 
   actual_checksum="$(sha256_file "$file_path")"
@@ -130,33 +87,26 @@ verify_manifest_checksum() {
   fi
 }
 
-restore_volume() {
-  local volume_name="$1"
-  local archive_name="$2"
+restore_archive() {
+  local archive_name="$1"
+  local target_path="$2"
 
   if [[ ! -f "$backup_dir/$archive_name" ]]; then
     echo "Skipping missing archive $backup_dir/$archive_name"
     return
   fi
 
-  docker volume create "$volume_name" >/dev/null
-  docker run --rm \
-    -v "$volume_name:/to" \
-    -v "$absolute_backup_dir:/backup:ro" \
-    alpine:3.20 \
-    sh -lc "rm -rf /to/* /to/.[!.]* /to/..?* && tar xzf /backup/$archive_name -C /to"
+  mkdir -p "$target_path"
+  find "$target_path" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  tar xzf "$backup_dir/$archive_name" -C "$target_path"
 }
 
-verify_archive "api-uploads.tar.gz"
-verify_archive "minio-data.tar.gz"
-verify_manifest_checksum "postgres_sha256" "$backup_dir/postgres.sql"
-verify_manifest_checksum "api_uploads_sha256" "$backup_dir/api-uploads.tar.gz"
-verify_manifest_checksum "minio_data_sha256" "$backup_dir/minio-data.tar.gz"
+verify_archive "web-content.tar.gz"
+verify_archive "public-images.tar.gz"
+verify_manifest_checksum "web_content_sha256" "$backup_dir/web-content.tar.gz"
+verify_manifest_checksum "public_images_sha256" "$backup_dir/public-images.tar.gz"
 
-docker compose up -d postgres
-docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U "$postgres_user" "$postgres_db" < "$backup_dir/postgres.sql"
-
-restore_volume "${compose_project_name}_api-uploads" "api-uploads.tar.gz"
-restore_volume "${compose_project_name}_minio-data" "minio-data.tar.gz"
+restore_archive "web-content.tar.gz" "$content_target_path"
+restore_archive "public-images.tar.gz" "$images_target_path"
 
 echo "Restore complete from $backup_dir"

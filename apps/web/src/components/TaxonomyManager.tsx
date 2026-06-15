@@ -10,6 +10,7 @@ import {
   normalizeTaxonomyTerm,
   readTaxonomyErrorMessage,
   type TaxonomyTerm,
+  type TaxonomyTermGroups,
   type TaxonomyType,
 } from '@/lib/taxonomy';
 
@@ -29,11 +30,20 @@ const taxonomyCopy: Record<TaxonomyType, { title: string; placeholder: string }>
 };
 
 type PanelState = 'idle' | 'loading' | 'submitting' | 'success' | 'error';
+const emptyTerms: TaxonomyTerm[] = [];
 
-function TaxonomyPanel({ type }: { type: TaxonomyType }) {
+function TaxonomyPanel({
+  type,
+  initialTerms = emptyTerms,
+  repositoryMode = false,
+}: {
+  type: TaxonomyType;
+  initialTerms?: TaxonomyTerm[];
+  repositoryMode?: boolean;
+}) {
   const [state, setState] = useState<PanelState>('idle');
   const [message, setMessage] = useState('');
-  const [terms, setTerms] = useState<TaxonomyTerm[]>([]);
+  const [terms, setTerms] = useState<TaxonomyTerm[]>(initialTerms);
   const copy = taxonomyCopy[type];
   const taxonomyBusy = state === 'submitting';
 
@@ -48,6 +58,13 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
   }
 
   async function loadTerms() {
+    if (repositoryMode) {
+      setTerms(initialTerms);
+      setState('idle');
+      setMessage('');
+      return;
+    }
+
     setState((current) => (current === 'submitting' ? current : 'loading'));
 
     try {
@@ -63,9 +80,15 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
 
   useEffect(() => {
     void loadTerms();
-  }, [type]);
+  }, [type, repositoryMode, initialTerms]);
 
   async function create(formData: FormData) {
+    if (repositoryMode) {
+      setState('error');
+      setMessage('仓库模式下分类、标签和系列由内容元数据自动生成，请在内容编辑页调整。');
+      return;
+    }
+
     setState('submitting');
     setMessage('');
 
@@ -84,6 +107,12 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
   }
 
   async function deleteTerm(id: string) {
+    if (repositoryMode) {
+      setState('error');
+      setMessage('仓库模式下无法单独删除术语，请先从相关内容元数据中移除。');
+      return;
+    }
+
     setState('submitting');
     setMessage('');
 
@@ -107,6 +136,7 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
         </div>
         <strong>{terms.length}</strong>
       </div>
+      {repositoryMode ? <p className="taxonomy-panel__notice">仓库模式：这里展示从内容元数据派生出的术语，不再写入数据库表。</p> : null}
       <div className="taxonomy-list" aria-label={`${copy.title}列表`}>
         {state === 'loading' ? <p className="empty-state">加载中...</p> : null}
         {terms.length === 0 && state !== 'loading' ? <p className="empty-state">暂无条目</p> : null}
@@ -116,47 +146,52 @@ function TaxonomyPanel({ type }: { type: TaxonomyType }) {
               <strong>{term.name}</strong>
               <span>{term.parentId ? `${term.slug} / 父级 ${parentLabel(terms, term.parentId)}` : term.slug}</span>
             </div>
-            <button type="button" onClick={() => deleteTerm(term.id)} disabled={taxonomyBusy} aria-disabled={taxonomyBusy}>
-              删除
-            </button>
+            {repositoryMode ? null : (
+              <button type="button" onClick={() => deleteTerm(term.id)} disabled={taxonomyBusy} aria-disabled={taxonomyBusy}>
+                删除
+              </button>
+            )}
           </article>
         ))}
       </div>
-      <form className="taxonomy-form" action={create} aria-busy={taxonomyBusy}>
-        <label>
-          名称
-          <input name="name" placeholder={copy.placeholder} required />
-        </label>
-        <label>
-          Slug
-          <input name="slug" placeholder="自动生成，可手动填写" />
-        </label>
-        <label>
-          描述
-          <textarea name="description" rows={3} placeholder="这个分类条目的补充说明" />
-        </label>
-        {type === 'category' ? (
+      {repositoryMode ? null : (
+        <form className="taxonomy-form" action={create} aria-busy={taxonomyBusy}>
           <label>
-            父级分类
-            <select name="parentId" defaultValue="">
-              <option value="">无</option>
-              {terms.map((term) => (
-                <option key={term.id} value={term.id}>
-                  {term.name}
-                </option>
-              ))}
-            </select>
+            名称
+            <input name="name" placeholder={copy.placeholder} required />
           </label>
-        ) : null}
-        <label>
-          排序
-          <input name="sortOrder" type="number" defaultValue={0} />
-        </label>
-        <button type="submit" disabled={taxonomyBusy} aria-disabled={taxonomyBusy}>
-          {taxonomyBusy ? '保存中' : '保存'}
-        </button>
-        {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
-      </form>
+          <label>
+            Slug
+            <input name="slug" placeholder="自动生成，可手动填写" />
+          </label>
+          <label>
+            描述
+            <textarea name="description" rows={3} placeholder="这个分类条目的补充说明" />
+          </label>
+          {type === 'category' ? (
+            <label>
+              父级分类
+              <select name="parentId" defaultValue="">
+                <option value="">无</option>
+                {terms.map((term) => (
+                  <option key={term.id} value={term.id}>
+                    {term.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label>
+            排序
+            <input name="sortOrder" type="number" defaultValue={0} />
+          </label>
+          <button type="submit" disabled={taxonomyBusy} aria-disabled={taxonomyBusy}>
+            {taxonomyBusy ? '保存中' : '保存'}
+          </button>
+          {message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
+        </form>
+      )}
+      {repositoryMode && message ? <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p> : null}
     </section>
   );
 }
@@ -165,12 +200,18 @@ function parentLabel(terms: TaxonomyTerm[], parentId: string): string {
   return terms.find((term) => term.id === parentId)?.name ?? parentId;
 }
 
-export function TaxonomyManager() {
+export function TaxonomyManager({
+  initialTerms,
+  repositoryMode = false,
+}: {
+  initialTerms?: TaxonomyTermGroups;
+  repositoryMode?: boolean;
+}) {
   return (
     <div className="split-panels">
-      <TaxonomyPanel type="category" />
-      <TaxonomyPanel type="tag" />
-      <TaxonomyPanel type="series" />
+      <TaxonomyPanel type="category" initialTerms={initialTerms?.category} repositoryMode={repositoryMode} />
+      <TaxonomyPanel type="tag" initialTerms={initialTerms?.tag} repositoryMode={repositoryMode} />
+      <TaxonomyPanel type="series" initialTerms={initialTerms?.series} repositoryMode={repositoryMode} />
     </div>
   );
 }

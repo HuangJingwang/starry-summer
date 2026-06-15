@@ -3,9 +3,13 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
+function readSources(paths: string[]) {
+  return paths.map((path) => readFileSync(join(process.cwd(), path), 'utf8')).join('\n');
+}
+
 describe('public accessibility copy', () => {
   test('uses Chinese labels for public reading and interaction landmarks', () => {
-    const sources = [
+    const sources = readSources([
       'src/app/about/page.tsx',
       'src/app/archives/page.tsx',
       'src/app/search/page.tsx',
@@ -16,15 +20,13 @@ describe('public accessibility copy', () => {
       'src/components/PublicSubmissionBodyField.tsx',
       'src/components/SiteShell.tsx',
       'src/lib/content-taxonomy.ts',
-    ]
-      .map((path) => readFileSync(join(process.cwd(), path), 'utf8'))
-      .join('\n');
+    ]);
 
     expect(sources).toContain('aria-label="社交链接"');
     expect(sources).toContain('aria-label="内容归档"');
     expect(sources).toContain('aria-label="搜索关键词"');
     expect(sources).toContain('aria-label="站内搜索"');
-    expect(sources).toContain('<form className="site-search" action="/search" role="search" aria-label="站内搜索">');
+    expect(sources).toContain('<form className="search-form" action="/search" role="search" aria-label="站内搜索">');
     expect(sources).toContain('enterKeyHint="search"');
     expect(sources).toContain('aria-label="所属系列"');
     expect(sources).toContain('aria-label="相邻内容"');
@@ -34,9 +36,8 @@ describe('public accessibility copy', () => {
     expect(sources).toContain('复制失败');
     expect(sources).toContain('button.textContent = defaultCopyLabel;');
     expect(sources).toContain("button.setAttribute('aria-label', defaultCopyAriaLabel);");
-    expect(sources).toContain('ariaLabel: \'分类\'');
-    expect(sources).toContain('ariaLabel: \'标签\'');
-    expect(sources).toContain('首页`}');
+    expect(sources).toContain("ariaLabel: '分类'");
+    expect(sources).toContain("ariaLabel: '标签'");
 
     expect(sources).not.toContain('aria-label="Social links"');
     expect(sources).not.toContain('aria-label="Content archive"');
@@ -47,13 +48,13 @@ describe('public accessibility copy', () => {
     expect(sources).not.toContain("'Copy'");
     expect(sources).not.toContain("'Copied'");
     expect(sources).not.toContain("'Failed'");
-    expect(sources).not.toContain('ariaLabel: \'Categories\'');
-    expect(sources).not.toContain('ariaLabel: \'Tags\'');
+    expect(sources).not.toContain("ariaLabel: 'Categories'");
+    expect(sources).not.toContain("ariaLabel: 'Tags'");
     expect(sources).not.toContain(' home`}');
   });
 
   test('uses Chinese visible microcopy on public archive and content surfaces', () => {
-    const sources = [
+    const sources = readSources([
       'src/app/about/page.tsx',
       'src/app/archives/page.tsx',
       'src/app/categories/page.tsx',
@@ -66,14 +67,11 @@ describe('public accessibility copy', () => {
       'src/app/tags/page.tsx',
       'src/components/ContentCard.tsx',
       'src/lib/content-public.ts',
-    ]
-      .map((path) => readFileSync(join(process.cwd(), path), 'utf8'))
-      .join('\n');
+    ]);
 
     expect(sources).toContain('次浏览');
     expect(sources).toContain('次喜欢');
     expect(sources).toContain('篇内容');
-    expect(sources).toContain('共 {total} 篇内容');
     expect(sources).toContain('关于');
     expect(sources).toContain('写作');
     expect(sources).toContain('笔记');

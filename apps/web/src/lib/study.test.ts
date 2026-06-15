@@ -40,6 +40,7 @@ describe('study dashboard client helpers', () => {
   });
 
   test('builds public and admin study API requests', () => {
+    expect(buildPublicStudyRequest()).toBeNull();
     expect(buildPublicStudyRequest({ apiBaseUrl: 'https://api.example.com/' })).toEqual({
       url: 'https://api.example.com/study',
       init: {

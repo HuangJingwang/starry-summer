@@ -96,9 +96,6 @@ if [[ "$1" == "compose" && "$2" == "--env-file" && -n "$3" ]]; then
     build)
       exit 0
       ;;
-    run)
-      [[ "${5:-}" == "--rm" && "${6:-}" == "migrate" ]] && exit 0
-      ;;
     up)
       [[ "${5:-}" == "-d" ]] && exit 0
       ;;
@@ -233,8 +230,8 @@ if [[ "$config_line" -ge "$build_line" ]]; then
   exit 1
 fi
 
-if ! grep -q 'compose --env-file .env.production run --rm migrate' "$DEPLOY_TEST_DOCKER_LOG"; then
-  echo "Deploy script did not run migrations with the configured env file."
+if grep -q 'compose --env-file .env.production run --rm migrate' "$DEPLOY_TEST_DOCKER_LOG"; then
+  echo "Deploy script still runs database migrations."
   cat "$DEPLOY_TEST_DOCKER_LOG"
   exit 1
 fi

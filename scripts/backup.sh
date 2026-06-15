@@ -4,18 +4,8 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-if [[ -f .env ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source .env
-  set +a
-fi
-
 timestamp="$(date +%F-%H%M%S)"
-backup_dir="${1:-backups/starry-summer-$timestamp}"
-compose_project_name="${COMPOSE_PROJECT_NAME:-$(basename "$repo_root")}"
-postgres_user="${POSTGRES_USER:-starry}"
-postgres_db="${POSTGRES_DB:-starry_summer}"
+backup_dir="${1:-backups/starry-summer-static-$timestamp}"
 
 sha256_file() {
   local file_path="$1"
@@ -41,74 +31,33 @@ if [[ -d "$backup_dir" ]] && [[ -n "$(find "$backup_dir" -mindepth 1 -maxdepth 1
 fi
 
 mkdir -p "$backup_dir"
-absolute_backup_dir="$(cd "$backup_dir" && pwd)"
 
-cleanup_incomplete_backup() {
-  rm -f \
-    "$backup_dir/postgres.sql" \
-    "$backup_dir/postgres.sql.tmp" \
-    "$backup_dir/api-uploads.tar.gz" \
-    "$backup_dir/api-uploads.tar.gz.tmp" \
-    "$backup_dir/minio-data.tar.gz" \
-    "$backup_dir/minio-data.tar.gz.tmp" \
-    "$backup_dir/manifest.txt"
-}
-
-echo "Writing backup to $backup_dir"
-
-postgres_dump_tmp="$backup_dir/postgres.sql.tmp"
-
-if ! docker compose exec -T postgres pg_dump --clean --if-exists -U "$postgres_user" "$postgres_db" > "$postgres_dump_tmp"; then
-  cleanup_incomplete_backup
-  echo "PostgreSQL backup failed."
-  exit 1
-fi
-
-if [[ ! -s "$postgres_dump_tmp" ]]; then
-  cleanup_incomplete_backup
-  echo "PostgreSQL backup produced an empty dump."
-  exit 1
-fi
-
-mv "$postgres_dump_tmp" "$backup_dir/postgres.sql"
-
-backup_volume() {
-  local volume_name="$1"
+backup_path() {
+  local source_path="$1"
   local archive_name="$2"
-  local archive_tmp="$archive_name.tmp"
 
-  if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
-    echo "Skipping missing volume $volume_name"
+  if [[ ! -d "$source_path" ]]; then
+    echo "Skipping missing path: $source_path"
     return
   fi
 
-  if ! docker run --rm \
-    -v "$volume_name:/from:ro" \
-    -v "$absolute_backup_dir:/backup" \
-    alpine:3.20 \
-    sh -lc "cd /from && tar czf /backup/$archive_tmp ."; then
-    cleanup_incomplete_backup
-    echo "Backup volume failed: $volume_name"
-    exit 1
-  fi
-
-  mv "$backup_dir/$archive_tmp" "$backup_dir/$archive_name"
+  tar czf "$backup_dir/$archive_name" -C "$source_path" .
 }
 
-backup_volume "${compose_project_name}_api-uploads" "api-uploads.tar.gz"
-backup_volume "${compose_project_name}_minio-data" "minio-data.tar.gz"
+echo "Writing static backup to $backup_dir"
+
+backup_path "apps/web/content" "web-content.tar.gz"
+backup_path "apps/web/public/images" "public-images.tar.gz"
 
 {
   echo "created_at=$timestamp"
-  echo "compose_project_name=$compose_project_name"
-  echo "postgres_sha256=$(sha256_file "$backup_dir/postgres.sql")"
-  if [[ -f "$backup_dir/api-uploads.tar.gz" ]]; then
-    echo "api_uploads_sha256=$(sha256_file "$backup_dir/api-uploads.tar.gz")"
+  if [[ -f "$backup_dir/web-content.tar.gz" ]]; then
+    echo "web_content_sha256=$(sha256_file "$backup_dir/web-content.tar.gz")"
   fi
-  if [[ -f "$backup_dir/minio-data.tar.gz" ]]; then
-    echo "minio_data_sha256=$(sha256_file "$backup_dir/minio-data.tar.gz")"
+  if [[ -f "$backup_dir/public-images.tar.gz" ]]; then
+    echo "public_images_sha256=$(sha256_file "$backup_dir/public-images.tar.gz")"
   fi
   git rev-parse --short HEAD 2>/dev/null | sed 's/^/git_revision=/'
-} > "$backup_dir/manifest.txt"
+} >"$backup_dir/manifest.txt"
 
 echo "Backup complete: $backup_dir"

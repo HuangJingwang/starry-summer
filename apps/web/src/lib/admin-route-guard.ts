@@ -92,6 +92,12 @@ export function verifyAdminSessionToken(
   }
 }
 
+export function createAdminSessionToken(payload: AdminSessionPayload, sessionSecret: string): string {
+  const encodedPayload = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
+
+  return `${encodedPayload}.${signSessionPayload(encodedPayload, sessionSecret)}`;
+}
+
 export function getAdminRouteAccessDecision(input: AdminRouteAccessInput): AdminRouteAccessDecision {
   const session = verifyAdminSessionToken(input.sessionToken, input.sessionSecret, input.now, input.adminEmail);
 

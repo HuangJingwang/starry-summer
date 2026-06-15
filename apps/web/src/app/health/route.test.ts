@@ -37,39 +37,20 @@ describe('web health route', () => {
     });
   });
 
-  test('returns HTTP 503 when the configured API health check is degraded', async () => {
+  test('does not depend on the legacy API health check', async () => {
     vi.stubEnv('API_BASE_URL', 'https://api.example.com');
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () =>
-        Response.json(
-          {
-            status: 'degraded',
-            service: 'starry-summer-api',
-            components: {
-              database: {
-                status: 'error',
-                driver: 'postgres',
-              },
-            },
-          },
-          { status: 503 },
-        ),
-      ),
-    );
+    vi.stubGlobal('fetch', vi.fn());
 
     const response = await GET();
 
-    expect(fetch).toHaveBeenCalledWith('https://api.example.com/health', { cache: 'no-store' });
-    expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toMatchObject({
-      status: 'degraded',
+    expect(fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      status: 'ok',
       service: 'starry-summer-web',
-      components: {
-        api: {
-          status: 'degraded',
-          upstreamStatus: 503,
-        },
+      release: {
+        version: 'development',
+        revision: 'unknown',
       },
     });
   });

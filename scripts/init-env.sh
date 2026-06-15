@@ -23,9 +23,9 @@ if [[ -f "$target_file" && "${INIT_ENV_OVERWRITE:-}" != "YES" ]]; then
   exit 1
 fi
 
-admin_password_hash="$(npm run --silent auth:hash-password -- "$admin_password")"
-session_secret="$(npm run --silent auth:secret)"
-interaction_hash_secret="$(npm run --silent auth:interaction-secret)"
+admin_password_hash="$(node scripts/admin-env.mjs hash-password "$admin_password")"
+session_secret="$(node scripts/admin-env.mjs session-secret)"
+interaction_hash_secret="$(node scripts/admin-env.mjs interaction-secret)"
 
 tmp_file="$(mktemp)"
 

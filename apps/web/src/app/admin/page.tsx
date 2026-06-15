@@ -1,23 +1,19 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 
 import { AdminShell } from '@/components/AdminShell';
-import { buildAdminOverviewSnapshot, getAdminContentStats, loadAdminContentItems } from '@/lib/admin-content';
-import { seedContent } from '@/lib/content';
+import { buildAdminOverviewSnapshot, getAdminContentStats } from '@/lib/admin-content';
+import { loadRepositoryAdminContentItems } from '@/lib/admin-content-repository';
 import { loadAdminModerationCount } from '@/lib/interaction-client';
 
 export default async function AdminPage() {
-  const cookieHeader = (await cookies()).toString();
-  const adminRequestOptions = {
-    apiBaseUrl: process.env.API_BASE_URL,
-    cookieHeader,
+  const adminInteractionRequestOptions = {
+    interactionBaseUrl: process.env.NEXT_PUBLIC_INTERACTION_BASE_URL,
+    cookieHeader: '',
   };
-  const { items } = await loadAdminContentItems(seedContent, undefined, {
-    ...adminRequestOptions,
-  });
+  const { items } = await loadRepositoryAdminContentItems();
   const [pendingComments, pendingGuestbook] = await Promise.all([
-    loadAdminModerationCount('comments', 'pending', adminRequestOptions),
-    loadAdminModerationCount('guestbook', 'pending', adminRequestOptions),
+    loadAdminModerationCount('comments', 'pending', adminInteractionRequestOptions),
+    loadAdminModerationCount('guestbook', 'pending', adminInteractionRequestOptions),
   ]);
   const stats = getAdminContentStats(items);
   const overview = buildAdminOverviewSnapshot(items);

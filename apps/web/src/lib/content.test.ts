@@ -59,12 +59,12 @@ describe('web content helpers', () => {
     expect(barrel.split('\n')).toHaveLength(6);
   });
 
-  test('uses the default post cover for seed featured items instead of the home workspace image', () => {
+  test('uses explicit and default post covers for seed featured items instead of the home workspace image', () => {
     const seedFeaturedCovers = seedContent
       .filter((item) => item.featured && ['intro-post', 'project-starry'].includes(item.id))
       .map((item) => item.coverImageUrl);
 
-    expect(seedFeaturedCovers).toEqual([DEFAULT_POST_COVER.imageUrl, DEFAULT_POST_COVER.imageUrl]);
+    expect(seedFeaturedCovers).toEqual(['/images/starry-summer-night.png', DEFAULT_POST_COVER.imageUrl]);
     expect(seedContent.some((item) => item.coverImageUrl === '/hero-workspace.png')).toBe(false);
   });
 

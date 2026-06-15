@@ -11,10 +11,10 @@ import type {
   AdminContentDashboardOptions,
   AdminContentFilters,
   AdminContentItemLoadResult,
-  AdminOverviewSnapshot,
   AdminContentSourceNotice,
   AdminContentSourceNoticeInput,
   AdminContentStats,
+  AdminOverviewSnapshot,
 } from './admin-content-types';
 
 function dateOnly(value: string | null | undefined): string {
@@ -100,7 +100,14 @@ export function buildAdminContentSourceNotice(input: AdminContentSourceNoticeInp
   if (input.source === 'api') {
     return {
       tone: 'success',
-      text: `已连接后台 API，当前显示 ${input.count} 条真实内容。`,
+      text: `已连接后台 API，当前显示 ${input.count} 条数据库内容。`,
+    };
+  }
+
+  if (input.source === 'repository-file') {
+    return {
+      tone: 'success',
+      text: `已从仓库内容文件读取 ${input.count} 条内容，不再依赖数据库列表。`,
     };
   }
 
@@ -114,7 +121,14 @@ export function buildAdminContentItemSourceNotice(source: AdminContentItemLoadRe
   if (source === 'api') {
     return {
       tone: 'success',
-      text: '已连接后台 API，当前正在编辑真实数据库内容。',
+      text: '已连接后台 API，当前正在编辑数据库内容。',
+    };
+  }
+
+  if (source === 'repository-file') {
+    return {
+      tone: 'success',
+      text: '已从仓库内容文件读取当前条目，保存会写入 GitHub 仓库。',
     };
   }
 
