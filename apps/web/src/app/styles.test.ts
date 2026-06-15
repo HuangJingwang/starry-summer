@@ -13,6 +13,21 @@ function readGlobalStyles() {
   return styleImportOrder.map(readStylesheet).join('\n');
 }
 
+function readStyleBlock(css: string, selector: string) {
+  return (
+    [...css.matchAll(new RegExp(`^${selector.replaceAll('.', '\\.')}\\s*{(?<body>[\\s\\S]*?)\\n}`, 'gm'))].at(-1)
+      ?.groups?.body ?? ''
+  );
+}
+
+function readCssDeclaration(block: string, property: string) {
+  return block.match(new RegExp(`${property}:\\s*(?<value>[^;]+);`))?.groups?.value?.trim() ?? '';
+}
+
+function parsePxTrackList(value: string) {
+  return [...value.matchAll(/(-?\d+(?:\.\d+)?)px/g)].map((match) => Number(match[1]));
+}
+
 describe('global styles', () => {
   test('keeps global CSS split by public, admin, and responsive concerns', () => {
     const rootLayout = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
@@ -118,6 +133,35 @@ describe('global styles', () => {
     expect(css).toContain('.cyber-home .content-card');
   });
 
+  test('keeps the home latest article card below the desktop navigation card', () => {
+    const css = readGlobalStyles();
+    const heroContentBlock = readStyleBlock(css, '.portfolio-hero__content');
+    const latestCardBlock = readStyleBlock(css, '.portfolio-hero__latest-card');
+    const gridRows = parsePxTrackList(readCssDeclaration(heroContentBlock, 'grid-template-rows'));
+    const rowGap = parsePxTrackList(readCssDeclaration(heroContentBlock, 'gap'))[0] ?? 0;
+    const latestTranslateY = parsePxTrackList(readCssDeclaration(latestCardBlock, 'translate'))[1] ?? 0;
+    const navReservedHeight = gridRows.slice(0, 3).reduce((sum, row) => sum + row, rowGap * 2);
+    const latestStartOffset = navReservedHeight + rowGap + latestTranslateY;
+
+    expect(gridRows).toHaveLength(4);
+    expect(navReservedHeight).toBeGreaterThanOrEqual(520);
+    expect(latestStartOffset - 520).toBeGreaterThanOrEqual(12);
+  });
+
+  test('does not render the removed night milky way background layer', () => {
+    const css = readGlobalStyles();
+    const heroShadeBeforeBlock = readStyleBlock(css, '.portfolio-hero__shade::before');
+    const heroShadeAfterBlock = readStyleBlock(css, '.portfolio-hero__shade::after');
+
+    expect(heroShadeBeforeBlock).toContain('content: none;');
+    expect(heroShadeBeforeBlock).toContain('display: none;');
+    expect(heroShadeAfterBlock).toContain('content: none;');
+    expect(heroShadeAfterBlock).toContain('display: none;');
+    expect(css).not.toContain('night-milky-way-drift');
+    expect(css).not.toContain('night-milky-dust');
+    expect(css).not.toContain('linear-gradient(112deg, transparent 4%');
+  });
+
   test('defines the README screenshot portfolio hero without the abandoned landing system', () => {
     const css = readGlobalStyles();
     const latestCardBlock = css.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -143,12 +187,8 @@ describe('global styles', () => {
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__shade\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
     const heroShadeBlock = css.match(/^\.portfolio-hero__shade\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
-    const heroShadeBeforeBlock =
-      css.match(/^\.portfolio-hero__shade::before\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
-    const heroShadeAfterBlock =
-      [...css.matchAll(/^\.portfolio-hero__shade::after\s*{(?<body>[\s\S]*?)\n}/gm)]
-        .map((match) => match.groups?.body ?? '')
-        .find((block) => block.includes('night-milky-dust')) ?? '';
+    const heroShadeBeforeBlock = readStyleBlock(css, '.portfolio-hero__shade::before');
+    const heroShadeAfterBlock = readStyleBlock(css, '.portfolio-hero__shade::after');
     const dayHeroShadeBeforeBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__shade::before\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
@@ -213,16 +253,12 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__day-avatar');
     expect(css).toContain('.portfolio-hero__shade::before');
     expect(css).toContain('.portfolio-hero__shade::after');
-    expect(heroShadeBeforeBlock).toContain('animation: night-milky-way-drift 34s');
-    expect(heroShadeBeforeBlock).toContain('rgba(248, 250, 252, 0.18)');
-    expect(heroShadeBeforeBlock).toContain('filter: blur(18px);');
-    expect(heroShadeBeforeBlock).toContain('mix-blend-mode: screen;');
-    expect(heroShadeBeforeBlock).toContain('transform: rotate(-13deg) translate3d(-20px, 0, 0);');
-    expect(heroShadeAfterBlock).toContain('animation: night-milky-dust 18s');
-    expect(heroShadeAfterBlock).toContain('radial-gradient(circle at 26% 48%, rgba(255, 255, 255, 0.36) 0 1px, transparent 2px)');
-    expect(heroShadeAfterBlock).toContain('mix-blend-mode: screen;');
-    expect(css).toContain('@keyframes night-milky-way-drift');
-    expect(css).toContain('@keyframes night-milky-dust');
+    expect(heroShadeBeforeBlock).toContain('content: none;');
+    expect(heroShadeBeforeBlock).toContain('display: none;');
+    expect(heroShadeAfterBlock).toContain('content: none;');
+    expect(heroShadeAfterBlock).toContain('display: none;');
+    expect(css).not.toContain('@keyframes night-milky-way-drift');
+    expect(css).not.toContain('@keyframes night-milky-dust');
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__actions");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__night-avatar");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__day-avatar");
@@ -606,7 +642,7 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--portfolio-right-stack-offset: 0px;');
     expect(homeHeroContentBlock).toContain('align-content: center;');
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
-    expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 180px 138px;');
+    expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 220px 138px;');
     expect(homeHeroContentBlock).toContain('gap: 22px 0;');
     expect(css).toContain('translate: var(--portfolio-left-stack-offset) 0;');
     expect(homeNavBlock).toContain('display: grid;');
