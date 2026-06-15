@@ -6,6 +6,18 @@ Starry Summer 是 Aster.H 的单人长期内容平台，用来公开沉淀文章
 
 ## 界面预览
 
+最新代码启动后的首页：
+
+夜间主题：
+
+![Starry Summer 最新运行首页夜间主题](docs/screenshots/latest-home-running.png)
+
+白天主题：
+
+![Starry Summer 最新运行首页白天主题](docs/screenshots/latest-home-running-day.png)
+
+项目内置预览截图：
+
 首页：
 
 ![Starry Summer 首页](docs/screenshots/home.png)
