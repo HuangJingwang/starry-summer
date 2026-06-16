@@ -65,7 +65,7 @@ export default async function HomePage() {
 
             <div className="portfolio-hero__center-stack">
               <div className="portfolio-hero__intro-card">
-                <p className="portfolio-hero__badge">技术写作 / 笔记 / 日常</p>
+                <p className="portfolio-hero__badge">技术写作 / 笔记 / 推荐分享</p>
                 <div className="portfolio-hero__title">
                   <h1 className="portfolio-hero__name">{profile.ownerName}</h1>
                   <span className="portfolio-hero__outline" aria-hidden="true">

@@ -20,7 +20,7 @@ const fallbackSettings = normalizeSiteSettings({});
 const navigationOptions = [
   { key: 'search', label: '搜索', description: '顶部搜索框和搜索页入口' },
   { key: 'posts', label: '文章', description: '长文和笔记的统一阅读入口' },
-  { key: 'moments', label: '日常', description: '轻量记录和时间线' },
+  { key: 'moments', label: '推荐分享', description: '工具、灵感网站和学习资源入口' },
   { key: 'projects', label: '项目', description: '项目档案和作品展示' },
   { key: 'categories', label: '分类', description: '按主题组织内容' },
   { key: 'tags', label: '标签', description: '自由标签索引' },

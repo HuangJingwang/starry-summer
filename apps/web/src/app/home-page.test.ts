@@ -13,7 +13,7 @@ describe('home page', () => {
     expect(source).toContain('className="portfolio-hero__content cyber-home__container"');
     expect(source).not.toContain('className="home-content-flow cyber-home__container"');
     expect(source).toContain('<h1 className="portfolio-hero__name">{profile.ownerName}</h1>');
-    expect(source).toContain('技术写作 / 笔记 / 日常');
+    expect(source).toContain('技术写作 / 笔记 / 推荐分享');
     expect(source).toContain('WRITING');
     expect(source).toContain('<p className="portfolio-hero__role">Technical Notes & Summer Moments</p>');
     expect(source).toContain('写技术文章，也记录一些生活里的光。');

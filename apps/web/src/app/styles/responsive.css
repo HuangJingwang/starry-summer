@@ -660,4 +660,58 @@
   .portfolio-stat-row {
     grid-template-columns: 1fr;
   }
+
+  .share-page {
+    gap: 24px;
+    padding-top: 104px;
+  }
+
+  .share-page__heading {
+    text-align: left;
+  }
+
+  .share-page__filters {
+    justify-items: stretch;
+  }
+
+  .share-page__search {
+    width: 100%;
+  }
+
+  .share-page__search input {
+    text-align: left;
+  }
+
+  .share-page__tag-list {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .share-page__tag-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .share-page__tag-list button {
+    flex: 0 0 auto;
+  }
+
+  .share-page__grid {
+    gap: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  .share-page__card {
+    border-radius: 24px;
+    grid-template-columns: 54px minmax(0, 1fr);
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .share-page__logo {
+    border-radius: 14px;
+    height: 54px;
+    width: 54px;
+  }
 }
