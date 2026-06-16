@@ -266,7 +266,8 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__intro-card");
     expect(css).toContain('.portfolio-hero__like-card');
     expect(css).toContain('.portfolio-hero__like-row');
-    expect(likeCardBlock).toContain('border: 1px solid rgba(255, 255, 255, 0.2);');
+    expect(likeCardBlock).toContain('border: 1px solid #ffffff;');
+    expect(likeCardBlock).toContain('border-color: #ffffff;');
     expect(likeCardBlock).toContain('border-radius: 999px;');
     expect(likeCardBlock).toContain('height: 48px;');
     expect(likeCardBlock).toContain('width: 48px;');
@@ -774,7 +775,7 @@ describe('global styles', () => {
     expect(dayCalendarBlock).toContain('backdrop-filter: blur(4px);');
     expect(dayCalendarBlock).toContain('border-radius: 40px;');
     expect(dayCalendarBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
-    expect(dayCalendarBlock).toContain('min-height: 286px;');
+    expect(dayCalendarBlock).toContain('min-height: 288px;');
     expect(dayCalendarBlock).toContain('padding: 24px;');
     expect(dayCalendarBlock).toContain('justify-self: start;');
     expect(dayCalendarBlock).toContain('width: 350px;');

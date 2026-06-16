@@ -3,6 +3,20 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
+function readRule(source: string, selector: string) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = source.match(new RegExp(`(?:^|\\n)${escapedSelector} \\{([\\s\\S]*?)\\n\\}`, 'm'));
+
+  return match?.[1] ?? '';
+}
+
+function readLastRule(source: string, selector: string) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const matches = [...source.matchAll(new RegExp(`(?:^|\\n)${escapedSelector} \\{([\\s\\S]*?)\\n\\}`, 'gm'))];
+
+  return matches.at(-1)?.[1] ?? '';
+}
+
 describe('home page', () => {
   test('renders the README screenshot portfolio hero instead of the immersive landing', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
@@ -356,5 +370,28 @@ describe('home page', () => {
     expect(pageSource).not.toContain('进入下方内容');
     expect(pageSource).not.toContain('home-dashboard');
     expect(pageSource).not.toContain('content-empty-card');
+  });
+
+  test('keeps home card geometry consistent across day and night themes', () => {
+    const css = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
+
+    expect(readRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
+    expect(readRule(css, '.portfolio-hero__latest-card')).toContain('border-color: #ffffff;');
+    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('border-color: #ffffff;');
+    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 365px;');
+    expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
+    expect(readRule(css, '.portfolio-hero__portrait')).toContain('border-radius: 32px;');
+    expect(readRule(css, '.portfolio-hero__portrait')).toContain('padding: 9px;');
+    expect(readRule(css, '.portfolio-hero__sky-card,\n.portfolio-hero__clock-card,\n.portfolio-hero__calendar-card')).toContain(
+      'border-color: #ffffff;',
+    );
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('border-radius: 40px;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('gap: 0;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('min-height: 288px;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('padding: 24px;');
+    expect(readRule(css, '.portfolio-hero__calendar-card ol')).toContain('height: 206px;');
+    expect(readRule(css, '.portfolio-hero__calendar-card li')).toContain('aspect-ratio: auto;');
+    expect(readRule(css, ".portfolio-hero__calendar-card li[data-current='true']")).toContain('border: 1px solid #ffffff;');
+    expect(readRule(css, '.portfolio-hero__like-card')).toContain('border-color: #ffffff;');
   });
 });
