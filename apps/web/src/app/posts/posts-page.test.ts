@@ -11,4 +11,11 @@ describe('posts page', () => {
     expect(source).toContain('href="/series"');
     expect(source).toContain('专题');
   });
+
+  test('keeps the article list title from repeating the writing eyebrow', () => {
+    const source = readFileSync(join(process.cwd(), 'src/app/posts/page.tsx'), 'utf8');
+
+    expect(source).toContain('<h1>文章</h1>');
+    expect(source).not.toContain('<p className="eyebrow">写作</p>');
+  });
 });

@@ -35,10 +35,10 @@ const homeNavItems = [
     iconActive: '/images/reference-nav/share-filled.svg',
   },
   {
-    href: '/about#links',
-    label: '优秀博客',
-    icon: '/images/reference-nav/website-outline.svg',
-    iconActive: '/images/reference-nav/website-filled.svg',
+    href: '/leetcode',
+    label: '刷题日记',
+    icon: '/images/reference-nav/leetcode-outline.svg',
+    iconActive: '/images/reference-nav/leetcode-filled.svg',
   },
 ] as const;
 

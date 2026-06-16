@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { buildCommentRequest, type CommentTargetType } from '@/lib/interaction-client';
 import type { AuthenticatedReaderSession } from '@/lib/reader-auth';
@@ -23,6 +23,7 @@ export function CommentForm({
 }) {
   const bodyCounterId = useId();
   const [loginGateOpen, setLoginGateOpen] = useState(false);
+  const loginModalRef = useRef<HTMLDivElement>(null);
   const {
     body,
     formRef,
@@ -44,6 +45,18 @@ export function CommentForm({
     successMessage: '评论已发布。',
   });
 
+  useEffect(() => {
+    if (!loginGateOpen) {
+      return;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      loginModalRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [loginGateOpen]);
+
   if (!reader) {
     return (
       <div className="comment-login-entry">
@@ -57,7 +70,7 @@ export function CommentForm({
           写评论
         </button>
         {loginGateOpen ? (
-          <div className="comment-login-modal" role="dialog" aria-modal="true" aria-label="GitHub 登录后评论">
+          <div ref={loginModalRef} className="comment-login-modal" role="dialog" aria-modal="true" aria-label="GitHub 登录后评论">
             <button
               type="button"
               className="comment-login-modal__backdrop"

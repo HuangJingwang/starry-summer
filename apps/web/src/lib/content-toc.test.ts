@@ -12,7 +12,9 @@ describe('buildContentTableOfContents', () => {
     ]);
   });
 
-  test('hides the table of contents for short content', () => {
-    expect(buildContentTableOfContents('## Only one section')).toEqual([]);
+  test('keeps a table of contents for single-section articles', () => {
+    expect(buildContentTableOfContents('## Only one section')).toEqual([
+      { depth: 2, text: 'Only one section', slug: 'only-one-section' },
+    ]);
   });
 });

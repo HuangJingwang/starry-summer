@@ -133,6 +133,44 @@ describe('global styles', () => {
     expect(css).toContain('.cyber-home .content-card');
   });
 
+  test('keeps public list sort tabs with crisp independent borders', () => {
+    const css = readGlobalStyles();
+    const tabsBlock = readStyleBlock(css, '.page-main .sort-tabs');
+    const tabBlock = readStyleBlock(css, '.page-main .sort-tabs a');
+    const activeTabBlock =
+      css.match(/\.page-main \.sort-tabs a\[aria-current='page'\]\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayActiveTabBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.page-main \.sort-tabs a\[aria-current='page'\]\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+
+    expect(tabsBlock).toContain('border: 0;');
+    expect(tabsBlock).toContain('gap: 10px;');
+    expect(tabsBlock).toContain('overflow: visible;');
+    expect(tabBlock).toContain('background: rgba(4, 8, 18, 0.46);');
+    expect(activeTabBlock).toContain('border-color: rgba(125, 211, 252, 0.82);');
+    expect(activeTabBlock).toContain('box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);');
+    expect(activeTabBlock).not.toContain('border-color: transparent;');
+    expect(dayActiveTabBlock).toContain('border-color: rgba(8, 116, 127, 0.28);');
+  });
+
+  test('uses the shared quiet canvas meteor layer on public pages instead of the page beam sweep', () => {
+    const css = readGlobalStyles();
+    const leetcodeBeamBlock = css.match(/\.study-archive-page::after\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const siteCanvasBlock = css.match(/\.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const siteShellSource = readStylesheet('src/components/SiteShell.tsx');
+    const leetcodeSource = readStylesheet('src/app/leetcode/page.tsx');
+
+    expect(siteShellSource).toContain("import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';");
+    expect(siteShellSource).toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
+    expect(leetcodeSource).not.toContain('page-main__canvas');
+    expect(siteCanvasBlock).toContain('position: fixed;');
+    expect(siteCanvasBlock).toContain('pointer-events: none;');
+    expect(leetcodeBeamBlock).toContain('animation: none;');
+    expect(leetcodeBeamBlock).toContain('background: transparent;');
+    expect(leetcodeBeamBlock).toContain('filter: none;');
+  });
+
   test('keeps the home latest article card below the desktop navigation card', () => {
     const css = readGlobalStyles();
     const heroContentBlock = readStyleBlock(css, '.portfolio-hero__content');
@@ -359,8 +397,21 @@ describe('global styles', () => {
     expect(css).toContain('opacity: 1;');
     expect(css).toContain(':root[data-theme=\'summer-day\'] .portfolio-hero__canvas');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('Math.floor(190 * density) + 70');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % 150 === 0');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('createRadialGradient');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHOOTING_STAR_INTERVAL_FRAMES = 520');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % SHOOTING_STAR_INTERVAL_FRAMES === 0');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('MAX_SHIP_SCREEN_RATIO = 0.045');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHIP_APPEAR_INTERVAL_MS = 10 * 60 * 1000');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeStarship');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && now >= nextShipAt)');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('fleet.forEach');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('FLEET_SIZE = 2');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('createExplorationFleet');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain("variant: 'scout'");
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain("variant: 'voyager'");
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('drawStarship');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('drawVoyagerStarship');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('drawNebula');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('createRadialGradient');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('LightDust');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('MistLayer');
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__shade::before");
@@ -601,6 +652,7 @@ describe('global styles', () => {
       )?.groups?.body ?? '';
     const homeNavKickerBlock = css.match(/^\.portfolio-hero__nav-kicker\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeHeroContentBlock = css.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeIntroBlock = css.match(/^\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
@@ -644,6 +696,7 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
     expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 220px 138px;');
     expect(homeHeroContentBlock).toContain('gap: 22px 0;');
+    expect(homeIntroBlock).toContain('translate: 0 -24px;');
     expect(css).toContain('translate: var(--portfolio-left-stack-offset) 0;');
     expect(homeNavBlock).toContain('display: grid;');
     expect(homeNavBlock).toContain('gap: 0;');
@@ -827,7 +880,7 @@ describe('global styles', () => {
     expect(actionsBlock).toContain('flex-direction: column;');
     expect(actionsBlock).toContain('gap: 18px;');
     expect(actionsBlock).toContain('justify-content: center;');
-    expect(actionsBlock).toContain('margin-top: 46px;');
+    expect(actionsBlock).toContain('margin-top: 18px;');
     expect(actionsBlock).toContain('max-width: min(100%, 374px);');
     expect(actionsBlock).not.toContain('border-top');
     expect(actionRowBlock).toContain('display: flex;');
@@ -953,7 +1006,9 @@ describe('global styles', () => {
     expect(mobileHomeNavCardBlock).toContain('border-radius: 24px;');
     expect(mobileHomeNavCardBlock).toContain('min-height: auto;');
     expect(mobileIntroCardBlock).toContain('grid-area: auto;');
+    expect(mobileIntroCardBlock).toContain('translate: none;');
     expect(mobileActionsBlock).toContain('grid-area: auto;');
+    expect(mobileActionsBlock).toContain('margin-top: 0;');
     expect(mobileLatestCardBlock).toContain('grid-area: auto;');
     expect(mobileLatestCardBlock).toContain('margin-right: 0;');
     expect(mobileLikeRowBlock).toContain('grid-area: auto;');
@@ -1018,15 +1073,17 @@ describe('global styles', () => {
       css.match(/body:has\(\.portfolio-home\),[\s\S]*?body:has\(\.page-main\)\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
     const homeBlock = css.match(/\.portfolio-home,[\s\S]*?\.portfolio-about-panel\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const siteShellBlock = css.match(/\.site-shell\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const siteShellCanvasBlock = css.match(/\.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const pageMainBlock =
       [...css.matchAll(/\.page-main\s*{(?<body>[\s\S]*?)\n}/g)]
         .map((match) => match.groups?.body ?? '')
-        .find((block) => block.includes('background: #02040b;')) ?? '';
+        .find((block) => block.includes('rgba(2, 4, 11, 0.74)')) ?? '';
     const pageMainBeforeBlock = css.match(/\.page-main::before\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const pageMainAfterBlock =
       [...css.matchAll(/\.page-main::after\s*{(?<body>[\s\S]*?)\n}/g)]
         .map((match) => match.groups?.body ?? '')
-        .find((block) => block.includes('night-meteor-shower')) ?? '';
+        .find((block) => block.includes('background: transparent;')) ?? '';
     const contentCardTitleLinkBlock = css.match(/\.page-main \.content-card h3 a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const contentCardSeriesBlock =
       css.match(/\.page-main \.content-card__series\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -1040,17 +1097,23 @@ describe('global styles', () => {
     expect(publicBodyBlock).not.toContain('rgba(251, 191, 36');
     expect(publicBodyBlock).toContain('background: #02040b;');
     expect(homeBlock).toContain('background: #02040b;');
-    expect(pageMainBlock).toContain('background: #02040b;');
+    expect(siteShellBlock).toContain('position: relative;');
+    expect(siteShellCanvasBlock).toContain('position: fixed;');
+    expect(siteShellCanvasBlock).toContain('height: 100vh;');
+    expect(siteShellCanvasBlock).toContain('width: 100vw;');
+    expect(siteShellCanvasBlock).toContain('pointer-events: none;');
+    expect(pageMainBlock).toContain('rgba(2, 4, 11, 0.74)');
     expect(pageMainBlock).toContain('isolation: isolate;');
     expect(css).toContain('.page-main::before');
     expect(css).toContain('.page-main::after');
     expect(css).toContain('.page-main > *');
     expect(pageMainBeforeBlock).toContain('var(--public-home-star-field)');
     expect(pageMainBeforeBlock).toContain('var(--public-night-sparkles)');
-    expect(pageMainBeforeBlock).toContain('animation:');
-    expect(pageMainBeforeBlock).toContain('night-star-twinkle');
-    expect(pageMainAfterBlock).toContain('animation: night-meteor-shower');
-    expect(pageMainAfterBlock).toContain('linear-gradient(112deg');
+    expect(pageMainBeforeBlock).toContain('animation: none;');
+    expect(pageMainAfterBlock).toContain('animation: none;');
+    expect(pageMainAfterBlock).toContain('background: transparent;');
+    expect(pageMainAfterBlock).toContain('filter: none;');
+    expect(pageMainAfterBlock).not.toContain('linear-gradient(112deg');
     expect(css).toContain('@keyframes night-star-twinkle');
     expect(css).toContain('@keyframes night-meteor-shower');
     expect(css).toContain('.page-main::after');
@@ -1089,10 +1152,13 @@ describe('global styles', () => {
     const detailBlock = css.match(/\.detail\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailBodyBlock = css.match(/\.detail \.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailBodyImageBlock = css.match(/\.detail \.detail__body img\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
-    const detailReaderDesktopBlock =
-      css.match(/\.detail-reader--with-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
-    const detailReaderTocDesktopBlock =
-      css.match(/\.detail-reader--with-toc \.detail-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const detailShellDesktopBlock =
+      css.match(/\.detail-shell--with-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const detailShellTocDesktopBlock =
+      css.match(/\.detail-shell--with-toc \.detail-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const detailShellBlock = css.match(/^\.detail-shell\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const detailTocBlock = css.match(/^\.detail-toc\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const detailTocLinkBlock = css.match(/^\.detail-toc a\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const commentEmptyBlock = css.match(/\.detail-comments__list li,[\s\S]*?\.detail-comments__empty\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const adjacentBlock = css.match(/\.adjacent-content a,[\s\S]*?\.adjacent-content__empty\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailLikeButtonBlock = css.match(/\.detail__meta \.like-button\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -1111,21 +1177,33 @@ describe('global styles', () => {
     expect(detailBodyBlock).toContain('border: 0;');
     expect(detailBodyBlock).toContain('font-size: 15px;');
     expect(detailBodyBlock).toContain('letter-spacing: 0.03em;');
-    expect(css).toContain('.detail-reader');
-    expect(css).toContain('@media (min-width: 1100px)');
-    expect(detailReaderDesktopBlock).toContain('grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);');
-    expect(detailReaderTocDesktopBlock).toContain('position: sticky;');
-    expect(detailReaderTocDesktopBlock).toContain('top: 92px;');
-    expect(css).toContain(".detail .detail__body h3::before");
-    expect(css).toContain("content: '## ';");
+    expect(css).toContain('.detail-shell');
+    expect(detailShellBlock).toContain('display: block;');
+    expect(detailShellBlock).toContain('position: relative;');
+    expect(css).toContain('@media (min-width: 1280px)');
+    expect(detailShellDesktopBlock).toContain('display: block;');
+    expect(detailShellDesktopBlock).not.toContain('grid-template-columns');
+    expect(detailShellTocDesktopBlock).toContain('position: absolute;');
+    expect(detailShellTocDesktopBlock).toContain('inset-inline-start: calc((100% - 860px) / 2 - 212px);');
+    expect(detailShellTocDesktopBlock).toContain('top: 0;');
+    expect(detailShellTocDesktopBlock).toContain('width: 180px;');
+    expect(detailTocBlock).toContain('border-radius: 16px;');
+    expect(detailTocBlock).toContain('border: 1px solid rgba(34, 211, 238, 0.2);');
+    expect(detailTocLinkBlock).toContain('color: rgba(226, 232, 240, 0.78);');
+    expect(css).not.toContain('.detail .detail__body h1::before');
+    expect(css).not.toContain('.detail .detail__body h2::before');
+    expect(css).not.toContain('.detail .detail__body h3::before');
+    expect(css).not.toContain("content: '# ';");
+    expect(css).not.toContain("content: '## ';");
     expect(detailBodyImageBlock).toContain('max-width: 40%;');
     expect(detailBodyImageBlock).toContain('width: auto;');
     expect(detailBodyImageBlock).toContain('height: auto;');
     expect(detailBodyImageBlock).toContain('margin: 1.5em auto;');
     expect(commentEmptyBlock).toContain('background: rgba(4, 6, 14, 0.52);');
     expect(adjacentBlock).toContain('background: rgba(4, 6, 14, 0.52);');
-    expect(detailLikeButtonBlock).toContain('min-height: 40px;');
-    expect(detailLikeButtonBlock).not.toContain('min-height: 30px;');
+    expect(detailLikeButtonBlock).toContain('flex: 0 0 auto;');
+    expect(detailLikeButtonBlock).not.toContain('min-height: 40px;');
+    expect(detailLikeButtonBlock).not.toContain('padding: 6px 12px;');
     expect(detailTaxonomyLinkBlock).toContain('background: rgba(6, 182, 212, 0.08);');
     expect(detailTaxonomyLinkBlock).toContain('color: #cffafe;');
     expect(detailTaxonomyLinkBlock).toContain('min-height: 40px;');
@@ -1207,21 +1285,30 @@ describe('global styles', () => {
   test('keeps like feedback compact and readable in article metadata', () => {
     const css = readGlobalStyles();
     const likeWrapBlock = css.match(/\.like-button-wrap\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const likeButtonBlock = css.match(/\.like-button\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const likeButtonCountBlock = css.match(/\.like-button__count\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const likeButtonIconBlock = css.match(/\.like-button__icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const likeMessageBlock = css.match(/\.like-button__message\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
     expect(css).toContain('.like-button-wrap');
+    expect(css).toContain('.like-button__count');
     expect(css).toContain('.like-button__icon');
     expect(css).toContain('.like-button__message');
+    expect(likeButtonBlock).toContain('height: 48px;');
+    expect(likeButtonBlock).toContain('width: 48px;');
+    expect(likeButtonBlock).toContain('border-radius: 999px;');
+    expect(likeButtonBlock).toContain('color: #fecdd3;');
+    expect(likeButtonCountBlock).toContain('left: 28px;');
+    expect(likeButtonCountBlock).toContain('top: -8px;');
     expect(likeButtonIconBlock).toContain('transition: fill 180ms ease');
-    expect(likeButtonIconBlock).toContain('opacity: 0.78;');
+    expect(likeButtonIconBlock).toContain('opacity: 1;');
     expect(likeWrapBlock).toContain('display: inline-flex;');
     expect(likeWrapBlock).toContain('align-items: center;');
     expect(likeMessageBlock).toContain('color: var(--cyber-cyan);');
     expect(likeMessageBlock).not.toContain('background: #fff;');
   });
 
-  test('shows the public comment login gate as a click-open modal overlay', () => {
+  test('shows the public comment login gate beside the clicked comment entry', () => {
     const css = readGlobalStyles();
     const entryBlock = css.match(/\.comment-login-entry\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const modalBlock = css.match(/\.comment-login-modal\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -1230,11 +1317,16 @@ describe('global styles', () => {
 
     expect(css).toContain('.comment-login-entry__button');
     expect(entryBlock).toContain('display: flex;');
-    expect(modalBlock).toContain('position: fixed;');
-    expect(modalBlock).toContain('place-items: center;');
-    expect(modalBlock).toContain('z-index: 100;');
+    expect(entryBlock).toContain('flex-direction: column;');
+    expect(entryBlock).toContain('position: relative;');
+    expect(modalBlock).toContain('position: relative;');
+    expect(modalBlock).toContain('margin-top: 12px;');
+    expect(modalBlock).toContain('z-index: 5;');
+    expect(modalBlock).not.toContain('position: fixed;');
+    expect(modalBlock).not.toContain('place-items: center;');
     expect(backdropBlock).toContain('inset: 0;');
-    expect(backdropBlock).toContain('backdrop-filter: blur(10px) saturate(1.08);');
+    expect(backdropBlock).toContain('border-radius: 20px;');
+    expect(backdropBlock).toContain('backdrop-filter: blur(8px) saturate(1.08);');
     expect(panelBlock).toContain('animation: comment-login-panel-in');
     expect(css).toContain(":root[data-theme='summer-day'] .comment-login-modal__backdrop");
   });

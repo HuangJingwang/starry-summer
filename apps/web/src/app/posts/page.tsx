@@ -28,7 +28,6 @@ export default async function PostsPage({
       <main className="page-main">
         <div className="page-title-row">
           <div className="page-title">
-            <p className="eyebrow">写作</p>
             <h1>文章</h1>
           </div>
           <div className="posts-page-actions">

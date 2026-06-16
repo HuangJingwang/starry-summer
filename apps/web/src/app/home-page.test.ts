@@ -164,8 +164,12 @@ describe('home page', () => {
     expect(navSource).toContain("label: '关于网站'");
     expect(navSource).toContain("href: '/moments'");
     expect(navSource).toContain("label: '推荐分享'");
-    expect(navSource).toContain("href: '/about#links'");
-    expect(navSource).toContain("label: '优秀博客'");
+    expect(navSource).toContain("href: '/leetcode'");
+    expect(navSource).toContain("label: '刷题日记'");
+    expect(navSource).toContain("icon: '/images/reference-nav/leetcode-outline.svg'");
+    expect(navSource).toContain("iconActive: '/images/reference-nav/leetcode-filled.svg'");
+    expect(navSource).not.toContain("href: '/about#links'");
+    expect(navSource).not.toContain("label: '优秀博客'");
     expect(navSource).not.toContain("href: '/posts?type=note'");
     expect(navSource).not.toContain("label: '技术笔记'");
     expect(navSource).not.toContain("label: '日常片段'");
@@ -219,9 +223,13 @@ describe('home page', () => {
     expect(navSource).toContain("href: '/moments'");
     expect(navSource).toContain("label: '推荐分享'");
     expect(navSource).toContain("icon: '/images/reference-nav/share-outline.svg'");
-    expect(navSource).toContain("href: '/about#links'");
-    expect(navSource).toContain("label: '优秀博客'");
-    expect(navSource).toContain("icon: '/images/reference-nav/website-outline.svg'");
+    expect(navSource).toContain("href: '/leetcode'");
+    expect(navSource).toContain("label: '刷题日记'");
+    expect(navSource).toContain("icon: '/images/reference-nav/leetcode-outline.svg'");
+    expect(navSource).toContain("iconActive: '/images/reference-nav/leetcode-filled.svg'");
+    expect(navSource).not.toContain("href: '/about#links'");
+    expect(navSource).not.toContain("label: '优秀博客'");
+    expect(navSource).not.toContain("icon: '/images/reference-nav/website-outline.svg'");
     expect(navSource).not.toContain("href: '/posts?type=note'");
     expect(navSource).not.toContain("label: '技术笔记'");
     expect(navSource).not.toContain("label: '日常片段'");
@@ -286,6 +294,7 @@ describe('home page', () => {
 
   test('renders the shared module navigation as a reference-style icon capsule', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/PublicCardNav.tsx'), 'utf8');
+    const orderedHrefs = ["href: '/posts'", "href: '/projects'", "href: '/about'", "href: '/moments'", "href: '/leetcode'"];
 
     expect(source).toContain('className="brand-avatar brand-avatar--night"');
     expect(source).toContain('className="brand-avatar brand-avatar--day"');
@@ -294,16 +303,31 @@ describe('home page', () => {
     expect(source).toContain('const referenceNavItems = [');
     expect(source).toContain("outline: '/images/reference-nav/scroll-outline.svg'");
     expect(source).toContain("filled: '/images/reference-nav/scroll-filled.svg'");
+    expect(source).toContain("href: '/moments'");
+    expect(source).toContain("label: '推荐分享'");
     expect(source).toContain("outline: '/images/reference-nav/share-outline.svg'");
     expect(source).toContain("filled: '/images/reference-nav/share-filled.svg'");
+    expect(source).toContain("href: '/leetcode'");
+    expect(source).toContain("label: '刷题日记'");
+    expect(source).toContain("outline: '/images/reference-nav/leetcode-outline.svg'");
+    expect(source).toContain("filled: '/images/reference-nav/leetcode-filled.svg'");
+    expect(source).not.toContain("href: '/about#links'");
+    expect(source).not.toContain("label: '优秀博客'");
     expect(source).toContain("outline: '/images/reference-nav/projects-outline.svg'");
     expect(source).toContain("filled: '/images/reference-nav/projects-filled.svg'");
     expect(source).toContain("outline: '/images/reference-nav/about-outline.svg'");
-    expect(source).toContain("outline: '/images/reference-nav/website-outline.svg'");
+    expect(source).not.toContain("outline: '/images/reference-nav/website-outline.svg'");
     expect(source).toContain('data-active-index={activeIndex}');
     expect(source).toContain('data-hover-index={hoveredIndex}');
     expect(source).toContain("'--active-index': activeIndex");
     expect(source).toContain("'--hover-index': hoveredIndex");
+    orderedHrefs.reduce((previousIndex, href) => {
+      const nextIndex = source.indexOf(href);
+
+      expect(nextIndex).toBeGreaterThan(previousIndex);
+
+      return nextIndex;
+    }, -1);
     expect(source).toContain("'--nav-count': referenceNavItems.length");
     expect(source).toContain('<span className="site-nav__hover" aria-hidden="true" />');
     expect(source).toContain('onFocusCapture={updateHoveredIndex}');

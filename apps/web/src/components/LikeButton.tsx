@@ -50,9 +50,18 @@ export function LikeButton({
 
   return (
     <span className="like-button-wrap">
-      <button className="like-button" type="button" onClick={like} disabled={pending} aria-pressed={liked}>
-        <Heart className="like-button__icon" size={15} strokeWidth={2} fill={liked ? 'currentColor' : 'none'} aria-hidden="true" />
-        {pending ? '保存中' : liked ? '已喜欢' : '喜欢'} / {count}
+      <button
+        className="like-button"
+        type="button"
+        onClick={like}
+        disabled={pending}
+        aria-label={`${pending ? '保存中' : liked ? '已喜欢' : '喜欢'}，当前 ${count} 次`}
+        aria-pressed={liked}
+      >
+        <span className="like-button__count" aria-hidden="true">
+          {count}
+        </span>
+        <Heart className="like-button__icon" size={28} strokeWidth={0} fill="currentColor" aria-hidden="true" />
       </button>
       {message ? (
         <span className="like-button__message" aria-live="polite">
