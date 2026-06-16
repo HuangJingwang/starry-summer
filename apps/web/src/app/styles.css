@@ -7336,6 +7336,7 @@ body:has(.search-page) .site-footer a {
   --share-chip-color: #b7f3ff;
   --share-ink: #ecfeff;
   --share-muted: rgba(203, 213, 225, 0.7);
+  align-content: start;
   background: var(--share-bg);
   color: var(--share-ink);
   display: grid;
@@ -7386,6 +7387,7 @@ body:has(.search-page) .site-footer a {
 }
 
 .share-page__panel {
+  align-content: start;
   display: grid;
   gap: 32px;
   margin-inline: auto;
@@ -7393,6 +7395,7 @@ body:has(.search-page) .site-footer a {
 }
 
 .share-page__filters {
+  align-content: start;
   display: grid;
   gap: 16px;
   justify-items: center;
@@ -7435,6 +7438,7 @@ body:has(.search-page) .site-footer a {
 }
 
 .share-page__tag-list {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -7447,6 +7451,7 @@ body:has(.search-page) .site-footer a {
   border-radius: 999px;
   color: var(--share-chip-color);
   cursor: pointer;
+  height: 32px;
   min-height: 32px;
   padding: 0 16px;
 }
@@ -7457,6 +7462,7 @@ body:has(.search-page) .site-footer a {
 }
 
 .share-page__grid {
+  align-items: start;
   display: grid;
   gap: 32px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -7464,6 +7470,7 @@ body:has(.search-page) .site-footer a {
 
 .share-page__card {
   background: var(--share-card-bg);
+  align-content: start;
   border: 1px solid var(--share-card-border);
   border-radius: 34px;
   color: var(--share-ink);
@@ -7500,6 +7507,7 @@ body:has(.search-page) .site-footer a {
 }
 
 .share-page__body {
+  align-content: start;
   display: grid;
   gap: 10px;
   min-width: 0;

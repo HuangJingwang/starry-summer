@@ -7,6 +7,13 @@ function readSource(path: string) {
   return readFileSync(join(process.cwd(), path), 'utf8');
 }
 
+function readRule(source: string, selector: string) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = source.match(new RegExp(`${escapedSelector} \\{([\\s\\S]*?)\\n\\}`, 'm'));
+
+  return match?.[1] ?? '';
+}
+
 describe('recommended share page', () => {
   test('turns the moments route into the recommended share resource page', () => {
     const page = readSource('src/app/moments/page.tsx');
@@ -44,5 +51,18 @@ describe('recommended share page', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .share-page__card");
     expect(css).toContain(":root[data-theme='summer-night'] .share-page__card");
     expect(responsiveCss).toContain('.share-page__grid');
+  });
+
+  test('keeps filters and cards compact after search results shrink', () => {
+    const css = readSource('src/app/styles.css');
+
+    expect(readRule(css, '.share-page')).toContain('align-content: start;');
+    expect(readRule(css, '.share-page__panel')).toContain('align-content: start;');
+    expect(readRule(css, '.share-page__filters')).toContain('align-content: start;');
+    expect(readRule(css, '.share-page__tag-list')).toContain('align-items: center;');
+    expect(readRule(css, '.share-page__tag-list button')).toContain('height: 32px;');
+    expect(readRule(css, '.share-page__grid')).toContain('align-items: start;');
+    expect(readRule(css, '.share-page__card')).toContain('align-content: start;');
+    expect(readRule(css, '.share-page__body')).toContain('align-content: start;');
   });
 });
