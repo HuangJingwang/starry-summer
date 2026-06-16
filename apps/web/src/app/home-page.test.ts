@@ -72,12 +72,14 @@ describe('home page', () => {
     expect(source).toContain('src="/images/aster-day-profile-v2.png"');
     expect(source).toContain('alt="Aster.H 的夏日头像"');
     expect(source).toContain("import { HomeCardNav } from '@/components/HomeCardNav';");
+    expect(source).toContain("import { MobileBackToTop } from '@/components/MobileBackToTop';");
     expect(source).toContain("import { getContentHref } from '@/lib/content';");
     expect(source).toContain("import { getContentCover } from '@/lib/content-cover';");
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--dashboard"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--featured"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--popular"');
     expect(source).not.toContain('<HomeScrollGate');
+    expect(source).toContain('<MobileBackToTop />');
     expect(source).not.toContain("import { HomeScrollGate }");
     expect(source).not.toContain("import { ContentCard }");
     expect(source).not.toContain('function HomeTeaserLink');
@@ -370,6 +372,21 @@ describe('home page', () => {
     expect(pageSource).not.toContain('进入下方内容');
     expect(pageSource).not.toContain('home-dashboard');
     expect(pageSource).not.toContain('content-empty-card');
+  });
+
+  test('renders a lightweight mobile scroll-to-top control', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/MobileBackToTop.tsx'), 'utf8');
+
+    expect(source).toContain("'use client';");
+    expect(source).toContain('aria-label="回到顶部"');
+    expect(source).toContain('className="mobile-back-to-top"');
+    expect(source).toContain("data-visible={isVisible ? 'true' : undefined}");
+    expect(source).toContain('window.scrollY > 24');
+    expect(source).toContain("window.addEventListener('scroll', updateVisibility");
+    expect(source).toContain("window.removeEventListener('scroll', updateVisibility");
+    expect(source).toContain("window.scrollTo({ top: 0, behavior: 'smooth' });");
+    expect(source).not.toContain('HomeScrollGate');
+    expect(source).not.toContain('portfolio-hero__scroll');
   });
 
   test('keeps home card geometry consistent across day and night themes', () => {

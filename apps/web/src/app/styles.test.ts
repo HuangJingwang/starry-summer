@@ -1025,6 +1025,17 @@ describe('global styles', () => {
     const mobileHiddenClockCalendarBlock =
       [...responsiveCss.matchAll(/\.portfolio-hero__clock-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
         ?.groups?.body ?? '';
+    const mobileHiddenSkyClockCalendarBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__sky-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
+        ?.groups?.body ?? '';
+    const mobileBackToTopBlock =
+      responsiveCss.match(/\.mobile-back-to-top\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileBackToTopVisibleBlock =
+      responsiveCss.match(/\.mobile-back-to-top\[data-visible='true'\]\s*{(?<body>[\s\S]*?)\n  }/)?.groups
+        ?.body ?? '';
+    const dayMobileBackToTopBlock =
+      responsiveCss.match(/:root\[data-theme='summer-day'\] \.portfolio-home \.mobile-back-to-top\s*{(?<body>[\s\S]*?)\n  }/)
+        ?.groups?.body ?? '';
     const mobileLikeRowBlock =
       responsiveCss.match(/\.portfolio-hero__like-row\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     expect(responsiveCss).toContain('.portfolio-hero__card-nav');
@@ -1032,21 +1043,35 @@ describe('global styles', () => {
     expect(responsiveCss).not.toContain('.portfolio-hero__status-card');
     expect(responsiveCss).not.toContain('.portfolio-hero__pulse-card');
     expect(mobileHeroContentBlock).toContain('grid-template-areas:');
+    expect(mobileHeroContentBlock).toContain('"nav"');
     expect(mobileHeroContentBlock).toContain('"intro"');
     expect(mobileHeroContentBlock).toContain('"actions"');
     expect(mobileHeroContentBlock).toContain('"latest"');
-    expect(mobileHeroContentBlock).toContain('"nav"');
-    expect(mobileHeroContentBlock).toContain('"sky"');
+    expect(mobileHeroContentBlock).not.toContain('"sky"');
     expect(mobileHeroContentBlock).not.toContain('"clock"');
     expect(mobileHeroContentBlock).not.toContain('"calendar"');
     expect(mobileLeftStackBlock).toContain('display: contents;');
     expect(mobileCenterStackBlock).toContain('display: contents;');
     expect(mobileHomeNavBlock).toContain('max-width: 100%;');
     expect(mobileHomeNavBlock).toContain('grid-area: nav;');
+    expect(mobileHomeNavBlock).toContain('justify-self: center;');
     expect(mobileHomeNavBlock).toContain('translate: none;');
-    expect(mobileHomeNavBlock).toContain('width: 100%;');
-    expect(mobileHomeNavCardBlock).toContain('border-radius: 24px;');
-    expect(mobileHomeNavCardBlock).toContain('min-height: auto;');
+    expect(mobileHomeNavBlock).toContain('width: min(340px, 100%);');
+    expect(mobileHomeNavCardBlock).toContain('align-items: center;');
+    expect(mobileHomeNavCardBlock).toContain('border-radius: 999px;');
+    expect(mobileHomeNavCardBlock).toContain('display: flex;');
+    expect(mobileHomeNavCardBlock).toContain('height: 64px;');
+    expect(mobileHomeNavCardBlock).toContain('padding: 8px;');
+    expect(mobileNavBrandTextBlock).toContain('display: none;');
+    expect(mobileNavKickerBlock).toContain('display: none;');
+    expect(mobileNavLinksBlock).toContain('display: flex;');
+    expect(mobileNavLinksBlock).toContain('gap: 2px;');
+    expect(mobileNavLinkBlock).toContain('font-size: 0;');
+    expect(mobileNavLinkBlock).toContain('height: 44px;');
+    expect(mobileNavLinkBlock).toContain('width: 44px;');
+    expect(mobileNavFooterBlock).toContain('border-top: 0;');
+    expect(mobileNavFooterBlock).toContain('margin-left: auto;');
+    expect(mobileNavFooterTextBlock).toContain('display: none;');
     expect(mobileIntroCardBlock).toContain('grid-area: intro;');
     expect(mobileIntroCardBlock).toContain('translate: none;');
     expect(mobileActionsBlock).toContain('grid-area: actions;');
@@ -1054,8 +1079,17 @@ describe('global styles', () => {
     expect(mobileLatestCardBlock).toContain('grid-area: latest;');
     expect(mobileLatestCardBlock).toContain('margin-right: 0;');
     expect(mobileLatestCardBlock).toContain('translate: none;');
-    expect(mobileSkyCardBlock).toContain('grid-area: sky;');
+    expect(mobileSkyCardBlock).not.toContain('grid-area: sky;');
+    expect(mobileHiddenSkyClockCalendarBlock).toContain('display: none;');
     expect(mobileHiddenClockCalendarBlock).toContain('display: none;');
+    expect(mobileBackToTopBlock).toContain('display: inline-flex;');
+    expect(mobileBackToTopBlock).toContain('position: fixed;');
+    expect(mobileBackToTopBlock).toContain('right: 18px;');
+    expect(mobileBackToTopBlock).toContain('bottom: 18px;');
+    expect(mobileBackToTopBlock).toContain('opacity: 0;');
+    expect(mobileBackToTopVisibleBlock).toContain('opacity: 1;');
+    expect(dayMobileBackToTopBlock).toContain('position: fixed;');
+    expect(dayMobileBackToTopBlock).toContain('z-index: 40;');
     expect(responsiveCss).toContain(
       'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card {\n    translate: none;\n  }',
     );
@@ -1063,7 +1097,8 @@ describe('global styles', () => {
     expect(mobileLikeRowBlock).toContain('translate: none;');
     expect(responsiveCss).toContain('translate: none;');
     expect(responsiveCss).toContain('.portfolio-hero__nav-links a');
-    expect(responsiveCss).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
+    expect(mobileNavLinksBlock).toContain('grid-template-columns: none;');
+    expect(responsiveCss).not.toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
   });
 
   test('keeps public reader route navigation in the reference icon capsule on mobile', () => {

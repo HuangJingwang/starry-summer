@@ -2055,6 +2055,10 @@ body:has(.guestbook-page) .site-footer a {
   transform: translateY(-1px);
 }
 
+.mobile-back-to-top {
+  display: none;
+}
+
 .home-orbital {
   align-items: stretch;
   display: grid;
