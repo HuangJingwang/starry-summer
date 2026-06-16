@@ -164,6 +164,9 @@
   .cyber-home .home-dashboard,
   .leetcode-list,
   .study-summary-grid,
+  .study-command-grid,
+  .study-task-board,
+  .study-round-grid,
   .study-category-grid,
   .study-note-list,
   .guestbook-layout,
@@ -433,6 +436,7 @@
     grid-area: auto;
     max-width: 100%;
     transform: none;
+    translate: none;
     width: 100%;
   }
 
@@ -541,7 +545,13 @@
     grid-area: auto;
     margin-right: 0;
     padding: 14px;
+    translate: none;
     width: 100%;
+  }
+
+  body:has(.portfolio-home) .portfolio-hero__card-nav,
+  body:has(.portfolio-home) .portfolio-hero__latest-card {
+    translate: none;
   }
 
   .portfolio-hero__like-card {

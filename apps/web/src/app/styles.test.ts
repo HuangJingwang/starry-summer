@@ -171,6 +171,25 @@ describe('global styles', () => {
     expect(leetcodeBeamBlock).toContain('filter: none;');
   });
 
+  test('keeps the LeetCode command center in the dark cyber glass system', () => {
+    const css = readGlobalStyles();
+    const commandCardBlock = readStyleBlock(css, '.study-command-card');
+    const taskCardBlock = readStyleBlock(css, '.study-task-card');
+    const roundTrackBlock = readStyleBlock(css, '.study-round-track');
+
+    expect(css).toContain('.study-command-grid');
+    expect(css).toContain('.study-task-board');
+    expect(css).toContain('.study-difficulty');
+    expect(css).toContain(':root[data-theme=\'summer-day\'] .study-archive-page .content-card');
+    expect(css).toContain(':root[data-theme=\'summer-day\'] .study-archive-page .section-heading h2');
+    expect(commandCardBlock).toContain('rgba(4, 6, 14');
+    expect(commandCardBlock).not.toContain('background: #fff;');
+    expect(taskCardBlock).toContain('rgba(4, 6, 14');
+    expect(taskCardBlock).not.toContain('background: #fff;');
+    expect(roundTrackBlock).toContain('var(--cyber-panel)');
+    expect(roundTrackBlock).not.toContain('background: #fff;');
+  });
+
   test('keeps the home latest article card below the desktop navigation card', () => {
     const css = readGlobalStyles();
     const heroContentBlock = readStyleBlock(css, '.portfolio-hero__content');
@@ -1007,6 +1026,7 @@ describe('global styles', () => {
     expect(mobileHeroContentBlock).toContain('"intro"');
     expect(mobileHomeNavBlock).toContain('max-width: 100%;');
     expect(mobileHomeNavBlock).toContain('grid-area: auto;');
+    expect(mobileHomeNavBlock).toContain('translate: none;');
     expect(mobileHomeNavBlock).toContain('width: 100%;');
     expect(mobileHomeNavCardBlock).toContain('border-radius: 24px;');
     expect(mobileHomeNavCardBlock).toContain('min-height: auto;');
@@ -1016,6 +1036,10 @@ describe('global styles', () => {
     expect(mobileActionsBlock).toContain('margin-top: 0;');
     expect(mobileLatestCardBlock).toContain('grid-area: auto;');
     expect(mobileLatestCardBlock).toContain('margin-right: 0;');
+    expect(mobileLatestCardBlock).toContain('translate: none;');
+    expect(responsiveCss).toContain(
+      'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card {\n    translate: none;\n  }',
+    );
     expect(mobileLikeRowBlock).toContain('grid-area: auto;');
     expect(mobileLikeRowBlock).toContain('translate: none;');
     expect(responsiveCss).toContain('translate: none;');
