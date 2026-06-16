@@ -400,9 +400,13 @@ describe('global styles', () => {
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHOOTING_STAR_INTERVAL_FRAMES = 520');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % SHOOTING_STAR_INTERVAL_FRAMES === 0');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('MAX_SHIP_SCREEN_RATIO = 0.045');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHIP_APPEAR_INTERVAL_MS = 10 * 60 * 1000');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SHIP_APPEAR_INTERVAL_MS = 5 * 60 * 1000');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SMALL_SHIP_WEIGHT = 3');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('FLAGSHIP_WEIGHT = 1');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('selectFleetEncounterVariant');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeSmallStarship');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeStarship');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && now >= nextShipAt)');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && !activeSmallStarship && now >= nextShipAt)');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('fleet.forEach');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('FLEET_SIZE = 2');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('createExplorationFleet');

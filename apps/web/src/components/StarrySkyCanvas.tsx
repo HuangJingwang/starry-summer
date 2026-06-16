@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
+import { SHIP_APPEAR_INTERVAL_MS, selectFleetEncounterVariant } from './starry-sky-encounters';
+
 interface Star {
   x: number;
   y: number;
@@ -55,7 +57,6 @@ interface FeaturedStarship {
 
 const MAX_SHIP_SCREEN_RATIO = 0.045;
 const ENGINE_PARTICLES = 6;
-const SHIP_APPEAR_INTERVAL_MS = 10 * 60 * 1000;
 const SHOOTING_STAR_INTERVAL_FRAMES = 520;
 
 const randomBetween = (min: number, max: number) => min + Math.random() * (max - min);
@@ -81,7 +82,7 @@ const createExplorationFleet = (width: number, height: number): Starship[] => {
       angle: randomBetween(-0.07, 0.04),
       drift: randomBetween(6, 12),
       phase: randomBetween(0, Math.PI * 2),
-      speed: randomBetween(0.016, 0.026),
+      speed: randomBetween(0.18, 0.28),
       trailLength: randomBetween(34, 58),
       variant: 'scout',
       width: maxShipWidth * randomBetween(0.66, 0.78),
@@ -92,7 +93,7 @@ const createExplorationFleet = (width: number, height: number): Starship[] => {
       angle: randomBetween(-0.04, 0.08),
       drift: randomBetween(10, 18),
       phase: randomBetween(0, Math.PI * 2),
-      speed: randomBetween(0.012, 0.022),
+      speed: randomBetween(0.14, 0.24),
       trailLength: randomBetween(74, 104),
       variant: 'voyager',
       width: maxShipWidth,
@@ -128,7 +129,7 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
     let animationId = 0;
     let stars: Star[] = [];
     let nebulae: Nebula[] = [];
-    let fleet: Starship[] = [];
+    let activeSmallStarship: Starship | null = null;
     let activeStarship: FeaturedStarship | null = null;
     let nextShipAt = window.performance.now() + SHIP_APPEAR_INTERVAL_MS;
     let time = 0;
@@ -164,7 +165,7 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
       }));
 
       nebulae = createNebulae(width, height);
-      fleet = showFleet ? createExplorationFleet(width, height) : [];
+      activeSmallStarship = null;
       activeStarship = null;
       nextShipAt = window.performance.now() + SHIP_APPEAR_INTERVAL_MS;
     };
@@ -554,11 +555,7 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
 
       context.restore();
       ship.x += ship.speed;
-      if (ship.x > width + ship.width + ship.trailLength) {
-        ship.x = -ship.width - ship.trailLength;
-        ship.y = height * randomBetween(0.14, 0.78);
-        ship.phase = randomBetween(0, Math.PI * 2);
-      }
+      return ship.x <= width + ship.width + ship.trailLength;
     };
 
     const draw = () => {
@@ -612,8 +609,23 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
 
       if (showFleet) {
         const now = window.performance.now();
-        if (!activeStarship && now >= nextShipAt) {
-          activeStarship = createFeaturedStarship(width, height);
+        if (!activeStarship && !activeSmallStarship && now >= nextShipAt) {
+          if (selectFleetEncounterVariant() === 'flagship') {
+            activeStarship = createFeaturedStarship(width, height);
+          } else {
+            activeSmallStarship = createExplorationFleet(width, height)[0] ?? null;
+            if (activeSmallStarship) {
+              activeSmallStarship.x = -activeSmallStarship.width - activeSmallStarship.trailLength;
+            }
+          }
+        }
+
+        if (activeSmallStarship) {
+          const stillVisible = drawStarship(activeSmallStarship, width, height);
+          if (!stillVisible) {
+            activeSmallStarship = null;
+            nextShipAt = now + SHIP_APPEAR_INTERVAL_MS;
+          }
         }
 
         if (activeStarship) {
