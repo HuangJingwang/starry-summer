@@ -38,10 +38,10 @@ const referenceNavItems = [
     filled: '/images/reference-nav/share-filled.svg',
   },
   {
-    href: '/about#links',
-    label: '优秀博客',
-    outline: '/images/reference-nav/website-outline.svg',
-    filled: '/images/reference-nav/website-filled.svg',
+    href: '/leetcode',
+    label: '刷题日记',
+    outline: '/images/reference-nav/leetcode-outline.svg',
+    filled: '/images/reference-nav/leetcode-filled.svg',
   },
 ] as const;
 

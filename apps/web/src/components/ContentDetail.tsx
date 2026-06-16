@@ -2,7 +2,7 @@ import { renderMarkdown } from '@starry-summer/markdown';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
-import { canShowComments, estimateReadingTime, formatPublicContentType, getContentHref, getContentTaxonomyLinkGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
+import { canShowComments, estimateReadingTime, getContentHref, getContentTaxonomyLinkGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import { getContentCover } from '@/lib/content-cover';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
@@ -59,10 +59,11 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   ) : null;
 
   return (
-    <article className="detail">
+    <div className={`detail-shell ${tableOfContentsNav ? 'detail-shell--with-toc' : 'detail-shell--no-toc'}`}>
       <ViewTracker targetType={item.type} targetId={item.id} />
-      <p className="eyebrow">{formatPublicContentType(item.type)}</p>
-      <h1>{item.title}</h1>
+      {tableOfContentsNav}
+      <article className="detail">
+        <h1>{item.title}</h1>
       <p className="detail__summary">{item.summary}</p>
       {cover ? (
         <figure className="detail-cover">
@@ -103,8 +104,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         </div>
       ))}
       {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
-      <div className={`detail-reader ${tableOfContentsNav ? 'detail-reader--with-toc' : 'detail-reader--no-toc'}`}>
-        {tableOfContentsNav}
+      <div className={`detail-reader ${tableOfContentsNav ? 'detail-reader--with-external-toc' : 'detail-reader--no-toc'}`}>
         <div className="detail-reader__main">
           <CodeCopyEnhancer />
           <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
@@ -140,7 +140,8 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         </nav>
       ) : null}
       {commentSection}
-    </article>
+      </article>
+    </div>
   );
 }
 

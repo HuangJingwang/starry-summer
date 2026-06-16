@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { PublicCardNav } from '@/components/PublicCardNav';
+import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 import { buildPublicNavigation } from '@/lib/navigation';
 import { loadSiteSettings } from '@/lib/settings-repository';
 
@@ -10,6 +11,7 @@ export async function SiteShell({ children, hideHeader = false }: { children: Re
 
   return (
     <div id="top" className="site-shell">
+      {hideHeader ? null : <StarrySkyCanvas className="site-shell__canvas" showFleet={false} />}
       {hideHeader ? null : <PublicCardNav title={settings.profile.title} navItems={navItems} />}
       {children}
     </div>

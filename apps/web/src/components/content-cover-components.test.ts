@@ -21,12 +21,13 @@ describe('content cover components', () => {
     expect(source).not.toContain('{item.type}');
   });
 
-  test('renders public detail and archive type labels through the article formatter', () => {
+  test('omits the public detail eyebrow while archives keep type labels through the formatter', () => {
     const detailSource = readFileSync(join(process.cwd(), 'src/components/ContentDetail.tsx'), 'utf8');
     const archivesSource = readFileSync(join(process.cwd(), 'src/app/archives/page.tsx'), 'utf8');
 
-    expect(detailSource).toContain('formatPublicContentType(item.type)');
     expect(archivesSource).toContain('formatPublicContentType(item.type)');
+    expect(detailSource).not.toContain('formatPublicContentType(item.type)');
+    expect(detailSource).not.toContain('<p className="eyebrow">{formatPublicContentType(item.type)}</p>');
     expect(detailSource).not.toContain('<p className="eyebrow">{item.type}</p>');
     expect(archivesSource).not.toContain('<span>{item.type}</span>');
   });
@@ -39,12 +40,16 @@ describe('content cover components', () => {
     expect(source).toContain('alt={cover.altText}');
   });
 
-  test('renders the content table of contents beside the reader body', () => {
+  test('renders the content table of contents outside the article reader body', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/ContentDetail.tsx'), 'utf8');
 
     expect(source).toContain('const tableOfContentsNav = tableOfContents.length > 0');
-    expect(source).toContain('className={`detail-reader ${tableOfContentsNav ?');
+    expect(source).toContain('className={`detail-shell ${tableOfContentsNav ?');
     expect(source).toContain('{tableOfContentsNav}');
+    expect(source).toContain('<article className="detail">');
+    expect(source.indexOf('{tableOfContentsNav}')).toBeLessThan(source.indexOf('<article className="detail">'));
+    expect(source).toContain('className={`detail-reader ${tableOfContentsNav ?');
     expect(source).toContain('<div className="detail-reader__main">');
+    expect(source).not.toContain('<div className={`detail-layout ${tableOfContentsNav ?');
   });
 });

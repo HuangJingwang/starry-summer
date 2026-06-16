@@ -96,10 +96,23 @@ textarea {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
 }
 
 .site-shell > main {
   flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.site-shell__canvas {
+  height: 100vh;
+  inset: 0;
+  opacity: 0.84;
+  pointer-events: none;
+  position: fixed;
+  width: 100vw;
+  z-index: 0;
 }
 
 body:has(.cyber-home) .site-shell {
@@ -1468,9 +1481,13 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .comment-login-entry {
+  align-items: flex-start;
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   margin-top: 16px;
+  position: relative;
+  width: 100%;
 }
 
 .comment-login-entry__button {
@@ -1494,17 +1511,19 @@ body:has(.cyber-home) .site-footer a {
 
 .comment-login-modal {
   display: grid;
-  inset: 0;
-  padding: clamp(18px, 4vw, 44px);
-  place-items: center;
-  position: fixed;
-  z-index: 100;
+  margin-top: 12px;
+  max-width: min(520px, 100%);
+  padding: 10px;
+  position: relative;
+  width: 100%;
+  z-index: 5;
 }
 
 .comment-login-modal__backdrop {
-  background: rgba(2, 6, 15, 0.64);
-  backdrop-filter: blur(10px) saturate(1.08);
+  background: rgba(2, 6, 15, 0.72);
+  backdrop-filter: blur(8px) saturate(1.08);
   border: 0;
+  border-radius: 20px;
   cursor: pointer;
   inset: 0;
   padding: 0;
@@ -1513,7 +1532,6 @@ body:has(.cyber-home) .site-footer a {
 
 .comment-login-modal__panel {
   animation: comment-login-panel-in 180ms cubic-bezier(0.2, 0.86, 0.2, 1) both;
-  max-width: min(440px, calc(100vw - 36px));
   position: relative;
   width: 100%;
   z-index: 1;
@@ -2396,6 +2414,7 @@ body:has(.guestbook-page) .site-footer a {
   padding: clamp(26px, 3vw, 38px);
   position: relative;
   text-align: center;
+  translate: 0 -24px;
   width: 100%;
   animation: home-widget-enter 680ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
 }
@@ -2494,7 +2513,7 @@ body:has(.guestbook-page) .site-footer a {
   grid-area: actions;
   justify-content: center;
   justify-self: center;
-  margin-top: 46px;
+  margin-top: 18px;
   max-width: min(100%, 374px);
   padding-top: 0;
   width: 100%;
@@ -3739,8 +3758,7 @@ body:has(.guestbook-page) .site-footer a {
 .hero__actions a,
 .guestbook-form button,
 .login-panel button,
-.interaction-form button,
-.like-button {
+.interaction-form button {
   align-items: center;
   background: var(--accent);
   border: 0;
@@ -3754,9 +3772,51 @@ body:has(.guestbook-page) .site-footer a {
   padding: 12px 18px;
 }
 
+.like-button {
+  align-items: center;
+  backdrop-filter: blur(18px) saturate(1.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent),
+    rgba(4, 6, 14, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 42px rgba(0, 0, 0, 0.2);
+  color: #fecdd3;
+  cursor: pointer;
+  display: inline-flex;
+  height: 48px;
+  justify-content: center;
+  overflow: visible;
+  padding: 9px;
+  position: relative;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+  width: 48px;
+}
+
+.like-button__count {
+  background: rgba(148, 163, 184, 0.86);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+  left: 28px;
+  line-height: 1;
+  min-width: 28px;
+  padding: 4px 6px;
+  position: absolute;
+  text-align: center;
+  top: -8px;
+}
+
 .like-button__icon {
   flex: 0 0 auto;
-  opacity: 0.78;
+  opacity: 1;
   transition: fill 180ms ease, opacity 180ms ease, transform 180ms ease;
 }
 
@@ -3764,6 +3824,15 @@ body:has(.guestbook-page) .site-footer a {
 .like-button:focus-visible .like-button__icon,
 .like-button[aria-pressed='true'] .like-button__icon {
   opacity: 1;
+  transform: scale(1.08);
+}
+
+.like-button:hover,
+.like-button:focus-visible {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent),
+    rgba(4, 6, 14, 0.62);
+  border-color: rgba(255, 255, 255, 0.28);
   transform: translateY(-1px);
 }
 
@@ -5512,7 +5581,10 @@ body:has(.guestbook-page) .site-footer a {
 }
 
 .page-main {
-  background: #02040b;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(34, 211, 238, 0.08), transparent 28%),
+    radial-gradient(circle at 86% 82%, rgba(167, 139, 250, 0.06), transparent 30%),
+    rgba(2, 4, 11, 0.74);
   color: var(--cyber-ink);
   isolation: isolate;
   min-height: calc(100vh - 71px);
@@ -5529,28 +5601,44 @@ body:has(.guestbook-page) .site-footer a {
 }
 
 .page-main::before {
-  animation:
-    night-sky-drift 42s ease-in-out infinite alternate,
-    night-star-twinkle 5.6s ease-in-out infinite;
+  animation: none;
   background:
     var(--public-night-sparkles),
     var(--public-home-star-field);
-  opacity: 0.58;
+  opacity: 0.14;
 }
 
 .page-main::after {
-  animation: night-meteor-shower 9s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-  background:
-    linear-gradient(112deg, transparent 0 44%, rgba(226, 232, 240, 0.84) 48%, rgba(34, 211, 238, 0.5) 51%, transparent 58%),
-    linear-gradient(112deg, transparent 0 18%, rgba(226, 232, 240, 0.55) 20%, rgba(34, 211, 238, 0.34) 23%, transparent 30%);
-  filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.3));
+  animation: none;
+  background: transparent;
+  filter: none;
   opacity: 0;
-  transform: translate3d(-18%, -12%, 0);
 }
 
 .page-main > * {
   position: relative;
   z-index: 1;
+}
+
+.page-main__canvas {
+  height: 100%;
+  inset: 0;
+  opacity: 0.78;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
+.study-archive-page::after {
+  animation: none;
+  background: transparent;
+  filter: none;
+  opacity: 0;
+}
+
+.study-archive-page .page-main__canvas {
+  mix-blend-mode: screen;
 }
 
 .page-main .eyebrow {
@@ -5573,14 +5661,22 @@ body:has(.guestbook-page) .site-footer a {
 }
 
 .page-main .sort-tabs a {
+  background: rgba(4, 8, 18, 0.46);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 999px;
   color: rgba(226, 232, 240, 0.72);
 }
 
+.page-main .sort-tabs {
+  border: 0;
+  gap: 10px;
+  overflow: visible;
+}
+
 .page-main .sort-tabs a[aria-current='page'] {
   background: linear-gradient(135deg, var(--cyber-cyan), var(--cyber-teal) 58%, var(--cyber-purple));
-  border-color: transparent;
+  border-color: rgba(125, 211, 252, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
   color: #031018;
   font-weight: 900;
 }
@@ -6089,8 +6185,7 @@ body:has(.search-page) .site-footer a {
 }
 
 .detail__meta .like-button {
-  min-height: 40px;
-  padding: 6px 12px;
+  flex: 0 0 auto;
 }
 
 .detail-taxonomy {
@@ -6158,28 +6253,40 @@ body:has(.search-page) .site-footer a {
   color: var(--accent);
 }
 
-.detail-reader {
+.detail-shell {
   align-items: start;
-  display: grid;
+  display: block;
   gap: 22px;
   margin-top: 18px;
+  margin-inline: auto;
+  position: relative;
+  width: min(100%, 1140px);
+}
+
+.detail-reader {
+  min-width: 0;
 }
 
 .detail-reader__main {
   min-width: 0;
 }
 
-@media (min-width: 1100px) {
-  .detail-reader--with-toc {
-    grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-    gap: clamp(22px, 3vw, 34px);
+@media (min-width: 1280px) {
+  .detail-shell--with-toc {
+    display: block;
   }
 
-  .detail-reader--with-toc .detail-toc {
+  .detail-shell--with-toc .detail-toc {
+    inset-inline-start: calc((100% - 860px) / 2 - 212px);
     max-height: calc(100vh - 120px);
     overflow: auto;
-    position: sticky;
-    top: 92px;
+    position: absolute;
+    top: 0;
+    width: 180px;
+  }
+
+  .detail-shell--with-toc .detail {
+    margin-inline: auto;
   }
 }
 
@@ -6257,27 +6364,6 @@ body:has(.search-page) .site-footer a {
   font-size: 0.75rem;
   font-weight: 500;
   margin: 2em 0 1.5em;
-}
-
-.detail .detail__body h1::before,
-.detail .detail__body h2::before {
-  color: rgba(34, 211, 238, 0.62);
-  content: '# ';
-}
-
-.detail .detail__body h3::before {
-  color: rgba(34, 211, 238, 0.62);
-  content: '## ';
-}
-
-.detail .detail__body h4::before {
-  color: rgba(34, 211, 238, 0.62);
-  content: '### ';
-}
-
-.detail .detail__body h5::before {
-  color: rgba(34, 211, 238, 0.62);
-  content: '#### ';
 }
 
 .detail .detail__body strong {
@@ -6506,14 +6592,16 @@ body:has(.search-page) .site-footer a {
 }
 
 .detail-toc {
-  background: rgba(4, 6, 14, 0.52);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 8px;
+  background: rgba(3, 9, 20, 0.68);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24);
   margin: 0;
   padding: 18px 20px;
 }
 
 .detail-toc .eyebrow {
+  color: #67e8f9;
   margin-bottom: 10px;
 }
 
@@ -6534,11 +6622,12 @@ body:has(.search-page) .site-footer a {
 }
 
 .detail-toc a {
-  color: var(--ink);
+  color: rgba(226, 232, 240, 0.78);
   text-decoration: none;
 }
 
 .detail-toc a:hover {
+  color: #e0faff;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -6854,6 +6943,14 @@ body:has(.search-page) .site-footer a {
   opacity: 0;
 }
 
+:root[data-theme='summer-day'] .page-main__canvas {
+  opacity: 0;
+}
+
+:root[data-theme='summer-day'] .site-shell__canvas {
+  opacity: 0;
+}
+
 :root[data-theme='summer-day'] .page-main:has(.detail) {
   animation: none;
   background:
@@ -7001,11 +7098,25 @@ body:has(.search-page) .site-footer a {
   color: var(--summer-accent);
 }
 
-:root[data-theme='summer-day'] .page-main .sort-tabs a[aria-current='page'],
-:root[data-theme='summer-day'] .detail__meta .like-button {
+:root[data-theme='summer-day'] .page-main .sort-tabs a[aria-current='page'] {
   background: var(--summer-accent-gradient);
-  border-color: transparent;
+  border-color: rgba(8, 116, 127, 0.28);
   color: var(--summer-ink);
+}
+
+:root[data-theme='summer-day'] .detail__meta .like-button {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(248, 255, 252, 0.72)),
+    rgba(255, 255, 255, 0.74);
+  border-color: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    inset 0 0 20px rgba(255, 255, 255, 0.34),
+    0 18px 38px rgba(44, 106, 116, 0.12);
+  color: #ffb8c5;
+}
+
+:root[data-theme='summer-day'] .detail__meta .like-button__count {
+  background: rgba(190, 198, 214, 0.86);
 }
 
 :root[data-theme='summer-day'] .page-main .content-card__series a:hover,
@@ -7078,14 +7189,6 @@ body:has(.search-page) .site-footer a {
   border: 0;
   box-shadow: none;
   color: inherit;
-}
-
-:root[data-theme='summer-day'] .detail .detail__body h1::before,
-:root[data-theme='summer-day'] .detail .detail__body h2::before,
-:root[data-theme='summer-day'] .detail .detail__body h3::before,
-:root[data-theme='summer-day'] .detail .detail__body h4::before,
-:root[data-theme='summer-day'] .detail .detail__body h5::before {
-  color: rgba(53, 191, 171, 0.62);
 }
 
 :root[data-theme='summer-day'] .detail .detail__body blockquote {
