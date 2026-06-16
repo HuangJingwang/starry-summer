@@ -400,7 +400,7 @@ describe('global styles', () => {
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHOOTING_STAR_INTERVAL_FRAMES = 520');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % SHOOTING_STAR_INTERVAL_FRAMES === 0');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('MAX_SHIP_SCREEN_RATIO = 0.045');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHIP_APPEAR_INTERVAL_MS = 10 * 60 * 1000');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeStarship');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && now >= nextShipAt)');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('fleet.forEach');

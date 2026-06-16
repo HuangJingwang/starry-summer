@@ -55,7 +55,7 @@ interface FeaturedStarship {
 
 const MAX_SHIP_SCREEN_RATIO = 0.045;
 const ENGINE_PARTICLES = 6;
-const SHIP_APPEAR_INTERVAL_MS = 10 * 60 * 1000;
+const SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000;
 const SHOOTING_STAR_INTERVAL_FRAMES = 520;
 
 const randomBetween = (min: number, max: number) => min + Math.random() * (max - min);
