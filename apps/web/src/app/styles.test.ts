@@ -1045,8 +1045,9 @@ describe('global styles', () => {
     expect(mobileHeroContentBlock).toContain('grid-template-areas:');
     expect(mobileHeroContentBlock).toContain('"nav"');
     expect(mobileHeroContentBlock).toContain('"intro"');
-    expect(mobileHeroContentBlock).toContain('"actions"');
     expect(mobileHeroContentBlock).toContain('"latest"');
+    expect(mobileHeroContentBlock).toContain('"actions"');
+    expect(mobileHeroContentBlock).toMatch(/"intro"\s*"latest"\s*"actions"/);
     expect(mobileHeroContentBlock).not.toContain('"sky"');
     expect(mobileHeroContentBlock).not.toContain('"clock"');
     expect(mobileHeroContentBlock).not.toContain('"calendar"');
