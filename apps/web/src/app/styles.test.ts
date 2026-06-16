@@ -1008,6 +1008,10 @@ describe('global styles', () => {
       responsiveCss.match(/\.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileHeroContentBlock =
       responsiveCss.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLeftStackBlock =
+      responsiveCss.match(/\.portfolio-hero__left-stack\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileCenterStackBlock =
+      responsiveCss.match(/\.portfolio-hero__center-stack\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileLatestCardBlock =
       responsiveCss.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileIntroCardBlock =
@@ -1015,6 +1019,12 @@ describe('global styles', () => {
         ?.body ?? '';
     const mobileActionsBlock =
       responsiveCss.match(/\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileSkyCardBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)?.groups
+        ?.body ?? '';
+    const mobileHiddenClockCalendarBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__clock-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
+        ?.groups?.body ?? '';
     const mobileLikeRowBlock =
       responsiveCss.match(/\.portfolio-hero__like-row\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     expect(responsiveCss).toContain('.portfolio-hero__card-nav');
@@ -1022,21 +1032,30 @@ describe('global styles', () => {
     expect(responsiveCss).not.toContain('.portfolio-hero__status-card');
     expect(responsiveCss).not.toContain('.portfolio-hero__pulse-card');
     expect(mobileHeroContentBlock).toContain('grid-template-areas:');
-    expect(mobileHeroContentBlock).toContain('"nav"');
     expect(mobileHeroContentBlock).toContain('"intro"');
+    expect(mobileHeroContentBlock).toContain('"actions"');
+    expect(mobileHeroContentBlock).toContain('"latest"');
+    expect(mobileHeroContentBlock).toContain('"nav"');
+    expect(mobileHeroContentBlock).toContain('"sky"');
+    expect(mobileHeroContentBlock).not.toContain('"clock"');
+    expect(mobileHeroContentBlock).not.toContain('"calendar"');
+    expect(mobileLeftStackBlock).toContain('display: contents;');
+    expect(mobileCenterStackBlock).toContain('display: contents;');
     expect(mobileHomeNavBlock).toContain('max-width: 100%;');
-    expect(mobileHomeNavBlock).toContain('grid-area: auto;');
+    expect(mobileHomeNavBlock).toContain('grid-area: nav;');
     expect(mobileHomeNavBlock).toContain('translate: none;');
     expect(mobileHomeNavBlock).toContain('width: 100%;');
     expect(mobileHomeNavCardBlock).toContain('border-radius: 24px;');
     expect(mobileHomeNavCardBlock).toContain('min-height: auto;');
-    expect(mobileIntroCardBlock).toContain('grid-area: auto;');
+    expect(mobileIntroCardBlock).toContain('grid-area: intro;');
     expect(mobileIntroCardBlock).toContain('translate: none;');
-    expect(mobileActionsBlock).toContain('grid-area: auto;');
+    expect(mobileActionsBlock).toContain('grid-area: actions;');
     expect(mobileActionsBlock).toContain('margin-top: 0;');
-    expect(mobileLatestCardBlock).toContain('grid-area: auto;');
+    expect(mobileLatestCardBlock).toContain('grid-area: latest;');
     expect(mobileLatestCardBlock).toContain('margin-right: 0;');
     expect(mobileLatestCardBlock).toContain('translate: none;');
+    expect(mobileSkyCardBlock).toContain('grid-area: sky;');
+    expect(mobileHiddenClockCalendarBlock).toContain('display: none;');
     expect(responsiveCss).toContain(
       'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card {\n    translate: none;\n  }',
     );

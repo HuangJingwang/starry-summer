@@ -422,8 +422,11 @@
     align-content: start;
     gap: 10px;
     grid-template-areas:
+      "intro"
+      "actions"
+      "latest"
       "nav"
-      "intro";
+      "sky";
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     min-height: auto;
@@ -433,7 +436,7 @@
 
   .portfolio-hero__card-nav {
     align-self: start;
-    grid-area: auto;
+    grid-area: nav;
     max-width: 100%;
     transform: none;
     translate: none;
@@ -441,7 +444,7 @@
   }
 
   .portfolio-hero__left-stack {
-    display: grid;
+    display: contents;
     gap: 10px;
     justify-items: stretch;
     transform: none;
@@ -508,14 +511,14 @@
   }
 
   .portfolio-hero__center-stack {
-    display: grid;
+    display: contents;
     gap: 12px;
     transform: none;
   }
 
   .portfolio-hero__intro-card {
     border-radius: 24px;
-    grid-area: auto;
+    grid-area: intro;
     min-height: auto;
     padding: 18px 14px;
     translate: none;
@@ -530,7 +533,7 @@
 
   .portfolio-hero__actions {
     gap: 8px;
-    grid-area: auto;
+    grid-area: actions;
     margin-top: 0;
     max-width: 100%;
     padding-top: 0;
@@ -542,11 +545,20 @@
 
   .portfolio-hero__latest-card {
     border-radius: 22px;
-    grid-area: auto;
+    grid-area: latest;
     margin-right: 0;
     padding: 14px;
     translate: none;
     width: 100%;
+  }
+
+  .portfolio-hero__sky-card {
+    grid-area: sky;
+  }
+
+  .portfolio-hero__clock-card,
+  .portfolio-hero__calendar-card {
+    display: none;
   }
 
   body:has(.portfolio-home) .portfolio-hero__card-nav,
