@@ -40,16 +40,23 @@ describe('content cover components', () => {
     expect(source).toContain('alt={cover.altText}');
   });
 
-  test('renders the content table of contents outside the article reader body', () => {
+  test('renders the reference-style content sidebar outside the article reader body', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/ContentDetail.tsx'), 'utf8');
 
     expect(source).toContain('const tableOfContentsNav = tableOfContents.length > 0');
+    expect(source).toContain('const detailSidebar = cover || item.summary || tableOfContentsNav');
     expect(source).toContain('className={`detail-shell ${tableOfContentsNav ?');
+    expect(source).toContain('{detailSidebar ? (');
+    expect(source).toContain('<aside className="detail-sidebar"');
+    expect(source).toContain('<section className="detail-sidebar__card detail-sidebar__cover"');
+    expect(source).toContain('<section className="detail-sidebar__card detail-sidebar__summary"');
     expect(source).toContain('{tableOfContentsNav}');
     expect(source).toContain('<article className="detail">');
+    expect(source.indexOf('<aside className="detail-sidebar"')).toBeLessThan(source.indexOf('<article className="detail">'));
     expect(source.indexOf('{tableOfContentsNav}')).toBeLessThan(source.indexOf('<article className="detail">'));
     expect(source).toContain('className={`detail-reader ${tableOfContentsNav ?');
     expect(source).toContain('<div className="detail-reader__main">');
+    expect(source).not.toContain('<figure className="detail-cover">');
     expect(source).not.toContain('<div className={`detail-layout ${tableOfContentsNav ?');
   });
 });

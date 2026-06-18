@@ -457,6 +457,11 @@
   padding: 9px 14px;
 }
 
+.admin-command-bar__actions .theme-toggle {
+  height: 38px;
+  width: 38px;
+}
+
 .admin-dashboard-grid,
 .admin-ops-grid,
 .admin-workflow-grid,

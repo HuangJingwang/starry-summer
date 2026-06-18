@@ -5,12 +5,10 @@ import { usePathname } from 'next/navigation';
 import type { CSSProperties, FocusEvent, MouseEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
+import { ThemeToggle } from '@/components/ThemeToggle';
 import type { NavigationItem } from '@/lib/navigation';
 
-type SiteTheme = 'summer-day' | 'summer-night';
-
 const transitionStorageKey = 'starry-summer-home-nav-transition';
-const sessionThemeKey = 'starry-summer-theme';
 
 const referenceNavItems = [
   {
@@ -83,22 +81,6 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
   }, [activeIndex]);
 
   useEffect(() => {
-    let timer: number;
-
-    function syncAutoTheme() {
-      const savedTheme = window.sessionStorage.getItem(sessionThemeKey);
-      const nextTheme = isSiteTheme(savedTheme) ? savedTheme : getThemeForTime();
-
-      document.documentElement.dataset.theme = nextTheme;
-      timer = window.setTimeout(syncAutoTheme, getMillisecondsUntilNextThemeBoundary());
-    }
-
-    syncAutoTheme();
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
     const transitionTarget = window.sessionStorage.getItem(transitionStorageKey);
     const targetPathname = transitionTarget?.split('?')[0];
 
@@ -116,7 +98,7 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
 
   return (
     <header className={`site-header site-nav-card${arrivedFromHome ? ' site-nav-card--from-home' : ''}`}>
-      <Link className="brand site-nav-card__brand" href="/#top" aria-label={`${title} 首页`}>
+      <Link className="brand site-nav-card__brand" href="/" aria-label={`${title} 首页`}>
         <img className="brand-avatar brand-avatar--night" src="/images/aster-profile.png" alt="" aria-hidden="true" />
         <img className="brand-avatar brand-avatar--day" src="/images/aster-day-profile-v2.png" alt="" aria-hidden="true" />
       </Link>
@@ -156,6 +138,9 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
           </div>
         </nav>
       </div>
+      <div className="site-nav-card__tools">
+        <ThemeToggle />
+      </div>
     </header>
   );
 }
@@ -170,23 +155,4 @@ function isActivePath(pathname: string, href: string): boolean {
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function getThemeForTime(date = new Date()): SiteTheme {
-  const hour = date.getHours();
-
-  return hour >= 6 && hour < 18 ? 'summer-day' : 'summer-night';
-}
-
-function isSiteTheme(value: string | null): value is SiteTheme {
-  return value === 'summer-day' || value === 'summer-night';
-}
-
-function getMillisecondsUntilNextThemeBoundary(date = new Date()) {
-  const nextBoundary = new Date(date);
-  const hour = date.getHours();
-
-  nextBoundary.setHours(hour < 6 ? 6 : hour < 18 ? 18 : 30, 0, 0, 0);
-
-  return nextBoundary.getTime() - date.getTime();
 }

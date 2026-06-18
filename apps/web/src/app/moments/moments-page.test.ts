@@ -57,6 +57,8 @@ describe('recommended share page', () => {
     const css = readSource('src/app/styles.css');
 
     expect(readRule(css, '.share-page')).toContain('align-content: start;');
+    expect(readRule(css, '.share-page')).toContain('background: transparent;');
+    expect(readRule(css, '.share-page')).not.toContain('background: var(--share-bg);');
     expect(readRule(css, '.share-page__panel')).toContain('align-content: start;');
     expect(readRule(css, '.share-page__filters')).toContain('align-content: start;');
     expect(readRule(css, '.share-page__tag-list')).toContain('align-items: center;');

@@ -72,7 +72,7 @@ export const seedContent: SiteContentItem[] = [
     series: ['Platform Journal'],
     project: {
       status: 'active',
-      stack: ['Next.js', 'Markdown', 'Repository JSON', 'Cloudflare Workers', 'Docker'],
+      stack: ['Next.js', 'Markdown', 'Repository JSON', 'Vercel', 'GitHub API'],
       startedAt: '2026-06-10',
     },
     viewCount: 214,

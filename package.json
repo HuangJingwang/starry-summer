@@ -32,10 +32,8 @@
     "ops:backup": "bash scripts/backup.sh",
     "ops:restore": "bash scripts/restore.sh",
     "ops:doctor": "bash scripts/doctor.sh",
-    "ops:docker-preflight": "bash scripts/docker-preflight.sh",
     "ops:init-env": "bash scripts/init-env.sh",
-    "ops:smoke": "bash scripts/smoke.sh",
-    "ops:deploy": "bash scripts/deploy.sh"
+    "ops:smoke": "bash scripts/smoke.sh"
   },
   "engines": {
     "node": ">=22.0.0",

@@ -38,5 +38,4 @@ These instructions apply to the entire repository.
   - `npm test`
   - `npm run typecheck`
   - `npm run build`
-  - `docker compose config --quiet`
 - The repository may have unrelated dirty files. Never revert or stage changes you did not intentionally make for the current task.

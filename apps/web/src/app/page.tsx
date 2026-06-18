@@ -4,7 +4,6 @@ import { FileText, Heart } from 'lucide-react';
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
 import { HomeContactButton } from '@/components/HomeContactButton';
-import { MobileBackToTop } from '@/components/MobileBackToTop';
 import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 import { getContentHref } from '@/lib/content';
@@ -176,7 +175,6 @@ export default async function HomePage() {
 
           </div>
         </section>
-        <MobileBackToTop />
       </main>
     </SiteShell>
   );

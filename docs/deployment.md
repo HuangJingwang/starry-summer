@@ -1,79 +1,94 @@
 # Deployment Guide
 
-Starry Summer now targets a database-free web deployment. The default Docker Compose stack runs only the Next.js web app and Caddy. Public content and settings are read from repository files, while admin publishing writes back through repository commits.
+Starry Summer targets a database-free, repository-backed web deployment. The default production path is Vercel for the Next.js app, GitHub repository files for durable content, and optional hosted edge services for interactions or uploaded assets.
 
-## 1. Server Prerequisites
+## 1. Prerequisites
 
-- A Linux cloud server with Docker and Docker Compose.
-- A domain pointing to the server public IP.
-- Ports `80` and `443` open.
 - Node.js 22 and npm 10 for local verification.
+- A GitHub repository connected to Vercel.
+- A Vercel project using `apps/web` as the project root directory.
+- A GitHub token with repository contents write access for admin publishing.
 
-## 2. Environment Setup
+## 2. Vercel Project Setup
 
-Generate `.env` with a local admin password:
+Import the repository in Vercel and keep the Next.js framework preset.
 
-```bash
-npm run ops:init-env -- "your local admin password"
+Recommended project settings:
+
+```text
+Root Directory: apps/web
+Install Command: cd ../.. && npm ci
+Build Command: cd ../.. && npm run build
+Output Directory: Framework default
+Node.js Version: 22
 ```
 
-For production, copy `.env.example` to `.env` and change these values:
+The build command runs from the monorepo root so shared packages compile before `apps/web`.
 
-- `DOMAIN`: your public domain, for example `blog.your-domain.com`.
-- `PUBLIC_SITE_URL`: `https://blog.your-domain.com`.
-- `ACME_EMAIL`: email used by Caddy for HTTPS certificates.
+## 3. Environment Setup
+
+Generate local secrets before filling production values:
+
+```bash
+npm run auth:hash-password -- "your strong password"
+npm run auth:secret
+npm run auth:interaction-secret
+```
+
+Set these variables in Vercel:
+
+- `NODE_ENV`: `production`.
+- `PUBLIC_SITE_URL`: your final public site URL, for example `https://blog.your-domain.com`.
 - `ADMIN_EMAIL`: owner login account.
-- `ADMIN_PASSWORD_HASH`: generated with `npm run auth:hash-password -- "your strong password"`.
+- `ADMIN_PASSWORD_HASH`: generated with `npm run auth:hash-password`.
 - `SESSION_SECRET`: generated with `npm run auth:secret`.
 - `INTERACTION_HASH_SECRET`: generated with `npm run auth:interaction-secret`.
 - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_CALLBACK_URL`: GitHub OAuth App values for reader login.
+- `GITHUB_CONTENT_OWNER`: GitHub owner or organization that owns the content repository.
+- `GITHUB_CONTENT_REPO`: repository name, usually `starry-summer`.
+- `GITHUB_CONTENT_BRANCH`: publishing branch, usually `main`.
+- `GITHUB_CONTENT_TOKEN`: GitHub fine-grained token with contents write access for the repository.
+- `REPOSITORY_PUBLISH_SECRET`: long random secret for machine-to-machine repository publishing.
 - `RELEASE_VERSION` and `GIT_REVISION`: optional release metadata returned by `/health`.
 
-Check the environment before boot:
+Check an env file locally before copying values to Vercel:
 
 ```bash
-npm run ops:doctor
+npm run ops:doctor -- .env.production
 ```
 
-## 3. First Boot
+## 4. Repository Publishing
 
-Build and start the web stack:
+Admin content and settings publishing use Next-owned routes:
 
-```bash
-npm run ops:docker-preflight
-docker compose build
-docker compose up -d
-```
+- `/api/repository/content`
+- `/api/repository/settings`
 
-Check service status:
+Publishing flow:
 
-```bash
-docker compose ps
-docker compose logs -f web caddy
-```
+1. The admin UI sends a protected request to the repository route.
+2. The route uses `GITHUB_CONTENT_TOKEN` to write content and settings files through the GitHub API.
+3. GitHub receives a commit on `GITHUB_CONTENT_BRANCH`.
+4. Vercel automatically rebuilds and publishes the site.
 
-Verify:
+If repository publishing variables are missing, the public site still renders existing repository files, but admin publishing returns a configuration error.
 
-- `https://$DOMAIN` opens the public site.
-- `https://$DOMAIN/health` returns the web health response.
-- `https://$DOMAIN/admin/login` opens the admin login screen.
+## 5. Verify Production
 
-Run the public smoke check after DNS and HTTPS are ready:
+After DNS and Vercel deployment are ready:
 
 ```bash
 npm run ops:smoke -- https://blog.your-domain.com
 ```
 
-## 4. Repository Publishing
+Verify manually:
 
-Admin content and settings publishing use Next-owned repository routes:
+- `https://blog.your-domain.com` opens the public site.
+- `https://blog.your-domain.com/health` returns the web health response.
+- `https://blog.your-domain.com/admin/login` opens the admin login screen.
+- Publishing a small draft creates a GitHub commit and triggers a Vercel deployment.
 
-- `/api/repository/content`
-- `/api/repository/settings`
-
-Configure the GitHub repository publishing environment used by `apps/web/src/lib/github-content-commit.ts` before relying on production admin publishing. The public site continues to render existing repository files when publishing is not configured.
-
-## 5. Backup
+## 6. Backup
 
 Create a timestamped static backup:
 
@@ -93,7 +108,7 @@ You can pass a fixed output directory:
 npm run ops:backup -- backups/starry-summer-before-upgrade
 ```
 
-## 6. Restore
+## 7. Restore
 
 Restore from a static backup:
 
@@ -103,26 +118,12 @@ RESTORE_CONFIRM=YES npm run ops:restore -- backups/starry-summer-static-YYYY-MM-
 
 The restore script verifies archives and checksums before replacing `apps/web/content` and `apps/web/public/images`.
 
-## 7. Updates
+## 8. Optional Dynamic Services
 
-Pull the latest code, rebuild, restart, and run smoke checks in one step:
+Keep the core site simple. Add hosted services only when the feature needs mutable runtime data:
 
-```bash
-git pull
-npm run ops:deploy -- https://blog.your-domain.com
-```
+- Likes and views: Cloudflare Workers + KV or D1.
+- Comments and guestbook moderation: Cloudflare Workers + D1, or a GitHub Discussions-based system.
+- Uploaded authoring assets: GitHub repository files under `apps/web/public/images/uploads`.
 
-The deploy script runs `ops:doctor`, validates Compose, exports release metadata for `/health`, builds images, starts the web stack, and then runs `ops:smoke`.
-
-By default, deploy refuses to run with uncommitted local changes. For an intentional emergency deploy from a dirty worktree:
-
-```bash
-ALLOW_DIRTY_DEPLOY=true npm run ops:deploy -- https://blog.your-domain.com
-```
-
-## 8. Production Notes
-
-- Keep `.env` out of git.
-- Do not add PostgreSQL, Redis, MinIO, or the old Nest API back to the default Compose path.
-- Use Cloudflare Workers, KV/D1, R2, or similar hosted services for interactions, LeetCode sync, and asset uploads when static files are not enough.
-- Keep regular off-server backups of repository content and public images.
+When these services are not configured, the repository-backed public site and admin publishing flow remain usable.

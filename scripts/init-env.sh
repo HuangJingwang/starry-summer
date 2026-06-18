@@ -62,5 +62,5 @@ mkdir -p "$target_dir"
 mv "$tmp_file" "$target_file"
 trap - EXIT
 
-echo "Wrote Docker environment file: $target_file"
+echo "Wrote environment file: $target_file"
 echo "Admin login account: owner@example.com"

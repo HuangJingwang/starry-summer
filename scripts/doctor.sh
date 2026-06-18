@@ -30,25 +30,6 @@ is_unset_or_placeholder() {
   [[ -z "$value" || "$value" == replace-* || "$value" == change-* ]]
 }
 
-is_example_com_hostname() {
-  local value="${1:-}"
-
-  [[ "$value" == "example.com" || "$value" == *.example.com ]]
-}
-
-case "${DOMAIN:-}" in
-  "" | localhost | 127.0.0.1)
-    fail "DOMAIN must be your public domain, not localhost."
-    ;;
-  *://* | */* | *:*)
-    fail "DOMAIN must be a hostname without a scheme or path."
-    ;;
-esac
-
-if is_example_com_hostname "${DOMAIN:-}"; then
-  fail "DOMAIN must not use an example.com placeholder."
-fi
-
 if [[ "${PUBLIC_SITE_URL:-}" != https://* ]]; then
   fail "PUBLIC_SITE_URL must start with https:// for production."
 fi
@@ -61,18 +42,8 @@ if [[ -z "$public_site_host" ]]; then
   fail "PUBLIC_SITE_URL must be a valid URL."
 fi
 
-if is_example_com_hostname "$public_site_host"; then
+if [[ "$public_site_host" == "example.com" || "$public_site_host" == *.example.com ]]; then
   fail "PUBLIC_SITE_URL must not use an example.com placeholder."
-fi
-
-if [[ -n "${DOMAIN:-}" && -n "$public_site_host" && "$public_site_host" != "$DOMAIN" ]]; then
-  fail "PUBLIC_SITE_URL host must match DOMAIN."
-fi
-
-if [[ "${ACME_EMAIL:-}" != *@* ]]; then
-  fail "ACME_EMAIL must be a valid email for HTTPS certificates."
-elif [[ "${ACME_EMAIL:-}" == *@example.com ]]; then
-  fail "ACME_EMAIL must not use an example.com placeholder."
 fi
 
 if is_unset_or_placeholder "${ADMIN_EMAIL:-}"; then
@@ -117,6 +88,28 @@ if is_unset_or_placeholder "${GITHUB_CALLBACK_URL:-}"; then
   fail "GITHUB_CALLBACK_URL must be set to the GitHub OAuth callback URL."
 elif [[ "${GITHUB_CALLBACK_URL:-}" != "$expected_github_callback_url" ]]; then
   fail "GITHUB_CALLBACK_URL must equal PUBLIC_SITE_URL plus /api/auth/github/callback."
+fi
+
+if is_unset_or_placeholder "${GITHUB_CONTENT_OWNER:-}"; then
+  fail "GITHUB_CONTENT_OWNER is required for repository publishing."
+fi
+
+if is_unset_or_placeholder "${GITHUB_CONTENT_REPO:-}"; then
+  fail "GITHUB_CONTENT_REPO is required for repository publishing."
+fi
+
+if is_unset_or_placeholder "${GITHUB_CONTENT_BRANCH:-}"; then
+  fail "GITHUB_CONTENT_BRANCH is required for repository publishing."
+fi
+
+if is_unset_or_placeholder "${GITHUB_CONTENT_TOKEN:-}"; then
+  fail "GITHUB_CONTENT_TOKEN is required for repository publishing."
+fi
+
+repository_publish_secret="${REPOSITORY_PUBLISH_SECRET:-}"
+
+if [[ ${#repository_publish_secret} -lt 32 ]] || is_unset_or_placeholder "$repository_publish_secret"; then
+  fail "REPOSITORY_PUBLISH_SECRET must be at least 32 characters and not a placeholder."
 fi
 
 if [[ "$errors" -gt 0 ]]; then

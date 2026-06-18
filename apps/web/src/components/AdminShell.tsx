@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import { buildAdminNavigation } from '@/lib/navigation';
 
 import { AdminSessionStatus } from './AdminSessionStatus';
+import { ThemeToggle } from './ThemeToggle';
 
 function matchesAdminPath(pathname: string, href: string): boolean {
   return pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`));
@@ -76,6 +77,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <div className="admin-command-bar__actions">
             <Link href="/admin/content/new">新建内容</Link>
             <Link href="/admin/assets">上传素材</Link>
+            <ThemeToggle />
           </div>
         </div>
         {children}

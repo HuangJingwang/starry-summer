@@ -51,6 +51,13 @@ describe('site shell helpers', () => {
     expect(source).toContain('<PublicCardNav title={settings.profile.title} navItems={navItems} />');
   });
 
+  test('renders the mobile reference scroll-to-top control from the shared shell', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+
+    expect(source).toContain("import { MobileBackToTop } from '@/components/MobileBackToTop';");
+    expect(source).toContain('<MobileBackToTop />');
+  });
+
   test('does not render a shared explanatory footer on public pages', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
 

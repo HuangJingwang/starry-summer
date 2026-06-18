@@ -8,6 +8,13 @@ import {
   type StudySubmission,
 } from '@starry-summer/shared';
 
+export interface StudySyncState {
+  lastSyncedAt: string;
+  historyBackfilledAt: string;
+  historyBackfilledUsername: string;
+  historyBackfilledListId: string;
+}
+
 export interface StudyRepository {
   getSettings(): Promise<StudySettings>;
   updateSettings(patch: StudySettingsPatch): Promise<StudySettings>;
@@ -17,12 +24,20 @@ export interface StudyRepository {
   updateProblem(slug: string, patch: StudyProblemPatch): Promise<StudyProblem | null>;
   listSubmissions(limit?: number): Promise<StudySubmission[]>;
   upsertSubmissions(submissions: StudySubmission[]): Promise<number>;
+  getSyncState(): Promise<StudySyncState>;
+  updateSyncState(patch: Partial<StudySyncState>): Promise<StudySyncState>;
 }
 
 export const STUDY_REPOSITORY = Symbol('STUDY_REPOSITORY');
 
 export class InMemoryStudyRepository implements StudyRepository {
   private settings: StudySettings;
+  private syncState: StudySyncState = {
+    lastSyncedAt: '',
+    historyBackfilledAt: '',
+    historyBackfilledUsername: '',
+    historyBackfilledListId: '',
+  };
   private readonly problems = new Map<string, StudyProblem>();
   private readonly submissions = new Map<string, StudySubmission>();
 
@@ -97,6 +112,15 @@ export class InMemoryStudyRepository implements StudyRepository {
     }
 
     return imported;
+  }
+
+  async getSyncState(): Promise<StudySyncState> {
+    return { ...this.syncState };
+  }
+
+  async updateSyncState(patch: Partial<StudySyncState>): Promise<StudySyncState> {
+    this.syncState = { ...this.syncState, ...patch };
+    return this.getSyncState();
   }
 }
 

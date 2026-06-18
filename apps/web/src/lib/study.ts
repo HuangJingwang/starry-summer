@@ -54,6 +54,7 @@ const fallbackStudyDashboard = normalizeStudyDashboard({
     nextRound: `R${index + 2}`,
     dueDate: '2026-06-12',
     overdueDays: index,
+    forcedByMustRepeat: false,
   })),
   heatmap: buildFallbackHeatmap(),
   recentSubmissions: [],

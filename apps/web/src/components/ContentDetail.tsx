@@ -45,6 +45,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       </ol>
     </nav>
   ) : null;
+  const detailSidebar = cover || item.summary || tableOfContentsNav;
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
     <section className="detail-comments" aria-label="评论">
       <h2>评论</h2>
@@ -61,85 +62,94 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   return (
     <div className={`detail-shell ${tableOfContentsNav ? 'detail-shell--with-toc' : 'detail-shell--no-toc'}`}>
       <ViewTracker targetType={item.type} targetId={item.id} />
-      {tableOfContentsNav}
+      {detailSidebar ? (
+        <aside className="detail-sidebar" aria-label="文章侧栏">
+          {cover ? (
+            <section className="detail-sidebar__card detail-sidebar__cover" aria-label="文章封面">
+              <img src={cover.imageUrl} alt={cover.altText} />
+            </section>
+          ) : null}
+          {item.summary ? (
+            <section className="detail-sidebar__card detail-sidebar__summary" aria-label="文章摘要">
+              <p className="eyebrow">摘要</p>
+              <p>{item.summary}</p>
+            </section>
+          ) : null}
+          {tableOfContentsNav}
+        </aside>
+      ) : null}
       <article className="detail">
         <h1>{item.title}</h1>
-      <p className="detail__summary">{item.summary}</p>
-      {cover ? (
-        <figure className="detail-cover">
-          <img src={cover.imageUrl} alt={cover.altText} />
-        </figure>
-      ) : null}
-      <div className="detail__meta">
-        <time dateTime={item.publishedAt}>{item.publishedAt}</time>
-        {updatedAt ? <time dateTime={updatedAt}>更新于 {updatedAt}</time> : null}
-        <span>{readingTime}</span>
-        <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>
-        {item.sourceType === 'repost' && item.sourceUrl ? (
-          <a href={item.sourceUrl} target="_blank" rel="nofollow noopener noreferrer">
-            原文
-          </a>
-        ) : null}
-        <span>{item.viewCount ?? 0} 次浏览</span>
-        <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
-      </div>
-      {item.series && item.series.length > 0 ? (
-        <div className="detail-taxonomy" aria-label="所属系列">
-          <span>系列</span>
-          {item.series.map((series) => (
-            <Link key={series} href={getSeriesHref(series)}>
-              {series}
-            </Link>
-          ))}
-        </div>
-      ) : null}
-      {taxonomyGroups.map((group) => (
-        <div key={group.ariaLabel} className="detail-taxonomy" aria-label={group.ariaLabel}>
-          <span>{group.label}</span>
-          {group.items.map((item) => (
-            <Link key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      ))}
-      {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
-      <div className={`detail-reader ${tableOfContentsNav ? 'detail-reader--with-external-toc' : 'detail-reader--no-toc'}`}>
-        <div className="detail-reader__main">
-          <CodeCopyEnhancer />
-          <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-          {isCommentTargetType(item.type) && canShowComments(item) ? (
-            <InlineCommentLayer
-              targetType={item.type}
-              targetId={item.id}
-              reader={readerSession.authenticated ? readerSession : null}
-              loginNextPath={`${getContentHref(item)}#comments`}
-              comments={anchoredComments}
-            />
+        <div className="detail__meta">
+          <time dateTime={item.publishedAt}>{item.publishedAt}</time>
+          {updatedAt ? <time dateTime={updatedAt}>更新于 {updatedAt}</time> : null}
+          <span>{readingTime}</span>
+          <span>{item.sourceType === 'repost' ? '转载' : '原创'}</span>
+          {item.sourceType === 'repost' && item.sourceUrl ? (
+            <a href={item.sourceUrl} target="_blank" rel="nofollow noopener noreferrer">
+              原文
+            </a>
           ) : null}
+          <span>{item.viewCount ?? 0} 次浏览</span>
+          <LikeButton targetType={item.type} targetId={item.id} initialCount={item.likeCount ?? 0} />
         </div>
-      </div>
-      {adjacent ? (
-        <nav className="adjacent-content" aria-label="相邻内容">
-          {adjacent.previous ? (
-            <a href={getContentHref(adjacent.previous)}>
-              <span>上一篇</span>
-              <strong>{adjacent.previous.title}</strong>
-            </a>
-          ) : (
-            <span className="adjacent-content__empty">没有更早内容</span>
-          )}
-          {adjacent.next ? (
-            <a href={getContentHref(adjacent.next)}>
-              <span>下一篇</span>
-              <strong>{adjacent.next.title}</strong>
-            </a>
-          ) : (
-            <span className="adjacent-content__empty">没有更新内容</span>
-          )}
-        </nav>
-      ) : null}
-      {commentSection}
+        {item.series && item.series.length > 0 ? (
+          <div className="detail-taxonomy" aria-label="所属系列">
+            <span>系列</span>
+            {item.series.map((series) => (
+              <Link key={series} href={getSeriesHref(series)}>
+                {series}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+        {taxonomyGroups.map((group) => (
+          <div key={group.ariaLabel} className="detail-taxonomy" aria-label={group.ariaLabel}>
+            <span>{group.label}</span>
+            {group.items.map((item) => (
+              <Link key={item.href} href={item.href}>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ))}
+        {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
+        <div className={`detail-reader ${tableOfContentsNav ? 'detail-reader--with-external-toc' : 'detail-reader--no-toc'}`}>
+          <div className="detail-reader__main">
+            <CodeCopyEnhancer />
+            <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+            {isCommentTargetType(item.type) && canShowComments(item) ? (
+              <InlineCommentLayer
+                targetType={item.type}
+                targetId={item.id}
+                reader={readerSession.authenticated ? readerSession : null}
+                loginNextPath={`${getContentHref(item)}#comments`}
+                comments={anchoredComments}
+              />
+            ) : null}
+          </div>
+        </div>
+        {adjacent ? (
+          <nav className="adjacent-content" aria-label="相邻内容">
+            {adjacent.previous ? (
+              <a href={getContentHref(adjacent.previous)}>
+                <span>上一篇</span>
+                <strong>{adjacent.previous.title}</strong>
+              </a>
+            ) : (
+              <span className="adjacent-content__empty">没有更早内容</span>
+            )}
+            {adjacent.next ? (
+              <a href={getContentHref(adjacent.next)}>
+                <span>下一篇</span>
+                <strong>{adjacent.next.title}</strong>
+              </a>
+            ) : (
+              <span className="adjacent-content__empty">没有更新内容</span>
+            )}
+          </nav>
+        ) : null}
+        {commentSection}
       </article>
     </div>
   );

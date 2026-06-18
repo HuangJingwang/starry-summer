@@ -30,10 +30,46 @@ describe('StudyService', () => {
         title: '两数之和',
         nextRound: 'R2',
         overdueDays: 10,
+        forcedByMustRepeat: false,
       }),
     ]);
     expect(dashboard.todayFocus.map((item) => item.slug)).not.toContain('two-sum');
     expect(dashboard.categories.some((category) => category.name === '哈希表')).toBe(true);
+  });
+
+  test('keeps today focus stable inside the weakest category', async () => {
+    const repository = new InMemoryStudyRepository(() => new Date('2026-06-12T08:00:00.000Z'));
+    const service = new StudyService(repository, new ContentService(new InMemoryContentRepository()));
+
+    await service.updateSettings({ dailyNew: 3 });
+    await service.updateProblem('two-sum', { rounds: ['2026-06-10'] });
+    await service.updateProblem('valid-parentheses', { rounds: ['2026-06-10'] });
+
+    const first = await service.getDashboard();
+    const second = await service.getDashboard();
+
+    expect(first.todayFocus).toHaveLength(3);
+    expect(new Set(first.todayFocus.map((item) => item.category)).size).toBe(1);
+    expect(second.todayFocus.map((item) => item.slug)).toEqual(first.todayFocus.map((item) => item.slug));
+  });
+
+  test('includes must-repeat problems in review even before their due date', async () => {
+    const repository = new InMemoryStudyRepository(() => new Date('2026-06-12T08:00:00.000Z'));
+    const service = new StudyService(repository, new ContentService(new InMemoryContentRepository()));
+
+    await service.updateProblem('two-sum', {
+      rounds: ['2026-06-12'],
+      mustRepeat: true,
+    });
+
+    expect((await service.getDashboard()).reviewDue).toEqual([
+      expect.objectContaining({
+        slug: 'two-sum',
+        nextRound: 'R2',
+        overdueDays: 0,
+        forcedByMustRepeat: true,
+      }),
+    ]);
   });
 
   test('creates an editable note draft from a problem notebook entry', async () => {
@@ -104,6 +140,9 @@ describe('StudyService', () => {
     const result = await service.syncRecentSubmissions();
 
     expect(result.imported).toBe(1);
+    expect(result.addedRounds).toBe(1);
+    expect(result.historyBackfilled).toBe(0);
+    expect(result.skipped).toBe(0);
     expect(fetcher).toHaveBeenCalledTimes(1);
     expect((await service.getDashboard()).recentSubmissions).toEqual([
       expect.objectContaining({
@@ -111,5 +150,84 @@ describe('StudyService', () => {
         language: 'TypeScript',
       }),
     ]);
+  });
+
+  test('does not advance the same problem twice for duplicate same-day accepted submissions', async () => {
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        data: {
+          recentSubmissionList: [
+            {
+              title: 'Two Sum',
+              titleSlug: 'two-sum',
+              timestamp: '1781126400',
+              statusDisplay: 'Accepted',
+              lang: 'TypeScript',
+            },
+            {
+              title: 'Two Sum',
+              titleSlug: 'two-sum',
+              timestamp: '1781155200',
+              statusDisplay: 'Accepted',
+              lang: 'TypeScript',
+            },
+          ],
+        },
+      }),
+    );
+    const service = new StudyService(
+      new InMemoryStudyRepository(() => new Date('2026-06-12T08:00:00.000Z')),
+      new ContentService(new InMemoryContentRepository()),
+      fetcher,
+    );
+
+    await service.updateSettings({ leetcodeUsername: 'summer' });
+    const result = await service.syncRecentSubmissions();
+
+    expect(result.imported).toBe(2);
+    expect(result.addedRounds).toBe(1);
+    expect(result.skipped).toBe(1);
+    expect((await service.getDashboard()).problems.find((problem) => problem.slug === 'two-sum')?.rounds).toEqual(['2026-06-10']);
+  });
+
+  test('backfills historical accepted submissions without overwriting existing rounds', async () => {
+    const fetcher = vi.fn(async () =>
+      Response.json({
+        data: {
+          recentAcSubmissionList: [
+            {
+              title: 'Two Sum',
+              titleSlug: 'two-sum',
+              timestamp: '1780963200',
+              statusDisplay: 'Accepted',
+              lang: 'TypeScript',
+            },
+            {
+              title: 'Valid Parentheses',
+              titleSlug: 'valid-parentheses',
+              timestamp: '1781049600',
+              statusDisplay: 'Accepted',
+              lang: 'TypeScript',
+            },
+          ],
+          recentSubmissionList: [],
+        },
+      }),
+    );
+    const service = new StudyService(
+      new InMemoryStudyRepository(() => new Date('2026-06-12T08:00:00.000Z')),
+      new ContentService(new InMemoryContentRepository()),
+      fetcher,
+    );
+
+    await service.updateSettings({ leetcodeUsername: 'summer' });
+    await service.updateProblem('two-sum', { rounds: ['2026-06-01'] });
+
+    const result = await service.syncRecentSubmissions();
+
+    expect(result.historyBackfilled).toBe(1);
+    expect(result.addedRounds).toBe(0);
+    expect((await service.getDashboard()).problems.find((problem) => problem.slug === 'two-sum')?.rounds).toEqual(['2026-06-01']);
+    expect((await service.getDashboard()).problems.find((problem) => problem.slug === 'valid-parentheses')?.rounds).toEqual(['2026-06-11']);
   });
 });

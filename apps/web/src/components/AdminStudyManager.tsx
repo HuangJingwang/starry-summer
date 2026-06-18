@@ -110,10 +110,16 @@ export function AdminStudyManager({ initialResult, repositoryMode = false }: Adm
     setMessage('');
 
     try {
-      const result = await send(buildSyncStudyRequest(), '同步失败，请检查 LeetCode 用户名和 API 服务。') as { imported?: number; matchedProblems?: number };
+      const result = await send(buildSyncStudyRequest(), '同步失败，请检查 LeetCode 用户名和 API 服务。') as {
+        imported?: number;
+        matchedProblems?: number;
+        addedRounds?: number;
+        historyBackfilled?: number;
+        skipped?: number;
+      };
       await load();
       setState('success');
-      setMessage(`同步完成：新增 ${result.imported ?? 0} 条提交，匹配 ${result.matchedProblems ?? 0} 道题。`);
+      setMessage(`同步完成：新增 ${result.imported ?? 0} 条提交，推进 ${result.addedRounds ?? result.matchedProblems ?? 0} 轮，历史回填 ${result.historyBackfilled ?? 0} 题，跳过 ${result.skipped ?? 0} 条。`);
     } catch (error) {
       setState('error');
       setMessage(error instanceof Error ? error.message : '同步失败，请检查 LeetCode 用户名和 API 服务。');

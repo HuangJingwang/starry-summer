@@ -17,6 +17,13 @@ function readLastRule(source: string, selector: string) {
   return matches.at(-1)?.[1] ?? '';
 }
 
+function readRuleContainingSelector(source: string, selectorFragment: string) {
+  const matches = [...source.matchAll(/(?:^|\n)(?<selector>[^{]+)\s\{(?<body>[\s\S]*?)\n\}/gm)];
+  const match = matches.find((item) => (item.groups?.selector ?? '').includes(selectorFragment));
+
+  return match?.groups?.body ?? '';
+}
+
 describe('home page', () => {
   test('renders the README screenshot portfolio hero instead of the immersive landing', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
@@ -72,14 +79,14 @@ describe('home page', () => {
     expect(source).toContain('src="/images/aster-day-profile-v2.png"');
     expect(source).toContain('alt="Aster.H 的夏日头像"');
     expect(source).toContain("import { HomeCardNav } from '@/components/HomeCardNav';");
-    expect(source).toContain("import { MobileBackToTop } from '@/components/MobileBackToTop';");
+    expect(source).not.toContain("import { MobileBackToTop } from '@/components/MobileBackToTop';");
     expect(source).toContain("import { getContentHref } from '@/lib/content';");
     expect(source).toContain("import { getContentCover } from '@/lib/content-cover';");
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--dashboard"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--featured"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--popular"');
     expect(source).not.toContain('<HomeScrollGate');
-    expect(source).toContain('<MobileBackToTop />');
+    expect(source).not.toContain('<MobileBackToTop />');
     expect(source).not.toContain("import { HomeScrollGate }");
     expect(source).not.toContain("import { ContentCard }");
     expect(source).not.toContain('function HomeTeaserLink');
@@ -266,6 +273,8 @@ describe('home page', () => {
     expect(navSource).toContain('className="portfolio-hero__nav-footer"');
     expect(navSource).toContain('className="portfolio-hero__nav-theme"');
     expect(navSource).toContain('onClick={toggleTheme}');
+    expect(navSource).toContain('className="portfolio-hero__nav-brand" href="/"');
+    expect(navSource).not.toContain('className="portfolio-hero__nav-brand" href="/#top"');
     expect(navSource).toContain('function getThemeForTime');
     expect(navSource).toContain("data-transitioning={pendingHref ? 'true' : undefined}");
     expect(navSource).toContain('function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string)');
@@ -351,15 +360,18 @@ describe('home page', () => {
     expect(source).toContain('onMouseLeave={() => setHoveredIndex(activeIndex)}');
     expect(source).toContain('data-nav-index={index}');
     expect(source).toContain('className="site-nav__label"');
+    expect(source).toContain("import { ThemeToggle } from '@/components/ThemeToggle';");
+    expect(source).toContain('className="site-nav-card__tools"');
+    expect(source).toContain('<ThemeToggle />');
     expect(source).not.toContain('className="site-search"');
-    expect(source).not.toContain('<ThemeToggle />');
     expect(source).not.toContain('action="/search"');
   });
 
-  test('uses the brand as the home and scroll-to-top control', () => {
+  test('uses the shared navigation brand as a clean home route', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/PublicCardNav.tsx'), 'utf8');
 
-    expect(source).toContain('href="/#top"');
+    expect(source).toContain('href="/"');
+    expect(source).not.toContain('href="/#top"');
     expect(source).not.toContain("label: '首页'");
   });
 
@@ -374,17 +386,23 @@ describe('home page', () => {
     expect(pageSource).not.toContain('content-empty-card');
   });
 
-  test('renders a lightweight mobile scroll-to-top control', () => {
+  test('renders a reference-style mobile scroll-to-top control', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/MobileBackToTop.tsx'), 'utf8');
+    const iconSource = readFileSync(join(process.cwd(), 'public/images/reference-nav/back-to-top.svg'), 'utf8');
 
     expect(source).toContain("'use client';");
     expect(source).toContain('aria-label="回到顶部"');
     expect(source).toContain('className="mobile-back-to-top"');
+    expect(source).toContain('className="mobile-back-to-top__icon"');
     expect(source).toContain("data-visible={isVisible ? 'true' : undefined}");
-    expect(source).toContain('window.scrollY > 24');
+    expect(source).toContain('window.scrollY > 160');
     expect(source).toContain("window.addEventListener('scroll', updateVisibility");
     expect(source).toContain("window.removeEventListener('scroll', updateVisibility");
     expect(source).toContain("window.scrollTo({ top: 0, behavior: 'smooth' });");
+    expect(source).not.toContain('lucide-react');
+    expect(source).not.toContain('ArrowUp');
+    expect(iconSource).toContain('viewBox="0 0 28 28"');
+    expect(iconSource).toContain('currentColor');
     expect(source).not.toContain('HomeScrollGate');
     expect(source).not.toContain('portfolio-hero__scroll');
   });
@@ -392,9 +410,9 @@ describe('home page', () => {
   test('keeps home card geometry consistent across day and night themes', () => {
     const css = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
 
-    expect(readRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
-    expect(readRule(css, '.portfolio-hero__latest-card')).toContain('border-color: #ffffff;');
-    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('border-color: #ffffff;');
+    expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
+    expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
+    expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 365px;');
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('border-radius: 32px;');
@@ -409,6 +427,8 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__calendar-card ol')).toContain('height: 206px;');
     expect(readRule(css, '.portfolio-hero__calendar-card li')).toContain('aspect-ratio: auto;');
     expect(readRule(css, ".portfolio-hero__calendar-card li[data-current='true']")).toContain('border: 1px solid #ffffff;');
-    expect(readRule(css, '.portfolio-hero__like-card')).toContain('border-color: #ffffff;');
+    expect(readRule(css, '.portfolio-hero__like-card')).toContain('border-radius: 999px;');
+    expect(readRule(css, '.portfolio-hero__like-card')).toContain('height: 48px;');
+    expect(readRule(css, '.portfolio-hero__like-card')).toContain('width: 48px;');
   });
 });

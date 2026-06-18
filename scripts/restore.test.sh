@@ -18,12 +18,24 @@ restore_content_dir="$tmp_dir/restore-content"
 restore_images_dir="$tmp_dir/restore-images"
 mkdir -p "$backup_dir" "$missing_manifest_dir" "$corrupt_archive_dir" "$tampered_checksum_dir"
 mkdir -p "$tmp_dir/content-source" "$tmp_dir/image-source"
+
+sha256_file() {
+  local file_path="$1"
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$file_path" | awk '{ print $1 }'
+    return
+  fi
+
+  LC_ALL=C shasum -a 256 "$file_path" | awk '{ print $1 }'
+}
+
 printf '%s\n' '{"items":[]}' >"$tmp_dir/content-source/public-content.json"
 printf '%s\n' 'fake image' >"$tmp_dir/image-source/profile.txt"
 LC_ALL=C tar czf "$backup_dir/web-content.tar.gz" -C "$tmp_dir/content-source" .
 LC_ALL=C tar czf "$backup_dir/public-images.tar.gz" -C "$tmp_dir/image-source" .
-web_content_sha="$(sha256sum "$backup_dir/web-content.tar.gz" | awk '{ print $1 }')"
-public_images_sha="$(sha256sum "$backup_dir/public-images.tar.gz" | awk '{ print $1 }')"
+web_content_sha="$(sha256_file "$backup_dir/web-content.tar.gz")"
+public_images_sha="$(sha256_file "$backup_dir/public-images.tar.gz")"
 printf '%s\n' \
   'created_at=2026-06-11-093300' \
   "web_content_sha256=$web_content_sha" \
