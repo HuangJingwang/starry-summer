@@ -12,6 +12,7 @@ const requiredOpsFiles = [
   'scripts/ops/public-identity-guard.mjs',
 ];
 const requiredSkillFiles = ['.codex/skills/starry-summer-public-theme-review/SKILL.md'];
+const requiredPublicBrandFiles = ['apps/web/src/app/icon.svg'];
 const removedDockerDeploymentFiles = [
   '.dockerignore',
   'docker-compose.yml',
@@ -41,6 +42,12 @@ for (const file of requiredOpsFiles) {
 for (const file of requiredSkillFiles) {
   if (!existsSync(file)) {
     fail(`Expected Codex skill is missing: ${file}`);
+  }
+}
+
+for (const file of requiredPublicBrandFiles) {
+  if (!existsSync(file)) {
+    fail(`Expected public brand asset is missing: ${file}`);
   }
 }
 
@@ -202,6 +209,14 @@ for (const requiredPhrase of [
 ]) {
   if (!publicThemeSkill.includes(requiredPhrase)) {
     fail(`Public theme review skill must mention "${requiredPhrase}".`);
+  }
+}
+
+const appIcon = readFileSync('apps/web/src/app/icon.svg', 'utf8');
+
+for (const requiredPhrase of ['Starry Summer icon', 'A.H', 'viewBox="0 0 64 64"']) {
+  if (!appIcon.includes(requiredPhrase)) {
+    fail(`App icon must include "${requiredPhrase}".`);
   }
 }
 

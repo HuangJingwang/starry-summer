@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Starry Summer icon - A.H</title>
+  <defs>
+    <radialGradient id="sky" cx="32" cy="26" r="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#174a57" />
+      <stop offset="0.58" stop-color="#101c2f" />
+      <stop offset="1" stop-color="#070b14" />
+    </radialGradient>
+    <linearGradient id="ring" x1="12" x2="52" y1="50" y2="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5eead4" />
+      <stop offset="1" stop-color="#8ab4ff" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#sky)" />
+  <path
+    d="M13 39c8 9 31 9 39-2"
+    fill="none"
+    stroke="url(#ring)"
+    stroke-linecap="round"
+    stroke-width="4"
+    opacity="0.86"
+  />
+  <path
+    d="M32 9l2.6 7.2 7.4 2.6-7.4 2.6L32 29l-2.6-7.6-7.4-2.6 7.4-2.6L32 9Z"
+    fill="#f7fbff"
+  />
+  <circle cx="49" cy="19" r="2.2" fill="#5eead4" />
+  <circle cx="17" cy="24" r="1.8" fill="#8ab4ff" opacity="0.9" />
+  <text
+    x="32"
+    y="47"
+    fill="#eef8ff"
+    font-family="Avenir Next, Inter, Arial, sans-serif"
+    font-size="15"
+    font-weight="700"
+    letter-spacing=".6"
+    text-anchor="middle"
+  >
+    A.H
+  </text>
+</svg>
