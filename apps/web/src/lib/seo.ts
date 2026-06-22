@@ -7,9 +7,30 @@ import type { SiteSettings } from './settings';
 const defaultSiteUrl = 'http://localhost:3000';
 
 export function normalizePublicSiteUrl(value: string | undefined): string {
-  const normalized = value?.trim().replace(/\/+$/, '');
+  const normalized = normalizeOptionalPublicSiteUrl(value);
 
-  return normalized || defaultSiteUrl;
+  return normalized ?? defaultSiteUrl;
+}
+
+export interface PublicSiteUrlOptions {
+  configuredUrl?: string;
+  productionHost?: string;
+}
+
+export function resolvePublicSiteUrl({ configuredUrl, productionHost }: PublicSiteUrlOptions): string {
+  const normalizedConfiguredUrl = normalizeOptionalPublicSiteUrl(configuredUrl);
+
+  if (normalizedConfiguredUrl && !isVercelDeploymentUrl(normalizedConfiguredUrl)) {
+    return normalizedConfiguredUrl;
+  }
+
+  const normalizedProductionUrl = normalizeOptionalPublicSiteUrl(productionHost);
+
+  if (normalizedProductionUrl) {
+    return normalizedProductionUrl;
+  }
+
+  return normalizedConfiguredUrl ?? defaultSiteUrl;
 }
 
 export function buildRobotsText(siteUrl: string): string {
@@ -222,4 +243,34 @@ function normalizePagePath(path: string): string {
   }
 
   return `/${normalized.replace(/^\/+|\/+$/g, '')}`;
+}
+
+function normalizeOptionalPublicSiteUrl(value: string | undefined): string | undefined {
+  const normalized = value?.trim().replace(/\/+$/, '');
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  if (isLocalHostname(normalized)) {
+    return `http://${normalized}`;
+  }
+
+  return `https://${normalized}`;
+}
+
+function isLocalHostname(value: string): boolean {
+  return /^(localhost|127(?:\.\d{1,3}){3}|\[::1\])(?::\d+)?$/i.test(value);
+}
+
+function isVercelDeploymentUrl(value: string): boolean {
+  try {
+    return new URL(value).hostname.endsWith('.vercel.app');
+  } catch {
+    return false;
+  }
 }

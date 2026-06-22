@@ -141,6 +141,8 @@ describe('home page', () => {
     expect(source).toContain('className="portfolio-hero__social portfolio-hero__social--github"');
     expect(source).toContain('className="portfolio-hero__social portfolio-hero__social--juejin"');
     expect(source).toContain('className="portfolio-hero__social portfolio-hero__social--guestbook"');
+    expect(source).toContain("const githubLink = settings.profile.socialLinks.find((link) => link.href.includes('github.com'));");
+    expect(source).toContain("const juejinLink = settings.profile.socialLinks.find((link) => link.href.includes('juejin.cn'));");
     expect(source).toContain('<HomeContactButton');
     expect(source).toContain('</HomeContactButton>');
     expect(source).toContain('className="portfolio-hero__like-row"');
@@ -148,8 +150,8 @@ describe('home page', () => {
     expect(source).toContain('formatNumber(stats.totalLikes)');
     expect(source).toContain('<Heart size={28} fill="currentColor" strokeWidth={0} aria-hidden="true" />');
     expect(source).toContain('<div className="portfolio-hero__actions"');
-    expect(source).toContain('href="https://github.com/HuangJingwang"');
-    expect(source).toContain('href="https://juejin.cn/user/959206842703773"');
+    expect(source).toContain('href={githubLink.href}');
+    expect(source).toContain('href={juejinLink.href}');
     expect(source).toContain('href="/guestbook"');
     expect(source).toContain('target="_blank"');
     expect(source).toContain('rel="noreferrer"');
@@ -164,7 +166,7 @@ describe('home page', () => {
     expect(source).toContain('fill="var(--color-border)"');
     expect(source).toContain('M1.81799 11.0067V20.7854');
     expect(source).toContain('M28.4446 7.95602');
-    expect(source).not.toContain('href="https://github.com/Aster-H"');
+    expect(source).not.toContain('HuangJingwang');
     expect(source).not.toContain('className="portfolio-hero__primary"');
     expect(source).not.toContain('className="portfolio-hero__secondary"');
     expect(source).not.toContain('阅读技术文章');

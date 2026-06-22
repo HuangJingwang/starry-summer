@@ -1,7 +1,40 @@
-import { permanentRedirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 
-export default async function NoteRedirectPage({ params }: { params: Promise<{ slug: string }> }) {
+import { ContentDetail } from '@/components/ContentDetail';
+import { SiteShell } from '@/components/SiteShell';
+import { getAdjacentContent, getContentBySlug } from '@/lib/content';
+import { loadSiteContent } from '@/lib/public-content';
+import { buildContentMetadata, normalizePublicSiteUrl } from '@/lib/seo';
+import { loadSiteSettings } from '@/lib/settings-repository';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const content = await loadSiteContent();
+  const item = getContentBySlug(content, 'note', slug);
 
-  permanentRedirect(`/posts/${slug}`);
+  if (!item) {
+    return {};
+  }
+
+  const settings = await loadSiteSettings();
+
+  return buildContentMetadata(item, settings, normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL));
+}
+
+export default async function NoteDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const content = await loadSiteContent();
+  const item = getContentBySlug(content, 'note', slug);
+
+  if (!item) {
+    notFound();
+  }
+
+  return (
+    <SiteShell>
+      <main className="page-main narrow">
+        <ContentDetail item={item} adjacent={getAdjacentContent(content, item.id)} />
+      </main>
+    </SiteShell>
+  );
 }

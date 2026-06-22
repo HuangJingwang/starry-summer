@@ -4,7 +4,7 @@ import { ContentDetail } from '@/components/ContentDetail';
 import { SiteShell } from '@/components/SiteShell';
 import { getAdjacentContent, getContentBySlug } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
-import { buildContentMetadata, normalizePublicSiteUrl } from '@/lib/seo';
+import { buildContentMetadata, resolvePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -18,7 +18,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const settings = await loadSiteSettings();
 
-  return buildContentMetadata(item, settings, normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL));
+  return buildContentMetadata(
+    item,
+    settings,
+    resolvePublicSiteUrl({
+      configuredUrl: process.env.PUBLIC_SITE_URL,
+      productionHost: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    }),
+  );
 }
 
 export default async function MomentDetailPage({ params }: { params: Promise<{ slug: string }> }) {
