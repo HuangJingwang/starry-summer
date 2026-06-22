@@ -214,10 +214,14 @@ for (const requiredPhrase of [
 
 const appIcon = readFileSync('apps/web/src/app/icon.svg', 'utf8');
 
-for (const requiredPhrase of ['Starry Summer icon', 'A.H', 'viewBox="0 0 64 64"']) {
+for (const requiredPhrase of ['Starry Summer star orbit icon', 'viewBox="0 0 64 64"', 'aria-labelledby="title"']) {
   if (!appIcon.includes(requiredPhrase)) {
     fail(`App icon must include "${requiredPhrase}".`);
   }
+}
+
+if (/<text\b|A\.H/.test(appIcon)) {
+  fail('App icon must stay textless so it remains legible at favicon sizes.');
 }
 
 console.log('Repository hygiene tests passed');
