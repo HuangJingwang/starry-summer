@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { MobileBackToTop } from '@/components/MobileBackToTop';
 import { PublicCardNav } from '@/components/PublicCardNav';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
+import { ThemeSync } from '@/components/ThemeSync';
 import { buildPublicNavigation } from '@/lib/navigation';
 import { loadSiteSettings } from '@/lib/settings-repository';
 
@@ -12,6 +13,7 @@ export async function SiteShell({ children, hideHeader = false }: { children: Re
 
   return (
     <div id="home" className="site-shell">
+      <ThemeSync />
       {hideHeader ? null : <StarrySkyCanvas className="site-shell__canvas" showFleet={false} />}
       {hideHeader ? null : <PublicCardNav title={settings.profile.title} navItems={navItems} />}
       {children}

@@ -3,6 +3,21 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
+function readGlobalStyles() {
+  return [
+    'src/app/styles/base.css',
+    'src/app/styles/public.css',
+    'src/app/styles/home.css',
+    'src/app/styles/content.css',
+    'src/app/styles/leetcode.css',
+    'src/app/styles/share.css',
+    'src/app/styles/admin.css',
+    'src/app/styles/responsive.css',
+  ]
+    .map((path) => readFileSync(join(process.cwd(), path), 'utf8'))
+    .join('\n');
+}
+
 describe('public interaction forms', () => {
   test('limits comment and guestbook field lengths before submission', () => {
     const commentForm = readFileSync(join(process.cwd(), 'src/components/CommentForm.tsx'), 'utf8');
@@ -167,7 +182,7 @@ describe('public interaction forms', () => {
     const inlineCommentLayer = readFileSync(join(process.cwd(), 'src/components/InlineCommentLayer.tsx'), 'utf8');
     const bodyField = readFileSync(join(process.cwd(), 'src/components/PublicSubmissionBodyField.tsx'), 'utf8');
     const submissionHook = readFileSync(join(process.cwd(), 'src/components/usePublicSubmissionForm.ts'), 'utf8');
-    const styles = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
+    const styles = readGlobalStyles();
 
     expect(submissionHook).toContain('const [body, setBody] = useState');
     expect(submissionHook).toContain('const remainingBodyLength = PUBLIC_SUBMISSION_LIMITS.body - body.length;');

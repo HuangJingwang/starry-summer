@@ -3,7 +3,16 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-const styleImportOrder = ['src/app/styles.css', 'src/app/styles/admin.css', 'src/app/styles/responsive.css'];
+const styleImportOrder = [
+  'src/app/styles/base.css',
+  'src/app/styles/public.css',
+  'src/app/styles/home.css',
+  'src/app/styles/content.css',
+  'src/app/styles/leetcode.css',
+  'src/app/styles/share.css',
+  'src/app/styles/admin.css',
+  'src/app/styles/responsive.css',
+];
 
 function readStylesheet(path: string) {
   return readFileSync(join(process.cwd(), path), 'utf8');
@@ -29,17 +38,42 @@ function parsePxTrackList(value: string) {
 }
 
 describe('global styles', () => {
-  test('keeps global CSS split by public, admin, and responsive concerns', () => {
+  test('keeps global CSS split by base, public, page-family, admin, and responsive concerns', () => {
     const rootLayout = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
-    const baseCss = readStylesheet('src/app/styles.css');
+    const baseCss = readStylesheet('src/app/styles/base.css');
+    const publicCss = readStylesheet('src/app/styles/public.css');
+    const homeCss = readStylesheet('src/app/styles/home.css');
+    const contentCss = readStylesheet('src/app/styles/content.css');
+    const leetcodeCss = readStylesheet('src/app/styles/leetcode.css');
+    const shareCss = readStylesheet('src/app/styles/share.css');
     const adminCss = readStylesheet('src/app/styles/admin.css');
     const responsiveCss = readStylesheet('src/app/styles/responsive.css');
 
     expect(baseCss.charCodeAt(0)).not.toBe(0xfeff);
-    expect(rootLayout).toContain("import './styles.css';");
+    expect(rootLayout).toContain("import './styles/base.css';");
+    expect(rootLayout).toContain("import './styles/public.css';");
+    expect(rootLayout).toContain("import './styles/home.css';");
+    expect(rootLayout).toContain("import './styles/content.css';");
+    expect(rootLayout).toContain("import './styles/leetcode.css';");
+    expect(rootLayout).toContain("import './styles/share.css';");
     expect(rootLayout).toContain("import './styles/admin.css';");
     expect(rootLayout).toContain("import './styles/responsive.css';");
+    expect(rootLayout).not.toContain("import './styles.css';");
     expect(baseCss).not.toContain('.admin-layout {');
+    expect(baseCss).not.toContain('.site-header {');
+    expect(baseCss).not.toContain('.portfolio-home');
+    expect(baseCss).not.toContain('.page-main');
+    expect(baseCss).not.toContain('.study-archive-page');
+    expect(baseCss).not.toContain('.share-page');
+    expect(publicCss).toContain('.site-header {');
+    expect(publicCss).toContain('.theme-toggle {');
+    expect(homeCss).toContain('.portfolio-home');
+    expect(homeCss).toContain('.cyber-home');
+    expect(contentCss).toContain('.page-main');
+    expect(contentCss).toContain('.guestbook-page');
+    expect(leetcodeCss).toContain('.study-archive-page');
+    expect(leetcodeCss).toContain('.study-metric-grid');
+    expect(shareCss).toContain('.share-page');
     expect(baseCss).not.toContain('@media (max-width: 820px)');
     expect(adminCss).toContain('.admin-layout {');
     expect(adminCss).toContain('.admin-primary-nav a[aria-current="page"]');

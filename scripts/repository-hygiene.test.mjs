@@ -8,6 +8,7 @@ const requiredOpsFiles = [
   'docs/ops/automation-runbook.md',
   'docs/ops/vercel-projects.md',
   'scripts/ops/production-smoke.mjs',
+  'scripts/ops/pr-health.mjs',
   'scripts/ops/public-identity-guard.mjs',
 ];
 const removedDockerDeploymentFiles = [
@@ -135,6 +136,34 @@ if (existsSync('.github/workflows/ci.yml')) {
     }
   }
 
+  if (!ci.includes('npm run ops:pr-health -- --pr ${{ github.event.pull_request.number }}')) {
+    fail('CI workflow must run the shared PR health gate for pull requests.');
+  }
+
+  if (!ci.includes("if: github.event_name == 'pull_request'")) {
+    fail('CI workflow must limit the PR health gate to pull request events.');
+  }
+
+  if (!ci.includes('GH_TOKEN: ${{ github.token }}')) {
+    fail('CI workflow must provide the GitHub token to gh for PR health checks.');
+  }
+
+  if (ci.includes("--ignore-check 'Vercel – starry-summer-web'")) {
+    fail('CI workflow must not ignore the removed legacy Vercel project check.');
+  }
+
+  if (!ci.includes("startsWith(github.head_ref, 'codex/')")) {
+    fail('CI workflow must limit auto-merge to Codex-managed pull request branches.');
+  }
+
+  if (!ci.includes('gh pr merge ${{ github.event.pull_request.number }}')) {
+    fail('CI workflow must request GitHub auto-merge for healthy Codex pull requests.');
+  }
+
+  if (!ci.includes('--match-head-commit ${{ github.event.pull_request.head.sha }}')) {
+    fail('CI auto-merge must pin the checked pull request head commit.');
+  }
+
   if (ci.includes('docker compose')) {
     fail('CI workflow must not validate Docker Compose after removing the Docker deployment path.');
   }
@@ -146,7 +175,7 @@ if (!productionSmokeWorkflow.includes('npm run ops:production-smoke -- --base-ur
   fail('Production smoke workflow must check https://www.asterh.me with the shared ops script.');
 }
 
-for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke']) {
+for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke', 'ops:pr-health']) {
   if (!(scriptName in (packageJson.scripts ?? {}))) {
     fail(`package.json must expose ${scriptName}.`);
   }

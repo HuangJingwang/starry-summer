@@ -61,8 +61,12 @@ Use these optional focused checks while debugging:
 npm run test --workspace @starry-summer/web -- src/app/leetcode/leetcode-page.test.ts
 node scripts/ops/public-identity-guard.test.mjs
 node scripts/ops/production-smoke.test.mjs
+node scripts/ops/pr-health.test.mjs
 npm run ops:production-smoke -- --base-url https://www.asterh.me
+npm run ops:pr-health -- --pr 3 --format json
 ```
+
+Use `ops:pr-health` as the reusable auto-merge gate. It reads GitHub PR state through `gh`, reports merge conflicts, failing checks, and pending checks, and exits non-zero when automation should stop. The CI workflow runs it on pull requests after test, typecheck, and build complete; it ignores the in-progress `Verify` check so the gate does not block on itself. Healthy `codex/**` pull requests request GitHub squash auto-merge pinned to the checked head commit.
 
 ## Rollback
 

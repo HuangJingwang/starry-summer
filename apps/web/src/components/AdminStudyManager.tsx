@@ -14,6 +14,10 @@ import {
   type StudyLoadResult,
 } from '@/lib/study';
 
+import { AdminStudyProblemList } from './AdminStudyProblemList';
+import { AdminStudySettingsPanel } from './AdminStudySettingsPanel';
+import { AdminStudyTaskPanel } from './AdminStudyTaskPanel';
+
 type PanelState = 'idle' | 'loading' | 'submitting' | 'success' | 'error';
 
 interface AdminStudyManagerProps {
@@ -209,114 +213,29 @@ export function AdminStudyManager({ initialResult, repositoryMode = false }: Adm
         <StatusCard label="到期复习" value={`${dashboard.reviewDue.length}`} />
       </div>
 
-      <section className="admin-study-section">
-        <div className="admin-study-section__header">
-          <div>
-            <h2>复习轮次</h2>
-            <p>默认按 R2 +1 天、R3 +3 天、R4 +7 天、R5 +14 天提醒。</p>
-          </div>
-          <button type="button" onClick={syncSubmissions} disabled={actionDisabled} aria-disabled={actionDisabled}>同步最近提交</button>
-        </div>
-        <form className="admin-study-settings" action={saveSettings} aria-busy={studyBusy}>
-          <label>
-            LeetCode 用户名
-            <input name="leetcodeUsername" defaultValue={dashboard.settings.leetcodeUsername} placeholder="username" readOnly={repositoryMode} />
-          </label>
-          <label>
-            当前题单
-            <select name="activeListId" defaultValue={dashboard.settings.activeListId} disabled={repositoryMode}>
-              <option value="hot100">Hot 100</option>
-              <option value="offer75">剑指 Offer 75</option>
-              <option value="top150">Top Interview 150</option>
-            </select>
-          </label>
-          <label>
-            轮次
-            <input name="roundCount" type="number" min={2} max={10} defaultValue={dashboard.settings.roundCount} readOnly={repositoryMode} />
-          </label>
-          <label>
-            间隔
-            <input name="reviewIntervals" defaultValue={dashboard.settings.reviewIntervals.join(',')} readOnly={repositoryMode} />
-          </label>
-          <label>
-            每日新题
-            <input name="dailyNew" type="number" min={0} defaultValue={dashboard.settings.dailyNew} readOnly={repositoryMode} />
-          </label>
-          <label>
-            每日复习
-            <input name="dailyReview" type="number" min={0} defaultValue={dashboard.settings.dailyReview} readOnly={repositoryMode} />
-          </label>
-          <label>
-            截止日期
-            <input name="deadline" type="date" defaultValue={dashboard.settings.deadline} readOnly={repositoryMode} />
-          </label>
-          <button type="submit" disabled={actionDisabled} aria-disabled={actionDisabled}>保存设置</button>
-        </form>
-      </section>
+      <AdminStudySettingsPanel
+        dashboard={dashboard}
+        studyBusy={studyBusy}
+        actionDisabled={actionDisabled}
+        repositoryMode={repositoryMode}
+        saveSettings={saveSettings}
+        syncSubmissions={syncSubmissions}
+      />
 
-      <section className="admin-study-section">
-        <div className="admin-study-section__header">
-          <div>
-            <h2>今日任务</h2>
-            <p>优先处理到期复习，再补充同分类新题。</p>
-          </div>
-          <div className="admin-study-actions">
-            <button type="button" onClick={() => createReportDraft('week')} disabled={actionDisabled} aria-disabled={actionDisabled}>生成周报草稿</button>
-            <button type="button" onClick={() => createReportDraft('month')} disabled={actionDisabled} aria-disabled={actionDisabled}>生成月报草稿</button>
-          </div>
-        </div>
-        <div className="admin-study-task-grid">
-          {dashboard.reviewDue.map((task) => (
-            <article key={task.slug}>
-              <span>{task.nextRound} / 逾期 {task.overdueDays} 天</span>
-              <strong>{task.title}</strong>
-              <small>{task.category} / {task.difficulty}</small>
-            </article>
-          ))}
-          {dashboard.todayFocus.map((task) => (
-            <article key={task.slug}>
-              <span>新题</span>
-              <strong>{task.title}</strong>
-              <small>{task.category} / {task.difficulty}</small>
-            </article>
-          ))}
-        </div>
-      </section>
+      <AdminStudyTaskPanel
+        dashboard={dashboard}
+        actionDisabled={actionDisabled}
+        createReportDraft={createReportDraft}
+      />
 
-      <section className="admin-study-section">
-        <div className="admin-study-section__header">
-          <div>
-            <h2>题目笔记</h2>
-            <p>轮次用英文逗号分隔日期，例如 2026-06-10,2026-06-12。</p>
-          </div>
-        </div>
-        <div className="admin-study-problem-list">
-          {dashboard.problems.map((problem) => (
-            <form className="admin-study-problem" action={(formData) => saveProblem(problem, formData)} key={problem.slug} aria-busy={studyBusy}>
-              <div>
-                <strong>{problem.number}. {problem.title}</strong>
-                <span>{problem.category} / {problem.difficulty}</span>
-              </div>
-              <label>
-                复习轮次
-                <input name="rounds" defaultValue={problem.rounds.join(',')} readOnly={repositoryMode} />
-              </label>
-              <label>
-                个人笔记
-                <textarea name="notes" rows={3} defaultValue={problem.notes} readOnly={repositoryMode} />
-              </label>
-              <div className="admin-study-problem__flags">
-                <label><input name="solutionViewed" type="checkbox" defaultChecked={problem.solutionViewed} disabled={repositoryMode} /> 看过题解</label>
-                <label><input name="mustRepeat" type="checkbox" defaultChecked={problem.mustRepeat} disabled={repositoryMode} /> 重点复刷</label>
-              </div>
-              <div className="admin-study-problem__actions">
-                <button type="submit" disabled={actionDisabled} aria-disabled={actionDisabled}>保存</button>
-                <button type="button" onClick={() => createProblemDraft(problem.slug)} disabled={actionDisabled} aria-disabled={actionDisabled}>生成复盘草稿</button>
-              </div>
-            </form>
-          ))}
-        </div>
-      </section>
+      <AdminStudyProblemList
+        dashboard={dashboard}
+        studyBusy={studyBusy}
+        actionDisabled={actionDisabled}
+        repositoryMode={repositoryMode}
+        saveProblem={saveProblem}
+        createProblemDraft={createProblemDraft}
+      />
     </div>
   );
 }

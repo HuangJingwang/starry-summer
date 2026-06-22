@@ -7,6 +7,21 @@ function readSource(path: string) {
   return readFileSync(join(process.cwd(), path), 'utf8');
 }
 
+function readGlobalStyles() {
+  return [
+    'src/app/styles/base.css',
+    'src/app/styles/public.css',
+    'src/app/styles/home.css',
+    'src/app/styles/content.css',
+    'src/app/styles/leetcode.css',
+    'src/app/styles/share.css',
+    'src/app/styles/admin.css',
+    'src/app/styles/responsive.css',
+  ]
+    .map((path) => readSource(path))
+    .join('\n');
+}
+
 function readRule(source: string, selector: string) {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = source.match(new RegExp(`${escapedSelector} \\{([\\s\\S]*?)\\n\\}`, 'm'));
@@ -38,7 +53,7 @@ describe('recommended share page', () => {
   });
 
   test('styles the share page with separate light and dark themes from the YYsuni reference layout', () => {
-    const css = readSource('src/app/styles.css');
+    const css = readGlobalStyles();
     const responsiveCss = readSource('src/app/styles/responsive.css');
 
     expect(css).toContain('.share-page');
@@ -54,7 +69,7 @@ describe('recommended share page', () => {
   });
 
   test('keeps filters and cards compact after search results shrink', () => {
-    const css = readSource('src/app/styles.css');
+    const css = readGlobalStyles();
 
     expect(readRule(css, '.share-page')).toContain('align-content: start;');
     expect(readRule(css, '.share-page')).toContain('background: transparent;');

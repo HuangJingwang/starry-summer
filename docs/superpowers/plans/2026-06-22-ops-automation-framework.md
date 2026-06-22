@@ -22,7 +22,7 @@ Add tests that import script helpers and assert:
 
 ```js
 assert.deepEqual(findPublicIdentityViolations([{ file: 'apps/web/src/app/page.tsx', source: 'Aster.H' }]), []);
-assert.equal(findPublicIdentityViolations([{ file: 'apps/web/src/app/page.tsx', source: 'OWNER_REAL_NAME' }]).length, 1);
+assert.equal(findPublicIdentityViolations([{ file: 'apps/web/src/app/page.tsx', source: 'FORBIDDEN_OWNER_NAME_FIXTURE' }]).length, 1);
 ```
 
 For smoke checks, start a local HTTP server and assert successful routes pass while 500/error-page routes fail.

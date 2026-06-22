@@ -1,6 +1,6 @@
 import type { StudyHeatmapDay } from '@starry-summer/shared';
 
-const heatmapWindowDays = 84;
+const heatmapWindowDays = 365;
 const millisecondsPerDay = 24 * 60 * 60 * 1000;
 
 export function buildStudyHeatmapWindow(days: StudyHeatmapDay[], endDate?: string): StudyHeatmapDay[] {

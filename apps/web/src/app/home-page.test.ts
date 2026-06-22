@@ -3,6 +3,23 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
+const globalStylePaths = [
+  'src/app/styles/base.css',
+  'src/app/styles/public.css',
+  'src/app/styles/home.css',
+  'src/app/styles/content.css',
+  'src/app/styles/leetcode.css',
+  'src/app/styles/share.css',
+  'src/app/styles/admin.css',
+  'src/app/styles/responsive.css',
+];
+
+function readGlobalStyles() {
+  return globalStylePaths
+    .map((path) => readFileSync(join(process.cwd(), path), 'utf8'))
+    .join('\n');
+}
+
 function readRule(source: string, selector: string) {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = source.match(new RegExp(`(?:^|\\n)${escapedSelector} \\{([\\s\\S]*?)\\n\\}`, 'm'));
@@ -422,7 +439,7 @@ describe('home page', () => {
   });
 
   test('keeps home card geometry consistent across day and night themes', () => {
-    const css = readFileSync(join(process.cwd(), 'src/app/styles.css'), 'utf8');
+    const css = readGlobalStyles();
 
     expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');

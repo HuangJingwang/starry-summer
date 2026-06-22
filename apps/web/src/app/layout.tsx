@@ -2,7 +2,12 @@ import type { Metadata } from 'next';
 
 import { buildSiteMetadata, normalizePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
-import './styles.css';
+import './styles/base.css';
+import './styles/public.css';
+import './styles/home.css';
+import './styles/content.css';
+import './styles/leetcode.css';
+import './styles/share.css';
 import './styles/admin.css';
 import './styles/responsive.css';
 

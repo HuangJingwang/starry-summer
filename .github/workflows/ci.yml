@@ -7,6 +7,12 @@ on:
       - main
       - "codex/**"
 
+permissions:
+  checks: read
+  contents: write
+  pull-requests: write
+  statuses: read
+
 jobs:
   verify:
     name: Verify
@@ -34,3 +40,15 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Check PR health
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run ops:pr-health -- --pr ${{ github.event.pull_request.number }} --ignore-check Verify
+
+      - name: Enable auto-merge
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'codex/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr merge ${{ github.event.pull_request.number }} --squash --auto --match-head-commit ${{ github.event.pull_request.head.sha }}

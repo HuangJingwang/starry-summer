@@ -8,7 +8,16 @@ function readSource(path: string): string {
 }
 
 function readGlobalStyles() {
-  return ['src/app/styles.css', 'src/app/styles/admin.css', 'src/app/styles/responsive.css']
+  return [
+    'src/app/styles/base.css',
+    'src/app/styles/public.css',
+    'src/app/styles/home.css',
+    'src/app/styles/content.css',
+    'src/app/styles/leetcode.css',
+    'src/app/styles/share.css',
+    'src/app/styles/admin.css',
+    'src/app/styles/responsive.css',
+  ]
     .map((path) => readSource(path))
     .join('\n');
 }
@@ -67,7 +76,14 @@ describe('admin detail polish', () => {
     ];
 
     for (const [path, busyName, disabledName = busyName] of checks) {
-      const source = readSource(path);
+      const source = path === 'src/components/AdminStudyManager.tsx'
+        ? [
+            readSource(path),
+            readSource('src/components/AdminStudySettingsPanel.tsx'),
+            readSource('src/components/AdminStudyTaskPanel.tsx'),
+            readSource('src/components/AdminStudyProblemList.tsx'),
+          ].join('\n')
+        : readSource(path);
 
       expect(source, path).toContain(busyName);
       expect(source, path).toContain(`aria-busy={${busyName}}`);
