@@ -11,6 +11,7 @@ const requiredOpsFiles = [
   'scripts/ops/pr-health.mjs',
   'scripts/ops/public-identity-guard.mjs',
 ];
+const requiredSkillFiles = ['.codex/skills/starry-summer-public-theme-review/SKILL.md'];
 const removedDockerDeploymentFiles = [
   '.dockerignore',
   'docker-compose.yml',
@@ -34,6 +35,12 @@ for (const file of requiredFiles) {
 for (const file of requiredOpsFiles) {
   if (!existsSync(file)) {
     fail(`Expected ops automation file is missing: ${file}`);
+  }
+}
+
+for (const file of requiredSkillFiles) {
+  if (!existsSync(file)) {
+    fail(`Expected Codex skill is missing: ${file}`);
   }
 }
 
@@ -178,6 +185,23 @@ if (!productionSmokeWorkflow.includes('npm run ops:production-smoke -- --base-ur
 for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke', 'ops:pr-health']) {
   if (!(scriptName in (packageJson.scripts ?? {}))) {
     fail(`package.json must expose ${scriptName}.`);
+  }
+}
+
+const publicThemeSkill = readFileSync('.codex/skills/starry-summer-public-theme-review/SKILL.md', 'utf8');
+
+for (const requiredPhrase of [
+  'light and dark public themes',
+  'cyber archive',
+  'old light card system',
+  '/posts',
+  '/series',
+  '/archives',
+  'horizontal overflow',
+  'taxonomy chips',
+]) {
+  if (!publicThemeSkill.includes(requiredPhrase)) {
+    fail(`Public theme review skill must mention "${requiredPhrase}".`);
   }
 }
 

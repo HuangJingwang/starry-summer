@@ -12,11 +12,12 @@ These instructions apply to the entire repository.
 
 ## Visual Design Guardrails
 
-- Do not mix the old light card system into dark public pages. Public reader pages such as home, posts, notes, moments, projects, series, categories, tags, archives, search, guestbook, and about must use the dark cyber/glass visual language unless the user explicitly asks for a different theme.
-- On dark public pages, avoid white panels, white form blocks, white content cards, low-contrast headings, and pale taxonomy chips. Use the existing `--cyber-*` tokens, translucent dark panels, subtle borders, and cyan/teal accents.
+- When changing or reviewing public page visuals, global public CSS, shared reader components, public forms, or taxonomy/search/archive/guestbook layouts, use the repository skill at `.codex/skills/starry-summer-public-theme-review/SKILL.md` before editing and before reporting completion.
+- Public reader pages such as home, posts, notes, moments, projects, series, categories, tags, archives, search, guestbook, and about must preserve both public themes unless the user explicitly asks for a different theme: light should stay clean, quiet, readable, and content-first; dark should keep the cyber/glass archive atmosphere.
+- Do not mix the old light card system into public pages. Avoid harsh white panels, mismatched form blocks, low-contrast headings, and pale taxonomy chips. In dark theme, use the existing `--cyber-*` tokens, translucent dark panels, subtle borders, and cyan/teal accents.
 - When changing a shared component or shared selector such as `ContentCard`, `.content-card`, `.page-main`, `.category-section`, `.archive-list`, `.search-form`, or `.guestbook-form`, check every page family that reuses it. A fix for one page must not leave series/categories/tags/archives with a mismatched style.
 - Tags, series chips, and taxonomy pills must remain compact inline controls. They must not stretch into tall vertical ovals or resize cards unexpectedly.
-- Forms on public dark pages must be styled as dark glass panels with dark inputs, visible focus states, and theme-consistent buttons. Never leave a bright white public form on a dark page.
+- Forms on public pages must match the active theme, with readable inputs, visible focus states, and theme-consistent buttons. Never leave a bright white public form on a dark page or a heavy dark form on a light page.
 - Public page headings must have readable contrast. Eyebrows should use the established mono/cyan treatment; titles should not disappear into the background.
 - Keep cards at 8px radius or less only where the existing system calls for utility/admin cards. Public cyber/glass cards may use the established larger radii already present in the design.
 

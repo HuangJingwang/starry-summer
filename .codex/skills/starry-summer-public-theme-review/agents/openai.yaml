@@ -1,0 +1,4 @@
+interface:
+  display_name: "Starry Summer Public Theme Review"
+  short_description: "Review Starry Summer public light and dark theme changes."
+  default_prompt: "Review this Starry Summer public UI change against the light and dark theme constraints."
