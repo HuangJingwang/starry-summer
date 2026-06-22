@@ -317,7 +317,12 @@ describe('public content API helpers', () => {
       visibility: 'public',
       sourceType: 'original',
     });
-    expect(introPost?.bodyMarkdown).toContain('[Pigs-blog](https://github.com/HuangJingwang/Pigs-blog/tree/dev/server)');
+    expect(introPost?.bodyMarkdown).toContain('[Pigs-blog](https://github.com/Aster-H/Pigs-blog/tree/dev/server)');
+    expect(introPost?.bodyMarkdown).not.toContain('HuangJingwang');
+
+    const studyPost = content.find((item) => item.slug === 'juejin-7615915954711691304');
+    expect(studyPost?.bodyMarkdown).toContain('[github.com/Aster-H/leetforge](https://github.com/Aster-H/leetforge)');
+    expect(studyPost?.bodyMarkdown).not.toContain('HuangJingwang');
   });
 
   test('does not keep a public API source switch for the site runtime', () => {
