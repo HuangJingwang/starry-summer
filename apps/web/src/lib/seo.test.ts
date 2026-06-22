@@ -10,6 +10,7 @@ import {
   buildSitemapXml,
   buildSiteMetadata,
   normalizePublicSiteUrl,
+  resolvePublicSiteUrl,
 } from './seo';
 
 const content: SiteContentItem = {
@@ -29,8 +30,27 @@ const content: SiteContentItem = {
 describe('SEO helpers', () => {
   test('normalizes public site URLs', () => {
     expect(normalizePublicSiteUrl('https://example.com/')).toBe('https://example.com');
+    expect(normalizePublicSiteUrl('www.asterh.me')).toBe('https://www.asterh.me');
     expect(normalizePublicSiteUrl('')).toBe('http://localhost:3000');
     expect(normalizePublicSiteUrl(undefined)).toBe('http://localhost:3000');
+  });
+
+  test('prefers the Vercel production domain over a preview-domain public site URL', () => {
+    expect(
+      resolvePublicSiteUrl({
+        configuredUrl: 'https://starry-summer-web-22ae.vercel.app/',
+        productionHost: 'www.asterh.me',
+      }),
+    ).toBe('https://www.asterh.me');
+  });
+
+  test('keeps an explicit custom public site URL when it is already correct', () => {
+    expect(
+      resolvePublicSiteUrl({
+        configuredUrl: 'https://www.asterh.me/',
+        productionHost: 'asterh.me',
+      }),
+    ).toBe('https://www.asterh.me');
   });
 
   test('builds robots text for public deployment', () => {

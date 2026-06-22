@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { buildSiteMetadata, normalizePublicSiteUrl } from '@/lib/seo';
+import { buildSiteMetadata, resolvePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
 import './styles.css';
 import './styles/admin.css';
@@ -9,7 +9,13 @@ import './styles/responsive.css';
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await loadSiteSettings();
 
-  return buildSiteMetadata(settings, normalizePublicSiteUrl(process.env.PUBLIC_SITE_URL));
+  return buildSiteMetadata(
+    settings,
+    resolvePublicSiteUrl({
+      configuredUrl: process.env.PUBLIC_SITE_URL,
+      productionHost: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    }),
+  );
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
