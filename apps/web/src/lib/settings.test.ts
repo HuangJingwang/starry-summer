@@ -75,6 +75,15 @@ describe('settings client helpers', () => {
     expect(normalizeSiteSettings({}).navigation).not.toContain('about');
   });
 
+  test('ships alias-safe public social links in the repository settings fixture', async () => {
+    const { readFile } = await import('node:fs/promises');
+
+    const source = await readFile(new URL('../../content/site-settings.json', import.meta.url), 'utf8');
+
+    expect(source).toContain('https://github.com/Aster-H');
+    expect(source).not.toContain('HuangJingwang');
+  });
+
   test('builds repository settings publish payloads for Git-backed settings', () => {
     const request = buildRepositorySettingsPublishRequest({
       profile: {
