@@ -10,6 +10,7 @@ export default async function LeetCodeArchivePage() {
   const { dashboard } = await loadRepositoryStudyDashboard();
   const roundTrack = buildRoundTrack(dashboard);
   const lastSyncLabel = dashboard.settings.updatedAt || dashboard.summary.lastActivityDate || '等待同步';
+  const categoryCount = dashboard.categories.length;
   const heatmapDays = buildStudyHeatmapWindow(
     dashboard.heatmap,
     dashboard.summary.lastActivityDate || dashboard.settings.updatedAt,
@@ -18,11 +19,11 @@ export default async function LeetCodeArchivePage() {
   return (
     <SiteShell>
       <main className="page-main study-archive-page">
-        <div className="page-title-row">
+        <div className="page-title-row study-title-row">
           <div className="page-title">
             <p className="eyebrow">LeetCode Trace</p>
-            <h1>刷题日记</h1>
-            <p>把每日练习、间隔复习和算法复盘留在同一条长期学习轨迹里。</p>
+            <h1>算法练习快照</h1>
+            <p>Hot100、五轮复习和最近同步记录。公开页只保留进度、节奏和可继续查看的入口。</p>
           </div>
           <div className="posts-page-actions">
             <nav className="sort-tabs" aria-label="刷题日记导航">
@@ -33,12 +34,57 @@ export default async function LeetCodeArchivePage() {
           </div>
         </div>
 
+        <section className="study-snapshot-hero" aria-label="LeetCode 学习快照">
+          <div className="study-snapshot-hero__copy">
+            <span>Repository snapshot</span>
+            <strong>{dashboard.settings.activeListId.toUpperCase()}</strong>
+            <p>
+              最近同步 {lastSyncLabel}
+              {dashboard.settings.leetcodeUsername ? ` · @${dashboard.settings.leetcodeUsername}` : ' · 仓库快照'}
+            </p>
+          </div>
+
+          <a className="study-progress-link" href="#review-rhythm" aria-label="查看五轮复习轨道">
+            <span>完成率</span>
+            <strong>{dashboard.summary.completionRate}%</strong>
+            <small>{dashboard.summary.doneRounds}/{dashboard.summary.totalRounds} 轮次完成 · 点击查看复习轨道</small>
+          </a>
+
+          <div className="study-snapshot-links" aria-label="学习数据入口">
+            <a className="study-snapshot-link" href="#today-plan">
+              <span>Today</span>
+              <strong>{dashboard.settings.dailyNew} / {dashboard.settings.dailyReview}</strong>
+              <small>新题 / 复习</small>
+            </a>
+            <a className="study-snapshot-link" href="#activity">
+              <span>Streak</span>
+              <strong>{dashboard.summary.streak} 天</strong>
+              <small>累计 {dashboard.summary.totalDays} 天</small>
+            </a>
+            <a className="study-snapshot-link" href="#categories">
+              <span>Types</span>
+              <strong>{categoryCount} 类</strong>
+              <small>{dashboard.summary.startedProblems}/{dashboard.summary.totalProblems} 已开始</small>
+            </a>
+          </div>
+
+          <nav className="study-round-links" aria-label="五轮复习入口">
+            {roundTrack.map((round) => (
+              <a className="study-round-link" href="#review-rhythm" key={round.label}>
+                <span>{round.label}</span>
+                <strong>{round.rate}%</strong>
+                <small>{round.note}</small>
+              </a>
+            ))}
+          </nav>
+        </section>
+
         <section className="content-section study-overview-section" aria-label="学习总览">
-          <div className="study-metric-grid">
-            <SummaryCard label="完成率" value={`${dashboard.summary.completionRate}%`} hint={`${dashboard.summary.doneRounds}/${dashboard.summary.totalRounds} 轮次`} />
-            <SummaryCard label="已开始" value={`${dashboard.summary.startedProblems}/${dashboard.summary.totalProblems}`} hint="题单覆盖" />
-            <SummaryCard label="连续打卡" value={`${dashboard.summary.streak} 天`} hint={`累计 ${dashboard.summary.totalDays} 天`} />
-            <SummaryCard label="最近同步" value={lastSyncLabel} hint={dashboard.settings.leetcodeUsername ? `@${dashboard.settings.leetcodeUsername}` : '仓库快照'} />
+          <div className="study-mini-stat-row">
+            <a href="#today-plan">今日 {dashboard.settings.dailyNew} 新题 / {dashboard.settings.dailyReview} 复习</a>
+            <a href="#review-rhythm">{dashboard.settings.roundCount} 轮复习</a>
+            <a href="#activity">最近活动 {dashboard.summary.lastActivityDate || '等待同步'}</a>
+            <a href="#categories">{categoryCount} 个题型分类</a>
           </div>
         </section>
 
@@ -110,76 +156,58 @@ export default async function LeetCodeArchivePage() {
           </div>
         </section>
 
-        <section className="content-section">
-          <div className="section-heading section-heading--row">
-            <div>
-              <p className="eyebrow">学习热力</p>
-              <h2>最近 12 周</h2>
-            </div>
-            <span>{dashboard.summary.lastActivityDate || '持续构建中'}</span>
-          </div>
-          <div className="study-heatmap" aria-label="学习热力图">
-            {heatmapDays.map((day) => (
-              <span
-                key={day.date}
-                title={`${day.date}：${day.count} 次`}
-                data-level={Math.min(4, day.count)}
-              />
-            ))}
-          </div>
-        </section>
-
-        <section className="content-section">
+        <section className="content-section" id="categories">
           <div className="section-heading">
             <p className="eyebrow">题型分类</p>
             <h2>分类进度</h2>
           </div>
           <div className="study-category-grid">
             {dashboard.categories.map((category) => (
-              <article key={category.name}>
+              <a className="study-category-chip" href={`#${buildCategoryAnchor(category.name)}`} id={buildCategoryAnchor(category.name)} key={category.name}>
                 <div>
                   <strong>{category.name}</strong>
                   <span>{category.rate}%</span>
                 </div>
                 <progress max={100} value={category.rate} aria-label={`${category.name}进度 ${category.rate}%`} />
                 <small>{category.started}/{category.total} 已开始</small>
-              </article>
+              </a>
             ))}
           </div>
         </section>
 
-        <section className="content-section">
+        <section className="content-section" id="activity">
           <div className="section-heading section-heading--row">
             <div>
-              <p className="eyebrow">提交记录</p>
-              <h2>最近提交</h2>
+              <p className="eyebrow">Activity</p>
+              <h2>热力与提交</h2>
             </div>
-            <Link href="/">返回首页</Link>
+            <span>{dashboard.summary.lastActivityDate || '持续构建中'}</span>
           </div>
-          <div className="leetcode-list">
-            {dashboard.recentSubmissions.length > 0 ? dashboard.recentSubmissions.map((submission) => (
-              <a className="leetcode-item" href={submission.problemUrl} key={`${submission.titleSlug}-${submission.submittedAt}`} target="_blank" rel="noreferrer">
-                <span>{submission.status}</span>
-                <strong>{submission.title}</strong>
-                <small>{submission.language} · {submission.submittedAtLabel}</small>
-              </a>
-            )) : <p className="content-empty-card">暂无同步记录，后台配置 LeetCode 用户名后会显示最近提交。</p>}
+          <div className="study-activity-grid">
+            <div className="study-heatmap" aria-label="学习热力图">
+              {heatmapDays.map((day) => (
+                <span
+                  key={day.date}
+                  title={`${day.date}：${day.count} 次`}
+                  data-level={Math.min(4, day.count)}
+                />
+              ))}
+            </div>
+            <div className="leetcode-list">
+              {dashboard.recentSubmissions.length > 0 ? dashboard.recentSubmissions.map((submission) => (
+                <a className="leetcode-item" href={submission.problemUrl} key={`${submission.titleSlug}-${submission.submittedAt}`} target="_blank" rel="noreferrer">
+                  <span>{submission.status}</span>
+                  <strong>{submission.title}</strong>
+                  <small>{submission.language} · {submission.submittedAtLabel}</small>
+                </a>
+              )) : <p className="content-empty-card">暂无同步记录，后台配置 LeetCode 用户名后会显示最近提交。</p>}
+            </div>
           </div>
         </section>
+
+        <p className="study-return-home"><Link href="/">返回首页</Link></p>
       </main>
     </SiteShell>
-  );
-}
-
-function SummaryCard({ label, value, hint }: { label: string; value: string; hint: string }) {
-  const className = value.length > 7 ? 'study-metric-card study-metric-card--compact' : 'study-metric-card';
-
-  return (
-    <div className={className}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <small>{hint}</small>
-    </div>
   );
 }
 
@@ -246,6 +274,14 @@ function buildRoundTrack(dashboard: StudyDashboard) {
       rate,
     };
   });
+}
+
+function buildCategoryAnchor(name: string) {
+  return `category-${name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'uncategorized'}`;
 }
 
 function distributeDoneRounds(doneRounds: number, roundCount: number, totalProblems: number) {

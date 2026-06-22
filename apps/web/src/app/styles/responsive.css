@@ -191,6 +191,9 @@
   .cyber-hero__grid,
   .author-bio-card__meta,
   .cyber-home .home-dashboard,
+  .study-snapshot-hero,
+  .study-snapshot-links,
+  .study-activity-grid,
   .leetcode-list,
   .study-metric-grid,
   .study-task-grid,
@@ -240,6 +243,23 @@
   .asset-item,
   .split-panels:has(section:nth-child(3)) {
     grid-template-columns: 1fr;
+  }
+
+  .study-snapshot-hero {
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .study-progress-link {
+    min-height: 160px;
+  }
+
+  .study-round-links {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .study-mini-stat-row a {
+    width: 100%;
   }
 
   .admin-command-bar,

@@ -13,6 +13,13 @@ describe('leetcode archive page', () => {
     expect(source).not.toContain('page-main__canvas');
     expect(source).toContain('page-title-row');
     expect(source).toContain('page-title');
+    expect(source).toContain('study-snapshot-hero');
+    expect(source).toContain('href="#review-rhythm"');
+    expect(source).toContain('href="#today-plan"');
+    expect(source).toContain('href="#activity"');
+    expect(source).toContain('href="#categories"');
+    expect(source).toContain('study-round-link');
+    expect(source).toContain('buildCategoryAnchor');
     expect(source).toContain('content-section');
     expect(source).toContain('study-heatmap');
     expect(source).toContain('study-round-track');
