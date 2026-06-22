@@ -11,7 +11,7 @@ export async function SiteShell({ children, hideHeader = false }: { children: Re
   const navItems = buildPublicNavigation(settings.navigation);
 
   return (
-    <div id="top" className="site-shell">
+    <div id="home" className="site-shell">
       {hideHeader ? null : <StarrySkyCanvas className="site-shell__canvas" showFleet={false} />}
       {hideHeader ? null : <PublicCardNav title={settings.profile.title} navItems={navItems} />}
       {children}

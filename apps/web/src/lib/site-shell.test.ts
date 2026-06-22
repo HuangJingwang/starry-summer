@@ -58,6 +58,13 @@ describe('site shell helpers', () => {
     expect(source).toContain('<MobileBackToTop />');
   });
 
+  test('uses home as the public top anchor name', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+
+    expect(source).toContain('<div id="home" className="site-shell">');
+    expect(source).not.toContain('id="top"');
+  });
+
   test('does not render a shared explanatory footer on public pages', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
 
