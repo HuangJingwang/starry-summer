@@ -547,7 +547,7 @@ describe('global styles', () => {
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHOOTING_STAR_INTERVAL_FRAMES = 520');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % SHOOTING_STAR_INTERVAL_FRAMES === 0');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('MAX_SHIP_SCREEN_RATIO = 0.045');
-    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SHIP_APPEAR_INTERVAL_MS = 5 * 60 * 1000');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000');
     expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SMALL_SHIP_WEIGHT = 3');
     expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('FLAGSHIP_WEIGHT = 1');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('selectFleetEncounterVariant');

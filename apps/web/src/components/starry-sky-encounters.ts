@@ -1,6 +1,6 @@
 export type FleetEncounterVariant = 'small' | 'flagship';
 
-export const SHIP_APPEAR_INTERVAL_MS = 5 * 60 * 1000;
+export const SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000;
 
 const SMALL_SHIP_WEIGHT = 3;
 const FLAGSHIP_WEIGHT = 1;
