@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 const requiredFiles = ['LICENSE', 'CONTRIBUTING.md', 'SECURITY.md'];
 const requiredOpsFiles = [
   '.github/workflows/ci.yml',
+  '.github/workflows/leetcode-sync.yml',
   '.github/workflows/production-smoke.yml',
   'docs/ops/automation-runbook.md',
   'docs/ops/vercel-projects.md',
@@ -189,10 +190,20 @@ if (!productionSmokeWorkflow.includes('npm run ops:production-smoke -- --base-ur
   fail('Production smoke workflow must check https://www.asterh.me with the shared ops script.');
 }
 
+const leetcodeSyncWorkflow = readFileSync('.github/workflows/leetcode-sync.yml', 'utf8');
+
+if (!leetcodeSyncWorkflow.includes('npm run sync:leetcode -- --username adonis-14')) {
+  fail('LeetCode sync workflow must sync the configured public LeetCode.cn username.');
+}
+
 for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke', 'ops:pr-health']) {
   if (!(scriptName in (packageJson.scripts ?? {}))) {
     fail(`package.json must expose ${scriptName}.`);
   }
+}
+
+if (!('sync:leetcode' in (packageJson.scripts ?? {}))) {
+  fail('package.json must expose sync:leetcode.');
 }
 
 const publicThemeSkill = readFileSync('.codex/skills/starry-summer-public-theme-review/SKILL.md', 'utf8');

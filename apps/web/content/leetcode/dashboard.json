@@ -1,6 +1,6 @@
 {
   "settings": {
-    "leetcodeUsername": "",
+    "leetcodeUsername": "adonis-14",
     "activeListId": "hot100",
     "roundCount": 5,
     "reviewIntervals": [
@@ -12,20 +12,41 @@
     "dailyNew": 3,
     "dailyReview": 5,
     "deadline": "",
-    "updatedAt": "2026-06-18"
+    "updatedAt": "2026-06-22"
   },
   "summary": {
     "totalProblems": 101,
-    "startedProblems": 0,
+    "startedProblems": 10,
     "completedProblems": 0,
-    "doneRounds": 0,
+    "doneRounds": 11,
     "totalRounds": 505,
-    "completionRate": 0,
+    "completionRate": 2.2,
     "streak": 0,
-    "totalDays": 0,
-    "lastActivityDate": ""
+    "totalDays": 20,
+    "lastActivityDate": "2026-04-23"
   },
   "categories": [
+    {
+      "name": "哈希表",
+      "total": 4,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "链表",
+      "total": 12,
+      "started": 1,
+      "completed": 0,
+      "rate": 8.3
+    },
+    {
+      "name": "滑动窗口",
+      "total": 3,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
     {
       "name": "二分查找",
       "total": 4,
@@ -34,11 +55,53 @@
       "rate": 0
     },
     {
-      "name": "二叉树",
-      "total": 15,
+      "name": "动态规划",
+      "total": 20,
+      "started": 1,
+      "completed": 0,
+      "rate": 5
+    },
+    {
+      "name": "双指针",
+      "total": 6,
+      "started": 2,
+      "completed": 0,
+      "rate": 33.3
+    },
+    {
+      "name": "回溯",
+      "total": 7,
       "started": 0,
       "completed": 0,
       "rate": 0
+    },
+    {
+      "name": "栈",
+      "total": 8,
+      "started": 2,
+      "completed": 0,
+      "rate": 25
+    },
+    {
+      "name": "数组",
+      "total": 8,
+      "started": 1,
+      "completed": 0,
+      "rate": 12.5
+    },
+    {
+      "name": "贪心",
+      "total": 4,
+      "started": 1,
+      "completed": 0,
+      "rate": 25
+    },
+    {
+      "name": "二叉树",
+      "total": 15,
+      "started": 2,
+      "completed": 0,
+      "rate": 13.3
     },
     {
       "name": "位运算",
@@ -48,29 +111,8 @@
       "rate": 0
     },
     {
-      "name": "动态规划",
-      "total": 20,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "双指针",
-      "total": 6,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "哈希表",
-      "total": 4,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "回溯",
-      "total": 7,
+      "name": "设计",
+      "total": 2,
       "started": 0,
       "completed": 0,
       "rate": 0
@@ -85,48 +127,6 @@
     {
       "name": "堆",
       "total": 2,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "数组",
-      "total": 8,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "栈",
-      "total": 8,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "滑动窗口",
-      "total": 3,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "设计",
-      "total": 2,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "贪心",
-      "total": 4,
-      "started": 0,
-      "completed": 0,
-      "rate": 0
-    },
-    {
-      "name": "链表",
-      "total": 12,
       "started": 0,
       "completed": 0,
       "rate": 0
@@ -245,12 +245,14 @@
         "hot100",
         "top150"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-22"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-22"
     },
     {
       "number": 17,
@@ -495,12 +497,15 @@
         "hot100",
         "top150"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-20",
+        "2026-04-21"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-21"
     },
     {
       "number": 46,
@@ -743,12 +748,14 @@
       "listIds": [
         "hot100"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-23"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-23"
     },
     {
       "number": 85,
@@ -841,12 +848,14 @@
       "listIds": [
         "hot100"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-22"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-22"
     },
     {
       "number": 104,
@@ -1010,12 +1019,14 @@
       "listIds": [
         "hot100"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-22"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-22"
     },
     {
       "number": 146,
@@ -1128,12 +1139,14 @@
         "hot100",
         "top150"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-22"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-22"
     },
     {
       "number": 200,
@@ -1280,12 +1293,14 @@
         "hot100",
         "top150"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-22"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-22"
     },
     {
       "number": 238,
@@ -1716,12 +1731,14 @@
       "listIds": [
         "hot100"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-21"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-21"
     },
     {
       "number": 617,
@@ -1748,12 +1765,14 @@
       "listIds": [
         "hot100"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-21"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-21"
     },
     {
       "number": 647,
@@ -1780,12 +1799,14 @@
       "listIds": [
         "hot100"
       ],
-      "rounds": [],
+      "rounds": [
+        "2026-04-20"
+      ],
       "notes": "",
       "solutionViewed": false,
       "mustRepeat": false,
       "timeSpentSeconds": [],
-      "updatedAt": ""
+      "updatedAt": "2026-04-20"
     },
     {
       "number": 763,
@@ -1824,8 +1845,276 @@
       "category": "动态规划"
     }
   ],
-  "reviewDue": [],
-  "heatmap": [],
-  "recentSubmissions": [],
+  "reviewDue": [
+    {
+      "slug": "daily-temperatures",
+      "title": "每日温度",
+      "difficulty": "中等",
+      "category": "栈",
+      "nextRound": "R2",
+      "dueDate": "2026-04-21",
+      "overdueDays": 62,
+      "forcedByMustRepeat": false
+    },
+    {
+      "slug": "task-scheduler",
+      "title": "任务调度器",
+      "difficulty": "中等",
+      "category": "贪心",
+      "nextRound": "R2",
+      "dueDate": "2026-04-22",
+      "overdueDays": 61,
+      "forcedByMustRepeat": false
+    },
+    {
+      "slug": "shortest-unsorted-continuous-subarray",
+      "title": "最短无序连续子数组",
+      "difficulty": "中等",
+      "category": "数组",
+      "nextRound": "R2",
+      "dueDate": "2026-04-22",
+      "overdueDays": 61,
+      "forcedByMustRepeat": false
+    },
+    {
+      "slug": "3sum",
+      "title": "三数之和",
+      "difficulty": "中等",
+      "category": "双指针",
+      "nextRound": "R2",
+      "dueDate": "2026-04-23",
+      "overdueDays": 60,
+      "forcedByMustRepeat": false
+    },
+    {
+      "slug": "lowest-common-ancestor-of-a-binary-tree",
+      "title": "二叉树的最近公共祖先",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "nextRound": "R2",
+      "dueDate": "2026-04-23",
+      "overdueDays": 60,
+      "forcedByMustRepeat": false
+    }
+  ],
+  "heatmap": [
+    {
+      "date": "2026-02-24",
+      "count": 1
+    },
+    {
+      "date": "2026-02-25",
+      "count": 15
+    },
+    {
+      "date": "2026-02-27",
+      "count": 7
+    },
+    {
+      "date": "2026-03-02",
+      "count": 11
+    },
+    {
+      "date": "2026-03-03",
+      "count": 2
+    },
+    {
+      "date": "2026-03-23",
+      "count": 4
+    },
+    {
+      "date": "2026-03-26",
+      "count": 3
+    },
+    {
+      "date": "2026-03-27",
+      "count": 11
+    },
+    {
+      "date": "2026-03-29",
+      "count": 18
+    },
+    {
+      "date": "2026-03-30",
+      "count": 9
+    },
+    {
+      "date": "2026-03-31",
+      "count": 9
+    },
+    {
+      "date": "2026-04-13",
+      "count": 13
+    },
+    {
+      "date": "2026-04-14",
+      "count": 4
+    },
+    {
+      "date": "2026-04-15",
+      "count": 3
+    },
+    {
+      "date": "2026-04-16",
+      "count": 3
+    },
+    {
+      "date": "2026-04-17",
+      "count": 4
+    },
+    {
+      "date": "2026-04-20",
+      "count": 22
+    },
+    {
+      "date": "2026-04-21",
+      "count": 13
+    },
+    {
+      "date": "2026-04-22",
+      "count": 14
+    },
+    {
+      "date": "2026-04-23",
+      "count": 3
+    }
+  ],
+  "recentSubmissions": [
+    {
+      "title": "柱状图中最大的矩形",
+      "titleSlug": "largest-rectangle-in-histogram",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-23T07:37:48.000Z",
+      "submittedAtLabel": "2026-04-23",
+      "problemUrl": "https://leetcode.cn/problems/largest-rectangle-in-histogram/"
+    },
+    {
+      "title": "打家劫舍",
+      "titleSlug": "house-robber",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-22T03:32:24.000Z",
+      "submittedAtLabel": "2026-04-22",
+      "problemUrl": "https://leetcode.cn/problems/house-robber/"
+    },
+    {
+      "title": "二叉树的最近公共祖先",
+      "titleSlug": "lowest-common-ancestor-of-a-binary-tree",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-22T02:54:04.000Z",
+      "submittedAtLabel": "2026-04-22",
+      "problemUrl": "https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/"
+    },
+    {
+      "title": "环形链表 II",
+      "titleSlug": "linked-list-cycle-ii",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-22T02:45:00.000Z",
+      "submittedAtLabel": "2026-04-22",
+      "problemUrl": "https://leetcode.cn/problems/linked-list-cycle-ii/"
+    },
+    {
+      "title": "二叉树的层序遍历",
+      "titleSlug": "binary-tree-level-order-traversal",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-22T02:36:18.000Z",
+      "submittedAtLabel": "2026-04-22",
+      "problemUrl": "https://leetcode.cn/problems/binary-tree-level-order-traversal/"
+    },
+    {
+      "title": "三数之和",
+      "titleSlug": "3sum",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-22T01:53:24.000Z",
+      "submittedAtLabel": "2026-04-22",
+      "problemUrl": "https://leetcode.cn/problems/3sum/"
+    },
+    {
+      "title": "接雨水",
+      "titleSlug": "trapping-rain-water",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-21T08:37:47.000Z",
+      "submittedAtLabel": "2026-04-21",
+      "problemUrl": "https://leetcode.cn/problems/trapping-rain-water/"
+    },
+    {
+      "title": "下一个更大元素 I",
+      "titleSlug": "next-greater-element-i",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-21T08:12:31.000Z",
+      "submittedAtLabel": "2026-04-21",
+      "problemUrl": "https://leetcode.cn/problems/next-greater-element-i/"
+    },
+    {
+      "title": "下一个更大元素 I",
+      "titleSlug": "next-greater-element-i",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-21T08:12:12.000Z",
+      "submittedAtLabel": "2026-04-21",
+      "problemUrl": "https://leetcode.cn/problems/next-greater-element-i/"
+    },
+    {
+      "title": "最短无序连续子数组",
+      "titleSlug": "shortest-unsorted-continuous-subarray",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-21T01:41:51.000Z",
+      "submittedAtLabel": "2026-04-21",
+      "problemUrl": "https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/"
+    },
+    {
+      "title": "任务调度器",
+      "titleSlug": "task-scheduler",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-21T01:26:19.000Z",
+      "submittedAtLabel": "2026-04-21",
+      "problemUrl": "https://leetcode.cn/problems/task-scheduler/"
+    },
+    {
+      "title": "接雨水",
+      "titleSlug": "trapping-rain-water",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-20T12:29:41.000Z",
+      "submittedAtLabel": "2026-04-20",
+      "problemUrl": "https://leetcode.cn/problems/trapping-rain-water/"
+    },
+    {
+      "title": "每日温度",
+      "titleSlug": "daily-temperatures",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-20T12:20:23.000Z",
+      "submittedAtLabel": "2026-04-20",
+      "problemUrl": "https://leetcode.cn/problems/daily-temperatures/"
+    },
+    {
+      "title": "每日温度",
+      "titleSlug": "daily-temperatures",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-20T12:19:31.000Z",
+      "submittedAtLabel": "2026-04-20",
+      "problemUrl": "https://leetcode.cn/problems/daily-temperatures/"
+    },
+    {
+      "title": "每日温度",
+      "titleSlug": "daily-temperatures",
+      "status": "Accepted",
+      "language": "LeetCode.cn",
+      "submittedAt": "2026-04-20T12:12:47.000Z",
+      "submittedAtLabel": "2026-04-20",
+      "problemUrl": "https://leetcode.cn/problems/daily-temperatures/"
+    }
+  ],
   "recentNotes": []
 }
