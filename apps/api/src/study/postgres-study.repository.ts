@@ -11,6 +11,7 @@ import {
 import {
   normalizeProblemPatch,
   normalizeSettingsPatch,
+  type StudySyncState,
   type StudyRepository,
 } from './study.repository.js';
 
@@ -24,6 +25,10 @@ interface SettingsRow {
   daily_new: number;
   daily_review: number;
   deadline: Date | null;
+  last_synced_at: Date | null;
+  history_backfilled_at: Date | null;
+  history_backfilled_username: string;
+  history_backfilled_list_id: string;
   updated_at: Date;
 }
 
@@ -194,6 +199,50 @@ export class PostgresStudyRepository implements StudyRepository {
     }
 
     return imported;
+  }
+
+  async getSyncState(): Promise<StudySyncState> {
+    await this.ensureSettingsRow();
+    const result = await this.pool.query<SettingsRow>(`
+      select last_synced_at, history_backfilled_at, history_backfilled_username, history_backfilled_list_id
+      from leetcode_study_settings
+      where id = true
+    `);
+    const row = result.rows[0];
+
+    return {
+      lastSyncedAt: row?.last_synced_at?.toISOString() ?? '',
+      historyBackfilledAt: row?.history_backfilled_at?.toISOString() ?? '',
+      historyBackfilledUsername: row?.history_backfilled_username ?? '',
+      historyBackfilledListId: row?.history_backfilled_list_id ?? '',
+    };
+  }
+
+  async updateSyncState(patch: Partial<StudySyncState>): Promise<StudySyncState> {
+    await this.ensureSettingsRow();
+    const current = await this.getSyncState();
+    const next = { ...current, ...patch };
+
+    await this.pool.query(
+      `
+        update leetcode_study_settings
+        set
+          last_synced_at = $1,
+          history_backfilled_at = $2,
+          history_backfilled_username = $3,
+          history_backfilled_list_id = $4,
+          updated_at = now()
+        where id = true
+      `,
+      [
+        next.lastSyncedAt || null,
+        next.historyBackfilledAt || null,
+        next.historyBackfilledUsername,
+        next.historyBackfilledListId,
+      ],
+    );
+
+    return this.getSyncState();
   }
 
   private async ensureSettingsRow(): Promise<void> {

@@ -60,7 +60,7 @@ export async function buildAssetUploadPayload(file: File, options: AssetUploadPa
 }
 
 export function buildAssetUploadRequest(payload: AssetUploadPayload, options: AssetRequestOptions = {}): AssetRequest | null {
-  const url = buildAssetUrl('/api/admin/assets', options);
+  const url = buildAssetUrl('/api/repository/assets', '/api/admin/assets', options);
 
   if (!url) {
     return null;
@@ -80,7 +80,7 @@ export function buildAssetUploadRequest(payload: AssetUploadPayload, options: As
 }
 
 export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): AssetRequest | null {
-  const url = buildAssetUrl('/api/admin/assets', options);
+  const url = buildAssetUrl('/api/repository/assets', '/api/admin/assets', options);
 
   if (!url) {
     return null;
@@ -96,7 +96,7 @@ export function buildAdminAssetListRequest(options: AssetRequestOptions = {}): A
 }
 
 export function buildPublicAssetListRequest(options: AssetRequestOptions = {}): AssetRequest | null {
-  const url = buildAssetUrl('/api/assets', options);
+  const url = buildExternalAssetUrl('/api/assets', options);
 
   if (!url) {
     return null;
@@ -114,7 +114,7 @@ export function buildPublicAssetListRequest(options: AssetRequestOptions = {}): 
 }
 
 export function buildAssetDeleteRequest(id: string, options: AssetRequestOptions = {}): AssetRequest | null {
-  const url = buildAssetUrl(`/api/admin/assets/${id}`, options);
+  const url = buildAssetUrl(`/api/repository/assets/${id}`, `/api/admin/assets/${id}`, options);
 
   if (!url) {
     return null;
@@ -149,7 +149,7 @@ export async function readAssetErrorMessage(response: Response, fallback: string
 }
 
 export function buildRandomAssetRequest(options: AssetRequestOptions = {}): AssetRequest | null {
-  const url = buildAssetUrl('/api/assets/random', options);
+  const url = buildExternalAssetUrl('/api/assets/random', options);
 
   if (!url) {
     return null;
@@ -287,7 +287,18 @@ export async function loadPublicAssets(
   }
 }
 
-function buildAssetUrl(path: string, options: AssetRequestOptions): string | null {
+function buildAssetUrl(repositoryPath: string, externalPath: string, options: AssetRequestOptions): string | null {
+  const baseUrl = getConfiguredAssetBaseUrl(options).replace(/\/$/, '');
+  if (!baseUrl) {
+    return appendUsage(repositoryPath, options);
+  }
+
+  const apiPath = externalPath.replace(/^\/api/, '');
+
+  return appendUsage(`${baseUrl}${apiPath}`, options);
+}
+
+function buildExternalAssetUrl(path: string, options: AssetRequestOptions): string | null {
   const baseUrl = getConfiguredAssetBaseUrl(options).replace(/\/$/, '');
   if (!baseUrl) {
     return null;
@@ -295,13 +306,17 @@ function buildAssetUrl(path: string, options: AssetRequestOptions): string | nul
 
   const apiPath = path.replace(/^\/api/, '');
 
+  return appendUsage(`${baseUrl}${apiPath}`, options);
+}
+
+function appendUsage(url: string, options: AssetRequestOptions): string {
   if (!options.usage) {
-    return `${baseUrl}${apiPath}`;
+    return url;
   }
 
   const params = new URLSearchParams({ usage: options.usage });
 
-  return `${baseUrl}${apiPath}?${params.toString()}`;
+  return `${url}?${params.toString()}`;
 }
 
 function getConfiguredAssetBaseUrl(options: AssetRequestOptions): string {

@@ -8,6 +8,7 @@ export interface GitHubRepositoryConfig {
 export interface GitHubCommitFile {
   path: string;
   content: string;
+  encoding?: 'utf-8' | 'base64';
 }
 
 export interface GitHubContentCommitInput {
@@ -117,7 +118,7 @@ export async function createGitHubContentCommit(
           method: 'POST',
           body: JSON.stringify({
             content: file.content,
-            encoding: 'utf-8',
+            encoding: file.encoding ?? 'utf-8',
           }),
         },
         fetcher,

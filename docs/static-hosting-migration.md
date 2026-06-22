@@ -71,7 +71,7 @@ Recommended storage:
 
 - Likes and views: Cloudflare Workers + KV or D1.
 - Guestbook and comments: Cloudflare Workers + D1, or GitHub Issues/Giscus if moderation can live outside this app.
-- Assets: repository for small curated images, R2 for larger uploaded images.
+- Assets: repository files for curated images and small authoring uploads.
 - Reader login: GitHub OAuth handled by Worker or a serverless route.
 
 Current implementation notes:
@@ -95,28 +95,16 @@ Current implementation notes:
 
 ## Assets Without The API Database
 
-Assets should be split into two storage modes:
-
-- Small curated site images live in Git with a repository manifest.
-- Uploaded authoring assets live in Cloudflare R2 behind a tiny Worker.
+Assets now live in Git with a repository manifest. This keeps the personal archive portable and lets Vercel publish uploaded files after the GitHub commit rebuilds the site.
 
 Current implementation notes:
 
 - `apps/web/content/assets.json` stores versioned public assets that ship with the site, such as avatars, default covers, and curated backgrounds.
 - `apps/web/src/lib/assets-repository.ts` reads that manifest without calling the API backend.
-- `workers/assets-worker` provides a database-free R2 asset service.
-- Set `NEXT_PUBLIC_ASSET_BASE_URL` to make browser-side admin asset upload, list, delete, and picker requests hit the Worker instead of the old `/api/admin/assets` route.
-- Set `ASSET_BASE_URL` for server-side public asset fetches when a runtime fetch is still preferred over repository files.
-- When these variables are not configured, asset upload/list/delete requests are treated as unavailable and do not fall back to the old API database backend.
-- The expected Worker-compatible paths are:
-  - `POST /admin/assets`
-  - `GET /admin/assets?usage=cover`
-  - `DELETE /admin/assets/:id`
-  - `GET /assets?usage=background`
-  - `GET /assets/random?usage=background`
-  - `GET /assets/file/:storageKey`
-
-The R2 Worker keeps asset metadata in `assets/index.json` inside the bucket. That replaces the old PostgreSQL `assets` table for uploaded media while keeping the public URLs stable.
+- `POST /api/repository/assets` commits uploaded files into `apps/web/public/images/uploads/YYYY/MM` and updates `apps/web/content/assets.json`.
+- `GET /api/repository/assets?usage=cover` reads the repository asset index for the admin gallery and cover picker.
+- `DELETE /api/repository/assets/:id` removes the asset from `assets.json`; historical files remain in Git history.
+- GitHub storage is intended for small blog images and attachments. Large galleries, videos, or frequent binary churn should be reconsidered before they bloat the repository.
 
 Suggested D1 tables:
 
@@ -196,12 +184,12 @@ The PostgreSQL backend is no longer required when all of these are true:
 - Likes, views, comments, and guestbook no longer use PostgreSQL tables.
 - LeetCode dashboard reads from repository files, KV, or D1.
 - Asset upload no longer depends on API local volume storage.
-- Docker deployment docs and smoke tests no longer expect PostgreSQL or Redis.
+- Deployment docs and smoke tests no longer expect PostgreSQL or Redis.
 
 Those conditions are now the default target for the web deployment. Keep any remaining API code as historical migration reference only; do not wire new runtime paths to PostgreSQL.
 
-## Compose Deployment
+## Hosted Web Deployment
 
-The default `docker compose up` path starts only the database-free web surface and Caddy. The Nest API, PostgreSQL, Redis, MinIO, and migration container are no longer part of the Compose deployment path.
+The default deployment path is Vercel hosting the database-free Next.js web surface. The Nest API, PostgreSQL, Redis, MinIO, migration container, and reverse proxy stack are no longer part of the default production path.
 
-Caddy sends requests to the web app by default, so Next-owned routes such as `/api/auth/*` and `/api/repository/*` are handled by the web deployment.
+Next-owned routes such as `/api/auth/*` and `/api/repository/*` are handled by the web deployment. Repository publishing creates GitHub commits, and the connected Vercel project rebuilds from those commits.

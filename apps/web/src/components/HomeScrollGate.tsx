@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const homeSelector = '.portfolio-home';
 const homeAnchorSelector = 'a[href="#writing"], a[href="#work"], a[href="/#writing"], a[href="/#work"]';
-const topLinkSelector = 'a[href="#top"], a[href="/#top"]';
+const topLinkSelector = 'a[href="#home"], a[href="/#home"], a[href="#top"], a[href="/#top"]';
 
 function setHomeScrollLock(isLocked: boolean) {
   const home = document.querySelector<HTMLElement>(homeSelector);
@@ -54,7 +54,7 @@ export function HomeScrollGate({ targetId }: { targetId: string }) {
     setHomeScrollLock(true);
 
     function handleHashChange() {
-      if (window.location.hash === '#top') {
+      if (window.location.hash === '#home' || window.location.hash === '#top') {
         scrollToTop();
       }
     }

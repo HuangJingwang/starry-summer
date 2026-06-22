@@ -79,7 +79,7 @@ describe('asset client helpers', () => {
     expect(optimizerCalls).toBe(0);
   });
 
-  test('does not build local database asset requests when the asset Worker is not configured', async () => {
+  test('builds repository asset requests by default without an external asset worker', async () => {
     const { buildAdminAssetListRequest, buildPublicAssetListRequest, buildRandomAssetRequest } = await import('./assets');
 
     expect(buildAssetUploadRequest({
@@ -88,11 +88,27 @@ describe('asset client helpers', () => {
       base64: 'aGVsbG8=',
       usage: 'cover',
       altText: 'Cover image',
-    })).toBeNull();
-    expect(buildAdminAssetListRequest({ usage: 'background' })).toBeNull();
+    })).toEqual({
+      url: '/api/repository/assets',
+      init: {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          filename: 'cover.png',
+          mimeType: 'image/png',
+          base64: 'aGVsbG8=',
+          usage: 'cover',
+          altText: 'Cover image',
+        }),
+      },
+    });
+    expect(buildAdminAssetListRequest({ usage: 'background' })?.url).toBe('/api/repository/assets?usage=background');
+    expect(buildAssetDeleteRequest('asset-1')?.url).toBe('/api/repository/assets/asset-1');
     expect(buildPublicAssetListRequest({ usage: 'background' })).toBeNull();
     expect(buildRandomAssetRequest({ usage: 'background' })).toBeNull();
-    expect(buildAssetDeleteRequest('asset-1')).toBeNull();
   });
 
   test('builds an authenticated asset upload request for the asset Worker', () => {

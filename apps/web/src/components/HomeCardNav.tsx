@@ -83,7 +83,7 @@ export function HomeCardNav() {
   return (
     <nav className="portfolio-hero__card-nav" aria-label="主页导航" data-transitioning={pendingHref ? 'true' : undefined}>
       <div className="portfolio-hero__nav-card">
-        <Link className="portfolio-hero__nav-brand" href="/#top">
+        <Link className="portfolio-hero__nav-brand" href="/">
           <img className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--night" src="/images/aster-profile.png" alt="" />
           <img className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--day" src="/images/aster-day-profile-v2.png" alt="" />
           <span>

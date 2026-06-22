@@ -3,84 +3,1829 @@
     "leetcodeUsername": "",
     "activeListId": "hot100",
     "roundCount": 5,
-    "reviewIntervals": [1, 3, 7, 14],
+    "reviewIntervals": [
+      1,
+      3,
+      7,
+      14
+    ],
     "dailyNew": 3,
     "dailyReview": 5,
     "deadline": "",
-    "updatedAt": "2026-06-14"
+    "updatedAt": "2026-06-18"
   },
   "summary": {
-    "totalProblems": 3,
-    "startedProblems": 3,
-    "completedProblems": 1,
-    "doneRounds": 5,
-    "totalRounds": 15,
-    "completionRate": 33.3,
-    "streak": 2,
-    "totalDays": 4,
-    "lastActivityDate": "2026-06-14"
+    "totalProblems": 101,
+    "startedProblems": 0,
+    "completedProblems": 0,
+    "doneRounds": 0,
+    "totalRounds": 505,
+    "completionRate": 0,
+    "streak": 0,
+    "totalDays": 0,
+    "lastActivityDate": ""
   },
   "categories": [
     {
-      "name": "Hash Table",
-      "total": 1,
-      "started": 1,
-      "completed": 1,
-      "rate": 100
+      "name": "二分查找",
+      "total": 4,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
     },
     {
-      "name": "Sliding Window",
-      "total": 1,
-      "started": 1,
+      "name": "二叉树",
+      "total": 15,
+      "started": 0,
       "completed": 0,
-      "rate": 50
+      "rate": 0
     },
     {
-      "name": "Stack",
-      "total": 1,
-      "started": 1,
+      "name": "位运算",
+      "total": 3,
+      "started": 0,
       "completed": 0,
-      "rate": 50
+      "rate": 0
+    },
+    {
+      "name": "动态规划",
+      "total": 20,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "双指针",
+      "total": 6,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "哈希表",
+      "total": 4,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "回溯",
+      "total": 7,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "图论",
+      "total": 3,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "堆",
+      "total": 2,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "数组",
+      "total": 8,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "栈",
+      "total": 8,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "滑动窗口",
+      "total": 3,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "设计",
+      "total": 2,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "贪心",
+      "total": 4,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
+    },
+    {
+      "name": "链表",
+      "total": 12,
+      "started": 0,
+      "completed": 0,
+      "rate": 0
     }
   ],
-  "problems": [],
+  "problems": [
+    {
+      "number": 1,
+      "title": "两数之和",
+      "slug": "two-sum",
+      "difficulty": "简单",
+      "category": "哈希表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 2,
+      "title": "两数相加",
+      "slug": "add-two-numbers",
+      "difficulty": "中等",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 3,
+      "title": "无重复字符的最长子串",
+      "slug": "longest-substring-without-repeating-characters",
+      "difficulty": "中等",
+      "category": "滑动窗口",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 4,
+      "title": "寻找两个正序数组的中位数",
+      "slug": "median-of-two-sorted-arrays",
+      "difficulty": "困难",
+      "category": "二分查找",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 5,
+      "title": "最长回文子串",
+      "slug": "longest-palindromic-substring",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 11,
+      "title": "盛最多水的容器",
+      "slug": "container-with-most-water",
+      "difficulty": "中等",
+      "category": "双指针",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 15,
+      "title": "三数之和",
+      "slug": "3sum",
+      "difficulty": "中等",
+      "category": "双指针",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 17,
+      "title": "电话号码的字母组合",
+      "slug": "letter-combinations-of-a-phone-number",
+      "difficulty": "中等",
+      "category": "回溯",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 19,
+      "title": "删除链表的倒数第N个结点",
+      "slug": "remove-nth-node-from-end-of-list",
+      "difficulty": "中等",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 20,
+      "title": "有效的括号",
+      "slug": "valid-parentheses",
+      "difficulty": "简单",
+      "category": "栈",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 21,
+      "title": "合并两个有序链表",
+      "slug": "merge-two-sorted-lists",
+      "difficulty": "简单",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 22,
+      "title": "括号生成",
+      "slug": "generate-parentheses",
+      "difficulty": "中等",
+      "category": "回溯",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 23,
+      "title": "合并K个升序链表",
+      "slug": "merge-k-sorted-lists",
+      "difficulty": "困难",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 24,
+      "title": "两两交换链表中的节点",
+      "slug": "swap-nodes-in-pairs",
+      "difficulty": "中等",
+      "category": "链表",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 25,
+      "title": "K个一组翻转链表",
+      "slug": "reverse-nodes-in-k-group",
+      "difficulty": "困难",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 31,
+      "title": "下一个排列",
+      "slug": "next-permutation",
+      "difficulty": "中等",
+      "category": "数组",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 32,
+      "title": "最长有效括号",
+      "slug": "longest-valid-parentheses",
+      "difficulty": "困难",
+      "category": "栈",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 33,
+      "title": "搜索旋转排序数组",
+      "slug": "search-in-rotated-sorted-array",
+      "difficulty": "中等",
+      "category": "二分查找",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 34,
+      "title": "在排序数组中查找元素的第一个和最后一个位置",
+      "slug": "find-first-and-last-position-of-element-in-sorted-array",
+      "difficulty": "中等",
+      "category": "二分查找",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 39,
+      "title": "组合总和",
+      "slug": "combination-sum",
+      "difficulty": "中等",
+      "category": "回溯",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 41,
+      "title": "缺失的第一个正数",
+      "slug": "first-missing-positive",
+      "difficulty": "困难",
+      "category": "数组",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 42,
+      "title": "接雨水",
+      "slug": "trapping-rain-water",
+      "difficulty": "困难",
+      "category": "双指针",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 46,
+      "title": "全排列",
+      "slug": "permutations",
+      "difficulty": "中等",
+      "category": "回溯",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 48,
+      "title": "旋转图像",
+      "slug": "rotate-image",
+      "difficulty": "中等",
+      "category": "数组",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 49,
+      "title": "字母异位词分组",
+      "slug": "group-anagrams",
+      "difficulty": "中等",
+      "category": "哈希表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 53,
+      "title": "最大子数组和",
+      "slug": "maximum-subarray",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 55,
+      "title": "跳跃游戏",
+      "slug": "jump-game",
+      "difficulty": "中等",
+      "category": "贪心",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 56,
+      "title": "合并区间",
+      "slug": "merge-intervals",
+      "difficulty": "中等",
+      "category": "数组",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 62,
+      "title": "不同路径",
+      "slug": "unique-paths",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 64,
+      "title": "最小路径和",
+      "slug": "minimum-path-sum",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 70,
+      "title": "爬楼梯",
+      "slug": "climbing-stairs",
+      "difficulty": "简单",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 72,
+      "title": "编辑距离",
+      "slug": "edit-distance",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 75,
+      "title": "颜色分类",
+      "slug": "sort-colors",
+      "difficulty": "中等",
+      "category": "双指针",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 76,
+      "title": "最小覆盖子串",
+      "slug": "minimum-window-substring",
+      "difficulty": "困难",
+      "category": "滑动窗口",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 78,
+      "title": "子集",
+      "slug": "subsets",
+      "difficulty": "中等",
+      "category": "回溯",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 79,
+      "title": "单词搜索",
+      "slug": "word-search",
+      "difficulty": "中等",
+      "category": "回溯",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 84,
+      "title": "柱状图中最大的矩形",
+      "slug": "largest-rectangle-in-histogram",
+      "difficulty": "困难",
+      "category": "栈",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 85,
+      "title": "最大矩形",
+      "slug": "maximal-rectangle",
+      "difficulty": "困难",
+      "category": "栈",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 94,
+      "title": "二叉树的中序遍历",
+      "slug": "binary-tree-inorder-traversal",
+      "difficulty": "简单",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 96,
+      "title": "不同的二叉搜索树",
+      "slug": "unique-binary-search-trees",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 98,
+      "title": "验证二叉搜索树",
+      "slug": "validate-binary-search-tree",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 101,
+      "title": "对称二叉树",
+      "slug": "symmetric-tree",
+      "difficulty": "简单",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 102,
+      "title": "二叉树的层序遍历",
+      "slug": "binary-tree-level-order-traversal",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 104,
+      "title": "二叉树的最大深度",
+      "slug": "maximum-depth-of-binary-tree",
+      "difficulty": "简单",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 105,
+      "title": "从前序与中序遍历序列构造二叉树",
+      "slug": "construct-binary-tree-from-preorder-and-inorder-traversal",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 114,
+      "title": "二叉树展开为链表",
+      "slug": "flatten-binary-tree-to-linked-list",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 121,
+      "title": "买卖股票的最佳时机",
+      "slug": "best-time-to-buy-and-sell-stock",
+      "difficulty": "简单",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 124,
+      "title": "二叉树中的最大路径和",
+      "slug": "binary-tree-maximum-path-sum",
+      "difficulty": "困难",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 128,
+      "title": "最长连续序列",
+      "slug": "longest-consecutive-sequence",
+      "difficulty": "中等",
+      "category": "哈希表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 136,
+      "title": "只出现一次的数字",
+      "slug": "single-number",
+      "difficulty": "简单",
+      "category": "位运算",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 139,
+      "title": "单词拆分",
+      "slug": "word-break",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 141,
+      "title": "环形链表",
+      "slug": "linked-list-cycle",
+      "difficulty": "简单",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 142,
+      "title": "环形链表 II",
+      "slug": "linked-list-cycle-ii",
+      "difficulty": "中等",
+      "category": "链表",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 146,
+      "title": "LRU 缓存",
+      "slug": "lru-cache",
+      "difficulty": "中等",
+      "category": "设计",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 148,
+      "title": "排序链表",
+      "slug": "sort-list",
+      "difficulty": "中等",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 152,
+      "title": "乘积最大子数组",
+      "slug": "maximum-product-subarray",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 155,
+      "title": "最小栈",
+      "slug": "min-stack",
+      "difficulty": "中等",
+      "category": "栈",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 160,
+      "title": "相交链表",
+      "slug": "intersection-of-two-linked-lists",
+      "difficulty": "简单",
+      "category": "链表",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 169,
+      "title": "多数元素",
+      "slug": "majority-element",
+      "difficulty": "简单",
+      "category": "数组",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 198,
+      "title": "打家劫舍",
+      "slug": "house-robber",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 200,
+      "title": "岛屿数量",
+      "slug": "number-of-islands",
+      "difficulty": "中等",
+      "category": "图论",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 206,
+      "title": "反转链表",
+      "slug": "reverse-linked-list",
+      "difficulty": "简单",
+      "category": "链表",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 207,
+      "title": "课程表",
+      "slug": "course-schedule",
+      "difficulty": "中等",
+      "category": "图论",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 208,
+      "title": "实现 Trie (前缀树)",
+      "slug": "implement-trie-prefix-tree",
+      "difficulty": "中等",
+      "category": "设计",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 215,
+      "title": "数组中的第K个最大元素",
+      "slug": "kth-largest-element-in-an-array",
+      "difficulty": "中等",
+      "category": "堆",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 221,
+      "title": "最大正方形",
+      "slug": "maximal-square",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 226,
+      "title": "翻转二叉树",
+      "slug": "invert-binary-tree",
+      "difficulty": "简单",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 234,
+      "title": "回文链表",
+      "slug": "palindrome-linked-list",
+      "difficulty": "简单",
+      "category": "链表",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 236,
+      "title": "二叉树的最近公共祖先",
+      "slug": "lowest-common-ancestor-of-a-binary-tree",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 238,
+      "title": "除自身以外数组的乘积",
+      "slug": "product-of-array-except-self",
+      "difficulty": "中等",
+      "category": "数组",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 239,
+      "title": "滑动窗口最大值",
+      "slug": "sliding-window-maximum",
+      "difficulty": "困难",
+      "category": "栈",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 240,
+      "title": "搜索二维矩阵 II",
+      "slug": "search-a-2d-matrix-ii",
+      "difficulty": "中等",
+      "category": "二分查找",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 279,
+      "title": "完全平方数",
+      "slug": "perfect-squares",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 283,
+      "title": "移动零",
+      "slug": "move-zeroes",
+      "difficulty": "简单",
+      "category": "双指针",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 287,
+      "title": "寻找重复数",
+      "slug": "find-the-duplicate-number",
+      "difficulty": "中等",
+      "category": "双指针",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 300,
+      "title": "最长递增子序列",
+      "slug": "longest-increasing-subsequence",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 301,
+      "title": "删除无效的括号",
+      "slug": "remove-invalid-parentheses",
+      "difficulty": "困难",
+      "category": "回溯",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 309,
+      "title": "最佳买卖股票时机含冷冻期",
+      "slug": "best-time-to-buy-and-sell-stock-with-cooldown",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 312,
+      "title": "戳气球",
+      "slug": "burst-balloons",
+      "difficulty": "困难",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 322,
+      "title": "零钱兑换",
+      "slug": "coin-change",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 337,
+      "title": "打家劫舍 III",
+      "slug": "house-robber-iii",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 338,
+      "title": "比特位计数",
+      "slug": "counting-bits",
+      "difficulty": "简单",
+      "category": "位运算",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 347,
+      "title": "前 K 个高频元素",
+      "slug": "top-k-frequent-elements",
+      "difficulty": "中等",
+      "category": "堆",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 394,
+      "title": "字符串解码",
+      "slug": "decode-string",
+      "difficulty": "中等",
+      "category": "栈",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 399,
+      "title": "除法求值",
+      "slug": "evaluate-division",
+      "difficulty": "中等",
+      "category": "图论",
+      "listIds": [
+        "hot100",
+        "top150"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 406,
+      "title": "根据身高重建队列",
+      "slug": "queue-reconstruction-by-height",
+      "difficulty": "中等",
+      "category": "贪心",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 416,
+      "title": "分割等和子集",
+      "slug": "partition-equal-subset-sum",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 437,
+      "title": "路径总和 III",
+      "slug": "path-sum-iii",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 438,
+      "title": "找到字符串中所有字母异位词",
+      "slug": "find-all-anagrams-in-a-string",
+      "difficulty": "中等",
+      "category": "滑动窗口",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 448,
+      "title": "找到所有数组中消失的数字",
+      "slug": "find-all-numbers-disappeared-in-an-array",
+      "difficulty": "简单",
+      "category": "数组",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 461,
+      "title": "汉明距离",
+      "slug": "hamming-distance",
+      "difficulty": "简单",
+      "category": "位运算",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 494,
+      "title": "目标和",
+      "slug": "target-sum",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 538,
+      "title": "把二叉搜索树转换为累加树",
+      "slug": "convert-bst-to-greater-tree",
+      "difficulty": "中等",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 543,
+      "title": "二叉树的直径",
+      "slug": "diameter-of-binary-tree",
+      "difficulty": "简单",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 560,
+      "title": "和为 K 的子数组",
+      "slug": "subarray-sum-equals-k",
+      "difficulty": "中等",
+      "category": "哈希表",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 581,
+      "title": "最短无序连续子数组",
+      "slug": "shortest-unsorted-continuous-subarray",
+      "difficulty": "中等",
+      "category": "数组",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 617,
+      "title": "合并二叉树",
+      "slug": "merge-two-binary-trees",
+      "difficulty": "简单",
+      "category": "二叉树",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 621,
+      "title": "任务调度器",
+      "slug": "task-scheduler",
+      "difficulty": "中等",
+      "category": "贪心",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 647,
+      "title": "回文子串",
+      "slug": "palindromic-substrings",
+      "difficulty": "中等",
+      "category": "动态规划",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 739,
+      "title": "每日温度",
+      "slug": "daily-temperatures",
+      "difficulty": "中等",
+      "category": "栈",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    },
+    {
+      "number": 763,
+      "title": "划分字母区间",
+      "slug": "partition-labels",
+      "difficulty": "中等",
+      "category": "贪心",
+      "listIds": [
+        "hot100"
+      ],
+      "rounds": [],
+      "notes": "",
+      "solutionViewed": false,
+      "mustRepeat": false,
+      "timeSpentSeconds": [],
+      "updatedAt": ""
+    }
+  ],
   "todayFocus": [
     {
-      "slug": "two-sum",
-      "title": "Two Sum",
-      "difficulty": "绠€鍗?",
-      "category": "Hash Table"
+      "slug": "longest-palindromic-substring",
+      "title": "最长回文子串",
+      "difficulty": "中等",
+      "category": "动态规划"
+    },
+    {
+      "slug": "maximum-subarray",
+      "title": "最大子数组和",
+      "difficulty": "中等",
+      "category": "动态规划"
+    },
+    {
+      "slug": "unique-paths",
+      "title": "不同路径",
+      "difficulty": "中等",
+      "category": "动态规划"
     }
   ],
   "reviewDue": [],
-  "heatmap": [
-    {
-      "date": "2026-06-11",
-      "count": 1
-    },
-    {
-      "date": "2026-06-12",
-      "count": 2
-    },
-    {
-      "date": "2026-06-13",
-      "count": 0
-    },
-    {
-      "date": "2026-06-14",
-      "count": 2
-    }
-  ],
-  "recentSubmissions": [
-    {
-      "title": "Two Sum",
-      "titleSlug": "two-sum",
-      "status": "Accepted",
-      "language": "TypeScript",
-      "submittedAt": "2026-06-14T08:20:00.000Z",
-      "submittedAtLabel": "2026-06-14",
-      "problemUrl": "https://leetcode.com/problems/two-sum/"
-    }
-  ],
+  "heatmap": [],
+  "recentSubmissions": [],
   "recentNotes": []
 }

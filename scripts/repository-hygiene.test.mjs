@@ -2,12 +2,29 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 
 const requiredFiles = ['LICENSE', 'CONTRIBUTING.md', 'SECURITY.md'];
+const removedDockerDeploymentFiles = [
+  '.dockerignore',
+  'docker-compose.yml',
+  'apps/web/Dockerfile',
+  'apps/api/Dockerfile',
+  'packages/database/Dockerfile',
+  'infra/caddy/Caddyfile',
+  'scripts/docker-preflight.sh',
+  'scripts/docker-preflight.test.sh',
+  'scripts/dockerfile.test.sh',
+];
 
 console.log('Running repository hygiene tests');
 
 for (const file of requiredFiles) {
   if (!existsSync(file)) {
     fail(`Expected repository file is missing: ${file}`);
+  }
+}
+
+for (const file of removedDockerDeploymentFiles) {
+  if (existsSync(file)) {
+    fail(`Docker self-hosting artifact should not be part of the default repository path: ${file}`);
   }
 }
 
@@ -29,6 +46,12 @@ if (packageLock.includes('npm.runtongqiuben.com')) {
   fail('package-lock.json must not reference a private npm registry mirror.');
 }
 
+for (const scriptName of ['ops:docker-preflight', 'ops:deploy']) {
+  if (scriptName in (packageJson.scripts ?? {})) {
+    fail(`package.json must not expose ${scriptName}; default deployment is Vercel-managed.`);
+  }
+}
+
 const envExample = readFileSync('.env.example', 'utf8');
 
 if (!/^ADMIN_EMAIL=owner@example\.com$/m.test(envExample)) {
@@ -45,6 +68,24 @@ if (/^[A-Z_]*(SECRET|TOKEN|PASSWORD|KEY|HASH)=scrypt:/m.test(envExample)) {
 
 if (/^[A-Z_]*EMAIL=[0-9]{7,}$/m.test(envExample)) {
   fail('.env.example contains a numeric account identifier where a placeholder email is expected.');
+}
+
+for (const removedVariable of ['DOMAIN', 'ACME_EMAIL']) {
+  if (new RegExp(`^${removedVariable}=`, 'm').test(envExample)) {
+    fail(`.env.example must not document ${removedVariable}; Caddy/Docker deployment has been removed.`);
+  }
+}
+
+for (const requiredVariable of [
+  'GITHUB_CONTENT_OWNER',
+  'GITHUB_CONTENT_REPO',
+  'GITHUB_CONTENT_BRANCH',
+  'GITHUB_CONTENT_TOKEN',
+  'REPOSITORY_PUBLISH_SECRET',
+]) {
+  if (!new RegExp(`^${requiredVariable}=`, 'm').test(envExample)) {
+    fail(`.env.example must document repository publishing variable ${requiredVariable}.`);
+  }
 }
 
 const trackedFiles = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
@@ -78,6 +119,10 @@ if (existsSync('.github/workflows/ci.yml')) {
     if (!ci.includes(command)) {
       fail(`CI workflow must run ${command}.`);
     }
+  }
+
+  if (ci.includes('docker compose')) {
+    fail('CI workflow must not validate Docker Compose after removing the Docker deployment path.');
   }
 }
 

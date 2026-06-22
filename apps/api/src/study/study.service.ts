@@ -29,12 +29,17 @@ interface LeetCodeSubmissionPayload {
 interface LeetCodeRecentSubmissionsResponse {
   data?: {
     recentSubmissionList?: LeetCodeSubmissionPayload[];
+    recentAcSubmissionList?: LeetCodeSubmissionPayload[];
   };
 }
 
 export interface StudySyncResult {
   imported: number;
   matchedProblems: number;
+  addedRounds: number;
+  historyBackfilled: number;
+  skipped: number;
+  error?: string;
 }
 
 const LEETCODE_GRAPHQL_URL = 'https://leetcode.com/graphql';
@@ -59,10 +64,7 @@ export class StudyService {
     const today = this.today();
     const reviewDue = buildReviewDue(problems, settings, today).slice(0, settings.dailyReview || 5);
     const reviewSlugs = new Set(reviewDue.map((item) => item.slug));
-    const todayFocus = problems
-      .filter((problem) => problem.rounds.length === 0 && !reviewSlugs.has(problem.slug))
-      .slice(0, settings.dailyNew || 3)
-      .map(toStudyTask);
+    const todayFocus = buildTodayFocus(problems, settings, reviewSlugs);
 
     return {
       settings,
@@ -93,11 +95,12 @@ export class StudyService {
   }
 
   async syncRecentSubmissions(): Promise<StudySyncResult> {
+    await this.ensureDefaultProblems();
     const settings = await this.repository.getSettings();
     const username = settings.leetcodeUsername.trim();
 
     if (!username) {
-      return { imported: 0, matchedProblems: 0 };
+      return { imported: 0, matchedProblems: 0, addedRounds: 0, historyBackfilled: 0, skipped: 0 };
     }
 
     const response = await this.fetcher(LEETCODE_GRAPHQL_URL, {
@@ -108,8 +111,15 @@ export class StudyService {
       },
       body: JSON.stringify({
         query: `
-          query recentSubmissions($username: String!, $limit: Int!) {
-            recentSubmissionList(username: $username, limit: $limit) {
+          query studySubmissions($username: String!, $recentLimit: Int!, $historyLimit: Int!) {
+            recentSubmissionList(username: $username, limit: $recentLimit) {
+              title
+              titleSlug
+              timestamp
+              statusDisplay
+              lang
+            }
+            recentAcSubmissionList(username: $username, limit: $historyLimit) {
               title
               titleSlug
               timestamp
@@ -120,40 +130,70 @@ export class StudyService {
         `,
         variables: {
           username,
-          limit: 20,
+          recentLimit: 50,
+          historyLimit: 300,
         },
       }),
     });
 
     if (!response.ok) {
-      return { imported: 0, matchedProblems: 0 };
+      return { imported: 0, matchedProblems: 0, addedRounds: 0, historyBackfilled: 0, skipped: 0, error: `LeetCode responded ${response.status}` };
     }
 
     const payload = (await response.json()) as LeetCodeRecentSubmissionsResponse;
+    const syncState = await this.repository.getSyncState();
+    const shouldBackfill = (
+      syncState.historyBackfilledUsername !== username
+      || syncState.historyBackfilledListId !== settings.activeListId
+    );
+    let historyBackfilled = 0;
+
+    if (shouldBackfill) {
+      const historicalAccepted = (payload.data?.recentAcSubmissionList ?? [])
+        .map((submission) => normalizeSubmission({ ...submission, statusDisplay: submission.statusDisplay ?? 'Accepted' }))
+        .filter((submission): submission is StudySubmission => submission !== null && submission.status === 'Accepted');
+      historyBackfilled = await this.backfillAcceptedHistory(historicalAccepted, settings.activeListId);
+      await this.repository.updateSyncState({
+        historyBackfilledAt: new Date().toISOString(),
+        historyBackfilledUsername: username,
+        historyBackfilledListId: settings.activeListId,
+      });
+    }
+
     const submissions = (payload.data?.recentSubmissionList ?? [])
       .map(normalizeSubmission)
       .filter((submission): submission is StudySubmission => submission !== null);
     const imported = await this.repository.upsertSubmissions(submissions);
-    let matchedProblems = 0;
+    let addedRounds = 0;
+    let skipped = 0;
 
     for (const submission of submissions) {
+      if (syncState.lastSyncedAt && submission.submittedAt <= syncState.lastSyncedAt) {
+        skipped += 1;
+        continue;
+      }
+
       if (submission.status !== 'Accepted') {
+        skipped += 1;
         continue;
       }
 
       const problem = await this.repository.findProblem(submission.titleSlug);
 
-      if (!problem || problem.rounds.includes(submission.submittedAtLabel)) {
+      if (!problem || !problem.listIds.includes(settings.activeListId) || problem.rounds.includes(submission.submittedAtLabel) || problem.rounds.length >= settings.roundCount) {
+        skipped += 1;
         continue;
       }
 
-      matchedProblems += 1;
+      addedRounds += 1;
       await this.repository.updateProblem(problem.slug, {
         rounds: [...problem.rounds, submission.submittedAtLabel],
       });
     }
 
-    return { imported, matchedProblems };
+    await this.repository.updateSyncState({ lastSyncedAt: new Date().toISOString() });
+
+    return { imported, matchedProblems: addedRounds + historyBackfilled, addedRounds, historyBackfilled, skipped };
   }
 
   async createProblemDraft(slug: string): Promise<ContentRecord> {
@@ -204,6 +244,25 @@ export class StudyService {
         });
       }
     }
+  }
+
+  private async backfillAcceptedHistory(submissions: StudySubmission[], activeListId: StudySettings['activeListId']): Promise<number> {
+    let imported = 0;
+
+    for (const submission of submissions) {
+      const problem = await this.repository.findProblem(submission.titleSlug);
+
+      if (!problem || !problem.listIds.includes(activeListId) || problem.rounds.length > 0) {
+        continue;
+      }
+
+      imported += 1;
+      await this.repository.updateProblem(problem.slug, {
+        rounds: [submission.submittedAtLabel],
+      });
+    }
+
+    return imported;
   }
 
   private today(): Date {
@@ -273,9 +332,40 @@ function buildReviewDue(problems: StudyProblem[], settings: StudySettings, today
         nextRound: `R${problem.rounds.length + 1}`,
         dueDate: toDateLabel(dueDate),
         overdueDays: Math.max(0, daysBetween(dueDate, today)),
+        forcedByMustRepeat: today < dueDate && problem.mustRepeat,
       }];
     })
     .sort((a, b) => b.overdueDays - a.overdueDays || a.title.localeCompare(b.title, 'zh-CN'));
+}
+
+function buildTodayFocus(problems: StudyProblem[], settings: StudySettings, reviewSlugs: Set<string>): StudyTask[] {
+  const todos = problems.filter((problem) => problem.rounds.length === 0 && !reviewSlugs.has(problem.slug));
+  const desiredCount = settings.dailyNew || 3;
+
+  if (todos.length <= desiredCount) {
+    return todos.map(toStudyTask);
+  }
+
+  const categoryProgress = buildCategoryProgress(problems, settings);
+  const categoryRate = new Map(categoryProgress.map((category) => [category.name, category.rate]));
+  const preferredCategory = [...new Set(todos.map((problem) => problem.category))]
+    .sort((a, b) => (categoryRate.get(a) ?? 0) - (categoryRate.get(b) ?? 0) || a.localeCompare(b, 'zh-CN'))[0];
+  const difficultyOrder: Record<StudyProblem['difficulty'], number> = {
+    简单: 0,
+    中等: 1,
+    困难: 2,
+  };
+  const selected = todos
+    .filter((problem) => problem.category === preferredCategory)
+    .sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty] || a.number - b.number)
+    .slice(0, desiredCount);
+
+  if (selected.length < desiredCount) {
+    const selectedSlugs = new Set(selected.map((problem) => problem.slug));
+    selected.push(...todos.filter((problem) => !selectedSlugs.has(problem.slug)).slice(0, desiredCount - selected.length));
+  }
+
+  return selected.map(toStudyTask);
 }
 
 function buildHeatmap(problems: StudyProblem[], today: Date): StudyHeatmapDay[] {

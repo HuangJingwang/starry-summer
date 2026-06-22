@@ -41,5 +41,7 @@ describe('admin Chinese localization', () => {
     expect(source).toContain('usePathname');
     expect(source).toContain('aria-current');
     expect(source).toContain('admin-command-bar');
+    expect(source).toContain("import { ThemeToggle } from './ThemeToggle';");
+    expect(source).toContain('<ThemeToggle />');
   });
 });

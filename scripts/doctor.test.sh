@@ -15,16 +15,19 @@ write_valid_env() {
 
   cat >"$env_file" <<'ENV'
 NODE_ENV=production
-DOMAIN=blog.aster.test
 PUBLIC_SITE_URL=https://blog.aster.test
-ACME_EMAIL=admin@aster.test
 ADMIN_EMAIL=owner@aster.test
-ADMIN_PASSWORD_HASH=scrypt:32768:8:1:abcdef0123456789:abcdef0123456789abcdef0123456789
+ADMIN_PASSWORD_HASH=scrypt:test-placeholder
 SESSION_SECRET=abcdefghijklmnopqrstuvwxyz123456
 INTERACTION_HASH_SECRET=123456abcdefghijklmnopqrstuvwxyz
 GITHUB_CLIENT_ID=github-oauth-client-id
 GITHUB_CLIENT_SECRET=github-oauth-client-secret
 GITHUB_CALLBACK_URL=https://blog.aster.test/api/auth/github/callback
+GITHUB_CONTENT_OWNER=aster
+GITHUB_CONTENT_REPO=starry-summer
+GITHUB_CONTENT_BRANCH=main
+GITHUB_CONTENT_TOKEN=github_pat_example
+REPOSITORY_PUBLISH_SECRET=repository-publish-secret-123456
 ENV
 }
 
@@ -109,6 +112,38 @@ fi
 if ! grep -q 'GITHUB_CALLBACK_URL must equal PUBLIC_SITE_URL plus /api/auth/github/callback.' "$tmp_dir/wrong-path-callback.log"; then
   echo "Deployment doctor did not explain the wrong GitHub callback path."
   cat "$tmp_dir/wrong-path-callback.log"
+  exit 1
+fi
+
+missing_repo_token_env="$tmp_dir/missing-repo-token.env"
+write_valid_env "$missing_repo_token_env"
+remove_env_key "GITHUB_CONTENT_TOKEN" "$missing_repo_token_env"
+
+if bash "$repo_root/scripts/doctor.sh" "$missing_repo_token_env" >"$tmp_dir/missing-repo-token.log" 2>&1; then
+  echo "Deployment doctor accepted a missing GitHub content token."
+  cat "$tmp_dir/missing-repo-token.log"
+  exit 1
+fi
+
+if ! grep -q 'GITHUB_CONTENT_TOKEN is required for repository publishing.' "$tmp_dir/missing-repo-token.log"; then
+  echo "Deployment doctor did not explain the missing GitHub content token."
+  cat "$tmp_dir/missing-repo-token.log"
+  exit 1
+fi
+
+placeholder_publish_secret_env="$tmp_dir/placeholder-publish-secret.env"
+write_valid_env "$placeholder_publish_secret_env"
+replace_env_key "REPOSITORY_PUBLISH_SECRET" "replace-with-random-secret" "$placeholder_publish_secret_env"
+
+if bash "$repo_root/scripts/doctor.sh" "$placeholder_publish_secret_env" >"$tmp_dir/placeholder-publish-secret.log" 2>&1; then
+  echo "Deployment doctor accepted a placeholder repository publish secret."
+  cat "$tmp_dir/placeholder-publish-secret.log"
+  exit 1
+fi
+
+if ! grep -q 'REPOSITORY_PUBLISH_SECRET must be at least 32 characters and not a placeholder.' "$tmp_dir/placeholder-publish-secret.log"; then
+  echo "Deployment doctor did not explain the placeholder repository publish secret."
+  cat "$tmp_dir/placeholder-publish-secret.log"
   exit 1
 fi
 

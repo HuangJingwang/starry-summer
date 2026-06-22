@@ -20,14 +20,14 @@ describe('public navigation helpers', () => {
   test('folds notes into the articles navigation item', () => {
     expect(buildPublicNavigation(['posts', 'notes', 'moments'])).toEqual([
       { href: '/posts', label: '文章' },
-      { href: '/moments', label: '日常' },
+      { href: '/moments', label: '推荐分享' },
     ]);
   });
 
   test('hides search about series and guestbook from the public link navigation', () => {
     expect(buildPublicNavigation(['posts', 'moments', 'projects', 'series', 'guestbook', 'search', 'about'])).toEqual([
       { href: '/posts', label: '文章' },
-      { href: '/moments', label: '日常' },
+      { href: '/moments', label: '推荐分享' },
       { href: '/projects', label: '项目' },
     ]);
   });

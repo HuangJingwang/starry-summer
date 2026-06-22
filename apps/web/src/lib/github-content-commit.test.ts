@@ -92,4 +92,60 @@ describe('github content commit client', () => {
       'https://api.github.com/repos/aster/starry-summer/git/refs/heads/main',
     ]);
   });
+
+  test('creates base64 blobs for binary repository files', async () => {
+    const responses = [
+      { object: { sha: 'base-commit' } },
+      { sha: 'base-commit', tree: { sha: 'base-tree' } },
+      { sha: 'image-blob' },
+      { sha: 'index-blob' },
+      { sha: 'tree-1' },
+      { sha: 'commit-1' },
+      { ok: true },
+    ];
+    const blobBodies: unknown[] = [];
+    const fetcher = vi.fn(async (url, init) => {
+      const next = responses.shift();
+
+      if (!next) {
+        throw new Error('Unexpected GitHub request');
+      }
+
+      if (String(url).endsWith('/git/blobs')) {
+        blobBodies.push(JSON.parse(String(init.body)));
+      }
+
+      return Response.json(next);
+    });
+
+    await createGitHubContentCommit(
+      {
+        message: 'assets: upload cover.png',
+        files: [
+          {
+            path: 'apps/web/public/images/uploads/cover.png',
+            content: 'aGVsbG8=',
+            encoding: 'base64',
+          },
+          {
+            path: 'apps/web/content/assets.json',
+            content: '[]\n',
+          },
+        ],
+      },
+      config,
+      fetcher,
+    );
+
+    expect(blobBodies).toEqual([
+      {
+        content: 'aGVsbG8=',
+        encoding: 'base64',
+      },
+      {
+        content: '[]\n',
+        encoding: 'utf-8',
+      },
+    ]);
+  });
 });

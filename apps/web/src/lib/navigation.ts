@@ -6,7 +6,7 @@ export interface NavigationItem {
 
 const navigationByKey: Record<string, NavigationItem> = {
   posts: { href: '/posts', label: '文章' },
-  moments: { href: '/moments', label: '日常' },
+  moments: { href: '/moments', label: '推荐分享' },
   projects: { href: '/projects', label: '项目' },
   series: { href: '/series', label: '专题' },
   categories: { href: '/categories', label: '分类' },

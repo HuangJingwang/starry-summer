@@ -74,7 +74,7 @@ else
   exit 1
 fi
 
-if ! grep -q "Wrote Docker environment file: $env_file" "$tmp_dir/overwrite.log"; then
+if ! grep -q "Wrote environment file: $env_file" "$tmp_dir/overwrite.log"; then
   echo "Environment initializer did not report the written file."
   cat "$tmp_dir/overwrite.log"
   exit 1

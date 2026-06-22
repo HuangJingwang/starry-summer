@@ -1,31 +1,26 @@
-import { ContentCard } from '@/components/ContentCard';
+import { RecommendedShareGrid } from '@/components/RecommendedShareGrid';
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
-import { loadSiteContent } from '@/lib/public-content';
+import { recommendedShares } from '@/lib/recommended-shares';
 
 export function generateMetadata() {
   return loadPublicPageMetadata({
-    title: '日常',
-    description: '日常片段、近况和即时记录。',
+    title: '推荐分享',
+    description: '收藏常用工具、灵感网站、组件库和学习资源。',
     path: '/moments',
   });
 }
 
-export default async function MomentsPage() {
-  const moments = await loadSiteContent('moment');
-
+export default function MomentsPage() {
   return (
     <SiteShell>
-      <main className="page-main">
-        <div className="page-title">
-          <p className="eyebrow">日常</p>
-          <h1>日常</h1>
+      <main className="page-main share-page">
+        <div className="share-page__heading">
+          <p className="eyebrow">Recommended Shares</p>
+          <h1>推荐分享</h1>
+          <p>收藏一些真的会反复打开的工具、灵感网站、组件库和学习资料。</p>
         </div>
-        <div className="content-grid">
-          {moments.map((item) => (
-            <ContentCard key={item.id} item={item} />
-          ))}
-        </div>
+        <RecommendedShareGrid resources={recommendedShares} />
       </main>
     </SiteShell>
   );

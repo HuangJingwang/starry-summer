@@ -89,6 +89,7 @@ describe('global styles', () => {
     expect(adminLayoutBlock).toContain('var(--cyber-bg)');
     expect(css).toContain('.admin-layout::before');
     expect(css).toContain('.admin-command-bar');
+    expect(css).toContain('.admin-command-bar__actions .theme-toggle');
     expect(css).toContain('.admin-primary-nav a[aria-current="page"]');
     expect(css).toContain('.admin-stat-card');
     expect(css).toContain('.admin-workflow-grid');
@@ -154,6 +155,47 @@ describe('global styles', () => {
     expect(dayActiveTabBlock).toContain('border-color: rgba(8, 116, 127, 0.28);');
   });
 
+  test('styles the posts archive as a YYsuni-inspired dark grouped timeline', () => {
+    const css = readGlobalStyles();
+    const archiveBlock = readStyleBlock(css, '.posts-archive');
+    const groupBlock = readStyleBlock(css, '.posts-archive-group');
+    const headingBlock = readStyleBlock(css, '.posts-archive-group__heading');
+    const itemBlock = readStyleBlock(css, '.posts-archive-item');
+    const dotBlock = readStyleBlock(css, '.posts-archive-item__dot');
+    const titleHoverBlock = readStyleBlock(css, '.posts-archive-item:hover .posts-archive-item__title');
+    const coverPreviewBlock = readStyleBlock(css, '.posts-archive-item__cover-preview');
+    const coverPreviewHoverBlock = readStyleBlock(css, '.posts-archive-item:hover .posts-archive-item__cover-preview');
+    const dayGroupBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.posts-archive-group\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
+      '';
+    const dayItemHoverBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.posts-archive-item:hover\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+
+    expect(archiveBlock).toContain('max-width: 840px;');
+    expect(archiveBlock).toContain('gap: 24px;');
+    expect(groupBlock).toContain('background: rgba(4, 6, 14, 0.54);');
+    expect(groupBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(groupBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.18);');
+    expect(groupBlock).not.toContain('background: #fff;');
+    expect(headingBlock).toContain('justify-content: space-between;');
+    expect(itemBlock).toContain('grid-template-columns: 52px 18px minmax(0, 1fr) auto auto;');
+    expect(itemBlock).toContain('color: rgba(226, 232, 240, 0.86);');
+    expect(itemBlock).not.toContain('background: #fff;');
+    expect(dotBlock).toContain('background: rgba(148, 163, 184, 0.64);');
+    expect(dotBlock).toContain('height: 5px;');
+    expect(titleHoverBlock).toContain('color: var(--cyber-cyan);');
+    expect(titleHoverBlock).toContain('transform: translateX(8px);');
+    expect(coverPreviewBlock).toContain('height: 128px;');
+    expect(coverPreviewBlock).toContain('opacity: 0;');
+    expect(coverPreviewBlock).toContain('pointer-events: none;');
+    expect(coverPreviewHoverBlock).toContain('opacity: 1;');
+    expect(coverPreviewHoverBlock).toContain('transform: translate3d(0, 0, 0) scale(1);');
+    expect(dayGroupBlock).toContain('background: var(--summer-panel-sheen), var(--summer-panel);');
+    expect(dayGroupBlock).toContain('color: var(--summer-ink);');
+    expect(dayItemHoverBlock).toContain('background: rgba(255, 213, 105, 0.16);');
+  });
+
   test('uses the shared quiet canvas meteor layer on public pages instead of the page beam sweep', () => {
     const css = readGlobalStyles();
     const leetcodeBeamBlock = css.match(/\.study-archive-page::after\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -169,6 +211,104 @@ describe('global styles', () => {
     expect(leetcodeBeamBlock).toContain('animation: none;');
     expect(leetcodeBeamBlock).toContain('background: transparent;');
     expect(leetcodeBeamBlock).toContain('filter: none;');
+  });
+
+  test('keeps the LeetCode archive in the home glass dashboard style across day and night themes', () => {
+    const css = readGlobalStyles();
+    const studyPageBlock = readStyleBlock(css, '.study-archive-page');
+    const metricCardBlock = readStyleBlock(css, '.study-metric-card');
+    const metricNumberBlock = readStyleBlock(css, '.study-metric-card strong');
+    const taskCardBlock = readStyleBlock(css, '.study-task-card');
+    const contentSectionBlock = readStyleBlock(css, '.study-archive-page .content-section');
+    const heatmapBlock = readStyleBlock(css, '.study-heatmap');
+    const heatmapLevelFourBlock =
+      css.match(/\.study-heatmap span\[data-level="4"\]\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const noteGridBlock = readStyleBlock(css, '.study-note-grid');
+
+    expect(css).toContain('.study-metric-grid');
+    expect(css).toContain('.study-task-grid');
+    expect(css).toContain('.study-note-grid');
+    expect(css).toContain('.study-difficulty');
+    expect(css).toContain(':root[data-theme=\'summer-day\'] .study-archive-page .section-heading h2');
+    expect(studyPageBlock).toContain('--study-accent: var(--cyber-cyan);');
+    expect(studyPageBlock).toContain('--study-glass-blur: blur(18px) saturate(1.08);');
+    expect(studyPageBlock).toContain('linear-gradient(135deg, rgba(34, 211, 238, 0.07), transparent 48%)');
+    expect(studyPageBlock).toContain('rgba(4, 6, 14, 0.54)');
+    expect(studyPageBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.22)');
+    expect(studyPageBlock).toContain('background: var(--public-home-background);');
+    expect(studyPageBlock).toContain('--study-panel:');
+    expect(metricCardBlock).toContain('background: var(--study-panel-strong);');
+    expect(metricCardBlock).toContain('box-shadow: var(--study-shadow);');
+    expect(metricCardBlock).not.toContain('background: #fff;');
+    expect(metricNumberBlock).toContain('font-variant-numeric: tabular-nums;');
+    expect(metricNumberBlock).toContain('font-size: clamp(2.35rem, 5vw, 4.25rem);');
+    expect(taskCardBlock).toContain('background: var(--study-panel-soft);');
+    expect(taskCardBlock).not.toContain('background: #fff;');
+    expect(contentSectionBlock).toContain('background: var(--study-panel);');
+    expect(contentSectionBlock).toContain('border: 1px solid var(--study-line);');
+    expect(contentSectionBlock).toContain('box-shadow: var(--study-shadow);');
+    expect(contentSectionBlock).not.toContain('background: #fff;');
+    expect(heatmapBlock).toContain('grid-auto-flow: column;');
+    expect(heatmapBlock).toContain('grid-template-rows: repeat(7, 18px);');
+    expect(heatmapLevelFourBlock).toContain('rgba(var(--study-accent-rgb), 0.84)');
+    expect(noteGridBlock).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
+    expect(readStylesheet('src/app/styles/responsive.css')).toContain('.study-note-grid,');
+    expect(heatmapLevelFourBlock).not.toContain('rgba(251, 191, 36, 0.56)');
+  });
+
+  test('lets the LeetCode study module switch between refined light and dark themes', () => {
+    const css = readGlobalStyles();
+    const nightBodyBlock =
+      css.match(/:root\[data-theme='summer-night'\] body:has\(\.study-archive-page\),\nbody:has\(\.study-archive-page\)\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayPageBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.study-archive-page\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayBodyBlock =
+      css.match(/:root\[data-theme='summer-day'\] body:has\(\.study-archive-page\)\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayCardBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.study-metric-card,[\s\S]*?\.leetcode-item\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayContentCardBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.study-archive-page \.content-card\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+
+    expect(css).toContain(":root[data-theme='summer-night'] .study-archive-page");
+    expect(css).toContain(":root[data-theme='summer-day'] body:has(.study-archive-page)");
+    expect(css).toContain(":root[data-theme='summer-night'] body:has(.study-archive-page)");
+    expect(nightBodyBlock).toContain('background: var(--public-home-background);');
+    expect(dayBodyBlock).toContain('linear-gradient(135deg, #cfe8f2 0%, #ddf3f4 52%, #edf8e8 100%)');
+    expect(css).not.toContain(":root[data-theme='summer-day'] body:has(.study-archive-page) {\n  background: #02040b;");
+    expect(dayPageBlock).toContain('--study-ink: var(--summer-ink);');
+    expect(dayPageBlock).toContain('--study-muted: #7b888e;');
+    expect(dayPageBlock).toContain('--study-panel: var(--summer-panel-sheen), var(--summer-panel);');
+    expect(dayPageBlock).toContain('background: radial-gradient(circle at 48% 0%, rgba(255, 255, 255, 0.72), transparent 22%),');
+    expect(dayPageBlock).not.toContain('linear-gradient(180deg, #f8fbff');
+    expect(dayPageBlock).toContain('color: var(--study-ink);');
+    expect(dayCardBlock).toContain('background: var(--study-panel-strong);');
+    expect(dayCardBlock).toContain('backdrop-filter: var(--study-glass-blur);');
+    expect(dayContentCardBlock).toContain('background: var(--study-panel);');
+    expect(dayContentCardBlock).toContain('color: var(--study-ink);');
+  });
+
+  test('keeps the LeetCode module visually aligned with public content pages', () => {
+    const css = readGlobalStyles();
+    const pageTitleBlock = readStyleBlock(css, '.study-archive-page .page-title');
+    const contentSectionBlock = readStyleBlock(css, '.study-archive-page .content-section');
+    const sectionHeadingBlock = readStyleBlock(css, '.study-archive-page .section-heading h2');
+    const studyMetricBlock = readStyleBlock(css, '.study-metric-card');
+    const taskCardBlock = readStyleBlock(css, '.study-task-card');
+
+    expect(css).not.toContain('.study-hero__copy h1');
+    expect(css).not.toContain('.study-progress-orb');
+    expect(pageTitleBlock).toContain('margin: 0 auto 28px;');
+    expect(contentSectionBlock).toContain('border-radius: 32px;');
+    expect(contentSectionBlock).toContain('backdrop-filter: var(--study-glass-blur);');
+    expect(sectionHeadingBlock).toContain('font-size: clamp(1.35rem, 2.2vw, 2.1rem);');
+    expect(studyMetricBlock).toContain('border-radius: 32px;');
+    expect(taskCardBlock).toContain('min-height: 76px;');
+    expect(taskCardBlock).toContain('padding: 16px;');
   });
 
   test('keeps the home latest article card below the desktop navigation card', () => {
@@ -255,6 +395,10 @@ describe('global styles', () => {
     expect(css).not.toContain('grid-area: pulse;');
     expect(latestCardBlock).toContain('border-radius: 32px;');
     expect(latestCardBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(latestCardBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.26);');
+    expect(latestCardBlock).toContain('rgba(4, 6, 14, 0.52)');
+    expect(latestCardBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.22)');
+    expect(latestCardBlock).not.toContain('border: 1px solid #ffffff;');
     expect(latestCardBlock).toContain('align-self: stretch;');
     expect(latestCardBlock).toContain('justify-self: stretch;');
     expect(latestCardBlock).toContain('width: 100%;');
@@ -266,7 +410,10 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__intro-card");
     expect(css).toContain('.portfolio-hero__like-card');
     expect(css).toContain('.portfolio-hero__like-row');
-    expect(likeCardBlock).toContain('border: 1px solid rgba(255, 255, 255, 0.2);');
+    expect(likeCardBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.26);');
+    expect(likeCardBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(likeCardBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.22)');
+    expect(likeCardBlock).not.toContain('border: 1px solid #ffffff;');
     expect(likeCardBlock).toContain('border-radius: 999px;');
     expect(likeCardBlock).toContain('height: 48px;');
     expect(likeCardBlock).toContain('width: 48px;');
@@ -400,9 +547,13 @@ describe('global styles', () => {
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHOOTING_STAR_INTERVAL_FRAMES = 520');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % SHOOTING_STAR_INTERVAL_FRAMES === 0');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('MAX_SHIP_SCREEN_RATIO = 0.045');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SMALL_SHIP_WEIGHT = 3');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('FLAGSHIP_WEIGHT = 1');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('selectFleetEncounterVariant');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeSmallStarship');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeStarship');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && now >= nextShipAt)');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && !activeSmallStarship && now >= nextShipAt)');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('fleet.forEach');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('FLEET_SIZE = 2');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('createExplorationFleet');
@@ -587,14 +738,15 @@ describe('global styles', () => {
     expect(css).toContain('.site-header');
     expect(css).toContain('.site-nav-card');
     expect(css).toContain('.site-nav-card__brand');
+    expect(css).toContain('.site-nav-card__tools');
     expect(css).toContain('.brand-avatar');
     expect(css).toContain('.site-nav__items');
     expect(css).toContain('.site-nav');
     expect(siteHeaderBlock).toContain('display: flex;');
-    expect(siteHeaderBlock).toContain('width: 340px;');
+    expect(siteHeaderBlock).toContain('width: 388px;');
     expect(siteHeaderBlock).toContain('border-radius: 24px;');
     expect(siteHeaderBlock).toContain('min-height: 64px;');
-    expect(siteHeaderBlock).toContain('gap: 24px;');
+    expect(siteHeaderBlock).toContain('gap: 14px;');
     expect(siteHeaderBlock).toContain('padding: 12px;');
     expect(siteHeaderBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(css).toContain('.site-nav__icon');
@@ -675,6 +827,16 @@ describe('global styles', () => {
     const dayHomeNavThemeBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__nav-theme\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
+    const dayHomePanelBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__intro-card,[\s\S]*?:root\[data-theme='summer-day'\] \.home-photo-album__viewport\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const dayHomeLatestBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHomeLikeBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__like-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
     const dayCalendarBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
@@ -697,6 +859,11 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 220px 138px;');
     expect(homeHeroContentBlock).toContain('gap: 22px 0;');
     expect(homeIntroBlock).toContain('translate: 0 -24px;');
+    expect(homeIntroBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(homeIntroBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.26);');
+    expect(homeIntroBlock).toContain('rgba(4, 6, 14, 0.54)');
+    expect(homeIntroBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.22)');
+    expect(homeIntroBlock).not.toContain('border: 1px solid #ffffff;');
     expect(css).toContain('translate: var(--portfolio-left-stack-offset) 0;');
     expect(homeNavBlock).toContain('display: grid;');
     expect(homeNavBlock).toContain('gap: 0;');
@@ -712,6 +879,15 @@ describe('global styles', () => {
     expect(dayHomeNavBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
     expect(dayHomeNavBlock).toContain('0 40px 50px -32px rgba(0, 0, 0, 0.05)');
     expect(dayHomeNavBlock).not.toContain('rgba(4, 6, 14, 0.6)');
+    expect(dayHomePanelBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(dayHomePanelBlock).toContain('border-color: rgba(255, 255, 255, 0.86);');
+    expect(dayHomePanelBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
+    expect(dayHomeLatestBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(dayHomeLatestBlock).toContain('border-color: rgba(255, 255, 255, 0.86);');
+    expect(dayHomeLatestBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
+    expect(dayHomeLikeBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(dayHomeLikeBlock).toContain('border-color: rgba(255, 255, 255, 0.86);');
+    expect(dayHomeLikeBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
     expect(dayHomeNavLinkBlock).toContain('color: rgba(91, 66, 63, 0.68);');
     expect(dayHomeNavActiveBlock).toContain('linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%)');
     expect(dayHomeNavActiveBlock).toContain('color: var(--summer-ink);');
@@ -770,7 +946,7 @@ describe('global styles', () => {
     expect(dayCalendarBlock).toContain('backdrop-filter: blur(4px);');
     expect(dayCalendarBlock).toContain('border-radius: 40px;');
     expect(dayCalendarBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
-    expect(dayCalendarBlock).toContain('min-height: 286px;');
+    expect(dayCalendarBlock).toContain('min-height: 288px;');
     expect(dayCalendarBlock).toContain('padding: 24px;');
     expect(dayCalendarBlock).toContain('justify-self: start;');
     expect(dayCalendarBlock).toContain('width: 350px;');
@@ -982,15 +1158,55 @@ describe('global styles', () => {
       responsiveCss.match(/\.portfolio-hero__card-nav\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileHomeNavCardBlock =
       responsiveCss.match(/\.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileNavBrandTextBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-brand span\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileNavKickerBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-kicker\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileNavLinksBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-links\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileNavLinkBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-links a\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileNavFooterBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-footer\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileNavFooterTextBlock =
+      responsiveCss.match(/\.portfolio-hero__nav-footer span\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileHeroContentBlock =
       responsiveCss.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLeftStackBlock =
+      responsiveCss.match(/\.portfolio-hero__left-stack\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileCenterStackBlock =
+      responsiveCss.match(/\.portfolio-hero__center-stack\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileLatestCardBlock =
       responsiveCss.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLatestCardLinkBlock =
+      responsiveCss.match(/\.portfolio-hero__latest-card a\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLatestCoverBlock =
+      responsiveCss.match(/\.portfolio-hero__latest-card img,[\s\S]*?\.portfolio-hero__latest-cover\s*{(?<body>[\s\S]*?)\n  }/)
+        ?.groups?.body ?? '';
     const mobileIntroCardBlock =
       [...responsiveCss.matchAll(/\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)?.groups
         ?.body ?? '';
     const mobileActionsBlock =
       responsiveCss.match(/\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileSkyCardBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)?.groups
+        ?.body ?? '';
+    const mobileHiddenClockCalendarBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__clock-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
+        ?.groups?.body ?? '';
+    const mobileHiddenSkyClockCalendarBlock =
+      [...responsiveCss.matchAll(/\.portfolio-hero__sky-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
+        ?.groups?.body ?? '';
+    const mobileBackToTopBlock =
+      responsiveCss.match(/\.mobile-back-to-top\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileBackToTopVisibleBlock =
+      responsiveCss.match(/\.mobile-back-to-top\[data-visible='true'\]\s*{(?<body>[\s\S]*?)\n  }/)?.groups
+        ?.body ?? '';
+    const mobileBackToTopIconBlock =
+      responsiveCss.match(/\.mobile-back-to-top__icon\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const dayMobileBackToTopBlock =
+      responsiveCss.match(/:root\[data-theme='summer-day'\] \.mobile-back-to-top\s*{(?<body>[\s\S]*?)\n  }/)
+        ?.groups?.body ?? '';
     const mobileLikeRowBlock =
       responsiveCss.match(/\.portfolio-hero__like-row\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     expect(responsiveCss).toContain('.portfolio-hero__card-nav');
@@ -1000,22 +1216,76 @@ describe('global styles', () => {
     expect(mobileHeroContentBlock).toContain('grid-template-areas:');
     expect(mobileHeroContentBlock).toContain('"nav"');
     expect(mobileHeroContentBlock).toContain('"intro"');
+    expect(mobileHeroContentBlock).toContain('"latest"');
+    expect(mobileHeroContentBlock).toContain('"actions"');
+    expect(mobileHeroContentBlock).toMatch(/"intro"\s*"latest"\s*"actions"/);
+    expect(mobileHeroContentBlock).not.toContain('"sky"');
+    expect(mobileHeroContentBlock).not.toContain('"clock"');
+    expect(mobileHeroContentBlock).not.toContain('"calendar"');
+    expect(mobileLeftStackBlock).toContain('display: contents;');
+    expect(mobileCenterStackBlock).toContain('display: contents;');
     expect(mobileHomeNavBlock).toContain('max-width: 100%;');
-    expect(mobileHomeNavBlock).toContain('grid-area: auto;');
-    expect(mobileHomeNavBlock).toContain('width: 100%;');
-    expect(mobileHomeNavCardBlock).toContain('border-radius: 24px;');
-    expect(mobileHomeNavCardBlock).toContain('min-height: auto;');
-    expect(mobileIntroCardBlock).toContain('grid-area: auto;');
+    expect(mobileHomeNavBlock).toContain('grid-area: nav;');
+    expect(mobileHomeNavBlock).toContain('justify-self: center;');
+    expect(mobileHomeNavBlock).toContain('translate: none;');
+    expect(mobileHomeNavBlock).toContain('width: min(340px, 100%);');
+    expect(mobileHomeNavCardBlock).toContain('align-items: center;');
+    expect(mobileHomeNavCardBlock).toContain('border-radius: 999px;');
+    expect(mobileHomeNavCardBlock).toContain('display: flex;');
+    expect(mobileHomeNavCardBlock).toContain('height: 64px;');
+    expect(mobileHomeNavCardBlock).toContain('padding: 8px;');
+    expect(mobileNavBrandTextBlock).toContain('display: none;');
+    expect(mobileNavKickerBlock).toContain('display: none;');
+    expect(mobileNavLinksBlock).toContain('display: flex;');
+    expect(mobileNavLinksBlock).toContain('gap: 2px;');
+    expect(mobileNavLinkBlock).toContain('font-size: 0;');
+    expect(mobileNavLinkBlock).toContain('height: 44px;');
+    expect(mobileNavLinkBlock).toContain('width: 44px;');
+    expect(mobileNavFooterBlock).toContain('border-top: 0;');
+    expect(mobileNavFooterBlock).toContain('margin-left: auto;');
+    expect(mobileNavFooterTextBlock).toContain('display: none;');
+    expect(mobileIntroCardBlock).toContain('grid-area: intro;');
     expect(mobileIntroCardBlock).toContain('translate: none;');
-    expect(mobileActionsBlock).toContain('grid-area: auto;');
+    expect(mobileActionsBlock).toContain('grid-area: actions;');
     expect(mobileActionsBlock).toContain('margin-top: 0;');
-    expect(mobileLatestCardBlock).toContain('grid-area: auto;');
+    expect(mobileLatestCardBlock).toContain('grid-area: latest;');
+    expect(mobileLatestCardBlock).toContain('justify-self: center;');
     expect(mobileLatestCardBlock).toContain('margin-right: 0;');
+    expect(mobileLatestCardBlock).toContain('padding: 12px 14px;');
+    expect(mobileLatestCardBlock).toContain('translate: none;');
+    expect(mobileLatestCardBlock).toContain('width: min(340px, 100%);');
+    expect(mobileLatestCardLinkBlock).toContain('grid-template-columns: 44px minmax(0, 1fr);');
+    expect(mobileLatestCoverBlock).toContain('width: 44px;');
+    expect(mobileSkyCardBlock).not.toContain('grid-area: sky;');
+    expect(mobileHiddenSkyClockCalendarBlock).toContain('display: none;');
+    expect(mobileHiddenClockCalendarBlock).toContain('display: none;');
+    expect(mobileBackToTopBlock).toContain('display: inline-flex;');
+    expect(mobileBackToTopBlock).toContain('position: fixed;');
+    expect(mobileBackToTopBlock).toContain('right: 18px;');
+    expect(mobileBackToTopBlock).toContain('bottom: 18px;');
+    expect(mobileBackToTopBlock).toContain('height: 44px;');
+    expect(mobileBackToTopBlock).toContain('width: 44px;');
+    expect(mobileBackToTopBlock).toContain('transform: translate3d(0, 14px, 0) scale(0.92);');
+    expect(mobileBackToTopBlock).toContain('opacity: 0;');
+    expect(mobileBackToTopBlock).toContain('visibility: hidden;');
+    expect(mobileBackToTopBlock).toContain('transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;');
+    expect(mobileBackToTopVisibleBlock).toContain('opacity: 1;');
+    expect(mobileBackToTopVisibleBlock).toContain('transform: translate3d(0, 0, 0) scale(1);');
+    expect(mobileBackToTopVisibleBlock).toContain('visibility: visible;');
+    expect(mobileBackToTopIconBlock).toContain('mask: url("/images/reference-nav/back-to-top.svg") center / contain no-repeat;');
+    expect(mobileBackToTopIconBlock).toContain('height: 24px;');
+    expect(mobileBackToTopIconBlock).toContain('width: 24px;');
+    expect(dayMobileBackToTopBlock).toContain('position: fixed;');
+    expect(dayMobileBackToTopBlock).toContain('z-index: 40;');
+    expect(responsiveCss).toContain(
+      'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card {\n    translate: none;\n  }',
+    );
     expect(mobileLikeRowBlock).toContain('grid-area: auto;');
     expect(mobileLikeRowBlock).toContain('translate: none;');
     expect(responsiveCss).toContain('translate: none;');
     expect(responsiveCss).toContain('.portfolio-hero__nav-links a');
-    expect(responsiveCss).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
+    expect(mobileNavLinksBlock).toContain('grid-template-columns: none;');
+    expect(responsiveCss).not.toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
   });
 
   test('keeps public reader route navigation in the reference icon capsule on mobile', () => {
@@ -1023,7 +1293,7 @@ describe('global styles', () => {
     const mobileReaderHeaderBlock =
       responsiveCss.match(/body:has\(\.page-main\) \.site-header\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
 
-    expect(mobileReaderHeaderBlock).toContain('width: 340px;');
+    expect(mobileReaderHeaderBlock).toContain('width: 388px;');
     expect(mobileReaderHeaderBlock).toContain('padding: 12px;');
     expect(mobileReaderHeaderBlock).not.toContain('grid-template-columns: 1fr;');
     expect(responsiveCss).toContain('--nav-item-size: 28px;');
@@ -1152,10 +1422,21 @@ describe('global styles', () => {
     const detailBlock = css.match(/\.detail\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailBodyBlock = css.match(/\.detail \.detail__body\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailBodyImageBlock = css.match(/\.detail \.detail__body img\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailBodyHeadingPrefixBlock =
+      css.match(/\.detail \.detail__body h1::before,[\s\S]*?\.detail \.detail__body h3::before\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const detailBodyH3PrefixBlock =
+      [...css.matchAll(/\.detail \.detail__body h3::before\s*{(?<body>[\s\S]*?)\n}/g)].at(-1)?.groups?.body ??
+      '';
+    const detailSidebarBlock = css.match(/^\.detail-sidebar\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const detailSidebarCardBlock =
+      css.match(/\.detail-sidebar__card\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const detailSidebarCoverImageBlock =
+      css.match(/\.detail-sidebar__cover img\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const detailShellDesktopBlock =
       css.match(/\.detail-shell--with-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const detailShellTocDesktopBlock =
-      css.match(/\.detail-shell--with-toc \.detail-toc\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+      css.match(/\.detail-shell--with-toc \.detail-sidebar\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const detailShellBlock = css.match(/^\.detail-shell\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const detailTocBlock = css.match(/^\.detail-toc\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const detailTocLinkBlock = css.match(/^\.detail-toc a\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
@@ -1172,29 +1453,38 @@ describe('global styles', () => {
     expect(detailBlock).toContain('rgba(4, 6, 14, 0.62)');
     expect(detailBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(detailBlock).toContain('border-radius: 24px;');
-    expect(detailBlock).toContain('max-width: 860px;');
+    expect(detailBlock).toContain('max-width: 888px;');
     expect(detailBodyBlock).toContain('background: transparent;');
     expect(detailBodyBlock).toContain('border: 0;');
     expect(detailBodyBlock).toContain('font-size: 15px;');
     expect(detailBodyBlock).toContain('letter-spacing: 0.03em;');
+    expect(detailBodyHeadingPrefixBlock).toContain("content: '# ';");
+    expect(detailBodyHeadingPrefixBlock).toContain('color: rgba(103, 232, 249, 0.58);');
+    expect(detailBodyH3PrefixBlock).toContain("content: '## ';");
+    expect(detailSidebarBlock).toContain('width: 200px;');
+    expect(detailSidebarBlock).toContain('display: grid;');
+    expect(detailSidebarCardBlock).toContain('border-radius: 12px;');
+    expect(detailSidebarCardBlock).toContain('background: rgba(3, 9, 20, 0.68);');
+    expect(detailSidebarCoverImageBlock).toContain('width: 100%;');
+    expect(detailSidebarCoverImageBlock).toContain('border-radius: 12px;');
     expect(css).toContain('.detail-shell');
     expect(detailShellBlock).toContain('display: block;');
     expect(detailShellBlock).toContain('position: relative;');
     expect(css).toContain('@media (min-width: 1280px)');
-    expect(detailShellDesktopBlock).toContain('display: block;');
+    expect(detailShellDesktopBlock).toContain('display: flex;');
+    expect(detailShellDesktopBlock).toContain('justify-content: center;');
     expect(detailShellDesktopBlock).not.toContain('grid-template-columns');
-    expect(detailShellTocDesktopBlock).toContain('position: absolute;');
-    expect(detailShellTocDesktopBlock).toContain('inset-inline-start: calc((100% - 860px) / 2 - 212px);');
-    expect(detailShellTocDesktopBlock).toContain('top: 0;');
-    expect(detailShellTocDesktopBlock).toContain('width: 180px;');
+    expect(detailShellTocDesktopBlock).toContain('order: 2;');
+    expect(detailShellTocDesktopBlock).toContain('position: sticky;');
+    expect(detailShellTocDesktopBlock).toContain('top: 24px;');
+    expect(detailShellTocDesktopBlock).toContain('flex: 0 0 200px;');
+    expect(detailShellTocDesktopBlock).toContain('width: 200px;');
+    expect(css.match(/\.detail-shell--with-toc \.detail\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '').toContain(
+      'margin-inline: 0;',
+    );
     expect(detailTocBlock).toContain('border-radius: 16px;');
     expect(detailTocBlock).toContain('border: 1px solid rgba(34, 211, 238, 0.2);');
     expect(detailTocLinkBlock).toContain('color: rgba(226, 232, 240, 0.78);');
-    expect(css).not.toContain('.detail .detail__body h1::before');
-    expect(css).not.toContain('.detail .detail__body h2::before');
-    expect(css).not.toContain('.detail .detail__body h3::before');
-    expect(css).not.toContain("content: '# ';");
-    expect(css).not.toContain("content: '## ';");
     expect(detailBodyImageBlock).toContain('max-width: 40%;');
     expect(detailBodyImageBlock).toContain('width: auto;');
     expect(detailBodyImageBlock).toContain('height: auto;');
@@ -1234,6 +1524,12 @@ describe('global styles', () => {
     const dayDetailPageMainBeforeBlock =
       css.match(/:root\[data-theme='summer-day'\] \.page-main:has\(\.detail\)::before\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
+    const daySharePageMainBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.page-main\.share-page\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const nightSharePageMainBlock =
+      css.match(/:root\[data-theme='summer-night'\] \.page-main\.share-page\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
     const dayDetailSurfacesBlocks = [
       ...css.matchAll(
         /:root\[data-theme='summer-day'\] \.detail-toc,[\s\S]*?:root\[data-theme='summer-day'\] \.adjacent-content__empty\s*{(?<body>[\s\S]*?)\n}/g,
@@ -1253,9 +1549,8 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .page-main::before");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main::after");
     expect(css).toContain(":root[data-theme='summer-day'] .page-main > *");
-    expect(dayPageMainBlock).toContain('radial-gradient(ellipse at 82% 86%, rgba(238, 194, 94, 0.34), transparent 42%)');
-    expect(dayPageMainBlock).toContain('radial-gradient(ellipse at 70% 96%, rgba(248, 221, 116, 0.24), transparent 38%)');
-    expect(dayPageMainBlock).toContain('linear-gradient(180deg, #d4e8f3 0%, #e9f7f5 48%, #f7fffb 100%)');
+    expect(dayPageMainBlock).toContain('background: transparent;');
+    expect(dayPageMainBlock).not.toContain('linear-gradient(180deg, #d4e8f3');
     expect(dayPageMainBlock).toContain('isolation: isolate;');
     expect(dayPageMainBlock).toContain('overflow: hidden;');
     expect(css).toContain('pointer-events: none;');
@@ -1267,7 +1562,13 @@ describe('global styles', () => {
     expect(dayHeaderBlock).toContain('0 14px 38px rgba(44, 106, 116, 0.08)');
     expect(dayDetailBodyPageBlock).toContain('radial-gradient(ellipse at 82% 86%, rgba(238, 194, 94, 0.34), transparent 42%)');
     expect(dayDetailBodyPageBlock).toContain('linear-gradient(180deg, #d4e8f3 0%, #e9f7f5 48%, #f7fffb 100%)');
+    expect(dayDetailPageMainBlock).toContain('background: transparent;');
     expect(dayDetailPageMainBlock).toContain('animation: none;');
+    expect(dayDetailPageMainBlock).not.toContain('linear-gradient(180deg, #d4e8f3');
+    expect(daySharePageMainBlock).toContain('background: transparent;');
+    expect(daySharePageMainBlock).not.toContain('var(--share-bg)');
+    expect(nightSharePageMainBlock).toContain('background: transparent;');
+    expect(nightSharePageMainBlock).not.toContain('var(--share-bg)');
     expect(dayDetailPageMainBlock).toContain('overflow: visible;');
     expect(dayDetailPageMainBeforeBlock).toContain('animation: none;');
     expect(dayDetailPageMainBeforeBlock).toContain('rgba(247, 218, 57, 0.22)');
