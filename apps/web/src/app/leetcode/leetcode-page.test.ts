@@ -26,6 +26,10 @@ describe('leetcode archive page', () => {
     expect(snapshotSource).not.toContain('算法练习快照');
     expect(snapshotSource).not.toContain('<h1>');
     expect(snapshotSource).toContain('Hot100 / Review Log');
+    expect(snapshotSource).toContain('今日题目、复习入口和提交轨迹，放在一页里继续推进。');
+    expect(snapshotSource).not.toContain('Hot100 的公开学习记录，只展示进度、节奏和继续查看的入口。');
+    expect(snapshotSource).not.toContain('仓库快照');
+    expect(snapshotSource).not.toContain('lastSyncLabel');
     expect(snapshotSource).not.toContain('className="study-progress-link"');
     expect(snapshotSource).toContain('<span>进度</span>');
     expect(snapshotSource).toContain('StudyContributionGraph');

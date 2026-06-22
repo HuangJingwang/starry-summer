@@ -3,7 +3,7 @@ import { StudyContributionGraph } from './StudyContributionGraph';
 import { StudyDailyCards } from './StudyDailyCards';
 
 export function StudySnapshotHero({ viewModel }: { viewModel: LeetCodeArchiveViewModel }) {
-  const { categoryCount, dashboard, lastSyncLabel, roundTrack } = viewModel;
+  const { categoryCount, dashboard, roundTrack } = viewModel;
   const visibleCategories = dashboard.categories.slice(0, 6);
 
   return (
@@ -13,10 +13,7 @@ export function StudySnapshotHero({ viewModel }: { viewModel: LeetCodeArchiveVie
       <div className="study-snapshot-hero__copy">
         <span>LeetCode Trace</span>
         <strong>Hot100 / Review Log</strong>
-        <p>
-          Hot100 的公开学习记录，只展示进度、节奏和继续查看的入口。最近同步 {lastSyncLabel}
-          {dashboard.settings.leetcodeUsername ? ` · @${dashboard.settings.leetcodeUsername}` : ' · 仓库快照'}。
-        </p>
+        <p>今日题目、复习入口和提交轨迹，放在一页里继续推进。</p>
       </div>
 
       <div className="study-snapshot-metrics" aria-label="核心学习数据">
