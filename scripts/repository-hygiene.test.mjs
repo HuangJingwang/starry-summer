@@ -2,6 +2,14 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 
 const requiredFiles = ['LICENSE', 'CONTRIBUTING.md', 'SECURITY.md'];
+const requiredOpsFiles = [
+  '.github/workflows/ci.yml',
+  '.github/workflows/production-smoke.yml',
+  'docs/ops/automation-runbook.md',
+  'docs/ops/vercel-projects.md',
+  'scripts/ops/production-smoke.mjs',
+  'scripts/ops/public-identity-guard.mjs',
+];
 const removedDockerDeploymentFiles = [
   '.dockerignore',
   'docker-compose.yml',
@@ -19,6 +27,12 @@ console.log('Running repository hygiene tests');
 for (const file of requiredFiles) {
   if (!existsSync(file)) {
     fail(`Expected repository file is missing: ${file}`);
+  }
+}
+
+for (const file of requiredOpsFiles) {
+  if (!existsSync(file)) {
+    fail(`Expected ops automation file is missing: ${file}`);
   }
 }
 
@@ -123,6 +137,18 @@ if (existsSync('.github/workflows/ci.yml')) {
 
   if (ci.includes('docker compose')) {
     fail('CI workflow must not validate Docker Compose after removing the Docker deployment path.');
+  }
+}
+
+const productionSmokeWorkflow = readFileSync('.github/workflows/production-smoke.yml', 'utf8');
+
+if (!productionSmokeWorkflow.includes('npm run ops:production-smoke -- --base-url https://www.asterh.me')) {
+  fail('Production smoke workflow must check https://www.asterh.me with the shared ops script.');
+}
+
+for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke']) {
+  if (!(scriptName in (packageJson.scripts ?? {}))) {
+    fail(`package.json must expose ${scriptName}.`);
   }
 }
 

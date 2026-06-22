@@ -22,7 +22,7 @@
     "dev:web": "npm run dev --workspace @starry-summer/web",
     "build": "npm run build --workspace @starry-summer/shared && npm run build --workspace @starry-summer/markdown && npm run build --workspace @starry-summer/web",
     "test": "npm run test --workspace @starry-summer/shared && npm run test --workspace @starry-summer/markdown && npm run test --workspace @starry-summer/web && npm run test:ops",
-    "test:ops": "node scripts/repository-hygiene.test.mjs",
+    "test:ops": "node scripts/repository-hygiene.test.mjs && node scripts/ops/public-identity-guard.test.mjs && node scripts/ops/production-smoke.test.mjs && npm run ops:public-identity-guard",
     "lint": "npm run lint --workspace @starry-summer/web --if-present",
     "typecheck": "npm run typecheck --workspace @starry-summer/shared && npm run typecheck --workspace @starry-summer/markdown && npm run typecheck --workspace @starry-summer/web",
     "auth:hash-password": "node scripts/admin-env.mjs hash-password",
@@ -33,7 +33,9 @@
     "ops:restore": "bash scripts/restore.sh",
     "ops:doctor": "bash scripts/doctor.sh",
     "ops:init-env": "bash scripts/init-env.sh",
-    "ops:smoke": "bash scripts/smoke.sh"
+    "ops:smoke": "bash scripts/smoke.sh",
+    "ops:public-identity-guard": "node scripts/ops/public-identity-guard.mjs",
+    "ops:production-smoke": "node scripts/ops/production-smoke.mjs"
   },
   "engines": {
     "node": ">=22.0.0",
