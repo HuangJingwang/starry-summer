@@ -39,35 +39,37 @@ export function StudySnapshotHero({ viewModel }: { viewModel: LeetCodeArchiveVie
 
       <StudyContributionGraph heatmapDays={viewModel.heatmapDays} />
 
-      <details className="study-snapshot-detail" id="review-rhythm">
-        <summary>
-          <span>复习轮次</span>
-          <strong>R1 - R{dashboard.settings.roundCount}</strong>
-        </summary>
-        <div className="study-snapshot-detail__body" aria-label="复习轮次入口">
-          {roundTrack.map((round) => (
-            <a className="study-round-link" href="#review-rhythm" key={round.label}>
-              <span>{round.label}</span>
-              <strong>{round.rate}%</strong>
-            </a>
-          ))}
-        </div>
-      </details>
+      <div className="study-snapshot-detail-row" aria-label="学习明细入口">
+        <details className="study-snapshot-detail" id="review-rhythm">
+          <summary>
+            <span>复习轮次</span>
+            <strong>R1 - R{dashboard.settings.roundCount}</strong>
+          </summary>
+          <div className="study-snapshot-detail__body" aria-label="复习轮次入口">
+            {roundTrack.map((round) => (
+              <a className="study-round-link" href="#review-rhythm" key={round.label}>
+                <span>{round.label}</span>
+                <strong>{round.rate}%</strong>
+              </a>
+            ))}
+          </div>
+        </details>
 
-      <details className="study-snapshot-detail study-snapshot-detail--categories" id="categories">
-        <summary>
-          <span>题型分类</span>
-          <strong>{categoryCount} 类</strong>
-        </summary>
-        <div className="study-snapshot-detail__body" aria-label="题型分类入口">
-          {visibleCategories.map((category) => (
-            <a className="study-category-chip" href="/posts?tag=LeetCode" key={category.name}>
-              <strong>{category.name}</strong>
-              <span>{category.rate}%</span>
-            </a>
-          ))}
-        </div>
-      </details>
+        <details className="study-snapshot-detail study-snapshot-detail--categories" id="categories">
+          <summary>
+            <span>题型分类</span>
+            <strong>{categoryCount} 类</strong>
+          </summary>
+          <div className="study-snapshot-detail__body" aria-label="题型分类入口">
+            {visibleCategories.map((category) => (
+              <a className="study-category-chip" href="/posts?tag=LeetCode" key={category.name}>
+                <strong>{category.name}</strong>
+                <span>{category.rate}%</span>
+              </a>
+            ))}
+          </div>
+        </details>
+      </div>
     </section>
   );
 }

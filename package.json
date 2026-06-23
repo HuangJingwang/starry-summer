@@ -22,7 +22,7 @@
     "dev:web": "npm run dev --workspace @starry-summer/web",
     "build": "npm run build --workspace @starry-summer/shared && npm run build --workspace @starry-summer/markdown && npm run build --workspace @starry-summer/web",
     "test": "npm run test --workspace @starry-summer/shared && npm run test --workspace @starry-summer/markdown && npm run test --workspace @starry-summer/web && npm run test:ops",
-    "test:ops": "node scripts/repository-hygiene.test.mjs && node scripts/sync-leetcode.test.mjs && node scripts/ops/public-identity-guard.test.mjs && node scripts/ops/production-smoke.test.mjs && node scripts/ops/pr-health.test.mjs && npm run ops:public-identity-guard",
+    "test:ops": "node scripts/repository-hygiene.test.mjs && node scripts/sync-leetcode.test.mjs && node scripts/ops/public-identity-guard.test.mjs && node scripts/ops/production-smoke.test.mjs && node scripts/ops/pr-health.test.mjs && node scripts/ops/watch-pushed-deployment.test.mjs && node .codex/hooks/post-git-push-check.test.mjs && npm run ops:public-identity-guard",
     "sync:leetcode": "node scripts/sync-leetcode.mjs",
     "lint": "npm run lint --workspace @starry-summer/web --if-present",
     "typecheck": "npm run typecheck --workspace @starry-summer/shared && npm run typecheck --workspace @starry-summer/markdown && npm run typecheck --workspace @starry-summer/web",
@@ -37,7 +37,8 @@
     "ops:smoke": "bash scripts/smoke.sh",
     "ops:public-identity-guard": "node scripts/ops/public-identity-guard.mjs",
     "ops:production-smoke": "node scripts/ops/production-smoke.mjs",
-    "ops:pr-health": "node scripts/ops/pr-health.mjs"
+    "ops:pr-health": "node scripts/ops/pr-health.mjs",
+    "ops:watch-pushed-deployment": "node scripts/ops/watch-pushed-deployment.mjs"
   },
   "engines": {
     "node": ">=22.0.0",

@@ -49,6 +49,8 @@ describe('leetcode archive page', () => {
     expect(contributionSource).toContain('study-contribution-months');
     expect(snapshotSource).toContain('href="#review-rhythm"');
     expect(snapshotSource).toContain('href="#categories"');
+    expect(snapshotSource).toContain('className="study-snapshot-detail-row"');
+    expect(snapshotSource).toContain('<div className="study-snapshot-detail-row" aria-label="学习明细入口">');
     expect(snapshotSource).toContain('href="/posts?tag=LeetCode"');
     expect(snapshotSource).toContain('dashboard.categories.slice(0, 6)');
     expect(snapshotSource).toContain('roundTrack.map');

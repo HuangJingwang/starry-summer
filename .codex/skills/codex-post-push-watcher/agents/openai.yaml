@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Post-Push Watcher"
+  short_description: "Watch CI and Vercel after Codex pushes"
+  default_prompt: "Use $codex-post-push-watcher to add, restore, or explain the local Codex hook that watches GitHub and Vercel after git push."

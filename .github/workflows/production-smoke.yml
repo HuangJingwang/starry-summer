@@ -2,6 +2,11 @@ name: Production Smoke
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types:
+      - vercel.deployment.success
+      - vercel.deployment.error
+      - vercel.deployment.failed
   schedule:
     - cron: "17 * * * *"
 
@@ -22,7 +27,17 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        if: github.event_name != 'repository_dispatch' || github.event.action == 'vercel.deployment.success'
         run: npm ci
 
       - name: Run production smoke
+        if: github.event_name != 'repository_dispatch' || github.event.action == 'vercel.deployment.success'
         run: npm run ops:production-smoke -- --base-url https://www.asterh.me
+
+      - name: Report Vercel deployment failure
+        if: github.event_name == 'repository_dispatch' && (github.event.action == 'vercel.deployment.error' || github.event.action == 'vercel.deployment.failed')
+        run: |
+          echo "Vercel deployment event: ${{ github.event.action }}"
+          echo "Deployment URL: ${{ github.event.client_payload.url }}"
+          echo "Environment: ${{ github.event.client_payload.environment }}"
+          exit 1

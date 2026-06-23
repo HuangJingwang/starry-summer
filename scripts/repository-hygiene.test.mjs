@@ -190,13 +190,19 @@ if (!productionSmokeWorkflow.includes('npm run ops:production-smoke -- --base-ur
   fail('Production smoke workflow must check https://www.asterh.me with the shared ops script.');
 }
 
+for (const dispatchType of ['vercel.deployment.success', 'vercel.deployment.error', 'vercel.deployment.failed']) {
+  if (!productionSmokeWorkflow.includes(dispatchType)) {
+    fail(`Production smoke workflow must handle ${dispatchType} repository dispatch events.`);
+  }
+}
+
 const leetcodeSyncWorkflow = readFileSync('.github/workflows/leetcode-sync.yml', 'utf8');
 
 if (!leetcodeSyncWorkflow.includes('npm run sync:leetcode -- --username adonis-14')) {
   fail('LeetCode sync workflow must sync the configured public LeetCode.cn username.');
 }
 
-for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke', 'ops:pr-health']) {
+for (const scriptName of ['ops:public-identity-guard', 'ops:production-smoke', 'ops:pr-health', 'ops:watch-pushed-deployment']) {
   if (!(scriptName in (packageJson.scripts ?? {}))) {
     fail(`package.json must expose ${scriptName}.`);
   }
@@ -220,6 +226,47 @@ for (const requiredPhrase of [
 ]) {
   if (!publicThemeSkill.includes(requiredPhrase)) {
     fail(`Public theme review skill must mention "${requiredPhrase}".`);
+  }
+}
+
+const postPushWatcherSkillPath = '.codex/skills/codex-post-push-watcher/SKILL.md';
+const postPushWatcherDocPath = 'docs/ops/codex-post-push-watcher.md';
+
+if (!existsSync(postPushWatcherSkillPath)) {
+  fail('Codex post-push watcher skill must be available in .codex/skills.');
+}
+
+const postPushWatcherSkill = readFileSync(postPushWatcherSkillPath, 'utf8');
+
+for (const forbiddenPhrase of ['TODO', '[TODO']) {
+  if (postPushWatcherSkill.includes(forbiddenPhrase)) {
+    fail(`Codex post-push watcher skill must not contain ${forbiddenPhrase}.`);
+  }
+}
+
+for (const requiredPhrase of [
+  'PostToolUse',
+  'git push',
+  'watch-pushed-deployment',
+  'repository_dispatch',
+  'Vercel',
+  'gh',
+  '.codex/local/post-push-status.jsonl',
+]) {
+  if (!postPushWatcherSkill.includes(requiredPhrase)) {
+    fail(`Codex post-push watcher skill must mention "${requiredPhrase}".`);
+  }
+}
+
+if (!existsSync(postPushWatcherDocPath)) {
+  fail('Codex post-push watcher must have standalone ops documentation.');
+}
+
+const readme = readFileSync('README.md', 'utf8');
+
+for (const requiredPhrase of ['Codex post-push watcher', postPushWatcherDocPath]) {
+  if (!readme.includes(requiredPhrase)) {
+    fail(`README must introduce the Codex post-push watcher with "${requiredPhrase}".`);
   }
 }
 

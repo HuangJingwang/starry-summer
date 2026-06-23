@@ -75,13 +75,17 @@ describe('settings client helpers', () => {
     expect(normalizeSiteSettings({}).navigation).not.toContain('about');
   });
 
-  test('ships alias-safe public social links in the repository settings fixture', async () => {
+  test('ships the canonical public GitHub profile while keeping the owner display alias', async () => {
     const { readFile } = await import('node:fs/promises');
 
     const source = await readFile(new URL('../../content/site-settings.json', import.meta.url), 'utf8');
+    const settings = JSON.parse(source) as { profile: { ownerName: string; socialLinks: Array<{ label: string; href: string }> } };
 
-    expect(source).toContain('https://github.com/Aster-H');
-    expect(source).not.toContain('HuangJingwang');
+    expect(settings.profile.ownerName).toBe('Aster.H');
+    expect(settings.profile.socialLinks).toContainEqual({
+      label: 'GitHub',
+      href: 'https://github.com/HuangJingwang',
+    });
   });
 
   test('builds repository settings publish payloads for Git-backed settings', () => {

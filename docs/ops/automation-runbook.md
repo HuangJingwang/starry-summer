@@ -12,6 +12,28 @@ This runbook defines the reusable automation path for Starry Summer. It is safe 
 6. Production smoke checks run against `https://www.asterh.me`.
 7. Code regressions found in production are reproduced locally, fixed on a new branch, and sent through the PR path.
 
+## Event-Driven Local Follow-Up
+
+The repository includes a local Codex hook at `.codex/hooks.json`. When Codex runs a successful `git push` through the Bash tool, the hook starts `scripts/ops/watch-pushed-deployment.mjs` in the background for the pushed branch and commit SHA.
+
+The watcher reads GitHub through `gh`, tracks the related pull request when one exists, inspects CI and Vercel checks, and records terminal results in `.codex/local/post-push-status.jsonl`. That local JSONL file is ignored by Git and can be used by a later Codex session to understand the most recent post-push outcome.
+
+For `main` pushes, the watcher runs the shared production smoke command after GitHub/Vercel checks are successful:
+
+```bash
+npm run ops:production-smoke -- --base-url https://www.asterh.me
+```
+
+The watcher does not change Vercel settings, merge pull requests, or push follow-up commits. It reports status only.
+
+## Vercel Deployment Events
+
+Vercel deployment events are routed through GitHub `repository_dispatch` in `.github/workflows/production-smoke.yml`.
+
+- `vercel.deployment.success` runs the production smoke workflow.
+- `vercel.deployment.error` and `vercel.deployment.failed` fail the workflow with the deployment URL and environment in the logs.
+- The scheduled production smoke remains as a low-frequency fallback for drift that is not tied to a fresh deployment.
+
 ## Auto-Fix Allowed
 
 Automation may fix and push when all of these are true:

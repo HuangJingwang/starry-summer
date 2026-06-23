@@ -1,10 +1,10 @@
 # Starry Summer
 
-Starry Summer 是 Aster.H 给自己搭的一座小小星档案馆。
+Starry Summer 是 Aster.H 给自己搭的一座长期运行的个人内容平台。
 
-这里会放文章、笔记、片刻、项目记录、留言和站点素材。它不是作品集，也不是技术展示柜，更像一个慢慢整理出来的个人内容平台：有些内容认真写，有些只是顺手记下，但都希望能安静地留下来，过几年再回头看也还能找得到。
+它把博客、笔记、片刻、项目档案、留言、素材管理和部署运维收在一个仓库里。目标不是做一个通用 CMS，而是回答一个很个人但也很常见的问题：如果我想把公开写作和个人记录认真保存很多年，怎样才能既好写、好看、好迁移，又不被一套很重的服务绑住？
 
-公开站点支持白天和夜间两种主题：白天清爽一点，夜间更接近 cyber archive 的氛围，安静、私人、耐读，像在夜里翻一间发光的旧资料室。后台就务实很多：中文、紧凑、好操作，目标是少折腾，多写一点。
+所以 Starry Summer 选择了比较轻的路线：内容和设置尽量落在 GitHub 仓库，Next.js 负责公开阅读和后台工作台，Vercel 负责部署，自动化脚本负责检查、备份和发布后的反馈。它更像一个可以长期打理的小型数字花园，也可以作为“个人内容平台怎么做得轻一点”的参考实现。
 
 这个项目的视觉和动效参考过 [yysuni.com](https://www.yysuni.com/)。第一次看到的时候真的很难不心动：简洁、舒服、氛围对，而且好看。Starry Summer 后来也顺着这个方向，慢慢长成了现在的样子。
 
@@ -32,6 +32,8 @@ Starry Summer 是 Aster.H 给自己搭的一座小小星档案馆。
 
 Starry Summer 现在更偏向“静态友好、仓库驱动”的路线。对一个单人内容站来说，东西能看见、能备份、能迁移，比把架构堆得很重更重要。
 
+![Starry Summer 仓库驱动内容流](docs/diagrams/repository-content-flow.svg)
+
 - 公开内容、站点设置、LeetCode 仪表盘和资源索引主要放在 `apps/web/content`。
 - Next.js 负责公开页面、后台界面、登录、发布接口和构建。
 - 后台发布文章、设置或素材时，会把文件写回 GitHub 仓库。
@@ -39,7 +41,9 @@ Starry Summer 现在更偏向“静态友好、仓库驱动”的路线。对一
 - 评论、留言、点赞、浏览量这类高频互动，可以交给 Worker、KV/D1 或类似托管服务。
 - 旧的数据库/API 组件已经不是默认路线；不是不能用，只是现在这座小站更适合轻一点。
 
-## 现在能做什么
+## 现在能做什么，之后还能做什么
+
+已经具备的能力：
 
 - 写文章、笔记、片刻，整理项目和归档。
 - 用分类、标签、系列把内容串起来。
@@ -49,6 +53,15 @@ Starry Summer 现在更偏向“静态友好、仓库驱动”的路线。对一
 - 用 GitHub OAuth 做读者登录，后台会话单独管理。
 - 用 GitHub 保存内容和素材，用 Vercel 部署主站。
 - 提供备份、恢复、健康检查和部署前检查，尽量少靠记忆维护。
+- 用 Codex post-push watcher 跟踪 push 后的 CI、PR 和 Vercel 部署状态。
+
+以后可能继续补上的方向：
+
+- 更完整的公开互动：评论、留言、点赞、浏览量和通知可以进一步接入 Worker、KV/D1 或其他托管存储。
+- 更舒服的写作流：草稿、预览、素材引用、Markdown 导入和批量整理还可以继续打磨。
+- 更清晰的内容关系：系列、专题、时间线、引用关系和阅读路径可以做得更像个人知识库。
+- 更自动的运维反馈：部署成功后的 smoke、失败后的上下文收集、回滚建议和本地 Codex 提醒可以继续完善。
+- 更好的可复用性：把 Starry Summer 的仓库驱动内容模型、部署检查和 Codex watcher 提炼成更容易迁移的模板。
 
 ## 技术栈
 
@@ -176,6 +189,8 @@ npm run import:juejin
 
 默认生产路线是 **GitHub + Vercel + 自定义域名**：
 
+![Starry Summer 部署与反馈流](docs/diagrams/deployment-feedback-flow.svg)
+
 1. GitHub 保存代码、文章、站点设置和小型素材。
 2. Vercel 运行 `apps/web` 这个 Next.js 应用。
 3. 自定义域名指向 Vercel。
@@ -256,8 +271,27 @@ npm run ops:doctor
 npm run ops:smoke
 ```
 
+## Codex post-push watcher
+
+这个项目还带了一套可以单独参考的 **Codex post-push watcher**。
+
+它适合这样的工作流：代码主要由本地 Codex push 到 GitHub，push 后希望自动跟踪这次提交的 GitHub Actions、PR 合并状态和 Vercel 部署结果，但又不想全天跑定时任务，也不想为了 GitHub Actions 里的 Codex 自动修复额外准备 OpenAI API key。
+
+大致流程是：
+
+```text
+Codex 执行 git push
+  -> 本地 Codex PostToolUse hook 识别成功 push
+  -> 启动短生命周期 watcher
+  -> watcher 通过 gh 查询 GitHub checks / PR / Vercel 状态
+  -> 结果写入 .codex/local/post-push-status.jsonl，并尽量发本地通知
+```
+
+这套功能的说明在 [Codex post-push watcher](docs/ops/codex-post-push-watcher.md)。如果想把这个模式迁移到别的仓库，可以参考项目内 skill：`.codex/skills/codex-post-push-watcher/SKILL.md`。
+
 ## 相关文档
 
 - [部署说明](docs/deployment.md)
 - [安全说明](docs/security.md)
 - [静态托管迁移记录](docs/static-hosting-migration.md)
+- [Codex post-push watcher](docs/ops/codex-post-push-watcher.md)

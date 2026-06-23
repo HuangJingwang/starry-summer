@@ -345,6 +345,24 @@ describe('global styles', () => {
     expect(taskCardBlock).toContain('padding: 16px;');
   });
 
+  test('keeps LeetCode snapshot detail controls grouped instead of splitting them across the hero', () => {
+    const css = readGlobalStyles();
+    const detailRowBlock = readStyleBlock(css, '.study-snapshot-detail-row');
+    const detailBlock = readStyleBlock(css, '.study-snapshot-detail');
+    const categoryDetailBlock = readStyleBlock(css, '.study-snapshot-detail--categories');
+    const mobileDetailRowBlock =
+      css.match(/@media \(max-width: 860px\) \{[\s\S]*?\.study-snapshot-detail-row\s*{(?<body>[\s\S]*?)\n  }/)
+        ?.groups?.body ?? '';
+
+    expect(detailRowBlock).toContain('display: flex;');
+    expect(detailRowBlock).toContain('grid-column: 1 / -1;');
+    expect(detailRowBlock).toContain('justify-content: flex-start;');
+    expect(detailRowBlock).toContain('max-width: 820px;');
+    expect(detailBlock).toContain('max-width: min(100%, 520px);');
+    expect(categoryDetailBlock).not.toContain('justify-self: end;');
+    expect(mobileDetailRowBlock).toContain('display: grid;');
+  });
+
   test('keeps the home latest article card below the desktop navigation card', () => {
     const css = readGlobalStyles();
     const heroContentBlock = readStyleBlock(css, '.portfolio-hero__content');
