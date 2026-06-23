@@ -443,6 +443,13 @@ describe('home page', () => {
   test('keeps home card geometry consistent across day and night themes', () => {
     const css = readGlobalStyles();
 
+    expect(readRule(css, '.portfolio-hero')).toContain('justify-content: flex-start;');
+    expect(readRule(css, '.portfolio-hero .cyber-home__container')).toContain('align-items: stretch;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('align-content: start;');
+    expect(readRule(css, '.portfolio-hero__latest-card')).toContain('translate: var(--portfolio-left-stack-offset) 0;');
+    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('translate: 0 0;');
+    expect(readRule(css, '.portfolio-hero__actions')).toContain('margin-top: 0;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('align-self: start;');
     expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
@@ -450,7 +457,7 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('border-radius: 32px;');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('padding: 9px;');
-    expect(readRule(css, '.portfolio-hero__sky-card,\n.portfolio-hero__clock-card,\n.portfolio-hero__calendar-card')).toContain(
+    expect(readRuleContainingSelector(css, '.portfolio-hero__calendar-card')).toContain(
       'border-color: #ffffff;',
     );
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('border-radius: 40px;');

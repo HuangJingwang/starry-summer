@@ -293,7 +293,7 @@ describe('global styles', () => {
   test('lets the LeetCode study module switch between refined light and dark themes', () => {
     const css = readGlobalStyles();
     const nightBodyBlock =
-      css.match(/:root\[data-theme='summer-night'\] body:has\(\.study-archive-page\),\nbody:has\(\.study-archive-page\)\s*{(?<body>[\s\S]*?)\n}/)?.groups
+      css.match(/:root\[data-theme='summer-night'\] body:has\(\.study-archive-page\),\r?\nbody:has\(\.study-archive-page\)\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
     const dayPageBlock =
       css.match(/:root\[data-theme='summer-day'\] \.study-archive-page\s*{(?<body>[\s\S]*?)\n}/)?.groups
@@ -454,7 +454,7 @@ describe('global styles', () => {
     expect(latestCardBlock).toContain('align-self: stretch;');
     expect(latestCardBlock).toContain('justify-self: stretch;');
     expect(latestCardBlock).toContain('width: 100%;');
-    expect(latestCardBlock).toContain('translate: var(--portfolio-left-stack-offset) -12px;');
+    expect(latestCardBlock).toContain('translate: var(--portfolio-left-stack-offset) 0;');
     expect(css).toContain('.portfolio-hero__latest-card img');
     expect(css).toContain('.portfolio-hero__latest-cover');
     expect(css).toContain('-webkit-line-clamp: 1;');
@@ -906,11 +906,11 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--portfolio-left-stack-offset: 38px;');
     expect(homeHeroContentBlock).toContain('grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);');
     expect(homeHeroContentBlock).toContain('--portfolio-right-stack-offset: 0px;');
-    expect(homeHeroContentBlock).toContain('align-content: center;');
+    expect(homeHeroContentBlock).toContain('align-content: start;');
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
     expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 220px 138px;');
     expect(homeHeroContentBlock).toContain('gap: 22px 0;');
-    expect(homeIntroBlock).toContain('translate: 0 -24px;');
+    expect(homeIntroBlock).toContain('translate: 0 0;');
     expect(homeIntroBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(homeIntroBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.26);');
     expect(homeIntroBlock).toContain('rgba(4, 6, 14, 0.54)');
@@ -1108,7 +1108,7 @@ describe('global styles', () => {
     expect(actionsBlock).toContain('flex-direction: column;');
     expect(actionsBlock).toContain('gap: 18px;');
     expect(actionsBlock).toContain('justify-content: center;');
-    expect(actionsBlock).toContain('margin-top: 18px;');
+    expect(actionsBlock).toContain('margin-top: 0;');
     expect(actionsBlock).toContain('max-width: min(100%, 374px);');
     expect(actionsBlock).not.toContain('border-top');
     expect(actionRowBlock).toContain('display: flex;');
@@ -1329,7 +1329,7 @@ describe('global styles', () => {
     expect(mobileBackToTopIconBlock).toContain('width: 24px;');
     expect(dayMobileBackToTopBlock).toContain('position: fixed;');
     expect(dayMobileBackToTopBlock).toContain('z-index: 40;');
-    expect(responsiveCss).toContain(
+    expect(responsiveCss.replace(/\r\n/g, '\n')).toContain(
       'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card {\n    translate: none;\n  }',
     );
     expect(mobileLikeRowBlock).toContain('grid-area: auto;');

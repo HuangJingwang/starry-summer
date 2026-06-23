@@ -392,6 +392,7 @@ body:has(.cyber-home) .site-footer a {
   display: flex;
   flex-direction: column;
   isolation: isolate;
+  justify-content: flex-start;
   min-height: 100vh;
   overflow: hidden;
   position: relative;
@@ -475,7 +476,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero .cyber-home__container {
-  align-items: center;
+  align-items: stretch;
   display: grid;
   min-height: 100vh;
 }
@@ -959,7 +960,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__content {
-  align-content: center;
+  align-content: start;
   align-items: stretch;
   box-sizing: border-box;
   display: grid;
@@ -1034,7 +1035,7 @@ body:has(.cyber-home) .site-footer a {
   padding: 16px 18px;
   width: 100%;
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both;
-  translate: var(--portfolio-left-stack-offset) -12px;
+  translate: var(--portfolio-left-stack-offset) 0;
 }
 
 .portfolio-hero__latest-card > span {
@@ -1150,7 +1151,7 @@ body:has(.cyber-home) .site-footer a {
   padding: clamp(26px, 3vw, 38px);
   position: relative;
   text-align: center;
-  translate: 0 -24px;
+  translate: 0 0;
   width: 100%;
   animation: home-widget-enter 680ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
 }
@@ -1249,7 +1250,7 @@ body:has(.cyber-home) .site-footer a {
   grid-area: actions;
   justify-content: center;
   justify-self: center;
-  margin-top: 18px;
+  margin-top: 0;
   max-width: min(100%, 374px);
   padding-top: 0;
   width: 100%;
@@ -1690,7 +1691,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__calendar-card {
-  align-self: center;
+  align-self: start;
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 460ms both;
   align-content: center;
   border-radius: 40px;
