@@ -14,10 +14,10 @@ describe('content cover components', () => {
 
   test('renders notes as article cards in public content lists', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/ContentCard.tsx'), 'utf8');
-    const contentSource = readFileSync(join(process.cwd(), 'src/lib/content-public.ts'), 'utf8');
+    const routingSource = readFileSync(join(process.cwd(), 'src/lib/content-routing.ts'), 'utf8');
 
     expect(source).toContain('formatPublicContentType(item.type)');
-    expect(contentSource).toContain("note: '文章'");
+    expect(routingSource).toContain("note: '文章'");
     expect(source).not.toContain('{item.type}');
   });
 

@@ -41,6 +41,9 @@ describe('web content helpers', () => {
     const modulePaths = [
       'src/lib/content-types.ts',
       'src/lib/content-public.ts',
+      'src/lib/content-routing.ts',
+      'src/lib/content-archive.ts',
+      'src/lib/content-adjacent.ts',
       'src/lib/content-taxonomy.ts',
       'src/lib/content-search.ts',
       'src/lib/content-seed.ts',
@@ -53,10 +56,13 @@ describe('web content helpers', () => {
 
     expect(barrel).toContain("export * from './content-types';");
     expect(barrel).toContain("export * from './content-public';");
+    expect(barrel).toContain("export * from './content-routing';");
+    expect(barrel).toContain("export * from './content-archive';");
+    expect(barrel).toContain("export * from './content-adjacent';");
     expect(barrel).toContain("export * from './content-taxonomy';");
     expect(barrel).toContain("export * from './content-search';");
     expect(barrel).toContain("export * from './content-seed';");
-    expect(barrel.split('\n')).toHaveLength(6);
+    expect(barrel.split('\n')).toHaveLength(9);
   });
 
   test('uses explicit and default post covers for seed featured items instead of the home workspace image', () => {

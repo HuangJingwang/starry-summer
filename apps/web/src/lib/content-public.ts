@@ -1,8 +1,6 @@
 import { isPublicContent, type ContentType } from '@starry-summer/shared';
 
 import type {
-  AdjacentContent,
-  ContentArchiveGroup,
   ContentSort,
   PopularContentOptions,
   PublicContentKind,
@@ -80,85 +78,6 @@ export function getSiteStats(items: SiteContentItem[]): SiteStats {
   };
 }
 
-export function groupContentByMonth(items: SiteContentItem[]): ContentArchiveGroup[] {
-  const groups = new Map<string, SiteContentItem[]>();
-
-  for (const item of getPublicContent(items)) {
-    const key = item.publishedAt.slice(0, 7);
-    const group = groups.get(key) ?? [];
-    group.push(item);
-    groups.set(key, group);
-  }
-
-  return [...groups.entries()].map(([key, groupItems]) => {
-    const [year, month] = key.split('-');
-
-    return {
-      key,
-      label: `${year} 年 ${month} 月`,
-      items: groupItems,
-    };
-  });
-}
-
-export function getAdjacentContent(items: SiteContentItem[], currentId: string): AdjacentContent {
-  const current = getPublicContent(items).find((item) => item.id === currentId);
-
-  if (!current) {
-    return { previous: null, next: null };
-  }
-
-  const timeline = [...getPublicContent(items, getPublicContentKindForAdjacent(current))].reverse();
-  const index = timeline.findIndex((item) => item.id === currentId);
-
-  if (index === -1) {
-    return { previous: null, next: null };
-  }
-
-  return {
-    previous: timeline[index - 1] ?? null,
-    next: timeline[index + 1] ?? null,
-  };
-}
-
-export function getContentHref(item: SiteContentItem): string {
-  const slug = item.slug ?? item.id;
-
-  if (item.type === 'page' && slug === 'about') {
-    return '/about';
-  }
-
-  const segmentByType: Record<ContentType, string> = {
-    moment: 'moments',
-    note: 'posts',
-    page: 'pages',
-    post: 'posts',
-    project: 'projects',
-  };
-
-  return `/${segmentByType[item.type]}/${slug}`;
-}
-
-export function formatPublicContentType(type: SiteContentItem['type']): string {
-  const labels: Record<SiteContentItem['type'], string> = {
-    moment: '日常',
-    note: '文章',
-    page: '页面',
-    post: '文章',
-    project: '项目',
-  };
-
-  return labels[type];
-}
-
-export function getContentBySlug(
-  items: SiteContentItem[],
-  type: PublicContentKind,
-  slug: string,
-): SiteContentItem | null {
-  return getPublicContent(items, type).find((item) => (item.slug ?? item.id) === slug) ?? null;
-}
-
 function sortPublicContent(a: SiteContentItem, b: SiteContentItem, sort: ContentSort): number {
   if (Boolean(a.pinned) !== Boolean(b.pinned)) {
     return a.pinned ? -1 : 1;
@@ -193,6 +112,3 @@ function matchesPublicContentKind(item: SiteContentItem, kind?: PublicContentKin
   return item.type === kind;
 }
 
-function getPublicContentKindForAdjacent(item: SiteContentItem): PublicContentKind {
-  return item.type === 'post' || item.type === 'note' ? 'article' : item.type;
-}
