@@ -965,7 +965,7 @@ body:has(.cyber-home) .site-footer a {
   box-sizing: border-box;
   display: grid;
   flex: 1;
-  gap: 22px 0;
+  gap: 16px 0;
   --portfolio-left-stack-offset: 38px;
   --portfolio-right-stack-offset: 0px;
   grid-template-areas:
@@ -974,10 +974,10 @@ body:has(.cyber-home) .site-footer a {
     "nav . intro . calendar"
     "latest . actions . calendar";
   grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);
-  grid-template-rows: 156px 104px 220px 138px;
+  grid-template-rows: 148px 98px 210px 124px;
   min-height: 100svh;
-  padding-bottom: 24px;
-  padding-top: 24px;
+  padding-bottom: 16px;
+  padding-top: 16px;
   position: relative;
   z-index: 1;
 }
@@ -1146,7 +1146,7 @@ body:has(.cyber-home) .site-footer a {
   grid-area: intro;
   justify-items: center;
   justify-self: start;
-  min-height: 365px;
+  min-height: 320px;
   overflow: hidden;
   padding: clamp(26px, 3vw, 38px);
   position: relative;

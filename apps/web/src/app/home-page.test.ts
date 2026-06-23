@@ -453,7 +453,11 @@ describe('home page', () => {
     expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
-    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 365px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('gap: 16px 0;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('grid-template-rows: 148px 98px 210px 124px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-bottom: 16px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-top: 16px;');
+    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 320px;');
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('border-radius: 32px;');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('padding: 9px;');

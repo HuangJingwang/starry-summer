@@ -369,13 +369,16 @@ describe('global styles', () => {
     const latestCardBlock = readStyleBlock(css, '.portfolio-hero__latest-card');
     const gridRows = parsePxTrackList(readCssDeclaration(heroContentBlock, 'grid-template-rows'));
     const rowGap = parsePxTrackList(readCssDeclaration(heroContentBlock, 'gap'))[0] ?? 0;
+    const paddingTop = parsePxTrackList(readCssDeclaration(heroContentBlock, 'padding-top'))[0] ?? 0;
+    const paddingBottom = parsePxTrackList(readCssDeclaration(heroContentBlock, 'padding-bottom'))[0] ?? 0;
     const latestTranslateY = parsePxTrackList(readCssDeclaration(latestCardBlock, 'translate'))[1] ?? 0;
     const navReservedHeight = gridRows.slice(0, 3).reduce((sum, row) => sum + row, rowGap * 2);
     const latestStartOffset = navReservedHeight + rowGap + latestTranslateY;
+    const fixedHeroContentHeight = gridRows.reduce((sum, row) => sum + row, rowGap * 3 + paddingTop + paddingBottom);
 
     expect(gridRows).toHaveLength(4);
-    expect(navReservedHeight).toBeGreaterThanOrEqual(520);
-    expect(latestStartOffset - 520).toBeGreaterThanOrEqual(12);
+    expect(fixedHeroContentHeight).toBeLessThanOrEqual(680);
+    expect(latestStartOffset - navReservedHeight).toBeGreaterThanOrEqual(16);
   });
 
   test('does not render the removed night milky way background layer', () => {
@@ -908,9 +911,10 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--portfolio-right-stack-offset: 0px;');
     expect(homeHeroContentBlock).toContain('align-content: start;');
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
-    expect(homeHeroContentBlock).toContain('grid-template-rows: 156px 104px 220px 138px;');
-    expect(homeHeroContentBlock).toContain('gap: 22px 0;');
+    expect(homeHeroContentBlock).toContain('grid-template-rows: 148px 98px 210px 124px;');
+    expect(homeHeroContentBlock).toContain('gap: 16px 0;');
     expect(homeIntroBlock).toContain('translate: 0 0;');
+    expect(homeIntroBlock).toContain('min-height: 320px;');
     expect(homeIntroBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(homeIntroBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.26);');
     expect(homeIntroBlock).toContain('rgba(4, 6, 14, 0.54)');
