@@ -6,6 +6,7 @@ import { describe, expect, test } from 'vitest';
 describe('leetcode archive page', () => {
   test('uses the repository dashboard for the public study archive', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/leetcode/page.tsx'), 'utf8');
+    const todayPageSource = readFileSync(join(process.cwd(), 'src/app/leetcode/today/page.tsx'), 'utf8');
     const snapshotSource = readFileSync(join(process.cwd(), 'src/app/leetcode/StudySnapshotHero.tsx'), 'utf8');
     const contributionSource = readFileSync(join(process.cwd(), 'src/app/leetcode/StudyContributionGraph.tsx'), 'utf8');
     const dailyCardsSource = readFileSync(join(process.cwd(), 'src/app/leetcode/StudyDailyCards.tsx'), 'utf8');
@@ -15,6 +16,12 @@ describe('leetcode archive page', () => {
     expect(source).toContain('loadRepositoryStudyDashboard');
     expect(source).toContain('buildLeetCodeArchiveViewModel');
     expect(source).toContain('StudySnapshotHero');
+    expect(source).not.toContain('StudyTodaySection');
+    expect(source).not.toContain('<StudyTodaySection dashboard={dashboard} />');
+    expect(todayPageSource).toContain('loadRepositoryStudyDashboard');
+    expect(todayPageSource).toContain('StudyTodaySection');
+    expect(todayPageSource).toContain('<StudyTodaySection dashboard={dashboard} />');
+    expect(todayPageSource).toContain('href="/leetcode"');
     expect(source).toContain('<SiteShell>');
     expect(source).not.toContain('hideHeader');
     expect(siteShellSource).toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
@@ -41,6 +48,10 @@ describe('leetcode archive page', () => {
     expect(dailyCardsSource).toContain('dashboard.todayFocus[0]');
     expect(dailyCardsSource).toContain('dashboard.reviewDue[0]');
     expect(dailyCardsSource).toContain('getLeetCodeProblemUrl');
+    expect(dailyCardsSource).toContain('href="/leetcode/today"');
+    expect(dailyCardsSource).not.toContain('href="#today-plan"');
+    expect(dailyCardsSource).toContain('study-daily-card__surface');
+    expect(dailyCardsSource).toContain('study-daily-card__problem-link');
     expect(dailyCardsSource).toContain('target="_blank"');
     expect(dailyCardsSource).toContain('rel="noreferrer"');
     expect(dailyCardsSource).toContain('study-daily-card-grid');
@@ -56,7 +67,6 @@ describe('leetcode archive page', () => {
     expect(snapshotSource).toContain('roundTrack.map');
     expect(source).not.toContain('PublicPageHeader');
     expect(source).not.toContain('StudyOverviewSection');
-    expect(source).not.toContain('StudyTodaySection');
     expect(source).not.toContain('StudyNotesSection');
     expect(source).not.toContain('StudyRoundTrack');
     expect(source).not.toContain('StudyCategoryGrid');

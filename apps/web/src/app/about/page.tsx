@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteSettings } from '@/lib/settings-repository';
@@ -31,18 +33,18 @@ export default async function AboutPage() {
           </section>
         ) : null}
         <section className="about-list">
-          <div className="about-list__item">
+          <Link className="about-list__item" href="/posts">
             <h2>写作</h2>
             <p>长文、教程、观点和阶段性复盘。</p>
-          </div>
-          <div className="about-list__item">
+          </Link>
+          <Link className="about-list__item" href="/notes">
             <h2>笔记</h2>
             <p>读书摘录、技术片段和临时灵感。</p>
-          </div>
-          <div className="about-list__item">
+          </Link>
+          <Link className="about-list__item" href="/projects">
             <h2>项目</h2>
             <p>开源项目、产品实验和作品集记录。</p>
-          </div>
+          </Link>
         </section>
       </main>
     </SiteShell>

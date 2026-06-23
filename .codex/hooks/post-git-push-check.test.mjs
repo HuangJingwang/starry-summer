@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { resolve } from 'node:path';
 
 import {
   buildWatcherArgs,
@@ -55,7 +56,7 @@ assert.deepEqual(buildWatcherArgs({
   sha: 'abc123',
   repository: 'HuangJingwang/starry-summer',
 }), [
-  '/repo/scripts/ops/watch-pushed-deployment.mjs',
+  resolve('/repo', 'scripts/ops/watch-pushed-deployment.mjs'),
   '--branch',
   'codex/post-push-watch',
   '--sha',
@@ -63,7 +64,7 @@ assert.deepEqual(buildWatcherArgs({
   '--repo',
   'HuangJingwang/starry-summer',
   '--log-file',
-  '/repo/.codex/local/post-push-status.jsonl',
+  resolve('/repo', '.codex/local/post-push-status.jsonl'),
 ]);
 
 console.log('post git push hook tests passed');

@@ -72,7 +72,7 @@ export default async function NotesPage({
                       </span>
                       <span className="posts-archive-item__tags" aria-label="笔记标签">
                         {taxonomyItems.slice(0, 3).map((taxonomyItem) => (
-                          <span key={taxonomyItem.href}>#{taxonomyItem.label}</span>
+                          <span key={taxonomyItem.href}>{taxonomyItem.label}</span>
                         ))}
                       </span>
                       <span className="posts-archive-item__stats" aria-label="笔记热度">

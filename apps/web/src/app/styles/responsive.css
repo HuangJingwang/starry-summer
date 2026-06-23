@@ -900,3 +900,56 @@
     width: 54px;
   }
 }
+
+@media (max-width: 1160px) and (min-width: 821px) {
+  .portfolio-hero {
+    overflow: visible;
+  }
+
+  .portfolio-hero__content {
+    gap: 18px 24px;
+    grid-template-areas:
+      "nav intro"
+      "latest actions"
+      "sky calendar"
+      "clock calendar";
+    grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+    grid-template-rows: auto;
+    min-height: auto;
+    padding-bottom: 24px;
+  }
+
+  .portfolio-hero__card-nav {
+    align-self: start;
+    max-width: 100%;
+    translate: none;
+  }
+
+  .portfolio-hero__latest-card {
+    align-self: start;
+    translate: none;
+  }
+
+  .portfolio-hero__intro-card,
+  .portfolio-hero__actions,
+  .portfolio-hero__sky-card {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .portfolio-hero__clock-card {
+    justify-self: stretch;
+    translate: none;
+    width: 100%;
+  }
+
+  .portfolio-hero__calendar-card {
+    justify-self: stretch;
+    translate: none;
+    width: 100%;
+  }
+
+  .portfolio-hero__visual {
+    display: none;
+  }
+}

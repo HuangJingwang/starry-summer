@@ -24,19 +24,23 @@ export function StudyDailyCards({ dashboard }: { dashboard: StudyDashboard }) {
 }
 
 function DailyProblemCard({ label, meta, task }: { label: string; meta: string; task: StudyTask }) {
+  const problemUrl = getLeetCodeProblemUrl(task.slug);
+
   return (
-    <a
+    <article
       className={`study-daily-card study-daily-card--${getDifficultyTone(task.difficulty)}`}
-      href={getLeetCodeProblemUrl(task.slug)}
-      target="_blank"
-      rel="noreferrer"
     >
+      <a className="study-daily-card__surface" href="/leetcode/today" aria-label={`${label}列表入口`} />
       <span>{label}</span>
-      <strong>{task.title}</strong>
+      <strong>
+        <a className="study-daily-card__problem-link" href={problemUrl} target="_blank" rel="noreferrer">
+          {task.title}
+        </a>
+      </strong>
       <small>
         {normalizeDifficultyLabel(task.difficulty)} · {meta}
       </small>
-    </a>
+    </article>
   );
 }
 

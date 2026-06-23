@@ -72,7 +72,7 @@ export default async function PostsPage({
                       </span>
                       <span className="posts-archive-item__tags" aria-label="文章标签">
                         {taxonomyItems.slice(0, 3).map((taxonomyItem) => (
-                          <span key={taxonomyItem.href}>#{taxonomyItem.label}</span>
+                          <span key={taxonomyItem.href}>{taxonomyItem.label}</span>
                         ))}
                       </span>
                       <span className="posts-archive-item__stats" aria-label="文章热度">

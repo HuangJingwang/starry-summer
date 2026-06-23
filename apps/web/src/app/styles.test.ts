@@ -377,8 +377,8 @@ describe('global styles', () => {
     const fixedHeroContentHeight = gridRows.reduce((sum, row) => sum + row, rowGap * 3 + paddingTop + paddingBottom);
 
     expect(gridRows).toHaveLength(4);
-    expect(fixedHeroContentHeight).toBeLessThanOrEqual(680);
-    expect(latestStartOffset - navReservedHeight).toBeGreaterThanOrEqual(16);
+    expect(fixedHeroContentHeight).toBeLessThanOrEqual(760);
+    expect(latestStartOffset - navReservedHeight).toBeGreaterThanOrEqual(28);
   });
 
   test('does not render the removed night milky way background layer', () => {
@@ -398,6 +398,10 @@ describe('global styles', () => {
   test('defines the README screenshot portfolio hero without the abandoned landing system', () => {
     const css = readGlobalStyles();
     const latestCardBlock = css.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const latestCardLinkBlock =
+      css.match(/\.portfolio-hero__latest-card a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const latestCardSummaryBlock =
+      css.match(/\.portfolio-hero__latest-card small\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const likeCardBlock = css.match(/\.portfolio-hero__like-card\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const likeCardBadgeBlock = css.match(/\.portfolio-hero__like-card span\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayHomeBodyBlock =
@@ -461,6 +465,9 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__latest-card img');
     expect(css).toContain('.portfolio-hero__latest-cover');
     expect(css).toContain('-webkit-line-clamp: 1;');
+    expect(latestCardLinkBlock).toContain('grid-template-rows: auto auto auto;');
+    expect(latestCardLinkBlock).toContain('align-content: center;');
+    expect(latestCardSummaryBlock).toContain('-webkit-line-clamp: 1;');
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__latest-card");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__intro-card");
     expect(css).toContain('.portfolio-hero__like-card');
@@ -602,13 +609,13 @@ describe('global styles', () => {
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('SHOOTING_STAR_INTERVAL_FRAMES = 520');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('time % SHOOTING_STAR_INTERVAL_FRAMES === 0');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('MAX_SHIP_SCREEN_RATIO = 0.045');
-    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SHIP_APPEAR_INTERVAL_MS = 3 * 60 * 1000');
-    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SMALL_SHIP_WEIGHT = 3');
-    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('FLAGSHIP_WEIGHT = 1');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('selectFleetEncounterVariant');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).toContain('SHIP_APPEAR_INTERVAL_MS = 2 * 60 * 1000');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).not.toContain('SMALL_SHIP_WEIGHT');
+    expect(readStylesheet('src/components/starry-sky-encounters.ts')).not.toContain('FLAGSHIP_WEIGHT');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('selectFleetEncounterVariant');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeSmallStarship');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('let activeStarship');
-    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeStarship && !activeSmallStarship && now >= nextShipAt)');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('let activeStarship');
+    expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('if (!activeSmallStarship && now >= nextShipAt)');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('fleet.forEach');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).not.toContain('FLEET_SIZE = 2');
     expect(readStylesheet('src/components/StarrySkyCanvas.tsx')).toContain('createExplorationFleet');
@@ -841,6 +848,10 @@ describe('global styles', () => {
   test('uses a single card navigation on the portfolio home page while keeping the night skin dark', () => {
     const css = readGlobalStyles();
     const homeNavBlock = css.match(/^\.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeNavInteractiveBlock =
+      css.match(
+        /\.portfolio-hero__nav-card:hover,[\s\S]*?\.portfolio-hero__nav-card:focus-within\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
     const homeNavLinksBlock = css.match(/\.portfolio-hero__nav-links\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeNavLinkBlock = css.match(/\.portfolio-hero__nav-links a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeNavBrandBlock = css.match(/\.portfolio-hero__nav-brand strong\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -861,6 +872,7 @@ describe('global styles', () => {
     const homeHeroContentBlock = css.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeIntroBlock = css.match(/^\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeSkyBlock = css.match(/^\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
       [...css.matchAll(/^\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/gm)]
@@ -912,7 +924,8 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('align-content: start;');
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
     expect(homeHeroContentBlock).toContain('grid-template-rows: 148px 98px 210px 124px;');
-    expect(homeHeroContentBlock).toContain('gap: 16px 0;');
+    expect(homeHeroContentBlock).toContain('gap: 28px 0;');
+    expect(homeHeroContentBlock).toContain('padding-top: 56px;');
     expect(homeIntroBlock).toContain('translate: 0 0;');
     expect(homeIntroBlock).toContain('min-height: 320px;');
     expect(homeIntroBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
@@ -929,20 +942,23 @@ describe('global styles', () => {
     expect(homeNavBlock).toContain('padding: 24px;');
     expect(homeNavBlock).toContain('rgba(4, 6, 14, 0.6)');
     expect(homeNavBlock).not.toContain('rgba(232, 246, 249, 0.86)');
+    expect(homeNavInteractiveBlock).toContain('border-color: rgba(148, 163, 184, 0.36);');
+    expect(homeNavInteractiveBlock).not.toContain('border-color: rgba(34, 211, 238, 0.32);');
     expect(dayHomeNavBlock).toContain('var(--summer-panel-sheen)');
     expect(dayHomeNavBlock).toContain('var(--summer-panel)');
     expect(dayHomeNavBlock).toContain('border-radius: 40px;');
+    expect(dayHomeNavBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
     expect(dayHomeNavBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
     expect(dayHomeNavBlock).toContain('0 40px 50px -32px rgba(0, 0, 0, 0.05)');
     expect(dayHomeNavBlock).not.toContain('rgba(4, 6, 14, 0.6)');
     expect(dayHomePanelBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
-    expect(dayHomePanelBlock).toContain('border-color: rgba(255, 255, 255, 0.86);');
+    expect(dayHomePanelBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
     expect(dayHomePanelBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
     expect(dayHomeLatestBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
-    expect(dayHomeLatestBlock).toContain('border-color: rgba(255, 255, 255, 0.86);');
+    expect(dayHomeLatestBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
     expect(dayHomeLatestBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
     expect(dayHomeLikeBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
-    expect(dayHomeLikeBlock).toContain('border-color: rgba(255, 255, 255, 0.86);');
+    expect(dayHomeLikeBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
     expect(dayHomeLikeBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
     expect(dayHomeNavLinkBlock).toContain('color: rgba(91, 66, 63, 0.68);');
     expect(dayHomeNavActiveBlock).toContain('linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%)');
@@ -996,10 +1012,14 @@ describe('global styles', () => {
     expect(css).toContain('@keyframes home-widget-enter');
     expect(css).toContain('animation: home-widget-enter');
     expect(css).toContain('grid-area: sky;');
+    expect(homeSkyBlock).toContain('align-content: center;');
+    expect(homeSkyBlock).toContain('justify-items: center;');
+    expect(homeSkyBlock).toContain('text-align: center;');
     expect(css).toContain('grid-area: clock;');
     expect(css).toContain('grid-area: calendar;');
     expect(dayCalendarBlock).toContain('rgba(255, 255, 255, 0.6)');
     expect(dayCalendarBlock).toContain('backdrop-filter: blur(4px);');
+    expect(dayCalendarBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
     expect(dayCalendarBlock).toContain('border-radius: 40px;');
     expect(dayCalendarBlock).toContain('inset 0 0 20px rgba(255, 255, 255, 0.25)');
     expect(dayCalendarBlock).toContain('min-height: 288px;');
@@ -1210,6 +1230,10 @@ describe('global styles', () => {
 
   test('keeps the portfolio home card navigation usable on mobile', () => {
     const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+    const mobileResponsiveCss = responsiveCss.slice(
+      responsiveCss.indexOf('@media (max-width: 820px) {'),
+      responsiveCss.indexOf('@media (max-width: 1160px) and (min-width: 821px) {'),
+    );
     const mobileHomeNavBlock =
       responsiveCss.match(/\.portfolio-hero__card-nav\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileHomeNavCardBlock =
@@ -1248,10 +1272,18 @@ describe('global styles', () => {
       [...responsiveCss.matchAll(/\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)?.groups
         ?.body ?? '';
     const mobileHiddenClockCalendarBlock =
-      [...responsiveCss.matchAll(/\.portfolio-hero__clock-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
+      [
+        ...mobileResponsiveCss.matchAll(
+          /\.portfolio-hero__clock-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g,
+        ),
+      ].at(-1)
         ?.groups?.body ?? '';
     const mobileHiddenSkyClockCalendarBlock =
-      [...responsiveCss.matchAll(/\.portfolio-hero__sky-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g)].at(-1)
+      [
+        ...mobileResponsiveCss.matchAll(
+          /\.portfolio-hero__sky-card,[\s\S]*?\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n  }/g,
+        ),
+      ].at(-1)
         ?.groups?.body ?? '';
     const mobileBackToTopBlock =
       responsiveCss.match(/\.mobile-back-to-top\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
@@ -1464,11 +1496,46 @@ describe('global styles', () => {
   test('keeps the public about page inside the cyber glass visual system', () => {
     const css = readGlobalStyles();
     const aboutItemBlock = css.match(/\.about-list__item\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutItemInteractiveBlock =
+      css.match(/\.about-list__item:hover,[\s\S]*?\.about-list__item:focus-visible\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayAboutSocialBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-social a\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayAboutItemBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-list__item\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+    const dayAboutItemInteractiveBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.about-list__item:hover,[\s\S]*?:root\[data-theme='summer-day'\] \.about-list__item:focus-visible\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
+    const dayAboutHeadingBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-list h2\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
+      '';
+    const dayAboutCopyBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-list p\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
+      '';
 
     expect(css).toContain('.about-list__item');
     expect(aboutItemBlock).toContain('background: rgba(4, 6, 14, 0.46);');
     expect(aboutItemBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
+    expect(aboutItemBlock).toContain('color: inherit;');
+    expect(aboutItemBlock).toContain('display: block;');
+    expect(aboutItemBlock).toContain('text-decoration: none;');
+    expect(aboutItemInteractiveBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
+    expect(aboutItemInteractiveBlock).toContain('transform: translateY(-1px);');
     expect(aboutItemBlock).not.toContain('background: #fff;');
+    expect(dayAboutSocialBlock).toContain('color: var(--summer-accent);');
+    expect(dayAboutSocialBlock).toContain('border-color: rgba(45, 109, 116, 0.18);');
+    expect(dayAboutItemBlock).toContain('var(--summer-panel-sheen)');
+    expect(dayAboutItemBlock).toContain('var(--summer-panel)');
+    expect(dayAboutItemBlock).toContain('border-color: var(--summer-line);');
+    expect(dayAboutItemBlock).toContain('color: var(--summer-ink);');
+    expect(dayAboutItemBlock).not.toContain('rgba(4, 6, 14, 0.46)');
+    expect(dayAboutItemInteractiveBlock).toContain('background: rgba(255, 213, 105, 0.16);');
+    expect(dayAboutItemInteractiveBlock).toContain('color: var(--summer-ink);');
+    expect(dayAboutHeadingBlock).toContain('color: var(--summer-ink);');
+    expect(dayAboutCopyBlock).toContain('color: var(--summer-muted);');
   });
 
   test('keeps public article detail surfaces inside the cyber glass visual system', () => {

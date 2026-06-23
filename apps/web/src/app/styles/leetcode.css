@@ -749,8 +749,38 @@
   gap: 6px;
   min-width: 0;
   padding: 13px 14px;
+  position: relative;
   text-decoration: none;
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.study-daily-card__surface {
+  border-radius: inherit;
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.study-daily-card > span,
+.study-daily-card > strong,
+.study-daily-card > small {
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+}
+
+.study-daily-card__problem-link {
+  color: inherit;
+  pointer-events: auto;
+  position: relative;
+  text-decoration: none;
+  z-index: 3;
+}
+
+.study-daily-card__problem-link:hover,
+.study-daily-card__problem-link:focus-visible {
+  color: var(--study-accent);
+  outline: 0;
 }
 
 .study-daily-card span {
@@ -955,8 +985,8 @@
 .study-round-link:focus-visible,
 .study-snapshot-detail--categories .study-category-chip:hover,
 .study-snapshot-detail--categories .study-category-chip:focus-visible,
-.study-daily-card[href]:hover,
-.study-daily-card[href]:focus-visible,
+.study-daily-card:hover,
+.study-daily-card:focus-within,
 .study-return-home a:hover,
 .study-return-home a:focus-visible {
   background: rgba(var(--study-accent-rgb), 0.1);

@@ -8,6 +8,15 @@ function readSources(paths: string[]) {
 }
 
 describe('public accessibility copy', () => {
+  test('turns public about summary cards into navigation links', () => {
+    const source = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
+
+    expect(source).toContain('href="/posts"');
+    expect(source).toContain('href="/notes"');
+    expect(source).toContain('href="/projects"');
+    expect(source).toContain('className="about-list__item"');
+  });
+
   test('uses Chinese labels for public reading and interaction landmarks', () => {
     const sources = readSources([
       'src/app/about/page.tsx',

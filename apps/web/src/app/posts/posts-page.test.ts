@@ -34,4 +34,14 @@ describe('posts page', () => {
     expect(source).toContain('getContentTaxonomyLinkGroups(item)');
     expect(source).not.toContain('<ContentCard key={item.id} item={item} />');
   });
+
+  test('renders archive taxonomy labels without social hashtag prefixes', () => {
+    const postsSource = readFileSync(join(process.cwd(), 'src/app/posts/page.tsx'), 'utf8');
+    const notesSource = readFileSync(join(process.cwd(), 'src/app/notes/page.tsx'), 'utf8');
+
+    expect(postsSource).toContain('<span key={taxonomyItem.href}>{taxonomyItem.label}</span>');
+    expect(notesSource).toContain('<span key={taxonomyItem.href}>{taxonomyItem.label}</span>');
+    expect(postsSource).not.toContain('<span key={taxonomyItem.href}>#{taxonomyItem.label}</span>');
+    expect(notesSource).not.toContain('<span key={taxonomyItem.href}>#{taxonomyItem.label}</span>');
+  });
 });
