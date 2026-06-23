@@ -4,6 +4,7 @@ import { FileText, Heart } from 'lucide-react';
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
 import { HomeContactButton } from '@/components/HomeContactButton';
+import { HomeFleetBackground } from '@/components/HomeFleetBackground';
 import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 import { getContentHref } from '@/lib/content';
@@ -35,6 +36,7 @@ export default async function HomePage() {
           <BlurredBubblesCanvas className="portfolio-hero__bubbles" />
           <StarrySkyCanvas className="portfolio-hero__canvas" />
           <div className="portfolio-hero__shade" />
+          <HomeFleetBackground />
 
           <div className="portfolio-hero__content cyber-home__container">
             <div className="portfolio-hero__left-stack">

@@ -1,16 +1,23 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, test } from 'vitest';
 
-import { SHIP_APPEAR_INTERVAL_MS, selectFleetEncounterVariant } from './starry-sky-encounters';
+import { SHIP_APPEAR_INTERVAL_MS } from './starry-sky-encounters';
 
 describe('starry sky fleet encounter scheduling', () => {
-  test('schedules one fleet encounter every three minutes', () => {
-    expect(SHIP_APPEAR_INTERVAL_MS).toBe(3 * 60 * 1000);
+  test('schedules one legacy small ship encounter every two minutes', () => {
+    expect(SHIP_APPEAR_INTERVAL_MS).toBe(2 * 60 * 1000);
   });
 
-  test('uses a three-to-one small ship to flagship encounter weight', () => {
-    expect(selectFleetEncounterVariant(() => 0)).toBe('small');
-    expect(selectFleetEncounterVariant(() => 0.74)).toBe('small');
-    expect(selectFleetEncounterVariant(() => 0.75)).toBe('flagship');
-    expect(selectFleetEncounterVariant(() => 0.99)).toBe('flagship');
+  test('uses the two legacy small ship variants instead of the canvas flagship lottery', () => {
+    const source = readFileSync(join(process.cwd(), 'src/components/StarrySkyCanvas.tsx'), 'utf8');
+
+    expect(source).toContain("variant: 'scout'");
+    expect(source).toContain("variant: 'voyager'");
+    expect(source).toContain('drawScoutStarship');
+    expect(source).toContain('drawVoyagerStarship');
+    expect(source).not.toContain('selectFleetEncounterVariant()');
+    expect(source).not.toContain('createFeaturedStarship(width, height)');
   });
 });

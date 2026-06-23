@@ -475,6 +475,36 @@ body:has(.cyber-home) .site-footer a {
   display: none;
 }
 
+.portfolio-hero__fleet-background {
+  animation: home-fleet-page-cruise 600s linear infinite;
+  animation-delay: var(--home-fleet-delay, 600s);
+  filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.36)) drop-shadow(0 0 32px rgba(125, 211, 252, 0.18));
+  height: clamp(58px, 8vw, 112px);
+  left: 0;
+  object-fit: contain;
+  opacity: 0.72;
+  pointer-events: none;
+  position: absolute;
+  top: clamp(76px, 18vh, 170px);
+  transform: translate3d(-34vw, 0, 0);
+  width: clamp(180px, 24vw, 340px);
+  z-index: -1;
+}
+
+@keyframes home-fleet-page-cruise {
+  0% {
+    transform: translate3d(-34vw, 0, 0);
+  }
+
+  4% {
+    transform: translate3d(112vw, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(112vw, 0, 0);
+  }
+}
+
 .portfolio-hero .cyber-home__container {
   align-items: stretch;
   display: grid;
@@ -556,8 +586,8 @@ body:has(.cyber-home) .site-footer a {
     linear-gradient(150deg, rgba(34, 211, 238, 0.08), transparent 42%),
     linear-gradient(180deg, rgba(15, 23, 42, 0.72), rgba(4, 6, 14, 0.66)),
     rgba(4, 6, 14, 0.6);
-  border: 1px solid #ffffff;
-  border-color: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-color: rgba(148, 163, 184, 0.26);
   border-radius: 40px;
   box-shadow:
     0 40px 50px -32px rgba(0, 0, 0, 0.32),
@@ -573,7 +603,7 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__nav-card:hover,
 .portfolio-hero__nav-card:focus-within {
-  border-color: rgba(34, 211, 238, 0.32);
+  border-color: rgba(148, 163, 184, 0.36);
   box-shadow: 0 32px 82px rgba(0, 0, 0, 0.38), 0 0 34px rgba(34, 211, 238, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -965,7 +995,7 @@ body:has(.cyber-home) .site-footer a {
   box-sizing: border-box;
   display: grid;
   flex: 1;
-  gap: 16px 0;
+  gap: 28px 0;
   --portfolio-left-stack-offset: 38px;
   --portfolio-right-stack-offset: 0px;
   grid-template-areas:
@@ -977,7 +1007,7 @@ body:has(.cyber-home) .site-footer a {
   grid-template-rows: 148px 98px 210px 124px;
   min-height: 100svh;
   padding-bottom: 16px;
-  padding-top: 16px;
+  padding-top: 56px;
   position: relative;
   z-index: 1;
 }
@@ -1046,11 +1076,13 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__latest-card a {
+  align-content: center;
   align-items: start;
   color: inherit;
   display: grid;
   gap: 3px 12px;
   grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
   min-height: 0;
   text-decoration: none;
   transition: opacity 180ms ease, transform 180ms ease;
@@ -1103,7 +1135,7 @@ body:has(.cyber-home) .site-footer a {
   font-size: 0.78rem;
   line-height: 1.35;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .portfolio-hero__latest-card time,
@@ -1606,8 +1638,8 @@ body:has(.cyber-home) .site-footer a {
   background:
     linear-gradient(145deg, rgba(251, 191, 36, 0.12), rgba(34, 211, 238, 0.1)),
     rgba(4, 6, 14, 0.54);
-  border: 1px solid #ffffff;
-  border-color: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-color: rgba(148, 163, 184, 0.26);
   border-radius: 32px;
   box-shadow:
     0 26px 80px rgba(0, 0, 0, 0.42),
@@ -1626,8 +1658,8 @@ body:has(.cyber-home) .site-footer a {
     linear-gradient(135deg, rgba(34, 211, 238, 0.08), transparent 50%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent),
     rgba(4, 6, 14, 0.48);
-  border: 1px solid #ffffff;
-  border-color: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-color: rgba(148, 163, 184, 0.26);
   border-radius: 32px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -1637,7 +1669,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__sky-card {
-  align-content: end;
+  align-content: center;
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
   background:
     radial-gradient(circle at 18% 28%, rgba(226, 232, 240, 0.72) 0 1px, transparent 2px),
@@ -1648,8 +1680,11 @@ body:has(.cyber-home) .site-footer a {
   display: grid;
   gap: 6px;
   grid-area: sky;
-  min-height: 0;
+  justify-items: center;
+  min-height: 98px;
   padding: 16px 18px;
+  text-align: center;
+  width: 100%;
 }
 
 .portfolio-hero__sky-card span,
@@ -2931,7 +2966,7 @@ body:has(.cyber-home) .site-footer a {
   background:
     var(--summer-panel-sheen),
     var(--summer-panel);
-  border-color: #ffffff;
+  border-color: rgba(148, 163, 184, 0.34);
   border-radius: 40px;
   box-shadow:
     0 40px 50px -32px rgba(0, 0, 0, 0.05),
@@ -2941,7 +2976,7 @@ body:has(.cyber-home) .site-footer a {
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-card:hover,
 :root[data-theme='summer-day'] .portfolio-hero__nav-card:focus-within {
-  border-color: #ffffff;
+  border-color: rgba(148, 163, 184, 0.34);
   box-shadow:
     0 40px 50px -32px rgba(0, 0, 0, 0.08),
     inset 0 0 20px rgba(255, 255, 255, 0.28);
@@ -3097,7 +3132,7 @@ body:has(.cyber-home) .site-footer a {
     var(--summer-panel-sheen),
     var(--summer-panel);
   backdrop-filter: blur(18px) saturate(1.08);
-  border-color: rgba(255, 255, 255, 0.86);
+  border-color: rgba(148, 163, 184, 0.34);
   border-radius: 32px;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.3),
@@ -3124,7 +3159,7 @@ body:has(.cyber-home) .site-footer a {
     var(--summer-panel-sheen),
     var(--summer-panel);
   backdrop-filter: blur(18px) saturate(1.08);
-  border-color: rgba(255, 255, 255, 0.86);
+  border-color: rgba(148, 163, 184, 0.34);
   border-radius: 32px;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.3),
@@ -3155,7 +3190,7 @@ body:has(.cyber-home) .site-footer a {
     var(--summer-panel-sheen),
     rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(4px);
-  border-color: #ffffff;
+  border-color: rgba(148, 163, 184, 0.34);
   border-radius: 40px;
   box-shadow:
     0 40px 50px -32px rgba(0, 0, 0, 0.05),
@@ -3233,7 +3268,7 @@ body:has(.cyber-home) .site-footer a {
     var(--summer-panel-sheen),
     var(--summer-panel);
   backdrop-filter: blur(18px) saturate(1.08);
-  border-color: rgba(255, 255, 255, 0.86);
+  border-color: rgba(148, 163, 184, 0.34);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.62),

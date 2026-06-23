@@ -1,539 +1,304 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
 
-interface StarPoint {
-  x: number;
-  y: number;
-  radius: number;
-  alpha: number;
-  phase: number;
-  speed: number;
+interface Starfield {
+  geometry: THREE.BufferGeometry;
+  points: THREE.Points;
+  speeds: Float32Array;
 }
 
-interface EscortShip {
-  x: number;
-  y: number;
-  scale: number;
-  phase: number;
-  drift: number;
-  depth: number;
+interface EngineSpark {
+  seed: number;
+  sprite: THREE.Sprite;
 }
 
-interface CloudLayer {
-  x: number;
-  y: number;
-  radiusX: number;
-  radiusY: number;
-  alpha: number;
-  hue: number;
-  drift: number;
+interface ShipLayer {
+  engineX: number;
+  engineLight: THREE.PointLight;
+  engineSparks: EngineSpark[];
+  engineTrail: THREE.Group;
+  group: THREE.Group;
+  hull: THREE.Mesh;
 }
+
+interface FlightPath {
+  endX: number;
+  startX: number;
+}
+
+const SHIP_TEXTURE_PATH = '/images/fleet-flagship/ship-render-side.png';
+const SHIP_TEXTURE_VERSION = 'side-profile-v1';
+const SHIP_ASPECT_RATIO = 1734 / 442;
+const SHIP_WORLD_HEIGHT = 2.92;
+const FLIGHT_LOOP_SECONDS = 10;
+const INITIAL_FLIGHT_PROGRESS = 0.32;
+const STAR_COUNT = 1900;
+const STAR_DEPTH = 128;
 
 const randomBetween = (min: number, max: number) => min + Math.random() * (max - min);
 
-function makeStars(width: number, height: number): StarPoint[] {
-  const density = Math.min(1.1, Math.max(0.58, width / 1280));
+function getVisibleSceneWidth(camera: THREE.PerspectiveCamera) {
+  const visibleHeight = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * Math.abs(camera.position.z);
 
-  return Array.from({ length: Math.floor(260 * density) }, () => ({
-    alpha: randomBetween(0.24, 0.9),
-    phase: randomBetween(0, Math.PI * 2),
-    radius: randomBetween(0.35, 1.55),
-    speed: randomBetween(0.0018, 0.006),
-    x: Math.random() * width,
-    y: Math.random() * height * 0.84,
-  }));
+  return visibleHeight * camera.aspect;
 }
 
-function makeEscorts(width: number, height: number): EscortShip[] {
-  const positions = [
-    [0.2, 0.32, 0.56, 0.5],
-    [0.72, 0.27, 0.48, 0.42],
-    [0.79, 0.48, 0.62, 0.58],
-    [0.31, 0.61, 0.42, 0.72],
-    [0.58, 0.18, 0.36, 0.35],
-    [0.12, 0.5, 0.32, 0.68],
+function getFlightX(path: FlightPath, elapsed: number) {
+  const progress = ((elapsed % FLIGHT_LOOP_SECONDS) / FLIGHT_LOOP_SECONDS + INITIAL_FLIGHT_PROGRESS) % 1;
+
+  return THREE.MathUtils.lerp(path.startX, path.endX, progress);
+}
+
+function makeCircleTexture(color = '#d8fbff') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    return new THREE.Texture();
+  }
+
+  const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gradient.addColorStop(0, color);
+  gradient.addColorStop(0.34, 'rgba(158, 238, 255, 0.72)');
+  gradient.addColorStop(1, 'rgba(158, 238, 255, 0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 64, 64);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  return texture;
+}
+
+function makeNebulaTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 512;
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    return new THREE.Texture();
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  const clouds = [
+    { x: 0.16, y: 0.52, r: 0.42, color: 'rgba(45, 212, 191, 0.15)' },
+    { x: 0.48, y: 0.34, r: 0.34, color: 'rgba(56, 189, 248, 0.13)' },
+    { x: 0.78, y: 0.58, r: 0.4, color: 'rgba(167, 139, 250, 0.12)' },
   ];
 
-  return positions.map(([x, y, scale, depth]) => ({
-    depth: depth ?? 0.5,
-    drift: randomBetween(5, 16),
-    phase: randomBetween(0, Math.PI * 2),
-    scale: Math.max(18, Math.min(width, height) * (scale ?? 0.45) * 0.052),
-    x: width * (x ?? 0.5),
-    y: height * (y ?? 0.5),
-  }));
-}
-
-function makeClouds(width: number, height: number): CloudLayer[] {
-  return Array.from({ length: 11 }, (_, index) => ({
-    alpha: randomBetween(0.04, 0.12),
-    drift: randomBetween(10, 38) * (index % 2 === 0 ? 1 : -1),
-    hue: [186, 205, 172, 38][index % 4] ?? 186,
-    radiusX: width * randomBetween(0.16, 0.38),
-    radiusY: height * randomBetween(0.05, 0.14),
-    x: width * randomBetween(-0.06, 1.06),
-    y: height * randomBetween(0.46, 0.96),
-  }));
-}
-
-function drawSkyGradient(context: CanvasRenderingContext2D, width: number, height: number) {
-  const sky = context.createLinearGradient(0, 0, 0, height);
-  sky.addColorStop(0, '#030616');
-  sky.addColorStop(0.42, '#06101d');
-  sky.addColorStop(0.72, '#071318');
-  sky.addColorStop(1, '#030606');
-  context.fillStyle = sky;
-  context.fillRect(0, 0, width, height);
-
-  const horizon = context.createRadialGradient(width * 0.72, height * 0.7, 0, width * 0.72, height * 0.7, width * 0.68);
-  horizon.addColorStop(0, 'rgba(19, 160, 177, 0.2)');
-  horizon.addColorStop(0.36, 'rgba(20, 89, 113, 0.14)');
-  horizon.addColorStop(1, 'rgba(3, 6, 14, 0)');
-  context.fillStyle = horizon;
-  context.fillRect(0, 0, width, height);
-}
-
-function drawMoonHalo(context: CanvasRenderingContext2D, width: number, height: number, time: number) {
-  const x = width * 0.74;
-  const y = height * 0.24;
-  const radius = Math.min(width, height) * 0.13;
-  const pulse = 1 + Math.sin(time * 0.0016) * 0.025;
-
-  const aura = context.createRadialGradient(x, y, radius * 0.2, x, y, radius * 2.9 * pulse);
-  aura.addColorStop(0, 'rgba(213, 248, 255, 0.16)');
-  aura.addColorStop(0.3, 'rgba(74, 222, 226, 0.07)');
-  aura.addColorStop(0.5, 'rgba(30, 86, 116, 0.04)');
-  aura.addColorStop(1, 'rgba(3, 6, 14, 0)');
-  context.fillStyle = aura;
-  context.beginPath();
-  context.arc(x, y, radius * 3.1, 0, Math.PI * 2);
-  context.fill();
-
-  const moon = context.createRadialGradient(x - radius * 0.22, y - radius * 0.18, 0, x, y, radius);
-  moon.addColorStop(0, 'rgba(255, 255, 246, 0.42)');
-  moon.addColorStop(0.38, 'rgba(206, 241, 241, 0.24)');
-  moon.addColorStop(0.78, 'rgba(45, 90, 105, 0.14)');
-  moon.addColorStop(1, 'rgba(15, 23, 42, 0.08)');
-  context.fillStyle = moon;
-  context.beginPath();
-  context.arc(x, y, radius, 0, Math.PI * 2);
-  context.fill();
-
-  context.globalCompositeOperation = 'destination-out';
-  context.beginPath();
-  context.arc(x + radius * 0.34, y - radius * 0.08, radius * 0.9, 0, Math.PI * 2);
-  context.fill();
-  context.globalCompositeOperation = 'source-over';
-
-  context.strokeStyle = 'rgba(210, 252, 255, 0.08)';
-  context.lineWidth = 1.2;
-  context.beginPath();
-  context.arc(x, y, radius * 1.04, -0.7, Math.PI * 1.45);
-  context.stroke();
-}
-
-function drawClouds(context: CanvasRenderingContext2D, clouds: CloudLayer[], width: number, height: number, time: number) {
-  clouds.forEach((cloud, index) => {
-    const drift = Math.sin(time * 0.0007 + index) * cloud.drift;
-    const y = cloud.y + Math.cos(time * 0.0005 + index) * height * 0.012;
-
-    context.save();
-    context.globalCompositeOperation = 'screen';
-    context.translate(cloud.x + drift, y);
-    context.scale(1, cloud.radiusY / cloud.radiusX);
-    const haze = context.createRadialGradient(0, 0, 0, 0, 0, cloud.radiusX);
-    haze.addColorStop(0, `hsla(${cloud.hue}, 88%, 70%, ${cloud.alpha})`);
-    haze.addColorStop(0.52, `hsla(${cloud.hue + 18}, 68%, 46%, ${cloud.alpha * 0.42})`);
-    haze.addColorStop(1, 'rgba(3, 6, 14, 0)');
-    context.fillStyle = haze;
-    context.beginPath();
-    context.arc(0, 0, cloud.radiusX, 0, Math.PI * 2);
-    context.fill();
-    context.restore();
+  clouds.forEach((cloud) => {
+    const radius = canvas.width * cloud.r;
+    const gradient = context.createRadialGradient(
+      canvas.width * cloud.x,
+      canvas.height * cloud.y,
+      0,
+      canvas.width * cloud.x,
+      canvas.height * cloud.y,
+      radius,
+    );
+    gradient.addColorStop(0, cloud.color);
+    gradient.addColorStop(0.5, cloud.color.replace('0.15', '0.05').replace('0.13', '0.05').replace('0.12', '0.04'));
+    gradient.addColorStop(1, 'rgba(3, 6, 14, 0)');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
   });
 
-  const mist = context.createLinearGradient(0, height * 0.7, 0, height);
-  mist.addColorStop(0, 'rgba(3, 6, 14, 0)');
-  mist.addColorStop(0.62, 'rgba(0, 12, 18, 0.46)');
-  mist.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
-  context.fillStyle = mist;
-  context.fillRect(0, height * 0.56, width, height * 0.44);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  return texture;
 }
 
-function drawStars(context: CanvasRenderingContext2D, stars: StarPoint[], time: number) {
-  stars.forEach((star) => {
-    const twinkle = star.alpha + Math.sin(time * star.speed + star.phase) * 0.24;
-    context.globalAlpha = Math.max(0.12, Math.min(1, twinkle));
-    context.fillStyle = star.radius > 1.2 ? '#d8fbff' : '#9ee9f5';
-    context.beginPath();
-    context.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-    context.fill();
-  });
-  context.globalAlpha = 1;
-}
+function makeFlameTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 192;
+  const context = canvas.getContext('2d');
 
-function drawDistantEscort(
-  context: CanvasRenderingContext2D,
-  ship: EscortShip,
-  time: number,
-) {
-  const drift = Math.sin(time * 0.0018 + ship.phase) * ship.drift;
-  const width = ship.scale * 2.4;
-  const height = ship.scale * 0.58;
-
-  context.save();
-  context.translate(ship.x, ship.y + drift);
-  context.rotate(-0.04 + ship.depth * 0.06);
-  context.globalAlpha = 0.5 + ship.depth * 0.38;
-
-  const trail = context.createLinearGradient(-width * 0.2, 0, -width * 1.6, 0);
-  trail.addColorStop(0, 'rgba(99, 238, 255, 0.34)');
-  trail.addColorStop(0.48, 'rgba(45, 212, 191, 0.08)');
-  trail.addColorStop(1, 'rgba(45, 212, 191, 0)');
-  context.fillStyle = trail;
-  context.beginPath();
-  context.moveTo(-width * 0.18, -height * 0.22);
-  context.bezierCurveTo(-width * 0.88, -height * 0.4, -width * 1.35, -height * 0.1, -width * 1.58, 0);
-  context.bezierCurveTo(-width * 1.35, height * 0.1, -width * 0.88, height * 0.4, -width * 0.18, height * 0.22);
-  context.closePath();
-  context.fill();
-
-  const hull = context.createLinearGradient(-width * 0.48, 0, width * 0.56, 0);
-  hull.addColorStop(0, 'rgba(15, 25, 39, 0.82)');
-  hull.addColorStop(0.5, 'rgba(105, 136, 151, 0.58)');
-  hull.addColorStop(1, 'rgba(219, 250, 255, 0.86)');
-  context.fillStyle = hull;
-  context.strokeStyle = 'rgba(112, 246, 255, 0.32)';
-  context.lineWidth = 0.8;
-  context.beginPath();
-  context.moveTo(width * 0.58, 0);
-  context.lineTo(width * 0.06, -height * 0.48);
-  context.lineTo(-width * 0.52, -height * 0.16);
-  context.lineTo(-width * 0.38, 0);
-  context.lineTo(-width * 0.52, height * 0.16);
-  context.lineTo(width * 0.06, height * 0.48);
-  context.closePath();
-  context.fill();
-  context.stroke();
-
-  context.fillStyle = 'rgba(216, 252, 255, 0.82)';
-  context.beginPath();
-  context.ellipse(width * 0.18, 0, width * 0.08, height * 0.14, 0, 0, Math.PI * 2);
-  context.fill();
-  context.restore();
-}
-
-function drawMainEngineTrail(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  shipWidth: number,
-  shipHeight: number,
-  time: number,
-) {
-  const pulse = 0.82 + Math.sin(time * 0.006) * 0.18;
-  const originX = -shipWidth * 0.5;
-  const trailLength = Math.min(width * 0.74, shipWidth * 1.18);
-
-  const trail = context.createLinearGradient(originX, 0, originX - trailLength, 0);
-  trail.addColorStop(0, `rgba(255, 242, 204, ${0.58 * pulse})`);
-  trail.addColorStop(0.11, `rgba(125, 249, 255, ${0.46 * pulse})`);
-  trail.addColorStop(0.36, `rgba(34, 211, 238, ${0.18 * pulse})`);
-  trail.addColorStop(0.68, `rgba(45, 212, 191, ${0.08 * pulse})`);
-  trail.addColorStop(1, 'rgba(45, 212, 191, 0)');
-
-  context.fillStyle = trail;
-  context.beginPath();
-  context.moveTo(originX, -shipHeight * 0.2);
-  context.bezierCurveTo(
-    originX - trailLength * 0.24,
-    -shipHeight * 0.64,
-    originX - trailLength * 0.78,
-    -height * 0.04,
-    originX - trailLength,
-    0,
-  );
-  context.bezierCurveTo(
-    originX - trailLength * 0.78,
-    height * 0.04,
-    originX - trailLength * 0.24,
-    shipHeight * 0.64,
-    originX,
-    shipHeight * 0.2,
-  );
-  context.closePath();
-  context.fill();
-
-  const core = context.createRadialGradient(originX - shipWidth * 0.03, 0, 0, originX - shipWidth * 0.03, 0, shipHeight * 0.56);
-  core.addColorStop(0, 'rgba(255, 255, 244, 0.94)');
-  core.addColorStop(0.22, 'rgba(125, 249, 255, 0.76)');
-  core.addColorStop(0.58, 'rgba(34, 211, 238, 0.24)');
-  core.addColorStop(1, 'rgba(34, 211, 238, 0)');
-  context.fillStyle = core;
-  context.beginPath();
-  context.ellipse(originX - shipWidth * 0.03, 0, shipHeight * 0.5, shipHeight * 0.34, 0, 0, Math.PI * 2);
-  context.fill();
-
-  for (let index = 0; index < 34; index += 1) {
-    const local = (time * 0.0005 + index / 34) % 1;
-    const particleX = originX - local * trailLength;
-    const particleY = Math.sin(local * Math.PI * 5 + index) * shipHeight * (0.12 + (1 - local) * 0.34);
-    context.globalAlpha = (1 - local) * 0.58;
-    context.fillStyle = index % 4 === 0 ? '#fff7d6' : '#67e8f9';
-    context.beginPath();
-    context.arc(particleX, particleY, 1.1 + (1 - local) * 2.9, 0, Math.PI * 2);
-    context.fill();
+  if (!context) {
+    return new THREE.Texture();
   }
-  context.globalAlpha = 1;
+
+  const gradient = context.createLinearGradient(512, 96, 0, 96);
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 0.96)');
+  gradient.addColorStop(0.14, 'rgba(125, 249, 255, 0.76)');
+  gradient.addColorStop(0.42, 'rgba(34, 211, 238, 0.34)');
+  gradient.addColorStop(0.72, 'rgba(45, 212, 191, 0.12)');
+  gradient.addColorStop(1, 'rgba(45, 212, 191, 0)');
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.moveTo(512, 46);
+  context.bezierCurveTo(330, 10, 130, 42, 0, 96);
+  context.bezierCurveTo(130, 150, 330, 182, 512, 146);
+  context.closePath();
+  context.fill();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  return texture;
 }
 
-function drawMainShip(context: CanvasRenderingContext2D, width: number, height: number, time: number) {
-  const t = time * 0.001;
-  const scale = Math.min(width * 0.58 / 170, height * 0.32 / 50);
+function createStarfield(starTexture: THREE.Texture): Starfield {
+  const positions = new Float32Array(STAR_COUNT * 3);
+  const colors = new Float32Array(STAR_COUNT * 3);
+  const speeds = new Float32Array(STAR_COUNT);
 
-  context.save();
-  context.translate(width * 0.5 - scale * 20, height * 0.5 + Math.sin(t * 1.2) * height * 0.006);
-  context.scale(scale, scale);
+  for (let index = 0; index < STAR_COUNT; index += 1) {
+    positions[index * 3] = randomBetween(-58, 58);
+    positions[index * 3 + 1] = randomBetween(-26, 26);
+    positions[index * 3 + 2] = randomBetween(-STAR_DEPTH, 10);
+    speeds[index] = randomBetween(0.04, 0.18);
 
-  const drawPlasmaExhaust = (tx: number, ty: number, baseW: number, length: number) => {
-    const spark = Math.sin(t * 35 + tx) * 4;
-    const currentLength = length + spark;
+    const tint = randomBetween(0.72, 1);
+    colors[index * 3] = tint * 0.72;
+    colors[index * 3 + 1] = tint * 0.95;
+    colors[index * 3 + 2] = 1;
+  }
 
-    const haloGrad = context.createLinearGradient(tx - currentLength, ty, tx, ty);
-    haloGrad.addColorStop(0, 'rgba(34, 211, 238, 0)');
-    haloGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.12)');
-    haloGrad.addColorStop(0.85, 'rgba(129, 140, 248, 0.4)');
-    haloGrad.addColorStop(1, 'rgba(255, 255, 255, 0.8)');
-    context.fillStyle = haloGrad;
-    context.beginPath();
-    context.moveTo(tx, ty - baseW * 1.5);
-    context.lineTo(tx - currentLength * 1.1, ty);
-    context.lineTo(tx, ty + baseW * 1.5);
-    context.closePath();
-    context.fill();
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    const coreGrad = context.createLinearGradient(tx - currentLength * 0.7, ty, tx, ty);
-    coreGrad.addColorStop(0, 'rgba(129, 140, 248, 0)');
-    coreGrad.addColorStop(0.5, 'rgba(34, 211, 238, 0.65)');
-    coreGrad.addColorStop(0.9, 'rgba(255, 255, 255, 0.95)');
-    coreGrad.addColorStop(1, '#ffffff');
-    context.fillStyle = coreGrad;
-    context.beginPath();
-    context.moveTo(tx, ty - baseW);
-    context.lineTo(tx - currentLength * 0.7, ty);
-    context.lineTo(tx, ty + baseW);
-    context.closePath();
-    context.fill();
+  const material = new THREE.PointsMaterial({
+    alphaMap: starTexture,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    size: 0.14,
+    transparent: true,
+    vertexColors: true,
+  });
 
-    context.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    context.shadowBlur = 6;
-    context.shadowColor = '#22d3ee';
-    for (let index = 1; index <= 3; index += 1) {
-      const dx = tx - currentLength * 0.22 * index;
-      context.beginPath();
-      context.moveTo(dx, ty - baseW * 0.4);
-      context.lineTo(dx - baseW * 0.9, ty);
-      context.lineTo(dx, ty + baseW * 0.4);
-      context.lineTo(dx + baseW * 0.9, ty);
-      context.closePath();
-      context.fill();
+  return {
+    geometry,
+    points: new THREE.Points(geometry, material),
+    speeds,
+  };
+}
+
+function createEngineSparks(texture: THREE.Texture, engineX: number): EngineSpark[] {
+  return Array.from({ length: 62 }, () => {
+    const material = new THREE.SpriteMaterial({
+      blending: THREE.AdditiveBlending,
+      color: Math.random() > 0.24 ? 0x67e8f9 : 0xfff7d6,
+      map: texture,
+      opacity: randomBetween(0.22, 0.82),
+      transparent: true,
+    });
+    const sprite = new THREE.Sprite(material);
+    sprite.position.set(randomBetween(engineX - 2.25, engineX - 0.12), randomBetween(-0.34, 0.18), randomBetween(-0.18, 0.18));
+    const size = randomBetween(0.045, 0.16);
+    sprite.scale.set(size, size, 1);
+
+    return {
+      seed: Math.random() * Math.PI * 2,
+      sprite,
+    };
+  });
+}
+
+function createEngineTrail(flameTexture: THREE.Texture, engineX: number) {
+  const group = new THREE.Group();
+  const material = new THREE.MeshBasicMaterial({
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    map: flameTexture,
+    opacity: 0.62,
+    transparent: true,
+  });
+
+  const wideTrail = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.96), material);
+  wideTrail.position.set(engineX - 1.18, -0.1, -0.1);
+  group.add(wideTrail);
+
+  const softTrail = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.3, 1.42),
+    new THREE.MeshBasicMaterial({
+      blending: THREE.AdditiveBlending,
+      color: 0x22d3ee,
+      depthWrite: false,
+      map: flameTexture,
+      opacity: 0.18,
+      transparent: true,
+    }),
+  );
+  softTrail.position.set(engineX - 1.58, -0.1, -0.22);
+  group.add(softTrail);
+
+  return group;
+}
+
+function createShipLayer(shipTexture: THREE.Texture, starTexture: THREE.Texture, flameTexture: THREE.Texture): ShipLayer {
+  const group = new THREE.Group();
+  group.rotation.set(-0.035, -0.11, 0.015);
+
+  const shipHeight = SHIP_WORLD_HEIGHT;
+  const shipWidth = shipHeight * SHIP_ASPECT_RATIO;
+  const engineX = -shipWidth * 0.38;
+  const hull = new THREE.Mesh(
+    new THREE.PlaneGeometry(shipWidth, shipHeight),
+    new THREE.MeshBasicMaterial({
+      depthWrite: false,
+      map: shipTexture,
+      transparent: true,
+    }),
+  );
+  hull.position.set(0, 0, 0);
+  group.add(hull);
+
+  const silhouette = new THREE.Mesh(
+    new THREE.PlaneGeometry(shipWidth * 1.02, shipHeight * 1.02),
+    new THREE.MeshBasicMaterial({
+      blending: THREE.AdditiveBlending,
+      color: 0x67e8f9,
+      depthWrite: false,
+      map: shipTexture,
+      opacity: 0.12,
+      transparent: true,
+    }),
+  );
+  silhouette.position.set(-0.03, -0.02, -0.1);
+  group.add(silhouette);
+
+  const engineTrail = createEngineTrail(flameTexture, engineX);
+  group.add(engineTrail);
+
+  const engineLight = new THREE.PointLight(0x67e8f9, 16, 7);
+  engineLight.position.set(engineX, -0.08, 0.32);
+  group.add(engineLight);
+
+  const engineSparks = createEngineSparks(starTexture, engineX);
+  engineSparks.forEach(({ sprite }) => group.add(sprite));
+
+  return {
+    engineX,
+    engineLight,
+    engineSparks,
+    engineTrail,
+    group,
+    hull,
+  };
+}
+
+function disposeObject3D(root: THREE.Object3D) {
+  root.traverse((object) => {
+    if (object instanceof THREE.Mesh || object instanceof THREE.Points || object instanceof THREE.Sprite) {
+      object.geometry?.dispose();
+      const material = object.material;
+
+      if (Array.isArray(material)) {
+        material.forEach((item) => item.dispose());
+      } else {
+        material.dispose();
+      }
     }
-    context.shadowBlur = 0;
-  };
-
-  drawPlasmaExhaust(-50, 0, 4.2, 70);
-  drawPlasmaExhaust(-42, -10, 2.5, 45);
-  drawPlasmaExhaust(-42, 10, 2.5, 45);
-
-  const drawNacelle = (ny: number) => {
-    const nacGrad = context.createLinearGradient(-42, ny, 16, ny);
-    nacGrad.addColorStop(0, '#070c20');
-    nacGrad.addColorStop(0.5, '#152458');
-    nacGrad.addColorStop(1, '#1e295d');
-    context.fillStyle = nacGrad;
-    context.strokeStyle = 'rgba(129, 140, 248, 0.5)';
-    context.lineWidth = 0.85;
-
-    context.beginPath();
-    context.moveTo(-42, ny - 3);
-    context.lineTo(-30, ny - 6);
-    context.lineTo(12, ny - 3);
-    context.lineTo(20, ny);
-    context.lineTo(12, ny + 3);
-    context.lineTo(-30, ny + 6);
-    context.lineTo(-42, ny + 3);
-    context.closePath();
-    context.fill();
-    context.stroke();
-
-    context.strokeStyle = 'rgba(34, 211, 238, 0.8)';
-    context.lineWidth = 0.65;
-    context.beginPath();
-    context.moveTo(-22, ny - 2);
-    context.lineTo(-6, ny - 2);
-    context.moveTo(-22, ny + 2);
-    context.lineTo(-6, ny + 2);
-    context.stroke();
-  };
-
-  drawNacelle(-16);
-  drawNacelle(16);
-
-  context.fillStyle = '#0c1334';
-  context.strokeStyle = 'rgba(129, 140, 248, 0.4)';
-  context.lineWidth = 0.9;
-  context.beginPath();
-  context.moveTo(-25, -12);
-  context.lineTo(-12, -21);
-  context.lineTo(8, -21);
-  context.lineTo(-2, -12);
-  context.moveTo(-25, 12);
-  context.lineTo(-12, 21);
-  context.lineTo(8, 21);
-  context.lineTo(-2, 12);
-  context.fill();
-  context.stroke();
-
-  const topHullGrad = context.createLinearGradient(-48, -12, 85, 0);
-  topHullGrad.addColorStop(0, '#0d1b3e');
-  topHullGrad.addColorStop(0.4, '#1a2c5a');
-  topHullGrad.addColorStop(0.8, '#314b8a');
-  topHullGrad.addColorStop(1, '#c5d7fe');
-
-  context.fillStyle = topHullGrad;
-  context.strokeStyle = 'rgba(147, 197, 253, 0.75)';
-  context.lineWidth = 0.95;
-  context.beginPath();
-  context.moveTo(85, 0);
-  context.lineTo(44, -5);
-  context.lineTo(18, -11);
-  context.lineTo(-25, -11);
-  context.lineTo(-48, -4);
-  context.lineTo(-48, 0);
-  context.closePath();
-  context.fill();
-  context.stroke();
-
-  const bottomHullGrad = context.createLinearGradient(-48, 12, 85, 0);
-  bottomHullGrad.addColorStop(0, '#050b1d');
-  bottomHullGrad.addColorStop(0.5, '#0b1435');
-  bottomHullGrad.addColorStop(1, '#182855');
-
-  context.fillStyle = bottomHullGrad;
-  context.strokeStyle = 'rgba(99, 102, 241, 0.45)';
-  context.lineWidth = 0.9;
-  context.beginPath();
-  context.moveTo(85, 0);
-  context.lineTo(44, 5);
-  context.lineTo(18, 11);
-  context.lineTo(-25, 11);
-  context.lineTo(-48, 4);
-  context.lineTo(-48, 0);
-  context.closePath();
-  context.fill();
-  context.stroke();
-
-  context.fillStyle = 'rgba(30, 41, 89, 0.95)';
-  context.strokeStyle = 'rgba(165, 180, 252, 0.6)';
-  context.lineWidth = 0.55;
-  context.beginPath();
-  context.moveTo(65, 0);
-  context.lineTo(25, -3.8);
-  context.lineTo(2, -4.5);
-  context.lineTo(-35, -4.5);
-  context.lineTo(-35, 4.5);
-  context.lineTo(2, 4.5);
-  context.lineTo(25, 3.8);
-  context.closePath();
-  context.fill();
-  context.stroke();
-
-  context.strokeStyle = '#030712';
-  context.lineWidth = 1;
-  context.beginPath();
-  context.moveTo(-42, 0);
-  context.lineTo(60, 0);
-  context.stroke();
-
-  const towerGrad = context.createLinearGradient(-22, -8, -6, -1);
-  towerGrad.addColorStop(0, '#080c1d');
-  towerGrad.addColorStop(0.6, '#152458');
-  towerGrad.addColorStop(1, '#44bcff');
-  context.fillStyle = towerGrad;
-  context.strokeStyle = 'rgba(56, 189, 248, 0.85)';
-  context.lineWidth = 0.85;
-  context.beginPath();
-  context.moveTo(-24, -2.5);
-  context.lineTo(-20, -9.5);
-  context.lineTo(-12, -9.5);
-  context.lineTo(-4, -2.5);
-  context.closePath();
-  context.fill();
-  context.stroke();
-
-  context.fillStyle = '#f43f5e';
-  context.beginPath();
-  context.arc(-13, -9.5, 0.9, 0, Math.PI * 2);
-  context.fill();
-
-  const gravityRingPhase = t * 3.8;
-  context.save();
-  context.translate(10, 0);
-  context.strokeStyle = 'rgba(34, 211, 238, 0.55)';
-  context.lineWidth = 1.25;
-  context.beginPath();
-  context.ellipse(0, 0, 4.5, 7.5, Math.PI / 4, 0, Math.PI * 2);
-  context.stroke();
-  context.fillStyle = '#a78bfa';
-  context.beginPath();
-  context.arc(Math.cos(gravityRingPhase) * 3.5, Math.sin(gravityRingPhase) * 5.5, 1.3, 0, Math.PI * 2);
-  context.shadowBlur = 8;
-  context.shadowColor = '#c084fc';
-  context.fill();
-  context.restore();
-
-  const drawHangarLights = (lx: number, ly: number, color: string) => {
-    context.beginPath();
-    context.arc(lx, ly, 0.65, 0, Math.PI * 2);
-    context.fillStyle = color;
-    context.fill();
-  };
-
-  const isBlinkerActive = Math.floor(t * 3) % 2 === 0;
-  for (let index = 0; index < 5; index += 1) {
-    const px = -22 + index * 11;
-    drawHangarLights(px - 1, -6.5, 'rgba(254, 240, 138, 0.88)');
-    drawHangarLights(px - 3, 6.5, 'rgba(34, 211, 238, 0.85)');
-  }
-
-  const dangerColor = isBlinkerActive ? '#ef4444' : 'rgba(239, 68, 68, 0.25)';
-  drawHangarLights(20, -16, dangerColor);
-  drawHangarLights(20, 16, dangerColor);
-
-  context.strokeStyle = 'rgba(255, 255, 255, 0.88)';
-  context.lineWidth = 0.5;
-  context.beginPath();
-  context.moveTo(85, 0);
-  context.lineTo(114, 0);
-  context.stroke();
-
-  const pulseR = (t * 18) % 18;
-  context.strokeStyle = `rgba(34, 211, 238, ${Math.max(0, 1 - pulseR / 18) * 0.45})`;
-  context.lineWidth = 0.4;
-  context.beginPath();
-  context.arc(114, 0, pulseR * 0.38, 0, Math.PI * 2);
-  context.stroke();
-  context.restore();
-}
-
-function drawForeground(context: CanvasRenderingContext2D, width: number, height: number, time: number) {
-  const vignette = context.createRadialGradient(width * 0.5, height * 0.5, height * 0.12, width * 0.5, height * 0.5, width * 0.72);
-  vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  vignette.addColorStop(0.74, 'rgba(0, 0, 0, 0.12)');
-  vignette.addColorStop(1, 'rgba(0, 0, 0, 0.58)');
-  context.fillStyle = vignette;
-  context.fillRect(0, 0, width, height);
+  });
 }
 
 export function FleetFlagshipCanvas({ className = '' }: { className?: string }) {
@@ -541,60 +306,183 @@ export function FleetFlagshipCanvas({ className = '' }: { className?: string }) 
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
 
-    if (!canvas || !context) {
+    if (!canvas) {
       return undefined;
     }
 
-    let animationId = 0;
-    let width = 0;
-    let height = 0;
-    let stars: StarPoint[] = [];
-    let escorts: EscortShip[] = [];
-    let clouds: CloudLayer[] = [];
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      canvas,
+      powerPreference: 'high-performance',
+      preserveDrawingBuffer: true,
+    });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x02040b, 1);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.16;
 
-    const resizeCanvas = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      width = canvas.offsetWidth || window.innerWidth;
-      height = canvas.offsetHeight || window.innerHeight;
-      canvas.width = Math.floor(width * ratio);
-      canvas.height = Math.floor(height * ratio);
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      stars = makeStars(width, height);
-      escorts = makeEscorts(width, height);
-      clouds = makeClouds(width, height);
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x02040b, 0.013);
+
+    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 180);
+    camera.position.set(0, 0.2, 8.8);
+
+    const textureLoader = new THREE.TextureLoader();
+    const shipTexture = textureLoader.load(`${SHIP_TEXTURE_PATH}?v=${SHIP_TEXTURE_VERSION}`);
+    shipTexture.colorSpace = THREE.SRGBColorSpace;
+    shipTexture.anisotropy = 8;
+
+    const starTexture = makeCircleTexture();
+    const flameTexture = makeFlameTexture();
+    const starfield = createStarfield(starTexture);
+    scene.add(starfield.points);
+
+    const nebula = new THREE.Mesh(
+      new THREE.PlaneGeometry(34, 17),
+      new THREE.MeshBasicMaterial({
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        map: makeNebulaTexture(),
+        opacity: 0.78,
+        transparent: true,
+      }),
+    );
+    nebula.position.set(4.8, 0.5, -36);
+    scene.add(nebula);
+
+    const planet = new THREE.Mesh(
+      new THREE.SphereGeometry(4.8, 64, 32),
+      new THREE.MeshBasicMaterial({
+        color: 0x0f5462,
+        transparent: true,
+        opacity: 0.74,
+      }),
+    );
+    planet.position.set(9.6, -5.2, -18);
+    scene.add(planet);
+
+    const planetHalo = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        blending: THREE.AdditiveBlending,
+        color: 0x22d3ee,
+        map: starTexture,
+        opacity: 0.24,
+        transparent: true,
+      }),
+    );
+    planetHalo.position.copy(planet.position);
+    planetHalo.scale.set(12, 12, 1);
+    scene.add(planetHalo);
+
+    const ship = createShipLayer(shipTexture, starTexture, flameTexture);
+    ship.group.position.set(0.28, 0.16, 0);
+    scene.add(ship.group);
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const startedAt = performance.now();
+    let previousFrameAt = startedAt;
+    let animationId = 0;
+    let flightPath: FlightPath = {
+      endX: 0,
+      startX: 0,
     };
 
-    const draw = (time: number) => {
-      context.clearRect(0, 0, width, height);
-      drawSkyGradient(context, width, height);
-      drawStars(context, stars, time);
-      drawMainShip(context, width, height, time);
-      drawForeground(context, width, height, time);
+    const resize = () => {
+      const width = canvas.offsetWidth || window.innerWidth;
+      const height = canvas.offsetHeight || window.innerHeight;
+      renderer.setSize(width, height, false);
+      camera.aspect = width / Math.max(1, height);
+      camera.updateProjectionMatrix();
 
+      const scale = Math.min(1.08, Math.max(0.68, width / 1120));
+      ship.group.scale.setScalar(scale);
+      const visibleWidth = getVisibleSceneWidth(camera);
+      const shipWidth = SHIP_WORLD_HEIGHT * SHIP_ASPECT_RATIO * scale;
+      flightPath = {
+        endX: visibleWidth / 2 + shipWidth * 0.62,
+        startX: -visibleWidth / 2 - shipWidth * 0.62,
+      };
+      ship.group.position.x = getFlightX(flightPath, (performance.now() - startedAt) / 1000);
+    };
+
+    const render = () => {
+      const frameAt = performance.now();
+      const elapsed = (frameAt - startedAt) / 1000;
+      const delta = Math.min((frameAt - previousFrameAt) / 1000, 0.05);
+      previousFrameAt = frameAt;
+      const positions = starfield.geometry.attributes.position as THREE.BufferAttribute;
+      const positionArray = positions.array as Float32Array;
+      const speedMultiplier = 18;
+
+      for (let index = 0; index < STAR_COUNT; index += 1) {
+        const zIndex = index * 3 + 2;
+        const currentZ = positionArray[zIndex] ?? -STAR_DEPTH;
+        const speed = starfield.speeds[index] ?? 0.08;
+        positionArray[zIndex] = currentZ + speed * delta * speedMultiplier;
+
+        if ((positionArray[zIndex] ?? -STAR_DEPTH) > 12) {
+          positionArray[index * 3] = randomBetween(-58, 58);
+          positionArray[index * 3 + 1] = randomBetween(-26, 26);
+          positionArray[zIndex] = -STAR_DEPTH;
+        }
+      }
+      positions.needsUpdate = true;
+
+      ship.group.position.y = 0.16 + Math.sin(elapsed * 1.18) * 0.1;
+      ship.group.position.x = getFlightX(flightPath, elapsed);
+      ship.group.rotation.x = -0.035 + Math.sin(elapsed * 0.72) * 0.012;
+      ship.group.rotation.y = -0.11 + Math.sin(elapsed * 0.48) * 0.025;
+      ship.group.rotation.z = 0.015 + Math.sin(elapsed * 0.84) * 0.012;
+
+      ship.engineTrail.scale.x = 0.94 + Math.sin(elapsed * 18) * 0.08;
+      ship.engineTrail.scale.y = 0.96 + Math.cos(elapsed * 16) * 0.12;
+      ship.engineLight.intensity = 12 + Math.sin(elapsed * 17) * 4;
+
+      ship.engineSparks.forEach(({ sprite, seed }, index) => {
+        sprite.position.x -= delta * (0.9 + (index % 5) * 0.2);
+        sprite.position.y += Math.sin(elapsed * 4 + seed) * delta * 0.14;
+        sprite.position.z += Math.cos(elapsed * 3.4 + seed) * delta * 0.14;
+
+        if (sprite.position.x < ship.engineX - 2.72) {
+          sprite.position.x = randomBetween(ship.engineX - 0.26, ship.engineX - 0.06);
+          sprite.position.y = randomBetween(-0.42, 0.24);
+          sprite.position.z = randomBetween(-0.18, 0.18);
+        }
+
+        const fade = Math.max(0, 1 - Math.abs(sprite.position.x - ship.engineX) / 2.72);
+        (sprite.material as THREE.SpriteMaterial).opacity = fade * 0.78;
+      });
+
+      nebula.position.x = 4.8 + Math.sin(elapsed * 0.08) * 0.8;
+      nebula.rotation.z = Math.sin(elapsed * 0.05) * 0.06;
+      planet.rotation.y += delta * 0.06;
+      camera.position.x = Math.sin(elapsed * 0.16) * 0.14;
+      camera.lookAt(0.18, 0.05, 0);
+
+      renderer.render(scene, camera);
       (window as Window & { __fleetFlagshipPreviewReady?: boolean }).__fleetFlagshipPreviewReady = true;
 
       if (!prefersReducedMotion) {
-        animationId = window.requestAnimationFrame(draw);
+        animationId = window.requestAnimationFrame(render);
       }
     };
 
-    const resizeObserver = new ResizeObserver(() => {
-      resizeCanvas();
-      if (prefersReducedMotion) {
-        draw(0);
-      }
-    });
-
-    resizeCanvas();
+    const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas);
-    draw(0);
+    resize();
+    render();
 
     return () => {
       window.cancelAnimationFrame(animationId);
       resizeObserver.disconnect();
+      disposeObject3D(scene);
+      renderer.dispose();
+      shipTexture.dispose();
+      starTexture.dispose();
+      flameTexture.dispose();
     };
   }, []);
 

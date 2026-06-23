@@ -41,6 +41,40 @@ function readRuleContainingSelector(source: string, selectorFragment: string) {
   return match?.groups?.body ?? '';
 }
 
+function readMediaRule(source: string, mediaQuery: string, selector: string) {
+  const mediaStart = source.indexOf(`@media ${mediaQuery} {`);
+
+  if (mediaStart === -1) {
+    return '';
+  }
+
+  let depth = 0;
+  let mediaEnd = source.length;
+  let started = false;
+
+  for (let index = mediaStart; index < source.length; index += 1) {
+    const char = source[index];
+
+    if (char === '{') {
+      depth += 1;
+      started = true;
+    }
+
+    if (char === '}') {
+      depth -= 1;
+    }
+
+    if (started && depth === 0) {
+      mediaEnd = index + 1;
+      break;
+    }
+  }
+
+  const mediaBlock = source.slice(mediaStart, mediaEnd).replace(/^[ \t]+/gm, '');
+
+  return readLastRule(mediaBlock, selector);
+}
+
 describe('home page', () => {
   test('renders the README screenshot portfolio hero instead of the immersive landing', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
@@ -67,11 +101,16 @@ describe('home page', () => {
     expect(source).toContain('className="portfolio-hero__intro-card"');
     expect(source).toContain('className="portfolio-hero__latest-card"');
     expect(source).not.toContain('className="portfolio-hero__pulse-card"');
+    expect(source).toContain('<HomeFleetBackground />');
+    expect(source).not.toContain('className="portfolio-hero__fleet-sketch"');
     expect(source).toContain('className="portfolio-hero__sky-card"');
+    expect(source).not.toContain('className="portfolio-hero__fleet-card"');
     expect(source).toContain('className="portfolio-hero__clock-card"');
     expect(source).toContain('className="portfolio-hero__calendar-card"');
     expect(source).not.toContain('className="portfolio-hero__recommend-card"');
     expect(source).not.toContain('ARCHIVE PULSE');
+    expect(source).toContain('STARRY SUMMER');
+    expect(source).toContain('Daylight notes, open archive.');
     expect(source).toContain('LOCAL TIME');
     expect(source).not.toContain('RECOMMEND');
     expect(source).not.toContain('formatNumber(stats.publicCount)');
@@ -96,6 +135,13 @@ describe('home page', () => {
     expect(source).toContain('src="/images/aster-day-profile-v2.png"');
     expect(source).toContain('alt="Aster.H 的夏日头像"');
     expect(source).toContain("import { HomeCardNav } from '@/components/HomeCardNav';");
+    expect(source).not.toContain("import { FleetFlagshipCanvas } from '@/components/FleetFlagshipCanvas';");
+    expect(source).not.toContain('className="portfolio-hero__fleet-canvas"');
+    expect(source).not.toContain('className="portfolio-hero__fleet-card"');
+    expect(source).not.toContain('className="portfolio-hero__fleet-ship"');
+    expect(source).toContain('<HomeFleetBackground />');
+    expect(source).not.toContain('className="portfolio-hero__fleet-sketch"');
+    expect(source).toContain("import { HomeFleetBackground } from '@/components/HomeFleetBackground';");
     expect(source).not.toContain("import { MobileBackToTop } from '@/components/MobileBackToTop';");
     expect(source).toContain("import { getContentHref } from '@/lib/content';");
     expect(source).toContain("import { getContentCover } from '@/lib/content-cover';");
@@ -442,6 +488,7 @@ describe('home page', () => {
 
   test('keeps home card geometry consistent across day and night themes', () => {
     const css = readGlobalStyles();
+    const normalizedCss = css.replace(/\r\n/g, '\n');
 
     expect(readRule(css, '.portfolio-hero')).toContain('justify-content: flex-start;');
     expect(readRule(css, '.portfolio-hero .cyber-home__container')).toContain('align-items: stretch;');
@@ -450,19 +497,44 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('translate: 0 0;');
     expect(readRule(css, '.portfolio-hero__actions')).toContain('margin-top: 0;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('align-self: start;');
-    expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: #ffffff;');
+    expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: rgba(148, 163, 184, 0.26);');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('gap: 16px 0;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('gap: 28px 0;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('grid-template-rows: 148px 98px 210px 124px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('padding-bottom: 16px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-top: 16px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-top: 56px;');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 320px;');
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
+    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('grid-area: sky;');
+    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('width: 100%;');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('position: absolute;');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('animation: home-fleet-page-cruise 600s linear infinite;');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('animation-delay: var(--home-fleet-delay, 600s);');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).not.toContain('animation-delay: -');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('pointer-events: none;');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('width: clamp(180px, 24vw, 340px);');
+    expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('z-index: -1;');
+    expect(readRule(css, '.portfolio-hero__fleet-sketch')).toBe('');
+    expect(normalizedCss).toContain('@keyframes home-fleet-page-cruise');
+    expect(normalizedCss).toContain(`@keyframes home-fleet-page-cruise {
+  0% {
+    transform: translate3d(-34vw, 0, 0);
+  }
+
+  4% {
+    transform: translate3d(112vw, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(112vw, 0, 0);
+  }
+}`);
+    expect(normalizedCss).not.toContain('@keyframes home-fleet-sketch-cruise');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('border-radius: 32px;');
     expect(readRule(css, '.portfolio-hero__portrait')).toContain('padding: 9px;');
     expect(readRuleContainingSelector(css, '.portfolio-hero__calendar-card')).toContain(
-      'border-color: #ffffff;',
+      'border-color: rgba(148, 163, 184, 0.26);',
     );
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('border-radius: 40px;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('gap: 0;');
@@ -474,5 +546,24 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__like-card')).toContain('border-radius: 999px;');
     expect(readRule(css, '.portfolio-hero__like-card')).toContain('height: 48px;');
     expect(readRule(css, '.portfolio-hero__like-card')).toContain('width: 48px;');
+  });
+
+  test('uses a tablet hero layout before fixed desktop cards can overlap', () => {
+    const css = readGlobalStyles();
+    const heroContentBlock = readMediaRule(css, '(max-width: 1160px) and (min-width: 821px)', '.portfolio-hero__content');
+    const navBlock = readMediaRule(css, '(max-width: 1160px) and (min-width: 821px)', '.portfolio-hero__card-nav');
+    const clockBlock = readMediaRule(css, '(max-width: 1160px) and (min-width: 821px)', '.portfolio-hero__clock-card');
+    const calendarBlock = readMediaRule(
+      css,
+      '(max-width: 1160px) and (min-width: 821px)',
+      '.portfolio-hero__calendar-card',
+    );
+
+    expect(heroContentBlock).toContain('grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);');
+    expect(heroContentBlock).toContain('"nav intro"');
+    expect(heroContentBlock).toContain('"latest actions"');
+    expect(navBlock).toContain('translate: none;');
+    expect(clockBlock).toContain('width: 100%;');
+    expect(calendarBlock).toContain('width: 100%;');
   });
 });

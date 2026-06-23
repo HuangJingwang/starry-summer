@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-import { SHIP_APPEAR_INTERVAL_MS, selectFleetEncounterVariant } from './starry-sky-encounters';
+import { SHIP_APPEAR_INTERVAL_MS } from './starry-sky-encounters';
 
 interface Star {
   x: number;
@@ -130,7 +130,6 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
     let stars: Star[] = [];
     let nebulae: Nebula[] = [];
     let activeSmallStarship: Starship | null = null;
-    let activeStarship: FeaturedStarship | null = null;
     let nextShipAt = window.performance.now() + SHIP_APPEAR_INTERVAL_MS;
     let time = 0;
     const shootingStar: ShootingStar = {
@@ -166,7 +165,6 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
 
       nebulae = createNebulae(width, height);
       activeSmallStarship = null;
-      activeStarship = null;
       nextShipAt = window.performance.now() + SHIP_APPEAR_INTERVAL_MS;
     };
 
@@ -609,14 +607,10 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
 
       if (showFleet) {
         const now = window.performance.now();
-        if (!activeStarship && !activeSmallStarship && now >= nextShipAt) {
-          if (selectFleetEncounterVariant() === 'flagship') {
-            activeStarship = createFeaturedStarship(width, height);
-          } else {
-            activeSmallStarship = createExplorationFleet(width, height)[0] ?? null;
-            if (activeSmallStarship) {
-              activeSmallStarship.x = -activeSmallStarship.width - activeSmallStarship.trailLength;
-            }
+        if (!activeSmallStarship && now >= nextShipAt) {
+          activeSmallStarship = createExplorationFleet(width, height)[0] ?? null;
+          if (activeSmallStarship) {
+            activeSmallStarship.x = -activeSmallStarship.width - activeSmallStarship.trailLength;
           }
         }
 
@@ -624,14 +618,6 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
           const stillVisible = drawStarship(activeSmallStarship, width, height);
           if (!stillVisible) {
             activeSmallStarship = null;
-            nextShipAt = now + SHIP_APPEAR_INTERVAL_MS;
-          }
-        }
-
-        if (activeStarship) {
-          const stillVisible = drawFeaturedStarship(activeStarship, width, height);
-          if (!stillVisible) {
-            activeStarship = null;
             nextShipAt = now + SHIP_APPEAR_INTERVAL_MS;
           }
         }
