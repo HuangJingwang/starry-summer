@@ -996,6 +996,7 @@ body:has(.cyber-home) .site-footer a {
   display: grid;
   flex: 1;
   gap: 28px 0;
+  --portfolio-hero-lift: clamp(28px, 4svh, 44px);
   --portfolio-left-stack-offset: 38px;
   --portfolio-right-stack-offset: 0px;
   grid-template-areas:
@@ -1009,6 +1010,7 @@ body:has(.cyber-home) .site-footer a {
   padding-bottom: clamp(24px, 6svh, 56px);
   padding-top: clamp(64px, 9svh, 92px);
   position: relative;
+  translate: 0 calc(-1 * var(--portfolio-hero-lift));
   z-index: 1;
 }
 
