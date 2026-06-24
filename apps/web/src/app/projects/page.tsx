@@ -1,5 +1,8 @@
-import { ContentCard } from '@/components/ContentCard';
+import Link from 'next/link';
+
 import { SiteShell } from '@/components/SiteShell';
+import { getContentHref, type SiteContentItem } from '@/lib/content';
+import { getContentCover } from '@/lib/content-cover';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
 
@@ -20,13 +23,92 @@ export default async function ProjectsPage() {
         <div className="page-title">
           <p className="eyebrow">项目</p>
           <h1>项目</h1>
+          <p>长期维护的产品实验、工程实践和公开作品。</p>
         </div>
-        <div className="content-grid">
+        <div className="projects-page__grid">
           {projects.map((item) => (
-            <ContentCard key={item.id} item={item} />
+            <ProjectShowcaseCard key={item.id} item={item} />
           ))}
         </div>
       </main>
     </SiteShell>
   );
+}
+
+function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
+  const href = getContentHref(item);
+  const cover = getContentCover(item);
+  const projectTags = getProjectTags(item);
+  const projectLinks = getProjectLinks(item, href);
+  const year = new Date(item.publishedAt).getFullYear();
+
+  return (
+    <article className="project-showcase-card">
+      <Link
+        aria-label={`查看项目：${item.title}`}
+        className={`project-showcase-card__media${cover ? '' : ' project-showcase-card__media--empty'}`}
+        href={href}
+      >
+        {cover ? (
+          <img src={cover.imageUrl} alt={cover.altText} />
+        ) : (
+          <span>PROJECT</span>
+        )}
+      </Link>
+
+      <div className="project-showcase-card__body">
+        <div className="project-showcase-card__heading">
+          <h2>
+            <Link href={href}>{item.title}</Link>
+          </h2>
+          <time dateTime={item.publishedAt}>{Number.isFinite(year) ? year : 'NOW'}</time>
+        </div>
+
+        {projectTags.length > 0 && (
+          <div className="project-showcase-card__tags" aria-label="项目标签">
+            {projectTags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+          </div>
+        )}
+
+        {item.summary && <p>{item.summary}</p>}
+
+        <div className="project-showcase-card__links">
+          {projectLinks.map((link) => (
+            <Link
+              key={`${link.label}-${link.href}`}
+              href={link.href}
+              rel={link.external ? 'noopener noreferrer' : undefined}
+              target={link.external ? '_blank' : undefined}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function getProjectTags(item: SiteContentItem): string[] {
+  const tags = item.project?.stack?.length
+    ? item.project.stack
+    : [...(item.tags ?? []), ...(item.categories ?? []), ...(item.series ?? [])];
+
+  return [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))].slice(0, 5);
+}
+
+function getProjectLinks(item: SiteContentItem, detailHref: string): Array<{ label: string; href: string; external?: boolean }> {
+  const links = item.project?.links;
+  const externalLinks = [
+    { label: 'Website', href: links?.website },
+    { label: 'GitHub', href: links?.repository },
+    { label: 'Demo', href: links?.demo },
+    { label: 'Article', href: links?.article },
+  ]
+    .filter((link): link is { label: string; href: string } => Boolean(link.href?.trim()))
+    .map((link) => ({ ...link, external: true }));
+
+  return [{ label: '详情', href: detailHref }, ...externalLinks];
 }

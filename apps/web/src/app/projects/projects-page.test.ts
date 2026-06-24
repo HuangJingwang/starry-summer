@@ -8,12 +8,20 @@ function readSource(path: string) {
 }
 
 describe('projects page', () => {
-  test('uses a smaller cover ratio only for project list cards', () => {
+  test('uses reference-inspired project showcase cards instead of generic content cards', () => {
     const pageSource = readSource('src/app/projects/page.tsx');
     const styles = readSource('src/app/styles/content.css');
 
     expect(pageSource).toContain('className="page-main projects-page"');
-    expect(styles).toContain('.content-card__cover {\n  aspect-ratio: 16 / 9;');
-    expect(styles).toContain('.projects-page .content-card__cover {\n  aspect-ratio: 21 / 9;');
+    expect(pageSource).not.toContain("import { ContentCard }");
+    expect(pageSource).toContain('function ProjectShowcaseCard');
+    expect(pageSource).toContain('className="projects-page__grid"');
+    expect(pageSource).toContain('className="project-showcase-card__tags"');
+    expect(pageSource).toContain('className="project-showcase-card__links"');
+
+    expect(styles).toContain('.projects-page .project-showcase-card');
+    expect(styles).toContain('grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);');
+    expect(styles).toContain('.project-showcase-card__media');
+    expect(styles).toContain(':root[data-theme=\'summer-day\'] .projects-page .project-showcase-card');
   });
 });
