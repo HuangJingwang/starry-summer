@@ -4,10 +4,17 @@ import Link from 'next/link';
 import type { CSSProperties, MouseEvent } from 'react';
 import { useEffect, useState } from 'react';
 
-const transitionStorageKey = 'starry-summer-home-nav-transition';
-const sessionThemeKey = 'starry-summer-theme';
+import {
+  getMillisecondsUntilNextThemeBoundary,
+  getThemeCookie,
+  getThemeForTime,
+  isSiteTheme,
+  setThemeCookie,
+  themeStorageKey,
+  type SiteTheme,
+} from '@/lib/site-theme';
 
-type SiteTheme = 'summer-day' | 'summer-night';
+const transitionStorageKey = 'starry-summer-home-nav-transition';
 
 const homeNavItems = [
   {
@@ -50,10 +57,14 @@ export function HomeCardNav() {
     let timer: number;
 
     function syncAutoTheme() {
-      const savedTheme = window.sessionStorage.getItem(sessionThemeKey);
-      const nextTheme = isSiteTheme(savedTheme) ? savedTheme : getThemeForTime();
+      const savedTheme = window.sessionStorage.getItem(themeStorageKey);
+      const sessionTheme = isSiteTheme(savedTheme) ? savedTheme : null;
+      const nextTheme = sessionTheme ?? getThemeCookie() ?? getThemeForTime();
 
       document.documentElement.dataset.theme = nextTheme;
+      if (sessionTheme) {
+        setThemeCookie(nextTheme);
+      }
       setTheme(nextTheme);
       timer = window.setTimeout(syncAutoTheme, getMillisecondsUntilNextThemeBoundary());
     }
@@ -75,7 +86,8 @@ export function HomeCardNav() {
   function toggleTheme() {
     const nextTheme = theme === 'summer-day' ? 'summer-night' : 'summer-day';
 
-    window.sessionStorage.setItem(sessionThemeKey, nextTheme);
+    window.sessionStorage.setItem(themeStorageKey, nextTheme);
+    setThemeCookie(nextTheme);
     document.documentElement.dataset.theme = nextTheme;
     setTheme(nextTheme);
   }
@@ -134,23 +146,4 @@ export function HomeCardNav() {
 
 function shouldUseNativeNavigation(event: MouseEvent<HTMLAnchorElement>) {
   return event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-}
-
-function getThemeForTime(date = new Date()): SiteTheme {
-  const hour = date.getHours();
-
-  return hour >= 6 && hour < 18 ? 'summer-day' : 'summer-night';
-}
-
-function isSiteTheme(value: string | null): value is SiteTheme {
-  return value === 'summer-day' || value === 'summer-night';
-}
-
-function getMillisecondsUntilNextThemeBoundary(date = new Date()) {
-  const nextBoundary = new Date(date);
-  const hour = date.getHours();
-
-  nextBoundary.setHours(hour < 6 ? 6 : hour < 18 ? 18 : 30, 0, 0, 0);
-
-  return nextBoundary.getTime() - date.getTime();
 }

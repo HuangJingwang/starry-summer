@@ -4,19 +4,21 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 describe('ThemeToggle', () => {
-  test('uses a single icon button while defaulting to time based theme sync with session preview persistence', () => {
+  test('uses a single icon button while defaulting to time based theme sync with cookie persistence', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/ThemeToggle.tsx'), 'utf8');
 
     expect(source).toContain("'use client';");
-    expect(source).toContain("const sessionThemeKey = 'starry-summer-theme';");
-    expect(source).toContain('function isSiteTheme(value: string | null): value is SiteTheme');
+    expect(source).toContain('getMillisecondsUntilNextThemeBoundary,');
+    expect(source).toContain('getThemeCookie,');
+    expect(source).toContain('getThemeForTime,');
+    expect(source).toContain('setThemeCookie,');
+    expect(source).toContain('themeStorageKey,');
     expect(source).toContain('function getSessionTheme()');
-    expect(source).toContain('window.sessionStorage.getItem(sessionThemeKey)');
-    expect(source).toContain('getSessionTheme() ?? getThemeForTime()');
-    expect(source).toContain('window.sessionStorage.setItem(sessionThemeKey, nextTheme)');
+    expect(source).toContain('window.sessionStorage.getItem(themeStorageKey)');
+    expect(source).toContain('sessionTheme ?? getThemeCookie() ?? getThemeForTime()');
+    expect(source).toContain('window.sessionStorage.setItem(themeStorageKey, nextTheme)');
+    expect(source).toContain('setThemeCookie(nextTheme);');
     expect(source).not.toContain("type ThemeMode = 'auto' | SiteTheme;");
-    expect(source).toContain("function getThemeForTime(date = new Date()): SiteTheme");
-    expect(source).toContain("hour >= 6 && hour < 18 ? 'summer-day' : 'summer-night'");
     expect(source).toContain('getMillisecondsUntilNextThemeBoundary()');
     expect(source).not.toContain('window.localStorage');
     expect(source).toContain('document.documentElement.dataset.theme = nextTheme;');
@@ -26,5 +28,18 @@ describe('ThemeToggle', () => {
     expect(source).toContain("{theme === 'summer-day' ? '☀' : '☾'}");
     expect(source).toContain('切换到${themeLabels[nextTheme]}模式');
     expect(source).not.toContain('aria-pressed=');
+  });
+});
+
+describe('first paint theme contract', () => {
+  test('server layout writes the initial data-theme from the theme cookie before hydration', () => {
+    const layoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
+
+    expect(layoutSource).toContain("import { cookies } from 'next/headers';");
+    expect(layoutSource).toContain("import { getInitialThemeFromCookie, getThemeInitScript } from '@/lib/site-theme';");
+    expect(layoutSource).toContain('const initialTheme = getInitialThemeFromCookie(await cookies());');
+    expect(layoutSource).toContain('data-theme={initialTheme}');
+    expect(layoutSource).toContain('suppressHydrationWarning');
+    expect(layoutSource).toContain('<script id="theme-init" dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />');
   });
 });

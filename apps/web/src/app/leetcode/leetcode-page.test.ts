@@ -27,7 +27,9 @@ describe('leetcode archive page', () => {
     expect(siteShellSource).toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
     expect(siteShellSource).toContain('<ThemeSync />');
     expect(themeSyncSource).toContain('document.documentElement.dataset.theme = nextTheme;');
-    expect(themeSyncSource).toContain('window.sessionStorage.getItem(sessionThemeKey)');
+    expect(themeSyncSource).toContain('window.sessionStorage.getItem(themeStorageKey)');
+    expect(themeSyncSource).toContain('sessionTheme ?? getThemeCookie() ?? getThemeForTime()');
+    expect(themeSyncSource).toContain('setThemeCookie(nextTheme);');
     expect(source).not.toContain('page-main__canvas');
     expect(snapshotSource).toContain('study-snapshot-hero');
     expect(snapshotSource).not.toContain('算法练习快照');

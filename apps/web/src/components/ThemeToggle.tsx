@@ -2,39 +2,27 @@
 
 import { useEffect, useState } from 'react';
 
-type SiteTheme = 'summer-day' | 'summer-night';
-const sessionThemeKey = 'starry-summer-theme';
+import {
+  getMillisecondsUntilNextThemeBoundary,
+  getThemeCookie,
+  getThemeForTime,
+  isSiteTheme,
+  setThemeCookie,
+  themeStorageKey,
+  type SiteTheme,
+} from '@/lib/site-theme';
 
 const themeLabels: Record<SiteTheme, string> = {
   'summer-day': '白天',
   'summer-night': '黑夜',
 };
 
-function getThemeForTime(date = new Date()): SiteTheme {
-  const hour = date.getHours();
-
-  return hour >= 6 && hour < 18 ? 'summer-day' : 'summer-night';
-}
-
-function isSiteTheme(value: string | null): value is SiteTheme {
-  return value === 'summer-day' || value === 'summer-night';
-}
-
-function getMillisecondsUntilNextThemeBoundary(date = new Date()) {
-  const nextBoundary = new Date(date);
-  const hour = date.getHours();
-
-  nextBoundary.setHours(hour < 6 ? 6 : hour < 18 ? 18 : 30, 0, 0, 0);
-
-  return nextBoundary.getTime() - date.getTime();
-}
-
 function applyTheme(nextTheme: SiteTheme) {
   document.documentElement.dataset.theme = nextTheme;
 }
 
 function getSessionTheme() {
-  const savedTheme = window.sessionStorage.getItem(sessionThemeKey);
+  const savedTheme = window.sessionStorage.getItem(themeStorageKey);
 
   return isSiteTheme(savedTheme) ? savedTheme : null;
 }
@@ -46,9 +34,14 @@ export function ThemeToggle() {
     let timer: number;
 
     function syncAutoTheme() {
-      const nextTheme = getSessionTheme() ?? getThemeForTime();
+      const sessionTheme = getSessionTheme();
+      const nextTheme = sessionTheme ?? getThemeCookie() ?? getThemeForTime();
+
       setTheme(nextTheme);
       applyTheme(nextTheme);
+      if (sessionTheme) {
+        setThemeCookie(nextTheme);
+      }
       timer = window.setTimeout(syncAutoTheme, getMillisecondsUntilNextThemeBoundary());
     }
 
@@ -60,7 +53,8 @@ export function ThemeToggle() {
   function toggleTheme() {
     const nextTheme = theme === 'summer-day' ? 'summer-night' : 'summer-day';
 
-    window.sessionStorage.setItem(sessionThemeKey, nextTheme);
+    window.sessionStorage.setItem(themeStorageKey, nextTheme);
+    setThemeCookie(nextTheme);
     setTheme(nextTheme);
     applyTheme(nextTheme);
   }
