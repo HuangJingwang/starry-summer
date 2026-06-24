@@ -97,7 +97,10 @@
         "GitHub Content",
         "Cloudflare Workers"
       ],
-      "startedAt": "2026-06-10"
+      "startedAt": "2026-06-10",
+      "links": {
+        "repository": "https://github.com/HuangJingwang/starry-summer"
+      }
     },
     "viewCount": 214,
     "likeCount": 31

@@ -1095,6 +1095,7 @@ body:has(.guestbook-page) .site-footer a {
   color: var(--cyber-ink);
   display: flex;
   flex-direction: column;
+  font-family: var(--font-nav);
   gap: 16px;
   max-width: 100%;
   min-height: 0;
@@ -1138,7 +1139,7 @@ body:has(.guestbook-page) .site-footer a {
   width: 64px;
 }
 
-.project-showcase-card__thumbnail img {
+.project-showcase-card__avatar {
   display: block;
   height: 100%;
   object-fit: cover;
@@ -1146,7 +1147,11 @@ body:has(.guestbook-page) .site-footer a {
   width: 100%;
 }
 
-.project-showcase-card:hover .project-showcase-card__thumbnail img {
+.project-showcase-card__avatar--day {
+  display: none;
+}
+
+.project-showcase-card:hover .project-showcase-card__avatar {
   filter: saturate(1.1) contrast(1.04);
   transform: scale(1.04);
 }
@@ -1178,22 +1183,6 @@ body:has(.guestbook-page) .site-footer a {
   margin: 0;
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.project-showcase-card__title-row h2 a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.project-showcase-card__title-row h2 a:hover,
-.project-showcase-card__title-row h2 a:focus-visible {
-  color: var(--cyber-cyan);
-  outline: 0;
-}
-
-.project-showcase-card__title-row h2 a:focus-visible {
-  border-radius: 6px;
-  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.34);
 }
 
 .project-showcase-card__title-row time {
@@ -2880,7 +2869,7 @@ body:has(.search-page) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .project-showcase-card__title-row h2,
-:root[data-theme='summer-day'] .project-showcase-card__title-row h2 a {
+:root[data-theme='summer-day'] .project-showcase-card__title-row h2 {
   color: var(--summer-ink);
 }
 
@@ -2898,6 +2887,14 @@ body:has(.search-page) .site-footer a {
   color: var(--summer-accent);
 }
 
+:root[data-theme='summer-day'] .project-showcase-card__avatar--night {
+  display: none;
+}
+
+:root[data-theme='summer-day'] .project-showcase-card__avatar--day {
+  display: block;
+}
+
 :root[data-theme='summer-day'] .project-showcase-card__tags span,
 :root[data-theme='summer-day'] .project-showcase-card__links a {
   background:
@@ -2913,8 +2910,6 @@ body:has(.search-page) .site-footer a {
   color: var(--summer-muted);
 }
 
-:root[data-theme='summer-day'] .project-showcase-card__title-row h2 a:hover,
-:root[data-theme='summer-day'] .project-showcase-card__title-row h2 a:focus-visible,
 :root[data-theme='summer-day'] .project-showcase-card__links a:hover,
 :root[data-theme='summer-day'] .project-showcase-card__links a:focus-visible {
   color: var(--summer-accent);

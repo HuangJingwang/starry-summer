@@ -335,6 +335,11 @@ describe('public content API helpers', () => {
           title: 'Starry Summer',
           coverImageUrl: '/images/projects/starry-summer-avatar.webp',
           coverAltText: 'Starry Summer 项目头像',
+          project: expect.objectContaining({
+            links: expect.objectContaining({
+              repository: 'https://github.com/HuangJingwang/starry-summer',
+            }),
+          }),
         }),
         expect.objectContaining({
           id: 'project-easy-yapi-micronaut',

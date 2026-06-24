@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { SiteShell } from '@/components/SiteShell';
-import { getContentHref, type SiteContentItem } from '@/lib/content';
+import type { SiteContentItem } from '@/lib/content';
 import { getContentCover } from '@/lib/content-cover';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
@@ -32,8 +32,8 @@ export default async function ProjectsPage() {
 }
 
 function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
-  const href = getContentHref(item);
   const cover = getContentCover(item);
+  const dayCoverImageUrl = getDayCoverImageUrl(cover?.imageUrl);
   const projectTags = getProjectTags(item);
   const projectLinks = getProjectLinks(item);
   const year = new Date(item.publishedAt).getFullYear();
@@ -41,23 +41,31 @@ function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
   return (
     <article className="project-showcase-card">
       <div className="project-showcase-card__header">
-        <Link
-          aria-label={`查看项目：${item.title}`}
+        <div
           className={`project-showcase-card__thumbnail${cover ? '' : ' project-showcase-card__thumbnail--empty'}`}
-          href={href}
         >
           {cover ? (
-            <img src={cover.imageUrl} alt={cover.altText} />
+            <>
+              <img
+                className="project-showcase-card__avatar project-showcase-card__avatar--night"
+                src={cover.imageUrl}
+                alt={cover.altText}
+              />
+              <img
+                className="project-showcase-card__avatar project-showcase-card__avatar--day"
+                src={dayCoverImageUrl}
+                alt=""
+                aria-hidden="true"
+              />
+            </>
           ) : (
             <span>PROJECT</span>
           )}
-        </Link>
+        </div>
 
         <div className="project-showcase-card__intro">
           <div className="project-showcase-card__title-row">
-            <h2>
-              <Link href={href}>{item.title}</Link>
-            </h2>
+            <h2>{item.title}</h2>
             <time dateTime={item.publishedAt}>{Number.isFinite(year) ? year : 'NOW'}</time>
           </div>
 
@@ -100,11 +108,12 @@ function getProjectTags(item: SiteContentItem): string[] {
 function getProjectLinks(item: SiteContentItem): Array<{ label: string; href: string; external?: boolean }> {
   const links = item.project?.links;
   return [
-    { label: 'Website', href: links?.website },
     { label: 'GitHub', href: links?.repository },
-    { label: 'Demo', href: links?.demo },
-    { label: 'Article', href: links?.article },
   ]
     .filter((link): link is { label: string; href: string } => Boolean(link.href?.trim()))
     .map((link) => ({ ...link, external: true }));
+}
+
+function getDayCoverImageUrl(imageUrl: string | undefined): string {
+  return imageUrl?.replace(/-avatar(\.[a-z0-9]+)$/i, '-avatar-day$1') ?? '';
 }

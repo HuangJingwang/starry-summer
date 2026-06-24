@@ -26,12 +26,20 @@ describe('projects page', () => {
     expect(pageSource).toContain('className="projects-page__grid"');
     expect(pageSource).toContain('className="project-showcase-card__header"');
     expect(pageSource).toContain('project-showcase-card__thumbnail');
+    expect(pageSource).toContain('project-showcase-card__avatar project-showcase-card__avatar--night');
+    expect(pageSource).toContain('project-showcase-card__avatar project-showcase-card__avatar--day');
     expect(pageSource).toContain('className="project-showcase-card__title-row"');
     expect(pageSource).toContain('className="project-showcase-card__tags"');
     expect(pageSource).toContain('className="project-showcase-card__links"');
+    expect(pageSource).not.toContain('getContentHref');
+    expect(pageSource).not.toContain('href={href}');
+    expect(pageSource).not.toContain('aria-label={`查看项目');
     expect(pageSource).not.toContain('detailHref');
     expect(pageSource).not.toContain('links?.website?.trim() ||');
-    expect(pageSource).toContain("{ label: 'Website', href: links?.website }");
+    expect(pageSource).not.toContain("label: 'Website'");
+    expect(pageSource).not.toContain("label: 'Demo'");
+    expect(pageSource).not.toContain("label: 'Article'");
+    expect(pageSource).toContain("{ label: 'GitHub', href: links?.repository }");
     expect(detailSource).toContain("['GitHub', project.links?.repository]");
 
     expect(styles).toContain('.projects-page .project-showcase-card');
@@ -45,8 +53,12 @@ describe('projects page', () => {
     expect(styles).toContain('.project-showcase-card__thumbnail');
     expect(styles).toContain('height: 64px;');
     expect(styles).toContain('width: 64px;');
+    expect(styles).toContain('font-family: var(--font-nav);');
     expect(thumbnailBlock).toContain('border-radius: 50%;');
     expect(thumbnailBlock).toContain('box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);');
+    expect(styles).toContain('.project-showcase-card__avatar--day');
+    expect(styles).toContain(":root[data-theme='summer-day'] .project-showcase-card__avatar--night");
+    expect(styles).toContain(":root[data-theme='summer-day'] .project-showcase-card__avatar--day");
     expect(titleBlock).toContain('font-size: 1.125rem;');
     expect(titleBlock).toContain('font-weight: 600;');
     expect(tagBlock).toContain('background: rgba(255, 255, 255, 0.06);');
