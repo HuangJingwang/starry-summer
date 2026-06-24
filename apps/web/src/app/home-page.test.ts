@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
@@ -109,9 +109,11 @@ describe('home page', () => {
     expect(source).not.toContain('className="portfolio-hero__recommend-card"');
     expect(source).not.toContain('ARCHIVE PULSE');
     expect(source).toContain('className="portfolio-hero__sky-image"');
-    expect(source).toContain('src="/images/starry-summer-night.png"');
-    expect(source).toContain('alt="Starry Summer reference atmosphere"');
+    expect(source).toContain('src="/images/yysuni-atmosphere.jpg"');
+    expect(source).toContain('alt="YYsuni reference atmosphere"');
+    expect(source).not.toContain('/images/starry-summer-night.png');
     expect(source).not.toContain('Daylight notes, open archive.');
+    expect(existsSync(join(process.cwd(), 'public/images/yysuni-atmosphere.jpg'))).toBe(true);
     expect(source).toContain("import { HomeClockCard } from '@/components/HomeClockCard';");
     expect(source).toContain('<HomeClockCard />');
     expect(source).not.toContain('formatHomeClock(homeNow)');
