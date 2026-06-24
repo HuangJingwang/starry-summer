@@ -10,6 +10,13 @@ These instructions apply to the entire repository.
 - The public owner display name is `Aster.H`. Do not expose, seed, test for, or render the owner's real name on public webpages, RSS metadata, default settings, or database migrations.
 - Public profile copy should describe Starry Summer as a personal content platform, not as an AI product/design portfolio.
 
+## Reference Site Context
+
+- When the user mentions the reference site, reference website, or upstream reference project, treat it as `https://www.yysuni.com/`.
+- The reference site's source repository is `YYsuni/2025-blog-public` at `https://github.com/YYsuni/2025-blog-public`.
+- For public homepage layout, card composition, motion, and image treatment requests, compare against the live reference site and, when implementation details matter, inspect the source repository before editing.
+- Preserve Starry Summer's product direction, public owner display name, content model, and theme guardrails even when borrowing layout or interaction ideas from the reference site.
+
 ## Visual Design Guardrails
 
 - When changing or reviewing public page visuals, global public CSS, shared reader components, public forms, or taxonomy/search/archive/guestbook layouts, use the repository skill at `.codex/skills/starry-summer-public-theme-review/SKILL.md` before editing and before reporting completion.
