@@ -874,6 +874,7 @@ describe('global styles', () => {
     const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyBlock = css.match(/^\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyImageBlock = css.match(/^\.portfolio-hero__sky-image\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeActionsBlock = css.match(/^\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
       [...css.matchAll(/^\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/gm)]
@@ -919,17 +920,18 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('"nav . intro . clock"');
     expect(homeHeroContentBlock).toContain('"nav . intro . calendar"');
     expect(homeHeroContentBlock).toContain('"latest . actions . calendar"');
-    expect(homeHeroContentBlock).toContain('--portfolio-left-stack-offset: 38px;');
-    expect(homeHeroContentBlock).toContain('grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);');
+    expect(homeHeroContentBlock).toContain('--portfolio-left-stack-offset: 0px;');
+    expect(homeHeroContentBlock).toContain('--portfolio-hero-lift: clamp(44px, 5svh, 60px);');
+    expect(homeHeroContentBlock).toContain('grid-template-columns: minmax(260px, 280px) minmax(48px, 70px) 360px 72px minmax(320px, 350px);');
     expect(homeHeroContentBlock).toContain('--portfolio-right-stack-offset: 0px;');
     expect(homeHeroContentBlock).toContain('align-content: center;');
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
-    expect(homeHeroContentBlock).toContain('grid-template-rows: 148px 144px 164px 124px;');
+    expect(homeHeroContentBlock).toContain('grid-template-rows: 200px 132px 128px 128px;');
     expect(homeHeroContentBlock).toContain('gap: 28px 0;');
     expect(homeHeroContentBlock).toContain('padding-top: clamp(64px, 9svh, 92px);');
     expect(homeHeroContentBlock).toContain('padding-bottom: clamp(24px, 6svh, 56px);');
     expect(homeIntroBlock).toContain('translate: 0 0;');
-    expect(homeIntroBlock).toContain('min-height: 320px;');
+    expect(homeIntroBlock).toContain('min-height: 288px;');
     expect(homeIntroBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(homeIntroBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.26);');
     expect(homeIntroBlock).toContain('rgba(4, 6, 14, 0.54)');
@@ -941,6 +943,7 @@ describe('global styles', () => {
     expect(homeNavBlock).toContain('align-content: start;');
     expect(homeNavBlock).toContain('border-radius: 40px;');
     expect(homeNavBlock).toContain('backdrop-filter: blur(4px);');
+    expect(homeNavBlock).toContain('min-height: 434px;');
     expect(homeNavBlock).toContain('padding: 24px;');
     expect(homeNavBlock).toContain('rgba(4, 6, 14, 0.6)');
     expect(homeNavBlock).not.toContain('rgba(232, 246, 249, 0.86)');
@@ -1018,6 +1021,9 @@ describe('global styles', () => {
     expect(css).toContain('grid-area: sky;');
     expect(homeSkyBlock).toContain('overflow: hidden;');
     expect(homeSkyBlock).toContain('padding: 0;');
+    expect(homeSkyBlock).toContain('min-height: 200px;');
+    expect(homeSkyBlock).toContain('width: min(100%, 360px);');
+    expect(homeSkyBlock).toContain('justify-self: start;');
     expect(homeSkyImageBlock).toContain('object-fit: cover;');
     expect(homeSkyImageBlock).toContain('width: 100%;');
     expect(homeSkyImageBlock).toContain('height: 100%;');
@@ -1052,9 +1058,10 @@ describe('global styles', () => {
     expect(homeVisualBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
     expect(homeClockBlock).toContain('justify-self: start;');
     expect(homeClockBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
-    expect(homeClockBlock).toContain('min-height: 144px;');
+    expect(homeClockBlock).toContain('min-height: 132px;');
     expect(homeClockBlock).toContain('translate: 0 0;');
     expect(homeClockBlock).toContain('width: min(100%, 232px);');
+    expect(homeActionsBlock).toContain('max-width: min(100%, 315px);');
     expect(homeCalendarBlock).toContain('justify-self: start;');
     expect(homeCalendarBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
     expect(homeCalendarBlock).toContain('translate: 0 0;');
@@ -1146,7 +1153,7 @@ describe('global styles', () => {
     expect(actionsBlock).toContain('gap: 18px;');
     expect(actionsBlock).toContain('justify-content: center;');
     expect(actionsBlock).toContain('margin-top: 0;');
-    expect(actionsBlock).toContain('max-width: min(100%, 374px);');
+    expect(actionsBlock).toContain('max-width: min(100%, 315px);');
     expect(actionsBlock).not.toContain('border-top');
     expect(actionRowBlock).toContain('display: flex;');
     expect(actionRowBlock).toContain('flex-wrap: wrap;');

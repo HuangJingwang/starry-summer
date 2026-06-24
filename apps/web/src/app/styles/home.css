@@ -512,9 +512,9 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__card-nav {
-  align-self: center;
+  align-self: start;
   justify-self: start;
-  max-width: 340px;
+  max-width: 280px;
   position: relative;
   transform-origin: 18% 10%;
   width: 100%;
@@ -596,7 +596,7 @@ body:has(.cyber-home) .site-footer a {
   display: grid;
   gap: 0;
   align-content: start;
-  min-height: 0;
+  min-height: 434px;
   min-width: 0;
   padding: 24px;
 }
@@ -996,16 +996,16 @@ body:has(.cyber-home) .site-footer a {
   display: grid;
   flex: 1;
   gap: 28px 0;
-  --portfolio-hero-lift: clamp(28px, 4svh, 44px);
-  --portfolio-left-stack-offset: 38px;
+  --portfolio-hero-lift: clamp(44px, 5svh, 60px);
+  --portfolio-left-stack-offset: 0px;
   --portfolio-right-stack-offset: 0px;
   grid-template-areas:
     "nav . sky . portrait"
     "nav . intro . clock"
     "nav . intro . calendar"
     "latest . actions . calendar";
-  grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);
-  grid-template-rows: 148px 144px 164px 124px;
+  grid-template-columns: minmax(260px, 280px) minmax(48px, 70px) 360px 72px minmax(320px, 350px);
+  grid-template-rows: 200px 132px 128px 128px;
   min-height: 100svh;
   padding-bottom: clamp(24px, 6svh, 56px);
   padding-top: clamp(64px, 9svh, 92px);
@@ -1039,7 +1039,7 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__card-nav {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
-  align-self: stretch;
+  align-self: start;
   grid-area: nav;
   translate: var(--portfolio-left-stack-offset) 0;
 }
@@ -1180,7 +1180,7 @@ body:has(.cyber-home) .site-footer a {
   grid-area: intro;
   justify-items: center;
   justify-self: start;
-  min-height: 320px;
+  min-height: 288px;
   overflow: hidden;
   padding: clamp(26px, 3vw, 38px);
   position: relative;
@@ -1285,7 +1285,7 @@ body:has(.cyber-home) .site-footer a {
   justify-content: center;
   justify-self: center;
   margin-top: 0;
-  max-width: min(100%, 374px);
+  max-width: min(100%, 315px);
   padding-top: 0;
   width: 100%;
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both;
@@ -1674,17 +1674,18 @@ body:has(.cyber-home) .site-footer a {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
   display: grid;
   grid-area: sky;
-  min-height: 98px;
+  justify-self: start;
+  min-height: 200px;
   overflow: hidden;
   padding: 0;
   position: relative;
-  width: 100%;
+  width: min(100%, 360px);
 }
 
 .portfolio-hero__sky-image {
   display: block;
   height: 100%;
-  min-height: 98px;
+  min-height: 200px;
   object-fit: cover;
   object-position: center;
   width: 100%;
@@ -1715,7 +1716,7 @@ body:has(.cyber-home) .site-footer a {
   justify-items: center;
   justify-self: start;
   margin-left: var(--portfolio-right-stack-offset);
-  min-height: 144px;
+  min-height: 132px;
   padding: 12px;
   translate: 0 0;
   width: min(100%, 232px);

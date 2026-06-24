@@ -506,13 +506,13 @@ describe('home page', () => {
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('gap: 28px 0;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('grid-template-rows: 148px 144px 164px 124px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('grid-template-rows: 200px 132px 128px 128px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('padding-bottom: clamp(24px, 6svh, 56px);');
     expect(readRule(css, '.portfolio-hero__content')).toContain('padding-top: clamp(64px, 9svh, 92px);');
-    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 320px;');
+    expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 288px;');
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('grid-area: sky;');
-    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('width: 100%;');
+    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('width: min(100%, 360px);');
     expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('position: absolute;');
     expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('animation: home-fleet-page-cruise 600s linear infinite;');
     expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('animation-delay: var(--home-fleet-delay, 600s);');
