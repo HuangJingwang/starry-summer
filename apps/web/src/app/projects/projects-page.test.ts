@@ -10,6 +10,7 @@ function readSource(path: string) {
 describe('projects page', () => {
   test('uses the reference project grid and compact card structure', () => {
     const pageSource = readSource('src/app/projects/page.tsx');
+    const detailSource = readSource('src/components/ContentDetail.tsx');
     const styles = readSource('src/app/styles/content.css');
     const responsiveStyles = readSource('src/app/styles/responsive.css');
     const thumbnailBlock = styles.match(/\.project-showcase-card__thumbnail\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
@@ -28,7 +29,10 @@ describe('projects page', () => {
     expect(pageSource).toContain('className="project-showcase-card__title-row"');
     expect(pageSource).toContain('className="project-showcase-card__tags"');
     expect(pageSource).toContain('className="project-showcase-card__links"');
-    expect(pageSource).toContain("label: 'Website'");
+    expect(pageSource).not.toContain('detailHref');
+    expect(pageSource).not.toContain('links?.website?.trim() ||');
+    expect(pageSource).toContain("{ label: 'Website', href: links?.website }");
+    expect(detailSource).toContain("['GitHub', project.links?.repository]");
 
     expect(styles).toContain('.projects-page .project-showcase-card');
     expect(styles).toContain('.page-main.projects-page');

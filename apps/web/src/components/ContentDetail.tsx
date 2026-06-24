@@ -164,7 +164,7 @@ function ProjectMeta({ item }: { item: SiteContentItem }) {
 
   const links = [
     ['官网', project.links?.website],
-    ['代码仓库', project.links?.repository],
+    ['GitHub', project.links?.repository],
     ['演示', project.links?.demo],
     ['文章', project.links?.article],
   ].filter(([, href]) => Boolean(href)) as Array<[string, string]>;

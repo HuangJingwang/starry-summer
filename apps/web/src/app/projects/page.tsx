@@ -35,7 +35,7 @@ function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
   const href = getContentHref(item);
   const cover = getContentCover(item);
   const projectTags = getProjectTags(item);
-  const projectLinks = getProjectLinks(item, href);
+  const projectLinks = getProjectLinks(item);
   const year = new Date(item.publishedAt).getFullYear();
 
   return (
@@ -97,15 +97,14 @@ function getProjectTags(item: SiteContentItem): string[] {
   return [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))].slice(0, 5);
 }
 
-function getProjectLinks(item: SiteContentItem, detailHref: string): Array<{ label: string; href: string; external?: boolean }> {
+function getProjectLinks(item: SiteContentItem): Array<{ label: string; href: string; external?: boolean }> {
   const links = item.project?.links;
-  const externalLinks = [
+  return [
+    { label: 'Website', href: links?.website },
     { label: 'GitHub', href: links?.repository },
     { label: 'Demo', href: links?.demo },
     { label: 'Article', href: links?.article },
   ]
     .filter((link): link is { label: string; href: string } => Boolean(link.href?.trim()))
     .map((link) => ({ ...link, external: true }));
-
-  return [{ label: 'Website', href: links?.website?.trim() || detailHref, external: Boolean(links?.website?.trim()) }, ...externalLinks];
 }
