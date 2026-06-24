@@ -799,6 +799,9 @@ describe('global styles', () => {
     const siteNavItemsBlock = siteNavItemsBlocks.at(-1)?.groups?.body ?? '';
     const siteNavHoverBlock = css.match(/\.site-nav__hover\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteNavLinkBlock = css.match(/\.site-nav a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const siteNavActiveIconBlock =
+      css.match(/\.site-nav a\[data-hovered='true'\] \.site-nav__icon,[\s\S]*?\.site-nav a\[aria-current='page'\] \.site-nav__icon\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
     const mobileSiteNavItemsBlock =
       responsiveCss.match(/\.site-nav__items\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
 
@@ -830,10 +833,13 @@ describe('global styles', () => {
     expect(siteNavItemsBlock).toContain('position: relative;');
     expect(siteNavHoverBlock).toContain('height: var(--nav-hover-size);');
     expect(siteNavHoverBlock).toContain('width: var(--nav-hover-size);');
+    expect(siteNavHoverBlock).toContain('will-change: transform;');
+    expect(siteNavHoverBlock).toContain('linear-gradient(to right bottom, rgba(148, 163, 184, 0.22) 60%, rgba(15, 23, 42, 0.42) 100%)');
+    expect(siteNavHoverBlock).toContain('box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);');
     expect(siteNavHoverBlock).toContain('top: calc(var(--nav-hover-extra) * -1);');
     expect(siteNavHoverBlock).toContain('transform: translate3d(calc(var(--hover-index, var(--active-index, 0)) * (var(--nav-item-size) + var(--nav-item-gap)) - var(--nav-hover-extra)), 0, 0);');
     expect(siteNavHoverBlock).toContain('transition:');
-    expect(siteNavHoverBlock).toContain('cubic-bezier(0.22, 1.12, 0.32, 1)');
+    expect(siteNavHoverBlock).toContain('cubic-bezier(0.34, 1.56, 0.64, 1)');
     expect(siteNavHoverBlock).toContain('pointer-events: none;');
     expect(siteNavLinkBlock).toContain('font-family: var(--font-nav);');
     expect(siteNavLinkBlock).toContain('font-weight: 400;');
@@ -843,6 +849,8 @@ describe('global styles', () => {
     expect(siteNavLinkBlock).toContain('padding: 0;');
     expect(siteNavLinkBlock).toContain('display: inline-flex;');
     expect(siteNavLinkBlock).toContain('z-index: 1;');
+    expect(siteNavActiveIconBlock).toContain('color: var(--cyber-cyan);');
+    expect(siteNavActiveIconBlock).toContain('transform: scale(1.04);');
     expect(responsiveCss).toContain('--nav-item-size: 28px;');
     expect(responsiveCss).toContain('--nav-item-gap: 24px;');
     expect(mobileSiteNavItemsBlock).toContain('overflow-x: auto;');

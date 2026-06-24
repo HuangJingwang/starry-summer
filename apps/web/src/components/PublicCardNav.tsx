@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { CSSProperties, FocusEvent, MouseEvent } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { NavigationItem } from '@/lib/navigation';
@@ -57,6 +57,29 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
     [pathname],
   );
   const [hoveredIndex, setHoveredIndex] = useState(activeIndex);
+  const hoverRestoreTimeoutRef = useRef<number | null>(null);
+  const clearHoveredIndexRestore = () => {
+    if (hoverRestoreTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(hoverRestoreTimeoutRef.current);
+    hoverRestoreTimeoutRef.current = null;
+  };
+  const scheduleHoveredIndexRestore = () => {
+    clearHoveredIndexRestore();
+    hoverRestoreTimeoutRef.current = window.setTimeout(() => {
+      setHoveredIndex(activeIndex);
+      hoverRestoreTimeoutRef.current = null;
+    }, 1200);
+  };
+  const restoreHoveredIndexWhenFocusLeaves = (event: FocusEvent<HTMLDivElement>) => {
+    const nextFocusedElement = event.relatedTarget;
+
+    if (!(nextFocusedElement instanceof Node) || !event.currentTarget.contains(nextFocusedElement)) {
+      scheduleHoveredIndexRestore();
+    }
+  };
   const updateHoveredIndex = (event: FocusEvent<HTMLDivElement> | MouseEvent<HTMLDivElement>) => {
     const link = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>('a[data-nav-index]');
 
@@ -67,6 +90,7 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
     const nextIndex = Number(link.dataset.navIndex);
 
     if (Number.isInteger(nextIndex)) {
+      clearHoveredIndexRestore();
       setHoveredIndex(nextIndex);
     }
   };
@@ -77,8 +101,11 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
   } as CSSProperties;
 
   useEffect(() => {
+    clearHoveredIndexRestore();
     setHoveredIndex(activeIndex);
   }, [activeIndex]);
+
+  useEffect(() => () => clearHoveredIndexRestore(), []);
 
   useEffect(() => {
     const transitionTarget = window.sessionStorage.getItem(transitionStorageKey);
@@ -109,8 +136,9 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
             style={navStyle}
             data-active-index={activeIndex}
             data-hover-index={hoveredIndex}
+            onBlurCapture={restoreHoveredIndexWhenFocusLeaves}
             onFocusCapture={updateHoveredIndex}
-            onMouseLeave={() => setHoveredIndex(activeIndex)}
+            onMouseLeave={scheduleHoveredIndexRestore}
             onMouseOver={updateHoveredIndex}
           >
             <span className="site-nav__hover" aria-hidden="true" />

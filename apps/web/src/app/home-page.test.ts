@@ -431,7 +431,9 @@ describe('home page', () => {
     expect(source).toContain('<span className="site-nav__hover" aria-hidden="true" />');
     expect(source).toContain('onFocusCapture={updateHoveredIndex}');
     expect(source).toContain('onMouseOver={updateHoveredIndex}');
-    expect(source).toContain('onMouseLeave={() => setHoveredIndex(activeIndex)}');
+    expect(source).toContain('hoverRestoreTimeoutRef');
+    expect(source).toContain('onBlurCapture={restoreHoveredIndexWhenFocusLeaves}');
+    expect(source).toContain('onMouseLeave={scheduleHoveredIndexRestore}');
     expect(source).toContain('data-nav-index={index}');
     expect(source).toContain('className="site-nav__label"');
     expect(source).toContain("import { ThemeToggle } from '@/components/ThemeToggle';");
