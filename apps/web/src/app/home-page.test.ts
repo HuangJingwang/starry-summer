@@ -505,7 +505,7 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero .cyber-home__container')).toContain('align-items: stretch;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('display: block;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-x: 50%;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-y: clamp(380px, calc(50svh + 31px), 400px);');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-y: clamp(408px, calc(50svh + 59px), 428px);');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-gap: 36px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-width: 360px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-height: 288px;');
@@ -533,7 +533,10 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: var(--reference-portrait-width);');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('left: calc(var(--reference-center-x) - var(--reference-art-width) / 2);');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('height: var(--reference-art-height);');
+    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('padding: 8px;');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('width: var(--reference-art-width);');
+    expect(readRule(css, '.portfolio-hero__sky-image')).toContain('border-radius: 24px;');
+    expect(readRule(css, '.portfolio-hero__sky-image')).toContain('min-height: 0;');
     expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('position: absolute;');
     expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('animation: home-fleet-page-cruise 600s linear infinite;');
     expect(readRule(css, '.portfolio-hero__fleet-background')).toContain('animation-delay: var(--home-fleet-delay, 600s);');

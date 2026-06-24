@@ -996,7 +996,7 @@ body:has(.cyber-home) .site-footer a {
   display: block;
   flex: 1;
   --reference-center-x: 50%;
-  --reference-center-y: clamp(380px, calc(50svh + 31px), 400px);
+  --reference-center-y: clamp(408px, calc(50svh + 59px), 428px);
   --reference-gap: 36px;
   --reference-hi-width: 360px;
   --reference-hi-height: 288px;
@@ -1698,16 +1698,17 @@ body:has(.cyber-home) .site-footer a {
   justify-self: start;
   min-height: var(--reference-art-height);
   overflow: hidden;
-  padding: 0;
+  padding: 8px;
   position: absolute;
   top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));
   width: var(--reference-art-width);
 }
 
 .portfolio-hero__sky-image {
+  border-radius: 24px;
   display: block;
   height: 100%;
-  min-height: 200px;
+  min-height: 0;
   object-fit: cover;
   object-position: center;
   width: 100%;
