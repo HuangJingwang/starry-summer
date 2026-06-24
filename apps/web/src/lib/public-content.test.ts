@@ -331,8 +331,16 @@ describe('public content API helpers', () => {
     expect(projects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
+          id: 'project-starry',
+          title: 'Starry Summer',
+          coverImageUrl: '/images/projects/starry-summer-avatar.webp',
+          coverAltText: 'Starry Summer 项目头像',
+        }),
+        expect.objectContaining({
           id: 'project-easy-yapi-micronaut',
           title: 'easy-yapi-micronaut',
+          coverImageUrl: '/images/projects/easy-yapi-micronaut-avatar.webp',
+          coverAltText: 'easy-yapi-micronaut 项目头像',
           project: expect.objectContaining({
             links: expect.objectContaining({
               repository: 'https://github.com/HuangJingwang/easy-yapi-micronaut',
@@ -343,6 +351,8 @@ describe('public content API helpers', () => {
         expect.objectContaining({
           id: 'project-brushup',
           title: 'brushup',
+          coverImageUrl: '/images/projects/brushup-avatar.webp',
+          coverAltText: 'brushup 项目头像',
           project: expect.objectContaining({
             links: expect.objectContaining({
               repository: 'https://github.com/HuangJingwang/brushup',

@@ -75,8 +75,8 @@
     "summary": "个人内容平台：文章、笔记、日常、项目、评论、后台管理，以及逐步转向文件内容源的部署方案。",
     "bodyMarkdown": "## 平台目标\n\nStarry Summer 面向单人长期使用：公网展示内容，后台维护文章、笔记、项目和互动。\n\n当前的迁移方向是让公开内容先从数据库里撤出来，放到仓库文件中；互动和管理能力后续再拆到更轻的 Worker 或 GitHub API 流程里。",
     "slug": "starry-summer",
-    "coverImageUrl": "/images/default-post-cover.png",
-    "coverAltText": "Starry Summer 默认文章封面",
+    "coverImageUrl": "/images/projects/starry-summer-avatar.webp",
+    "coverAltText": "Starry Summer 项目头像",
     "featured": true,
     "categories": [
       "Projects",
@@ -113,8 +113,8 @@
     "summary": "扩展 easy-yapi 的 Micronaut 适配能力，补充注解识别与 JDK21 支持，让接口文档生成更贴近现代 JVM 项目。",
     "bodyMarkdown": "## 项目说明\n\neasy-yapi-micronaut 基于 easy-yapi 做扩展，重点补齐 Micronaut 注解识别和 JDK21 支持。\n\n它适合放在项目页里作为后端工程效率工具：目标明确，技术栈清晰，也能体现对 JVM 生态和接口文档流程的实践。\n\n项目仓库：[github.com/HuangJingwang/easy-yapi-micronaut](https://github.com/HuangJingwang/easy-yapi-micronaut)",
     "slug": "easy-yapi-micronaut",
-    "coverImageUrl": "/images/default-post-cover.png",
-    "coverAltText": "easy-yapi-micronaut 项目封面",
+    "coverImageUrl": "/images/projects/easy-yapi-micronaut-avatar.webp",
+    "coverAltText": "easy-yapi-micronaut 项目头像",
     "featured": true,
     "categories": [
       "Projects",
@@ -155,8 +155,8 @@
     "summary": "面向刷题复盘的效率工具，覆盖 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试等流程。",
     "bodyMarkdown": "## 项目说明\n\nbrushup 是一个围绕刷题与求职准备的个人效率工具，聚合 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试。\n\n它适合放在项目页里作为学习系统和自动化工具的案例：问题真实、使用场景具体，也和站点里的刷题内容能形成呼应。\n\n项目仓库：[github.com/HuangJingwang/brushup](https://github.com/HuangJingwang/brushup)",
     "slug": "brushup",
-    "coverImageUrl": "/images/default-post-cover.png",
-    "coverAltText": "brushup 项目封面",
+    "coverImageUrl": "/images/projects/brushup-avatar.webp",
+    "coverAltText": "brushup 项目头像",
     "featured": true,
     "categories": [
       "Projects",
