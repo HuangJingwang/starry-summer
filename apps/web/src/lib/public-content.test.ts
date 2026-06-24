@@ -325,6 +325,35 @@ describe('public content API helpers', () => {
     expect(studyPost?.bodyMarkdown).not.toContain('HuangJingwang');
   });
 
+  test('includes selected GitHub repositories in project fallback content', async () => {
+    const projects = await loadSiteContent('project');
+
+    expect(projects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'project-easy-yapi-micronaut',
+          title: 'easy-yapi-micronaut',
+          project: expect.objectContaining({
+            links: expect.objectContaining({
+              repository: 'https://github.com/HuangJingwang/easy-yapi-micronaut',
+            }),
+            stack: expect.arrayContaining(['Kotlin', 'Micronaut', 'JDK21']),
+          }),
+        }),
+        expect.objectContaining({
+          id: 'project-brushup',
+          title: 'brushup',
+          project: expect.objectContaining({
+            links: expect.objectContaining({
+              repository: 'https://github.com/HuangJingwang/brushup',
+            }),
+            stack: expect.arrayContaining(['Python', 'LeetCode', 'AI Code Review']),
+          }),
+        }),
+      ]),
+    );
+  });
+
   test('does not keep a public API source switch for the site runtime', () => {
     const source = readFileSync(__filename.replace(/\.test\.ts$/, '.ts'), 'utf8');
 
