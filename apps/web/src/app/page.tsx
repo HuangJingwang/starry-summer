@@ -3,6 +3,7 @@ import { FileText, Heart } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
+import { HomeClockCard } from '@/components/HomeClockCard';
 import { HomeContactButton } from '@/components/HomeContactButton';
 import { HomeFleetBackground } from '@/components/HomeFleetBackground';
 import { SiteShell } from '@/components/SiteShell';
@@ -125,10 +126,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <aside className="portfolio-hero__clock-card" aria-label="Current archive time">
-              <span>LOCAL TIME</span>
-              <strong>{formatHomeClock(homeNow)}</strong>
-            </aside>
+            <HomeClockCard />
 
             <aside className="portfolio-hero__calendar-card" aria-label="Calendar">
               <div>
@@ -229,15 +227,6 @@ function formatHomeDate(value: string): string {
     month: 'long',
     day: 'numeric',
   }).format(new Date(value));
-}
-
-function formatHomeClock(value: Date): string {
-  return new Intl.DateTimeFormat('zh-CN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: 'Asia/Shanghai',
-  }).format(value);
 }
 
 function formatHomeDateHeading(value: Date): string {

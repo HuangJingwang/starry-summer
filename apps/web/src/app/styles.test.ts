@@ -1041,7 +1041,7 @@ describe('global styles', () => {
     expect(homeClockBlock).toContain('justify-self: start;');
     expect(homeClockBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
     expect(homeClockBlock).toContain('translate: 0 0;');
-    expect(homeClockBlock).toContain('width: min(100%, 194px);');
+    expect(homeClockBlock).toContain('width: min(100%, 232px);');
     expect(homeCalendarBlock).toContain('justify-self: start;');
     expect(homeCalendarBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
     expect(homeCalendarBlock).toContain('translate: 0 0;');

@@ -1707,21 +1707,122 @@ body:has(.cyber-home) .site-footer a {
   align-content: center;
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 360ms both;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   grid-area: clock;
   justify-items: center;
   justify-self: start;
   margin-left: var(--portfolio-right-stack-offset);
   min-height: 0;
-  padding: 14px 16px;
+  padding: 12px;
   translate: 0 0;
-  width: min(100%, 194px);
+  width: min(100%, 232px);
 }
 
-.portfolio-hero__clock-card strong {
-  color: #f8fafc;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+.portfolio-hero__clock-digits {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.24);
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 22px;
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  padding: 10px 9px;
+  width: 100%;
+}
+
+.portfolio-hero__clock-digit {
+  display: block;
+  height: 52px;
+  position: relative;
+  width: 29px;
+}
+
+.portfolio-hero__clock-digit i {
+  --clock-segment-off: rgba(148, 163, 184, 0.13);
+  --clock-segment-on: var(--cyber-cyan);
+  background: var(--clock-segment-off);
+  border-radius: 999px;
+  box-shadow: none;
+  display: block;
+  position: absolute;
+  transition: background 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.portfolio-hero__clock-digit i[data-active='true'] {
+  background: linear-gradient(135deg, var(--cyber-cyan), var(--cyber-teal));
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.34);
+}
+
+.portfolio-hero__clock-digit i[data-segment='0'],
+.portfolio-hero__clock-digit i[data-segment='3'],
+.portfolio-hero__clock-digit i[data-segment='6'] {
+  height: 5px;
+  left: 6px;
+  width: 17px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='0'] {
+  top: 1px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='3'] {
+  bottom: 1px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='6'] {
+  top: 23px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='1'],
+.portfolio-hero__clock-digit i[data-segment='2'],
+.portfolio-hero__clock-digit i[data-segment='4'],
+.portfolio-hero__clock-digit i[data-segment='5'] {
+  height: 18px;
+  width: 5px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='1'],
+.portfolio-hero__clock-digit i[data-segment='2'] {
+  right: 1px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='4'],
+.portfolio-hero__clock-digit i[data-segment='5'] {
+  left: 1px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='1'],
+.portfolio-hero__clock-digit i[data-segment='5'] {
+  top: 5px;
+}
+
+.portfolio-hero__clock-digit i[data-segment='2'],
+.portfolio-hero__clock-digit i[data-segment='4'] {
+  bottom: 5px;
+}
+
+.portfolio-hero__clock-colon {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 9px;
+  justify-content: center;
+  padding-inline: 1px;
+}
+
+.portfolio-hero__clock-colon i {
+  background: var(--cyber-cyan);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.35);
+  display: block;
+  height: 6px;
+  width: 6px;
+}
+
+.portfolio-hero__clock-card small {
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 0.72rem;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -3180,9 +3281,22 @@ body:has(.cyber-home) .site-footer a {
 
 :root[data-theme='summer-day'] .portfolio-hero__latest-card strong,
 :root[data-theme='summer-day'] .portfolio-hero__sky-card strong,
-:root[data-theme='summer-day'] .portfolio-hero__clock-card strong,
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card strong {
   color: var(--summer-ink);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__clock-digits {
+  background: rgba(255, 255, 255, 0.44);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__clock-digit i {
+  --clock-segment-off: rgba(140, 126, 107, 0.13);
+  --clock-segment-on: #2fcbe7;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__clock-card small {
+  color: #8b7667;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card {
