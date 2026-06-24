@@ -13,6 +13,8 @@ import { buildHomeProfileModel } from '@/lib/home-profile';
 import { loadSiteContent } from '@/lib/public-content';
 import { loadSiteSettings } from '@/lib/settings-repository';
 
+const homeGitHubUrl = 'https://github.com/HuangJingwang/starry-summer';
+
 export default async function HomePage() {
   const [content, settings] = await Promise.all([
     loadSiteContent(),
@@ -24,7 +26,6 @@ export default async function HomePage() {
   const heroMotto = profile.motto || '写技术文章，也记录一些生活里的光。';
   const latestArticle = profile.latestArticle;
   const latestArticleCover = latestArticle ? getContentCover(latestArticle) : null;
-  const githubLink = settings.profile.socialLinks.find((link) => link.href.includes('github.com'));
   const juejinLink = settings.profile.socialLinks.find((link) => link.href.includes('juejin.cn'));
   const homeNow = new Date();
   const calendarDays = buildHomeCalendarDays(homeNow);
@@ -83,18 +84,16 @@ export default async function HomePage() {
 
               <div className="portfolio-hero__actions" aria-label="首页快捷入口">
                 <div className="portfolio-hero__action-row portfolio-hero__action-row--primary">
-                  {githubLink ? (
-                    <a
-                      className="portfolio-hero__social portfolio-hero__social--github"
-                      href={githubLink.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label="打开 GitHub（新标签页）"
-                    >
-                      <GitHubIcon />
-                      <span>Github</span>
-                    </a>
-                  ) : null}
+                  <a
+                    className="portfolio-hero__social portfolio-hero__social--github"
+                    href={homeGitHubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="打开 GitHub（新标签页）"
+                  >
+                    <GitHubIcon />
+                    <span>Github</span>
+                  </a>
                   {juejinLink ? (
                     <a
                       className="portfolio-hero__social portfolio-hero__social--juejin"
