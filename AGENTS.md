@@ -42,6 +42,7 @@ These instructions apply to the entire repository.
 
 - Use TDD for behavior changes and regression fixes.
 - Keep commits focused. Do not mix unrelated worktree changes into a commit.
+- After modifying code or repository files, run the appropriate verification, create a focused commit, and push the current branch directly unless the user explicitly says not to push.
 - Run the appropriate verification before claiming completion. For broad app changes, use:
   - `npm test`
   - `npm run typecheck`
