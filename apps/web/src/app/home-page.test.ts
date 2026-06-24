@@ -108,11 +108,15 @@ describe('home page', () => {
     expect(source).toContain('className="portfolio-hero__calendar-card"');
     expect(source).not.toContain('className="portfolio-hero__recommend-card"');
     expect(source).not.toContain('ARCHIVE PULSE');
-    expect(source).toContain('className="portfolio-hero__sky-image"');
+    expect(source).toContain('portfolio-hero__sky-image portfolio-hero__sky-image--night');
+    expect(source).toContain('src="/images/starry-night-atmosphere.webp"');
+    expect(source).toContain('alt="Starry Summer night atmosphere"');
+    expect(source).toContain('portfolio-hero__sky-image portfolio-hero__sky-image--day');
     expect(source).toContain('src="/images/yysuni-atmosphere.jpg"');
     expect(source).toContain('alt="YYsuni reference atmosphere"');
     expect(source).not.toContain('/images/starry-summer-night.png');
     expect(source).not.toContain('Daylight notes, open archive.');
+    expect(existsSync(join(process.cwd(), 'public/images/starry-night-atmosphere.webp'))).toBe(true);
     expect(existsSync(join(process.cwd(), 'public/images/yysuni-atmosphere.jpg'))).toBe(true);
     expect(source).toContain("import { HomeClockCard } from '@/components/HomeClockCard';");
     expect(source).toContain('<HomeClockCard />');

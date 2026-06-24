@@ -66,7 +66,12 @@ export default async function HomePage() {
 
             <aside className="portfolio-hero__sky-card" aria-label="Starry Summer atmosphere">
               <img
-                className="portfolio-hero__sky-image"
+                className="portfolio-hero__sky-image portfolio-hero__sky-image--night"
+                src="/images/starry-night-atmosphere.webp"
+                alt="Starry Summer night atmosphere"
+              />
+              <img
+                className="portfolio-hero__sky-image portfolio-hero__sky-image--day"
                 src="/images/yysuni-atmosphere.jpg"
                 alt="YYsuni reference atmosphere"
               />

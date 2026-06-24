@@ -1712,6 +1712,22 @@ body:has(.cyber-home) .site-footer a {
   width: 100%;
 }
 
+.portfolio-hero__sky-image--day {
+  display: none;
+}
+
+.portfolio-hero__sky-image--night {
+  display: block;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__sky-image--day {
+  display: block;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__sky-image--night {
+  display: none;
+}
+
 .portfolio-hero__sky-card span,
 .portfolio-hero__clock-card span,
 .portfolio-hero__calendar-card span {

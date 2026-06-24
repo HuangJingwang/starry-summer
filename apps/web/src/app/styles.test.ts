@@ -879,6 +879,16 @@ describe('global styles', () => {
     const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyBlock = css.match(/^\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyImageBlock = css.match(/^\.portfolio-hero__sky-image\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeSkyImageDayBlock =
+      css.match(/^\.portfolio-hero__sky-image--day\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeSkyImageNightBlock =
+      css.match(/^\.portfolio-hero__sky-image--night\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const daySkyImageDayBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__sky-image--day\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const daySkyImageNightBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__sky-image--night\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
     const homeActionsBlock = css.match(/^\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
@@ -1044,6 +1054,10 @@ describe('global styles', () => {
     expect(homeSkyImageBlock).toContain('object-fit: cover;');
     expect(homeSkyImageBlock).toContain('width: 100%;');
     expect(homeSkyImageBlock).toContain('height: 100%;');
+    expect(homeSkyImageDayBlock).toContain('display: none;');
+    expect(homeSkyImageNightBlock).toContain('display: block;');
+    expect(daySkyImageDayBlock).toContain('display: block;');
+    expect(daySkyImageNightBlock).toContain('display: none;');
     expect(homeClockBlock).not.toContain('grid-area: clock;');
     expect(homeCalendarBlock).not.toContain('grid-area: calendar;');
     expect(homeCalendarBlock).toContain('align-self: start;');
