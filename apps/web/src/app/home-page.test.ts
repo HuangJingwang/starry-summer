@@ -108,8 +108,10 @@ describe('home page', () => {
     expect(source).toContain('className="portfolio-hero__calendar-card"');
     expect(source).not.toContain('className="portfolio-hero__recommend-card"');
     expect(source).not.toContain('ARCHIVE PULSE');
-    expect(source).toContain('STARRY SUMMER');
-    expect(source).toContain('Daylight notes, open archive.');
+    expect(source).toContain('className="portfolio-hero__sky-image"');
+    expect(source).toContain('src="/images/starry-summer-night.png"');
+    expect(source).toContain('alt="Starry Summer reference atmosphere"');
+    expect(source).not.toContain('Daylight notes, open archive.');
     expect(source).toContain("import { HomeClockCard } from '@/components/HomeClockCard';");
     expect(source).toContain('<HomeClockCard />');
     expect(source).not.toContain('formatHomeClock(homeNow)');

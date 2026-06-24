@@ -873,6 +873,7 @@ describe('global styles', () => {
     const homeIntroBlock = css.match(/^\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyBlock = css.match(/^\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeSkyImageBlock = css.match(/^\.portfolio-hero__sky-image\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
       [...css.matchAll(/^\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/gm)]
@@ -1007,15 +1008,18 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__nav-links a');
     expect(css).not.toContain('.portfolio-hero__pulse-card');
     expect(css).toContain('.portfolio-hero__sky-card');
+    expect(css).toContain('.portfolio-hero__sky-image');
     expect(css).toContain('.portfolio-hero__clock-card');
     expect(css).toContain('.portfolio-hero__calendar-card');
     expect(css).not.toContain('.portfolio-hero__recommend-card');
     expect(css).toContain('@keyframes home-widget-enter');
     expect(css).toContain('animation: home-widget-enter');
     expect(css).toContain('grid-area: sky;');
-    expect(homeSkyBlock).toContain('align-content: center;');
-    expect(homeSkyBlock).toContain('justify-items: center;');
-    expect(homeSkyBlock).toContain('text-align: center;');
+    expect(homeSkyBlock).toContain('overflow: hidden;');
+    expect(homeSkyBlock).toContain('padding: 0;');
+    expect(homeSkyImageBlock).toContain('object-fit: cover;');
+    expect(homeSkyImageBlock).toContain('width: 100%;');
+    expect(homeSkyImageBlock).toContain('height: 100%;');
     expect(css).toContain('grid-area: clock;');
     expect(css).toContain('grid-area: calendar;');
     expect(homeCalendarBlock).toContain('align-self: start;');

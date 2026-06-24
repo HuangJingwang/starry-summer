@@ -64,10 +64,13 @@ export default async function HomePage() {
               </aside>
             </div>
 
-              <aside className="portfolio-hero__sky-card" aria-label="Starry Summer atmosphere">
-                <span>STARRY SUMMER</span>
-                <strong>Daylight notes, open archive.</strong>
-              </aside>
+            <aside className="portfolio-hero__sky-card" aria-label="Starry Summer atmosphere">
+              <img
+                className="portfolio-hero__sky-image"
+                src="/images/starry-summer-night.png"
+                alt="Starry Summer reference atmosphere"
+              />
+            </aside>
 
             <div className="portfolio-hero__center-stack">
               <div className="portfolio-hero__intro-card">
