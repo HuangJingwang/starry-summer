@@ -1009,6 +1009,7 @@ describe('global styles', () => {
     expect(css).not.toContain('.portfolio-hero__pulse-card');
     expect(css).toContain('.portfolio-hero__sky-card');
     expect(css).toContain('.portfolio-hero__sky-image');
+    expect(css).not.toContain('.portfolio-hero__sky-card::after');
     expect(css).toContain('.portfolio-hero__clock-card');
     expect(css).toContain('.portfolio-hero__calendar-card');
     expect(css).not.toContain('.portfolio-hero__recommend-card');

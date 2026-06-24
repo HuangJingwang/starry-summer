@@ -1681,14 +1681,6 @@ body:has(.cyber-home) .site-footer a {
   width: 100%;
 }
 
-.portfolio-hero__sky-card::after {
-  background: linear-gradient(135deg, rgba(4, 6, 14, 0.08), rgba(4, 6, 14, 0.42));
-  content: "";
-  inset: 0;
-  pointer-events: none;
-  position: absolute;
-}
-
 .portfolio-hero__sky-image {
   display: block;
   height: 100%;
