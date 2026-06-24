@@ -251,22 +251,10 @@
 
   .projects-page .project-showcase-card {
     border-radius: 24px;
-    gap: 16px;
-    grid-template-columns: 1fr;
-    min-height: 0;
-    padding: 14px;
+    padding: 18px;
   }
 
-  .project-showcase-card__media {
-    aspect-ratio: 16 / 9;
-    min-height: 0;
-  }
-
-  .project-showcase-card__body {
-    padding: 0 2px 2px;
-  }
-
-  .project-showcase-card__heading {
+  .project-showcase-card__title-row {
     align-items: flex-start;
     gap: 8px;
   }

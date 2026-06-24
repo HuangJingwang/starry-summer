@@ -1064,80 +1064,83 @@ body:has(.guestbook-page) .site-footer a {
 
 .projects-page {
   background:
-    radial-gradient(circle at 16% 14%, rgba(34, 211, 238, 0.07), transparent 26%),
-    radial-gradient(circle at 78% 24%, rgba(167, 139, 250, 0.06), transparent 28%),
-    linear-gradient(180deg, rgba(3, 7, 18, 0.56), rgba(2, 4, 11, 0.82));
+    radial-gradient(circle at 14% 16%, rgba(34, 211, 238, 0.05), transparent 26%),
+    radial-gradient(circle at 82% 28%, rgba(167, 139, 250, 0.05), transparent 28%),
+    linear-gradient(180deg, rgba(3, 7, 18, 0.42), rgba(2, 4, 11, 0.74));
+  padding: clamp(48px, 8vw, 72px) clamp(16px, 4vw, 56px) clamp(48px, 7vw, 72px);
 }
 
-.projects-page .page-title {
-  margin-bottom: clamp(28px, 5vw, 46px);
-  max-width: 820px;
-}
-
-.projects-page .page-title h1 {
-  font-size: clamp(3rem, 7vw, 6.4rem);
-  letter-spacing: 0;
-}
-
-.projects-page .page-title p:not(.eyebrow) {
-  color: rgba(226, 232, 240, 0.72);
-  max-width: 560px;
+.projects-page__sr-title {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 .projects-page__grid {
   display: grid;
-  gap: 22px;
-  grid-template-columns: minmax(0, 840px);
-  max-width: 100%;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: 1200px;
+  width: 100%;
 }
 
 .projects-page .project-showcase-card {
-  align-items: stretch;
-  backdrop-filter: blur(18px) saturate(1.08);
-  background:
-    linear-gradient(135deg, rgba(34, 211, 238, 0.11), transparent 42%),
-    rgba(8, 13, 24, 0.72);
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  backdrop-filter: blur(8px) saturate(1.04);
+  background: rgba(11, 15, 25, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 28px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 76px rgba(0, 0, 0, 0.3);
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+  box-shadow: 0 24px 56px -38px rgba(0, 0, 0, 0.42), inset 0 0 20px rgba(255, 255, 255, 0.03);
+  color: var(--cyber-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   max-width: 100%;
-  min-height: 236px;
-  overflow: hidden;
-  padding: 16px;
-  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  min-height: 0;
+  padding: 24px;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .projects-page .project-showcase-card:hover {
-  border-color: rgba(34, 211, 238, 0.48);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 28px 86px rgba(34, 211, 238, 0.12);
-  transform: translateY(-2px);
+  background-color: rgba(15, 23, 42, 0.66);
+  border-color: rgba(34, 211, 238, 0.24);
+  box-shadow: 0 26px 60px -42px rgba(34, 211, 238, 0.36), inset 0 0 20px rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
 }
 
-.project-showcase-card__media {
+.project-showcase-card__header {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  min-width: 0;
+}
+
+.project-showcase-card__thumbnail {
   align-items: center;
-  aspect-ratio: 4 / 3;
   background:
-    radial-gradient(circle at 30% 24%, rgba(34, 211, 238, 0.18), transparent 34%),
-    radial-gradient(circle at 76% 70%, rgba(167, 139, 250, 0.16), transparent 36%),
+    radial-gradient(circle at 28% 24%, rgba(34, 211, 238, 0.16), transparent 34%),
     rgba(3, 7, 18, 0.72);
   border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 20px;
+  border-radius: 50%;
   color: rgba(207, 250, 254, 0.72);
-  display: flex;
+  display: grid;
+  flex: 0 0 auto;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: 0.72rem;
+  font-size: 0.58rem;
   font-weight: 800;
-  justify-content: center;
   letter-spacing: 0.14em;
-  min-height: 196px;
   overflow: hidden;
+  place-items: center;
   text-decoration: none;
+  height: 64px;
+  width: 64px;
 }
 
-.project-showcase-card__media img {
+.project-showcase-card__thumbnail img {
   display: block;
   height: 100%;
   object-fit: cover;
@@ -1145,59 +1148,56 @@ body:has(.guestbook-page) .site-footer a {
   width: 100%;
 }
 
-.project-showcase-card:hover .project-showcase-card__media img {
+.project-showcase-card:hover .project-showcase-card__thumbnail img {
   filter: saturate(1.1) contrast(1.04);
-  transform: scale(1.035);
+  transform: scale(1.04);
 }
 
-.project-showcase-card__media--empty span {
+.project-showcase-card__thumbnail--empty span {
   border: 1px solid rgba(34, 211, 238, 0.22);
-  border-radius: 999px;
-  padding: 8px 12px;
+  border-radius: 8px;
+  padding: 4px 6px;
 }
 
-.project-showcase-card__body {
-  align-content: start;
-  display: grid;
-  gap: 14px;
+.project-showcase-card__intro {
+  flex: 1 1 auto;
   min-width: 0;
-  padding: 10px 8px 10px 0;
 }
 
-.project-showcase-card__heading {
+.project-showcase-card__title-row {
   align-items: baseline;
   display: flex;
-  gap: 14px;
+  gap: 8px;
   justify-content: space-between;
+  min-width: 0;
 }
 
-.project-showcase-card__heading h2 {
+.project-showcase-card__title-row h2 {
   color: #fff;
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
-  line-height: 1.1;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.24;
   margin: 0;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.project-showcase-card__heading h2 a {
+.project-showcase-card__title-row h2 a {
   color: inherit;
   text-decoration: none;
 }
 
-.project-showcase-card__heading h2 a:hover,
-.project-showcase-card__heading h2 a:focus-visible {
+.project-showcase-card__title-row h2 a:hover,
+.project-showcase-card__title-row h2 a:focus-visible {
   color: var(--cyber-cyan);
   outline: 2px solid rgba(34, 211, 238, 0.42);
   outline-offset: 4px;
 }
 
-.project-showcase-card__heading time {
+.project-showcase-card__title-row time {
   color: rgba(148, 163, 184, 0.76);
   flex: 0 0 auto;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: 0.84rem;
-  font-weight: 800;
+  font-size: 0.86rem;
 }
 
 .project-showcase-card__tags,
@@ -1209,43 +1209,45 @@ body:has(.guestbook-page) .site-footer a {
 }
 
 .project-showcase-card__tags span {
-  background: rgba(34, 211, 238, 0.08);
-  border: 1px solid rgba(34, 211, 238, 0.2);
-  border-radius: 999px;
-  color: #cffafe;
-  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 0;
+  border-radius: 8px;
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1;
-  padding: 7px 10px;
+  padding: 4px 8px;
 }
 
-.project-showcase-card__body p {
+.project-showcase-card__description {
   color: rgba(226, 232, 240, 0.68);
-  font-size: 0.96rem;
-  line-height: 1.75;
+  font-size: 0.9rem;
+  line-height: 1.72;
   margin: 0;
   overflow-wrap: anywhere;
 }
 
 .project-showcase-card__links {
-  margin-top: 2px;
+  margin-top: auto;
 }
 
 .project-showcase-card__links a {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
   color: rgba(241, 245, 249, 0.88);
   font-size: 0.86rem;
-  font-weight: 700;
-  min-height: 36px;
-  padding: 9px 13px;
+  font-weight: 600;
+  min-height: 34px;
+  padding: 7px 12px;
   text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
 .project-showcase-card__links a:hover,
 .project-showcase-card__links a:focus-visible {
-  background: rgba(34, 211, 238, 0.12);
-  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.08);
+  border-color: rgba(34, 211, 238, 0.28);
   color: #fff;
   outline: 2px solid rgba(34, 211, 238, 0.34);
   outline-offset: 3px;
@@ -2867,14 +2869,13 @@ body:has(.search-page) .site-footer a {
   background: transparent;
 }
 
-:root[data-theme='summer-day'] .projects-page .page-title p:not(.eyebrow),
-:root[data-theme='summer-day'] .project-showcase-card__body p,
-:root[data-theme='summer-day'] .project-showcase-card__heading time {
+:root[data-theme='summer-day'] .project-showcase-card__description,
+:root[data-theme='summer-day'] .project-showcase-card__title-row time {
   color: var(--summer-muted);
 }
 
-:root[data-theme='summer-day'] .project-showcase-card__heading h2,
-:root[data-theme='summer-day'] .project-showcase-card__heading h2 a {
+:root[data-theme='summer-day'] .project-showcase-card__title-row h2,
+:root[data-theme='summer-day'] .project-showcase-card__title-row h2 a {
   color: var(--summer-ink);
 }
 
@@ -2883,7 +2884,7 @@ body:has(.search-page) .site-footer a {
   box-shadow: inset 0 1px 0 var(--summer-glint), 0 20px 58px var(--summer-hover-shadow);
 }
 
-:root[data-theme='summer-day'] .project-showcase-card__media {
+:root[data-theme='summer-day'] .project-showcase-card__thumbnail {
   background:
     radial-gradient(circle at 28% 22%, rgba(125, 211, 252, 0.22), transparent 32%),
     radial-gradient(circle at 80% 76%, rgba(242, 221, 154, 0.28), transparent 34%),
@@ -2901,8 +2902,14 @@ body:has(.search-page) .site-footer a {
   color: var(--summer-accent);
 }
 
-:root[data-theme='summer-day'] .project-showcase-card__heading h2 a:hover,
-:root[data-theme='summer-day'] .project-showcase-card__heading h2 a:focus-visible,
+:root[data-theme='summer-day'] .project-showcase-card__tags span {
+  background: rgba(255, 255, 255, 0.42);
+  border: 0;
+  color: var(--summer-muted);
+}
+
+:root[data-theme='summer-day'] .project-showcase-card__title-row h2 a:hover,
+:root[data-theme='summer-day'] .project-showcase-card__title-row h2 a:focus-visible,
 :root[data-theme='summer-day'] .project-showcase-card__links a:hover,
 :root[data-theme='summer-day'] .project-showcase-card__links a:focus-visible {
   color: var(--summer-accent);

@@ -20,11 +20,7 @@ export default async function ProjectsPage() {
   return (
     <SiteShell>
       <main className="page-main projects-page">
-        <div className="page-title">
-          <p className="eyebrow">项目</p>
-          <h1>项目</h1>
-          <p>长期维护的产品实验、工程实践和公开作品。</p>
-        </div>
+        <h1 className="projects-page__sr-title">项目</h1>
         <div className="projects-page__grid">
           {projects.map((item) => (
             <ProjectShowcaseCard key={item.id} item={item} />
@@ -44,48 +40,50 @@ function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
 
   return (
     <article className="project-showcase-card">
-      <Link
-        aria-label={`查看项目：${item.title}`}
-        className={`project-showcase-card__media${cover ? '' : ' project-showcase-card__media--empty'}`}
-        href={href}
-      >
-        {cover ? (
-          <img src={cover.imageUrl} alt={cover.altText} />
-        ) : (
-          <span>PROJECT</span>
-        )}
-      </Link>
+      <div className="project-showcase-card__header">
+        <Link
+          aria-label={`查看项目：${item.title}`}
+          className={`project-showcase-card__thumbnail${cover ? '' : ' project-showcase-card__thumbnail--empty'}`}
+          href={href}
+        >
+          {cover ? (
+            <img src={cover.imageUrl} alt={cover.altText} />
+          ) : (
+            <span>PROJECT</span>
+          )}
+        </Link>
 
-      <div className="project-showcase-card__body">
-        <div className="project-showcase-card__heading">
-          <h2>
-            <Link href={href}>{item.title}</Link>
-          </h2>
-          <time dateTime={item.publishedAt}>{Number.isFinite(year) ? year : 'NOW'}</time>
-        </div>
-
-        {projectTags.length > 0 && (
-          <div className="project-showcase-card__tags" aria-label="项目标签">
-            {projectTags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
+        <div className="project-showcase-card__intro">
+          <div className="project-showcase-card__title-row">
+            <h2>
+              <Link href={href}>{item.title}</Link>
+            </h2>
+            <time dateTime={item.publishedAt}>{Number.isFinite(year) ? year : 'NOW'}</time>
           </div>
-        )}
 
-        {item.summary && <p>{item.summary}</p>}
-
-        <div className="project-showcase-card__links">
-          {projectLinks.map((link) => (
-            <Link
-              key={`${link.label}-${link.href}`}
-              href={link.href}
-              rel={link.external ? 'noopener noreferrer' : undefined}
-              target={link.external ? '_blank' : undefined}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {projectTags.length > 0 && (
+            <div className="project-showcase-card__tags" aria-label="项目标签">
+              {projectTags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+          )}
         </div>
+      </div>
+
+      {item.summary && <p className="project-showcase-card__description">{item.summary}</p>}
+
+      <div className="project-showcase-card__links">
+        {projectLinks.map((link) => (
+          <Link
+            key={`${link.label}-${link.href}`}
+            href={link.href}
+            rel={link.external ? 'noopener noreferrer' : undefined}
+            target={link.external ? '_blank' : undefined}
+          >
+            {link.label}
+          </Link>
+        ))}
       </div>
     </article>
   );
@@ -102,7 +100,6 @@ function getProjectTags(item: SiteContentItem): string[] {
 function getProjectLinks(item: SiteContentItem, detailHref: string): Array<{ label: string; href: string; external?: boolean }> {
   const links = item.project?.links;
   const externalLinks = [
-    { label: 'Website', href: links?.website },
     { label: 'GitHub', href: links?.repository },
     { label: 'Demo', href: links?.demo },
     { label: 'Article', href: links?.article },
@@ -110,5 +107,5 @@ function getProjectLinks(item: SiteContentItem, detailHref: string): Array<{ lab
     .filter((link): link is { label: string; href: string } => Boolean(link.href?.trim()))
     .map((link) => ({ ...link, external: true }));
 
-  return [{ label: '详情', href: detailHref }, ...externalLinks];
+  return [{ label: 'Website', href: links?.website?.trim() || detailHref, external: Boolean(links?.website?.trim()) }, ...externalLinks];
 }
