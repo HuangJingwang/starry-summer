@@ -249,11 +249,6 @@
     grid-template-columns: 1fr;
   }
 
-  .projects-page .project-showcase-card {
-    border-radius: 24px;
-    padding: 18px;
-  }
-
   .project-showcase-card__title-row {
     align-items: flex-start;
     gap: 8px;
