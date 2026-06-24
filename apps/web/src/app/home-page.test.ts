@@ -493,7 +493,7 @@ describe('home page', () => {
 
     expect(readRule(css, '.portfolio-hero')).toContain('justify-content: flex-start;');
     expect(readRule(css, '.portfolio-hero .cyber-home__container')).toContain('align-items: stretch;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('align-content: start;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('align-content: center;');
     expect(readRule(css, '.portfolio-hero__latest-card')).toContain('translate: var(--portfolio-left-stack-offset) 0;');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('translate: 0 0;');
     expect(readRule(css, '.portfolio-hero__actions')).toContain('margin-top: 0;');
@@ -502,9 +502,9 @@ describe('home page', () => {
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
     expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('gap: 28px 0;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('grid-template-rows: 148px 98px 210px 124px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-bottom: 16px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-top: 56px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('grid-template-rows: 148px 144px 164px 124px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-bottom: clamp(24px, 6svh, 56px);');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('padding-top: clamp(64px, 9svh, 92px);');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('min-height: 320px;');
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: min(100%, 156px);');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('grid-area: sky;');
@@ -537,12 +537,19 @@ describe('home page', () => {
     expect(readRuleContainingSelector(css, '.portfolio-hero__calendar-card')).toContain(
       'border-color: rgba(148, 163, 184, 0.26);',
     );
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('grid-area: calendar;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('justify-self: start;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('translate: 0 0;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('border-radius: 40px;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('gap: 0;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('min-height: 288px;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('padding: 24px;');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('width: min(100%, 350px);');
     expect(readRule(css, '.portfolio-hero__calendar-card ol')).toContain('height: 206px;');
+    expect(readRule(css, '.portfolio-hero__calendar-card ol')).toContain('grid-template-columns: repeat(7, minmax(0, 1fr));');
     expect(readRule(css, '.portfolio-hero__calendar-card li')).toContain('aspect-ratio: auto;');
+    expect(readRule(css, '.portfolio-hero__calendar-card li')).toContain('min-height: 0;');
+    expect(readRule(css, '.portfolio-hero__calendar-card li')).toContain('min-width: 0;');
     expect(readRule(css, ".portfolio-hero__calendar-card li[data-current='true']")).toContain('border: 1px solid #ffffff;');
     expect(readRule(css, '.portfolio-hero__like-card')).toContain('border-radius: 999px;');
     expect(readRule(css, '.portfolio-hero__like-card')).toContain('height: 48px;');

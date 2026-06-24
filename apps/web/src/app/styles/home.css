@@ -990,7 +990,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__content {
-  align-content: start;
+  align-content: center;
   align-items: stretch;
   box-sizing: border-box;
   display: grid;
@@ -1004,10 +1004,10 @@ body:has(.cyber-home) .site-footer a {
     "nav . intro . calendar"
     "latest . actions . calendar";
   grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);
-  grid-template-rows: 148px 98px 210px 124px;
+  grid-template-rows: 148px 144px 164px 124px;
   min-height: 100svh;
-  padding-bottom: 16px;
-  padding-top: 56px;
+  padding-bottom: clamp(24px, 6svh, 56px);
+  padding-top: clamp(64px, 9svh, 92px);
   position: relative;
   z-index: 1;
 }
@@ -1712,7 +1712,7 @@ body:has(.cyber-home) .site-footer a {
   justify-items: center;
   justify-self: start;
   margin-left: var(--portfolio-right-stack-offset);
-  min-height: 0;
+  min-height: 144px;
   padding: 12px;
   translate: 0 0;
   width: min(100%, 232px);

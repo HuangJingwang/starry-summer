@@ -921,11 +921,12 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--portfolio-left-stack-offset: 38px;');
     expect(homeHeroContentBlock).toContain('grid-template-columns: minmax(250px, 266px) minmax(90px, 126px) minmax(360px, 376px) 36px minmax(320px, 350px);');
     expect(homeHeroContentBlock).toContain('--portfolio-right-stack-offset: 0px;');
-    expect(homeHeroContentBlock).toContain('align-content: start;');
+    expect(homeHeroContentBlock).toContain('align-content: center;');
     expect(homeHeroContentBlock).toContain('align-items: stretch;');
-    expect(homeHeroContentBlock).toContain('grid-template-rows: 148px 98px 210px 124px;');
+    expect(homeHeroContentBlock).toContain('grid-template-rows: 148px 144px 164px 124px;');
     expect(homeHeroContentBlock).toContain('gap: 28px 0;');
-    expect(homeHeroContentBlock).toContain('padding-top: 56px;');
+    expect(homeHeroContentBlock).toContain('padding-top: clamp(64px, 9svh, 92px);');
+    expect(homeHeroContentBlock).toContain('padding-bottom: clamp(24px, 6svh, 56px);');
     expect(homeIntroBlock).toContain('translate: 0 0;');
     expect(homeIntroBlock).toContain('min-height: 320px;');
     expect(homeIntroBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
@@ -1017,6 +1018,12 @@ describe('global styles', () => {
     expect(homeSkyBlock).toContain('text-align: center;');
     expect(css).toContain('grid-area: clock;');
     expect(css).toContain('grid-area: calendar;');
+    expect(homeCalendarBlock).toContain('align-self: start;');
+    expect(homeCalendarBlock).toContain('justify-self: start;');
+    expect(homeCalendarBlock).toContain('translate: 0 0;');
+    expect(homeCalendarBlock).toContain('width: min(100%, 350px);');
+    expect(homeCalendarBlock).toContain('min-height: 288px;');
+    expect(homeCalendarBlock).toContain('padding: 24px;');
     expect(dayCalendarBlock).toContain('rgba(255, 255, 255, 0.6)');
     expect(dayCalendarBlock).toContain('backdrop-filter: blur(4px);');
     expect(dayCalendarBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
@@ -1040,6 +1047,7 @@ describe('global styles', () => {
     expect(homeVisualBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
     expect(homeClockBlock).toContain('justify-self: start;');
     expect(homeClockBlock).toContain('margin-left: var(--portfolio-right-stack-offset);');
+    expect(homeClockBlock).toContain('min-height: 144px;');
     expect(homeClockBlock).toContain('translate: 0 0;');
     expect(homeClockBlock).toContain('width: min(100%, 232px);');
     expect(homeCalendarBlock).toContain('justify-self: start;');
