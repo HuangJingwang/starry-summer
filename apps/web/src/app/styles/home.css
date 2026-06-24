@@ -596,9 +596,11 @@ body:has(.cyber-home) .site-footer a {
   display: grid;
   gap: 0;
   align-content: start;
-  min-height: 434px;
+  box-sizing: border-box;
+  height: var(--reference-nav-height);
+  min-height: var(--reference-nav-height);
   min-width: 0;
-  padding: 24px;
+  padding: 20px;
 }
 
 .portfolio-hero__nav-card:hover,
@@ -673,16 +675,16 @@ body:has(.cyber-home) .site-footer a {
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.25;
-  margin: 24px 0 0;
+  margin: 16px 0 0;
   text-transform: uppercase;
 }
 
 .portfolio-hero__nav-links {
   align-content: start;
   display: grid;
-  gap: 8px;
+  gap: 4px;
   grid-template-columns: 1fr;
-  margin-top: 8px;
+  margin-top: 6px;
   max-width: none;
   min-width: 0;
   position: relative;
@@ -708,8 +710,8 @@ body:has(.cyber-home) .site-footer a {
   justify-content: flex-start;
   letter-spacing: 0;
   line-height: 1.5;
-  min-height: 52px;
-  padding: 0 20px;
+  min-height: 44px;
+  padding: 0 18px;
   position: relative;
   text-decoration: none;
   transition:
@@ -777,8 +779,8 @@ body:has(.cyber-home) .site-footer a {
   border-top: 1px solid rgba(148, 163, 184, 0.14);
   display: flex;
   justify-content: space-between;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 14px;
 }
 
 .portfolio-hero__nav-footer span {
@@ -801,12 +803,12 @@ body:has(.cyber-home) .site-footer a {
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 1.02rem;
-  height: 44px;
+  height: 40px;
   justify-content: center;
   line-height: 1;
   padding: 0;
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
-  width: 44px;
+  width: 40px;
 }
 
 .portfolio-hero__nav-theme:hover,
@@ -990,27 +992,30 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__content {
-  align-content: center;
-  align-items: stretch;
   box-sizing: border-box;
-  display: grid;
+  display: block;
   flex: 1;
-  gap: 28px 0;
-  --portfolio-hero-lift: clamp(44px, 5svh, 60px);
-  --portfolio-left-stack-offset: 0px;
-  --portfolio-right-stack-offset: 0px;
-  grid-template-areas:
-    "nav . sky . portrait"
-    "nav . intro . clock"
-    "nav . intro . calendar"
-    "latest . actions . calendar";
-  grid-template-columns: minmax(260px, 280px) minmax(48px, 70px) 360px 72px minmax(320px, 350px);
-  grid-template-rows: 200px 132px 128px 128px;
+  --reference-center-x: 50%;
+  --reference-center-y: clamp(380px, calc(50svh + 31px), 400px);
+  --reference-gap: 36px;
+  --reference-hi-width: 360px;
+  --reference-hi-height: 288px;
+  --reference-art-width: 360px;
+  --reference-art-height: 200px;
+  --reference-clock-width: 232px;
+  --reference-clock-height: 132px;
+  --reference-clock-offset: 92px;
+  --reference-calendar-width: 350px;
+  --reference-calendar-height: 286px;
+  --reference-social-width: 315px;
+  --reference-article-width: 266px;
+  --reference-nav-width: 280px;
+  --reference-nav-height: 434px;
+  --reference-nav-top: 52px;
+  --reference-portrait-width: 156px;
   min-height: 100svh;
-  padding-bottom: clamp(24px, 6svh, 56px);
-  padding-top: clamp(64px, 9svh, 92px);
+  padding: 0;
   position: relative;
-  translate: 0 calc(-1 * var(--portfolio-hero-lift));
   z-index: 1;
 }
 
@@ -1040,11 +1045,15 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__card-nav {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
   align-self: start;
-  grid-area: nav;
-  translate: var(--portfolio-left-stack-offset) 0;
+  left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2 - var(--reference-gap) - var(--reference-nav-width));
+  max-width: var(--reference-nav-width);
+  position: absolute;
+  top: var(--reference-nav-top);
+  width: var(--reference-nav-width);
 }
 
 .portfolio-hero__latest-card {
+  animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both;
   backdrop-filter: blur(18px) saturate(1.08);
   background:
     linear-gradient(135deg, rgba(34, 211, 238, 0.07), transparent 48%),
@@ -1059,15 +1068,16 @@ body:has(.cyber-home) .site-footer a {
   color: rgba(226, 232, 240, 0.9);
   display: grid;
   gap: 10px;
-  grid-area: latest;
   align-self: stretch;
   justify-self: stretch;
+  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width) - var(--reference-gap) - var(--reference-article-width));
   margin-right: 0;
+  min-height: 160px;
   overflow: hidden;
   padding: 16px 18px;
-  width: 100%;
-  animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 420ms both;
-  translate: var(--portfolio-left-stack-offset) 0;
+  position: absolute;
+  top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));
+  width: var(--reference-article-width);
 }
 
 .portfolio-hero__latest-card > span {
@@ -1165,6 +1175,7 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__intro-card {
   align-content: center;
+  animation: home-widget-enter 680ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
   backdrop-filter: blur(18px) saturate(1.08);
   background:
     linear-gradient(135deg, rgba(34, 211, 238, 0.07), transparent 48%),
@@ -1177,17 +1188,16 @@ body:has(.cyber-home) .site-footer a {
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 24px 64px rgba(0, 0, 0, 0.22);
   display: grid;
-  grid-area: intro;
   justify-items: center;
-  justify-self: start;
-  min-height: 288px;
+  height: var(--reference-hi-height);
+  left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2);
+  min-height: var(--reference-hi-height);
   overflow: hidden;
-  padding: clamp(26px, 3vw, 38px);
-  position: relative;
+  padding: 24px;
+  position: absolute;
   text-align: center;
-  translate: 0 0;
-  width: 100%;
-  animation: home-widget-enter 680ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
+  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2);
+  width: var(--reference-hi-width);
 }
 
 .portfolio-hero__badge,
@@ -1201,7 +1211,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__intro-card .portfolio-hero__badge {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .portfolio-hero__title {
@@ -1215,7 +1225,7 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__name {
   color: #f8fafc;
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 4.8rem);
+  font-size: clamp(2.4rem, 4.6vw, 4rem);
   font-weight: 400;
   line-height: 0.95;
   margin: 0;
@@ -1225,10 +1235,10 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__role {
   color: rgba(252, 211, 77, 0.78);
   font-family: var(--font-display);
-  font-size: clamp(0.84rem, 1.2vw, 1rem);
+  font-size: clamp(0.84rem, 1.2vw, 0.95rem);
   font-weight: 400;
   letter-spacing: 0.02em;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .portfolio-hero__outline,
@@ -1265,7 +1275,14 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__intro-card .portfolio-hero__lead,
 .portfolio-hero__intro-card .portfolio-hero__motto {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin-top: 14px;
   max-width: 380px;
+}
+
+.portfolio-hero__intro-card .portfolio-hero__motto {
+  margin-top: 8px;
 }
 
 .portfolio-hero__motto,
@@ -1278,17 +1295,19 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__actions {
   align-self: start;
   align-items: center;
+  animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  grid-area: actions;
   justify-content: center;
   justify-self: center;
+  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width));
   margin-top: 0;
-  max-width: min(100%, 315px);
+  max-width: var(--reference-social-width);
   padding-top: 0;
-  width: 100%;
-  animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 520ms both;
+  position: absolute;
+  top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));
+  width: var(--reference-social-width);
 }
 
 .portfolio-hero__action-row {
@@ -1627,13 +1646,13 @@ body:has(.cyber-home) .site-footer a {
   align-self: start;
   animation: home-widget-enter 660ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both;
   display: grid;
-  grid-area: portrait;
   justify-self: start;
-  margin-left: var(--portfolio-right-stack-offset);
+  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 + var(--reference-gap));
   max-width: 180px;
-  translate: 0 0;
+  position: absolute;
+  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));
   transform: none;
-  width: min(100%, 156px);
+  width: var(--reference-portrait-width);
 }
 
 .portfolio-hero__portrait {
@@ -1673,13 +1692,15 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__sky-card {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
   display: grid;
-  grid-area: sky;
+  left: calc(var(--reference-center-x) - var(--reference-art-width) / 2);
+  height: var(--reference-art-height);
   justify-self: start;
-  min-height: 200px;
+  min-height: var(--reference-art-height);
   overflow: hidden;
   padding: 0;
-  position: relative;
-  width: min(100%, 360px);
+  position: absolute;
+  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));
+  width: var(--reference-art-width);
 }
 
 .portfolio-hero__sky-image {
@@ -1712,14 +1733,16 @@ body:has(.cyber-home) .site-footer a {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 360ms both;
   display: grid;
   gap: 10px;
-  grid-area: clock;
   justify-items: center;
   justify-self: start;
-  margin-left: var(--portfolio-right-stack-offset);
-  min-height: 132px;
+  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);
+  box-sizing: border-box;
+  height: var(--reference-clock-height);
+  min-height: var(--reference-clock-height);
   padding: 12px;
-  translate: 0 0;
-  width: min(100%, 232px);
+  position: absolute;
+  top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height));
+  width: var(--reference-clock-width);
 }
 
 .portfolio-hero__clock-digits {
@@ -1837,13 +1860,15 @@ body:has(.cyber-home) .site-footer a {
   border-radius: 40px;
   display: grid;
   gap: 0;
-  grid-area: calendar;
   justify-self: start;
-  margin-left: var(--portfolio-right-stack-offset);
-  min-height: 288px;
+  box-sizing: border-box;
+  height: var(--reference-calendar-height);
+  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);
+  min-height: var(--reference-calendar-height);
   padding: 24px;
-  translate: 0 0;
-  width: min(100%, 350px);
+  position: absolute;
+  top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap));
+  width: var(--reference-calendar-width);
 }
 
 .portfolio-hero__calendar-card div {

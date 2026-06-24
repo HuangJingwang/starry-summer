@@ -470,6 +470,7 @@
 
   .portfolio-hero__content {
     align-content: start;
+    display: grid;
     gap: 22px;
     grid-template-areas:
       "nav"
@@ -482,6 +483,20 @@
     padding-bottom: 24px;
     padding-top: 16px;
     translate: none;
+  }
+
+  .portfolio-hero__card-nav,
+  .portfolio-hero__latest-card,
+  .portfolio-hero__intro-card,
+  .portfolio-hero__actions,
+  .portfolio-hero__sky-card,
+  .portfolio-hero__clock-card,
+  .portfolio-hero__calendar-card,
+  .portfolio-hero__visual {
+    height: auto;
+    left: auto;
+    position: static;
+    top: auto;
   }
 
   .portfolio-hero__card-nav {
@@ -908,6 +923,7 @@
   }
 
   .portfolio-hero__content {
+    display: grid;
     gap: 18px 24px;
     grid-template-areas:
       "nav intro"
@@ -919,6 +935,20 @@
     min-height: auto;
     padding-bottom: 24px;
     translate: none;
+  }
+
+  .portfolio-hero__card-nav,
+  .portfolio-hero__latest-card,
+  .portfolio-hero__intro-card,
+  .portfolio-hero__actions,
+  .portfolio-hero__sky-card,
+  .portfolio-hero__clock-card,
+  .portfolio-hero__calendar-card,
+  .portfolio-hero__visual {
+    height: auto;
+    left: auto;
+    position: static;
+    top: auto;
   }
 
   .portfolio-hero__card-nav {
