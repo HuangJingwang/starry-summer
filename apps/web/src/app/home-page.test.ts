@@ -510,6 +510,7 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-art-width: 360px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-art-height: 200px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-clock-width: 232px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-portrait-clock-gap: 16px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-calendar-width: 350px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-social-width: 315px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-article-width: 266px;');

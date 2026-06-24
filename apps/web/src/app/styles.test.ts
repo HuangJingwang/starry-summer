@@ -941,6 +941,7 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--reference-clock-width: 232px;');
     expect(homeHeroContentBlock).toContain('--reference-clock-height: 132px;');
     expect(homeHeroContentBlock).toContain('--reference-clock-offset: 92px;');
+    expect(homeHeroContentBlock).toContain('--reference-portrait-clock-gap: 16px;');
     expect(homeHeroContentBlock).toContain('--reference-calendar-width: 350px;');
     expect(homeHeroContentBlock).toContain('--reference-calendar-height: 286px;');
     expect(homeHeroContentBlock).toContain('--reference-social-width: 315px;');
@@ -1095,7 +1096,9 @@ describe('global styles', () => {
     expect(homeClockBlock).toContain('justify-self: start;');
     expect(homeClockBlock).toContain('position: absolute;');
     expect(homeClockBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);');
-    expect(homeClockBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height));');
+    expect(homeClockBlock).toContain(
+      'top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) + var(--reference-portrait-clock-gap));',
+    );
     expect(homeClockBlock).toContain('height: var(--reference-clock-height);');
     expect(homeClockBlock).toContain('min-height: var(--reference-clock-height);');
     expect(homeClockBlock).toContain('width: var(--reference-clock-width);');
