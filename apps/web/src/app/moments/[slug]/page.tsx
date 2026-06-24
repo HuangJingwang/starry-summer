@@ -7,6 +7,14 @@ import { loadSiteContent } from '@/lib/public-content';
 import { buildContentMetadata, resolvePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
 
+export async function generateStaticParams() {
+  const content = await loadSiteContent('moment');
+
+  return content.map((item) => ({
+    slug: item.slug ?? item.id,
+  }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const content = await loadSiteContent();

@@ -1,13 +1,11 @@
 import { renderMarkdown } from '@starry-summer/markdown';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 
 import { canShowComments, estimateReadingTime, getContentHref, getContentTaxonomyLinkGroups, getSeriesHref, type AdjacentContent, type SiteContentItem } from '@/lib/content';
 import { getContentCover } from '@/lib/content-cover';
 import { buildContentTableOfContents } from '@/lib/content-toc';
 import type { CommentTargetType } from '@/lib/interaction-client';
 import { loadApprovedComments, type PublicComment } from '@/lib/public-comments';
-import { loadReaderSession } from '@/lib/reader-auth';
 import { splitAnchoredComments } from '@/lib/selection-comments';
 import { CodeCopyEnhancer } from './CodeCopyEnhancer';
 import { CommentForm } from './CommentForm';
@@ -27,8 +25,6 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   const updatedAt = item.updatedAt && item.updatedAt !== item.publishedAt ? item.updatedAt : undefined;
   const taxonomyGroups = getContentTaxonomyLinkGroups(item);
   const cover = getContentCover(item);
-  const cookieHeader = (await cookies()).toString();
-  const readerSession = await loadReaderSession({ cookieHeader });
   const approvedComments = isCommentTargetType(item.type) && canShowComments(item)
     ? await loadApprovedComments(item.type, item.id)
     : [];
@@ -53,7 +49,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
       <CommentForm
         targetType={item.type}
         targetId={item.id}
-        reader={readerSession.authenticated ? readerSession : null}
+        reader={null}
         loginNextPath={`${getContentHref(item)}#comments`}
       />
     </section>
@@ -122,7 +118,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
               <InlineCommentLayer
                 targetType={item.type}
                 targetId={item.id}
-                reader={readerSession.authenticated ? readerSession : null}
+                reader={null}
                 loginNextPath={`${getContentHref(item)}#comments`}
                 comments={anchoredComments}
               />
@@ -132,18 +128,18 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
         {adjacent ? (
           <nav className="adjacent-content" aria-label="相邻内容">
             {adjacent.previous ? (
-              <a href={getContentHref(adjacent.previous)}>
+              <Link href={getContentHref(adjacent.previous)}>
                 <span>上一篇</span>
                 <strong>{adjacent.previous.title}</strong>
-              </a>
+              </Link>
             ) : (
               <span className="adjacent-content__empty">没有更早内容</span>
             )}
             {adjacent.next ? (
-              <a href={getContentHref(adjacent.next)}>
+              <Link href={getContentHref(adjacent.next)}>
                 <span>下一篇</span>
                 <strong>{adjacent.next.title}</strong>
-              </a>
+              </Link>
             ) : (
               <span className="adjacent-content__empty">没有更新内容</span>
             )}

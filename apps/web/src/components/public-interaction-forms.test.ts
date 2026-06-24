@@ -36,9 +36,10 @@ describe('public interaction forms', () => {
     const contentDetail = readFileSync(join(process.cwd(), 'src/components/ContentDetail.tsx'), 'utf8');
     const loginGatePath = join(process.cwd(), 'src/components/PublicGitHubLoginGate.tsx');
 
-    expect(contentDetail).toContain('loadReaderSession');
-    expect(contentDetail).toContain('const cookieHeader = (await cookies()).toString();');
-    expect(contentDetail).toContain('reader={readerSession.authenticated ? readerSession : null}');
+    expect(contentDetail).not.toContain("next/headers");
+    expect(contentDetail).not.toContain('cookies()');
+    expect(contentDetail).not.toContain('loadReaderSession');
+    expect(contentDetail).toContain('reader={null}');
     expect(existsSync(loginGatePath)).toBe(true);
     expect(commentForm).toContain("import { PublicGitHubLoginGate } from '@/components/PublicGitHubLoginGate';");
     expect(commentForm).toContain("import { useEffect, useId, useRef, useState } from 'react';");

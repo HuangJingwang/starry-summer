@@ -171,6 +171,10 @@ describe('home page', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
 
     expect(source).toContain('const latestArticle = profile.latestArticle;');
+    expect(source).toContain("import Link from 'next/link';");
+    expect(source).toContain('<Link href={getContentHref(latestArticle)}>');
+    expect(source).toContain('</Link>');
+    expect(source).not.toContain('<a href={getContentHref(latestArticle)}>');
     expect(source).not.toContain("getPublicContent(content, 'article').slice(0, 1)");
     expect(source).not.toContain('const articleHighlights');
   });

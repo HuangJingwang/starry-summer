@@ -32,13 +32,14 @@ describe('ThemeToggle', () => {
 });
 
 describe('first paint theme contract', () => {
-  test('server layout writes the initial data-theme from the theme cookie before hydration', () => {
+  test('server layout stays static-compatible while the inline script applies the saved theme before hydration', () => {
     const layoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
 
-    expect(layoutSource).toContain("import { cookies } from 'next/headers';");
-    expect(layoutSource).toContain("import { getInitialThemeFromCookie, getThemeInitScript } from '@/lib/site-theme';");
-    expect(layoutSource).toContain('const initialTheme = getInitialThemeFromCookie(await cookies());');
-    expect(layoutSource).toContain('data-theme={initialTheme}');
+    expect(layoutSource).not.toContain("next/headers");
+    expect(layoutSource).not.toContain('cookies()');
+    expect(layoutSource).not.toContain('getInitialThemeFromCookie');
+    expect(layoutSource).toContain("import { getThemeInitScript } from '@/lib/site-theme';");
+    expect(layoutSource).toContain('data-theme="summer-night"');
     expect(layoutSource).toContain('suppressHydrationWarning');
     expect(layoutSource).toContain('<script id="theme-init" dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />');
   });

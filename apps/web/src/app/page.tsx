@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { FileText, Heart } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
@@ -46,7 +47,7 @@ export default async function HomePage() {
               <aside className="portfolio-hero__latest-card" aria-label="最新文章">
                 <span>最新文章</span>
                 {latestArticle ? (
-                  <a href={getContentHref(latestArticle)}>
+                  <Link href={getContentHref(latestArticle)}>
                     {latestArticleCover ? (
                       <img src={latestArticleCover.imageUrl} alt={latestArticleCover.altText} />
                     ) : (
@@ -57,7 +58,7 @@ export default async function HomePage() {
                     <strong>{latestArticle.title}</strong>
                     <small>{latestArticle.summary}</small>
                     <time dateTime={latestArticle.publishedAt}>{formatHomeDate(latestArticle.publishedAt)}</time>
-                  </a>
+                  </Link>
                 ) : (
                   <p>正在整理新的文章。</p>
                 )}

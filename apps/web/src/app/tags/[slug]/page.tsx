@@ -2,8 +2,16 @@ import { notFound } from 'next/navigation';
 
 import { ContentCard } from '@/components/ContentCard';
 import { SiteShell } from '@/components/SiteShell';
-import { getContentByTagSlug } from '@/lib/content';
+import { getContentByTagSlug, groupContentByTag } from '@/lib/content';
 import { loadSiteContent } from '@/lib/public-content';
+
+export async function generateStaticParams() {
+  const content = await loadSiteContent();
+
+  return groupContentByTag(content).map((group) => ({
+    slug: group.key,
+  }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

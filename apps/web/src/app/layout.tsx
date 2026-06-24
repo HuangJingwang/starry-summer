@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 
 import { buildSiteMetadata, resolvePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
-import { getInitialThemeFromCookie, getThemeInitScript } from '@/lib/site-theme';
+import { getThemeInitScript } from '@/lib/site-theme';
 import './styles/base.css';
 import './styles/public.css';
 import './styles/home.css';
@@ -26,10 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const initialTheme = getInitialThemeFromCookie(await cookies());
-
   return (
-    <html lang="zh-CN" data-theme={initialTheme} suppressHydrationWarning>
+    <html lang="zh-CN" data-theme="summer-night" suppressHydrationWarning>
       <head>
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />
         <link rel="preconnect" href="https://fonts.googleapis.cn" />
