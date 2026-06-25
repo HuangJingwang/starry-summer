@@ -65,123 +65,126 @@
     "likeCount": 18
   },
   {
-    "id": "project-starry",
-    "title": "Starry Summer",
+    "id": "project-taste-skill",
+    "title": "Taste Skill",
     "type": "project",
     "status": "published",
     "visibility": "public",
-    "publishedAt": "2026-06-08",
-    "updatedAt": "2026-06-08",
-    "summary": "个人内容平台：文章、笔记、日常、项目、评论、后台管理，以及逐步转向文件内容源的部署方案。",
-    "bodyMarkdown": "## 平台目标\n\nStarry Summer 面向单人长期使用：公网展示内容，后台维护文章、笔记、项目和互动。\n\n当前的迁移方向是让公开内容先从数据库里撤出来，放到仓库文件中；互动和管理能力后续再拆到更轻的 Worker 或 GitHub API 流程里。",
-    "slug": "starry-summer",
-    "coverImageUrl": "/images/projects/starry-summer-avatar.webp",
-    "coverAltText": "Starry Summer 项目头像",
+    "publishedAt": "2026-06-25",
+    "updatedAt": "2026-06-25",
+    "summary": "给 AI 前端产物加上审美约束的开源 skill 集合，强调布局、字体、动效、间距和反模板化输出。",
+    "bodyMarkdown": "## 推荐理由\n\nTaste Skill 是一组面向 AI coding agent 的前端审美技能。它把布局、字体、动效、间距和反模板化检查写成可复用规则，让 Codex、Cursor、Claude Code 等工具在实现界面时少一点默认模板味，多一点真实产品感。\n\n项目仓库：[github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill)\n\n项目官网：[tasteskill.dev](https://www.tasteskill.dev/)",
+    "slug": "taste-skill",
     "featured": true,
+    "sourceType": "repost",
+    "sourceUrl": "https://github.com/Leonxlnx/taste-skill",
     "categories": [
-      "Projects",
-      "Platform"
+      "Open Source",
+      "AI Coding"
     ],
     "tags": [
-      "Next.js",
-      "GitHub",
-      "Cloudflare"
+      "Agent Skills",
+      "Frontend",
+      "Design Systems"
     ],
     "series": [
-      "Platform Journal"
-    ],
-    "project": {
-      "status": "active",
-      "stack": [
-        "Next.js",
-        "GitHub Content",
-        "Cloudflare Workers"
-      ],
-      "startedAt": "2026-06-10"
-    },
-    "viewCount": 214,
-    "likeCount": 31
-  },
-  {
-    "id": "project-easy-yapi-micronaut",
-    "title": "easy-yapi-micronaut",
-    "type": "project",
-    "status": "published",
-    "visibility": "public",
-    "publishedAt": "2026-06-16",
-    "updatedAt": "2026-06-16",
-    "summary": "扩展 easy-yapi 的 Micronaut 适配能力，补充注解识别与 JDK21 支持，让接口文档生成更贴近现代 JVM 项目。",
-    "bodyMarkdown": "## 项目说明\n\neasy-yapi-micronaut 基于 easy-yapi 做扩展，重点补齐 Micronaut 注解识别和 JDK21 支持。\n\n它适合放在项目页里作为后端工程效率工具：目标明确，技术栈清晰，也能体现对 JVM 生态和接口文档流程的实践。\n\n项目仓库：[github.com/HuangJingwang/easy-yapi-micronaut](https://github.com/HuangJingwang/easy-yapi-micronaut)",
-    "slug": "easy-yapi-micronaut",
-    "coverImageUrl": "/images/projects/easy-yapi-micronaut-avatar.webp",
-    "coverAltText": "easy-yapi-micronaut 项目头像",
-    "featured": true,
-    "categories": [
-      "Projects",
-      "Tooling"
-    ],
-    "tags": [
-      "Kotlin",
-      "Micronaut",
-      "JDK21"
-    ],
-    "series": [
-      "Project Archive"
+      "Open Source Recommendations"
     ],
     "project": {
       "status": "active",
       "links": {
-        "repository": "https://github.com/HuangJingwang/easy-yapi-micronaut"
+        "website": "https://www.tasteskill.dev/",
+        "repository": "https://github.com/Leonxlnx/taste-skill"
       },
       "stack": [
-        "Kotlin",
-        "Micronaut",
-        "JDK21",
-        "easy-yapi"
+        "Agent Skills",
+        "Frontend",
+        "Design Systems"
       ],
-      "startedAt": "2026-06-16"
+      "startedAt": "2026-06-25"
     },
     "viewCount": 0,
     "likeCount": 0
   },
   {
-    "id": "project-brushup",
-    "title": "brushup",
+    "id": "project-trellis",
+    "title": "Trellis",
     "type": "project",
     "status": "published",
     "visibility": "public",
-    "publishedAt": "2026-04-01",
-    "updatedAt": "2026-04-01",
-    "summary": "面向刷题复盘的效率工具，覆盖 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试等流程。",
-    "bodyMarkdown": "## 项目说明\n\nbrushup 是一个围绕刷题与求职准备的个人效率工具，聚合 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试。\n\n它适合放在项目页里作为学习系统和自动化工具的案例：问题真实、使用场景具体，也和站点里的刷题内容能形成呼应。\n\n项目仓库：[github.com/HuangJingwang/brushup](https://github.com/HuangJingwang/brushup)",
-    "slug": "brushup",
-    "coverImageUrl": "/images/projects/brushup-avatar.webp",
-    "coverAltText": "brushup 项目头像",
+    "publishedAt": "2026-06-24",
+    "updatedAt": "2026-06-25",
+    "summary": "面向 AI coding 的工程脚手架，把项目规范、任务和记忆持久化进仓库，让每次会话都带着上下文开始。",
+    "bodyMarkdown": "## 推荐理由\n\nTrellis 把 specs、tasks 和 workspace journal 放进仓库，让 AI coding session 能自动读取项目约定、任务上下文和历史记录。它适合长期项目，因为很多工程习惯可以写一次、反复注入，而不是每次重新解释。\n\n项目仓库：[github.com/mindfold-ai/trellis](https://github.com/mindfold-ai/trellis)\n\n项目文档：[docs.trytrellis.app](https://docs.trytrellis.app/)",
+    "slug": "trellis",
     "featured": true,
+    "sourceType": "repost",
+    "sourceUrl": "https://github.com/mindfold-ai/trellis",
     "categories": [
-      "Projects",
-      "Study"
+      "Open Source",
+      "AI Coding"
     ],
     "tags": [
-      "Python",
-      "LeetCode",
-      "AI Code Review"
+      "AI Coding",
+      "Specs",
+      "Project Memory"
     ],
     "series": [
-      "Project Archive"
+      "Open Source Recommendations"
     ],
     "project": {
       "status": "active",
       "links": {
-        "repository": "https://github.com/HuangJingwang/brushup"
+        "website": "https://docs.trytrellis.app/",
+        "repository": "https://github.com/mindfold-ai/trellis"
       },
       "stack": [
-        "Python",
-        "LeetCode",
-        "AI Code Review",
-        "Interview"
+        "AI Coding",
+        "Specs",
+        "Project Memory"
       ],
-      "startedAt": "2026-04-01"
+      "startedAt": "2026-06-25"
+    },
+    "viewCount": 0,
+    "likeCount": 0
+  },
+  {
+    "id": "project-superpowers",
+    "title": "Superpowers",
+    "type": "project",
+    "status": "published",
+    "visibility": "public",
+    "publishedAt": "2026-06-23",
+    "updatedAt": "2026-06-25",
+    "summary": "一套给 coding agents 使用的软件开发方法论，用可组合 skills 串起澄清、计划、TDD、实现和验证。",
+    "bodyMarkdown": "## 推荐理由\n\nSuperpowers 把软件开发流程拆成可组合 skills，从需求澄清、计划、TDD 到验证都给 agent 明确路线。它适合需要让 AI 长时间参与真实工程任务的项目，因为流程本身会提醒 agent 先理解目标，再动手实现。\n\n项目仓库：[github.com/obra/Superpowers](https://github.com/obra/Superpowers)",
+    "slug": "superpowers",
+    "featured": true,
+    "sourceType": "repost",
+    "sourceUrl": "https://github.com/obra/Superpowers",
+    "categories": [
+      "Open Source",
+      "AI Coding"
+    ],
+    "tags": [
+      "Agent Skills",
+      "Workflow",
+      "TDD"
+    ],
+    "series": [
+      "Open Source Recommendations"
+    ],
+    "project": {
+      "status": "active",
+      "links": {
+        "repository": "https://github.com/obra/Superpowers"
+      },
+      "stack": [
+        "Agent Skills",
+        "Workflow",
+        "TDD"
+      ],
+      "startedAt": "2026-06-25"
     },
     "viewCount": 0,
     "likeCount": 0

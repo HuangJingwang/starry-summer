@@ -325,39 +325,49 @@ describe('public content API helpers', () => {
     expect(studyPost?.bodyMarkdown).not.toContain('HuangJingwang');
   });
 
-  test('includes selected GitHub repositories in project fallback content', async () => {
+  test('keeps only the selected open-source recommendations in project fallback content', async () => {
     const projects = await loadSiteContent('project');
+
+    expect(projects.map((item) => item.id)).toEqual(['project-taste-skill', 'project-trellis', 'project-superpowers']);
+    expect(projects.map((item) => item.slug)).toEqual(['taste-skill', 'trellis', 'superpowers']);
+    expect(JSON.stringify(projects)).not.toContain('HuangJingwang');
+    expect(JSON.stringify(projects)).not.toContain('project-starry');
 
     expect(projects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: 'project-starry',
-          title: 'Starry Summer',
-          coverImageUrl: '/images/projects/starry-summer-avatar.webp',
-          coverAltText: 'Starry Summer 项目头像',
-        }),
-        expect.objectContaining({
-          id: 'project-easy-yapi-micronaut',
-          title: 'easy-yapi-micronaut',
-          coverImageUrl: '/images/projects/easy-yapi-micronaut-avatar.webp',
-          coverAltText: 'easy-yapi-micronaut 项目头像',
+          id: 'project-taste-skill',
+          title: 'Taste Skill',
+          sourceUrl: 'https://github.com/Leonxlnx/taste-skill',
           project: expect.objectContaining({
             links: expect.objectContaining({
-              repository: 'https://github.com/HuangJingwang/easy-yapi-micronaut',
+              website: 'https://www.tasteskill.dev/',
+              repository: 'https://github.com/Leonxlnx/taste-skill',
             }),
-            stack: expect.arrayContaining(['Kotlin', 'Micronaut', 'JDK21']),
+            stack: expect.arrayContaining(['Agent Skills', 'Frontend', 'Design Systems']),
           }),
         }),
         expect.objectContaining({
-          id: 'project-brushup',
-          title: 'brushup',
-          coverImageUrl: '/images/projects/brushup-avatar.webp',
-          coverAltText: 'brushup 项目头像',
+          id: 'project-trellis',
+          title: 'Trellis',
+          sourceUrl: 'https://github.com/mindfold-ai/trellis',
           project: expect.objectContaining({
             links: expect.objectContaining({
-              repository: 'https://github.com/HuangJingwang/brushup',
+              website: 'https://docs.trytrellis.app/',
+              repository: 'https://github.com/mindfold-ai/trellis',
             }),
-            stack: expect.arrayContaining(['Python', 'LeetCode', 'AI Code Review']),
+            stack: expect.arrayContaining(['AI Coding', 'Specs', 'Project Memory']),
+          }),
+        }),
+        expect.objectContaining({
+          id: 'project-superpowers',
+          title: 'Superpowers',
+          sourceUrl: 'https://github.com/obra/Superpowers',
+          project: expect.objectContaining({
+            links: expect.objectContaining({
+              repository: 'https://github.com/obra/Superpowers',
+            }),
+            stack: expect.arrayContaining(['Agent Skills', 'Workflow', 'TDD']),
           }),
         }),
       ]),
