@@ -353,7 +353,13 @@ describe('home page', () => {
     expect(navSource).toContain("data-transitioning={pendingHref ? 'true' : undefined}");
     expect(navSource).toContain('function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string)');
     expect(navSource).toContain('data-home-nav-link="true"');
-    expect(navSource).toContain("window.sessionStorage.setItem(transitionStorageKey, href);");
+    expect(navSource).toContain("event.currentTarget.closest('.portfolio-hero__nav-card')");
+    expect(navSource).toContain('navCard instanceof HTMLElement ? navCard.getBoundingClientRect() : null');
+    expect(navSource).toContain('JSON.stringify({');
+    expect(navSource).toContain('height: rect.height,');
+    expect(navSource).toContain('left: rect.left,');
+    expect(navSource).toContain('top: rect.top,');
+    expect(navSource).toContain('width: rect.width,');
     expect(navSource).toContain('onClick={(event) => handleNavClick(event, item.href)}');
     expect(navSource).not.toContain("import { useRouter } from 'next/navigation';");
     expect(navSource).not.toContain('event.preventDefault();');
@@ -377,11 +383,21 @@ describe('home page', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/PublicCardNav.tsx'), 'utf8');
 
     expect(source).toContain("const transitionStorageKey = 'starry-summer-home-nav-transition';");
+    expect(source).toContain('interface HomeNavTransitionPayload');
+    expect(source).toContain('const [arrivalStyle, setArrivalStyle] = useState<CSSProperties | undefined>();');
+    expect(source).toContain('const headerRef = useRef<HTMLElement | null>(null);');
+    expect(source).toContain('useLayoutEffect(() => {');
+    expect(source).toContain('readHomeNavTransitionPayload(window.sessionStorage.getItem(transitionStorageKey))');
     expect(source).toContain('const [arrivedFromHome, setArrivedFromHome] = useState(false);');
-    expect(source).toContain('window.sessionStorage.getItem(transitionStorageKey)');
     expect(source).toContain('window.sessionStorage.removeItem(transitionStorageKey);');
+    expect(source).toContain("'--nav-arrive-scale-x': sourceRect.width / destinationRect.width");
+    expect(source).toContain("'--nav-arrive-scale-y': sourceRect.height / destinationRect.height");
+    expect(source).toContain("'--nav-arrive-x': `${sourceRect.left - destinationRect.left}px`");
+    expect(source).toContain("'--nav-arrive-y': `${sourceRect.top - destinationRect.top}px`");
+    expect(source).toContain('style={arrivalStyle}');
     expect(source).toContain("site-nav-card--from-home");
-    expect(source).toContain('window.setTimeout(() => setArrivedFromHome(false), 680)');
+    expect(source).toContain('function readHomeNavTransitionPayload(value: string | null): HomeNavTransitionPayload | null');
+    expect(source).toContain('return { href: value };');
   });
 
   test('keeps the owner admin entry out of the public top navigation', () => {

@@ -79,7 +79,23 @@ export function HomeCardNav() {
       return;
     }
 
-    window.sessionStorage.setItem(transitionStorageKey, href);
+    const navCard = event.currentTarget.closest('.portfolio-hero__nav-card');
+    const rect = navCard instanceof HTMLElement ? navCard.getBoundingClientRect() : null;
+
+    window.sessionStorage.setItem(
+      transitionStorageKey,
+      JSON.stringify({
+        href,
+        rect: rect
+          ? {
+              height: rect.height,
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+            }
+          : null,
+      }),
+    );
     setPendingHref(href);
   }
 

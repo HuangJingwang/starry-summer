@@ -3,12 +3,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { CSSProperties, FocusEvent, MouseEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { NavigationItem } from '@/lib/navigation';
 
 const transitionStorageKey = 'starry-summer-home-nav-transition';
+
+interface HomeNavTransitionPayload {
+  href: string;
+  rect?: {
+    height: number;
+    left: number;
+    top: number;
+    width: number;
+  } | null;
+}
 
 const referenceNavItems = [
   {
@@ -46,6 +56,8 @@ const referenceNavItems = [
 export function PublicCardNav({ title, navItems }: { title: string; navItems: NavigationItem[] }) {
   const pathname = usePathname();
   const [arrivedFromHome, setArrivedFromHome] = useState(false);
+  const [arrivalStyle, setArrivalStyle] = useState<CSSProperties | undefined>();
+  const headerRef = useRef<HTMLElement | null>(null);
   void navItems;
 
   const activeIndex = useMemo(
@@ -107,24 +119,56 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
 
   useEffect(() => () => clearHoveredIndexRestore(), []);
 
-  useEffect(() => {
-    const transitionTarget = window.sessionStorage.getItem(transitionStorageKey);
-    const targetPathname = transitionTarget?.split('?')[0];
+  useLayoutEffect(() => {
+    const transitionPayload = readHomeNavTransitionPayload(window.sessionStorage.getItem(transitionStorageKey));
+    const targetPathname = transitionPayload?.href.split('?')[0];
 
     if (!targetPathname || !isActivePath(pathname, targetPathname)) {
       return;
     }
 
     window.sessionStorage.removeItem(transitionStorageKey);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const sourceRect = transitionPayload.rect;
+    const destinationRect = headerRef.current?.getBoundingClientRect();
+
+    if (sourceRect && destinationRect) {
+      setArrivalStyle({
+        '--nav-arrive-scale-x': sourceRect.width / destinationRect.width,
+        '--nav-arrive-scale-y': sourceRect.height / destinationRect.height,
+        '--nav-arrive-x': `${sourceRect.left - destinationRect.left}px`,
+        '--nav-arrive-y': `${sourceRect.top - destinationRect.top}px`,
+      } as CSSProperties);
+    } else {
+      setArrivalStyle(undefined);
+    }
+
     setArrivedFromHome(true);
-
-    const timeoutId = window.setTimeout(() => setArrivedFromHome(false), 680);
-
-    return () => window.clearTimeout(timeoutId);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!arrivedFromHome) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setArrivedFromHome(false);
+      setArrivalStyle(undefined);
+    }, 760);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [arrivedFromHome]);
+
   return (
-    <header className={`site-header site-nav-card${arrivedFromHome ? ' site-nav-card--from-home' : ''}`}>
+    <header
+      ref={headerRef}
+      className={`site-header site-nav-card${arrivedFromHome ? ' site-nav-card--from-home' : ''}`}
+      style={arrivalStyle}
+    >
       <Link className="brand site-nav-card__brand" href="/" aria-label={`${title} 首页`}>
         <img className="brand-avatar brand-avatar--night" src="/images/aster-profile.png" alt="" aria-hidden="true" />
         <img className="brand-avatar brand-avatar--day" src="/images/aster-day-profile-v2.png" alt="" aria-hidden="true" />
@@ -183,4 +227,22 @@ function isActivePath(pathname: string, href: string): boolean {
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function readHomeNavTransitionPayload(value: string | null): HomeNavTransitionPayload | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<HomeNavTransitionPayload>;
+
+    if (typeof parsed.href === 'string') {
+      return parsed as HomeNavTransitionPayload;
+    }
+  } catch {
+    return { href: value };
+  }
+
+  return null;
 }

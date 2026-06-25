@@ -1150,13 +1150,17 @@ describe('global styles', () => {
     expect(transitionNavCardBlock).toContain('animation: home-nav-card-press 180ms');
     expect(pendingLinkBlock).toContain('animation: home-nav-pending-press 180ms');
     expect(navLinkBlock).toContain('transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1)');
-    expect(moduleArriveBlock).toContain('animation: module-nav-arrive 620ms');
+    expect(moduleArriveBlock).toContain('animation: module-nav-arrive 720ms');
+    expect(moduleArriveBlock).toContain('transform-origin: 0 0;');
+    expect(moduleArriveBlock).toContain('will-change: opacity, transform;');
     expect(css).toContain('@keyframes home-nav-card-press');
     expect(css).toContain('@keyframes home-nav-pending-press');
     expect(css).not.toContain('@keyframes home-card-nav-exit');
     expect(css).not.toContain('@keyframes home-nav-card-compress');
     expect(css).not.toContain('@keyframes home-nav-pending-pulse');
     expect(css).toContain('@keyframes module-nav-arrive');
+    expect(css).toContain('translate3d(var(--nav-arrive-x, 18px), var(--nav-arrive-y, 22px), 0)');
+    expect(css).toContain('scale(var(--nav-arrive-scale-x, 0.94), var(--nav-arrive-scale-y, 0.94))');
     expect(css).toContain('@keyframes module-nav-focus');
     expect(reducedMotionBlock).not.toContain('.site-nav-card--from-home');
     expect(reducedMotionBlock).not.toContain('.portfolio-hero__card-nav[data-transitioning=\'true\']');
