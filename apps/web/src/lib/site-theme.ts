@@ -4,10 +4,6 @@ export const themeStorageKey = 'starry-summer-theme';
 export const themeCookieName = themeStorageKey;
 export const themeCookieMaxAgeSeconds = 60 * 60 * 24 * 365;
 
-type ThemeCookieStore = {
-  get(name: string): { value?: string } | undefined;
-};
-
 /**
  * Resolves the automatic public theme from the visitor's local clock.
  */
@@ -37,15 +33,6 @@ export function getMillisecondsUntilNextThemeBoundary(date = new Date()) {
 }
 
 /**
- * Picks the server-rendered theme from the request cookie, falling back to time.
- */
-export function getInitialThemeFromCookie(cookieStore: ThemeCookieStore, date = new Date()): SiteTheme {
-  const savedTheme = cookieStore.get(themeCookieName)?.value;
-
-  return isSiteTheme(savedTheme) ? savedTheme : getThemeForTime(date);
-}
-
-/**
  * Reads the browser theme cookie for client-side hydration and route changes.
  */
 export function getThemeCookie(): SiteTheme | null {
@@ -62,7 +49,7 @@ export function getThemeCookie(): SiteTheme | null {
 }
 
 /**
- * Persists the explicit theme choice so the next server render starts correctly.
+ * Persists the explicit theme choice so the next early theme script starts correctly.
  */
 export function setThemeCookie(nextTheme: SiteTheme) {
   document.cookie = `${themeCookieName}=${nextTheme}; Path=/; Max-Age=${themeCookieMaxAgeSeconds}; SameSite=Lax`;

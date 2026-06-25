@@ -13,7 +13,9 @@ describe('notes route source', () => {
 
     expect(source).toContain("title: '笔记'");
     expect(source).toContain("path: '/notes'");
-    expect(source).toContain("loadSiteContent('note', sort)");
+    expect(source).toContain("loadSiteContent('note', 'latest')");
+    expect(source).toContain("loadSiteContent('note', 'popular')");
+    expect(source).not.toContain('searchParams');
     expect(source).toContain('<h1>笔记</h1>');
     expect(source).not.toContain('permanentRedirect');
   });

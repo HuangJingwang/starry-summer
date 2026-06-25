@@ -1,7 +1,9 @@
-import Link from 'next/link';
+import { Suspense } from 'react';
 
+import { ContentArchiveActions, ContentArchiveMarkup } from '@/components/ContentArchiveMarkup';
 import { SiteShell } from '@/components/SiteShell';
-import { getContentHref, getContentTaxonomyLinkGroups, normalizeContentSort, type SiteContentItem } from '@/lib/content';
+import { SortableContentArchive, type SortableArchiveGroup } from '@/components/SortableContentArchive';
+import { getContentHref, getContentTaxonomyLinkGroups, type SiteContentItem } from '@/lib/content';
 import { getContentCover } from '@/lib/content-cover';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
@@ -14,15 +16,13 @@ export function generateMetadata() {
   });
 }
 
-export default async function PostsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ sort?: string }>;
-}) {
-  const { sort: sortParam } = await searchParams;
-  const sort = normalizeContentSort(sortParam);
-  const posts = await loadSiteContent('article', sort);
-  const groupedPosts = groupPostsByYear(posts);
+export default async function PostsPage() {
+  const [latestPosts, popularPosts] = await Promise.all([
+    loadSiteContent('article', 'latest'),
+    loadSiteContent('article', 'popular'),
+  ]);
+  const latestGroups = groupPostsByYear(latestPosts);
+  const popularGroups = groupPostsByYear(popularPosts);
 
   return (
     <SiteShell>
@@ -31,81 +31,66 @@ export default async function PostsPage({
           <div className="page-title">
             <h1>文章</h1>
           </div>
-          <div className="posts-page-actions">
-            <nav className="sort-tabs" aria-label="文章排序">
-              <Link href="/posts" aria-current={sort === 'latest' ? 'page' : undefined}>
-                最新
-              </Link>
-              <Link href="/posts?sort=popular" aria-current={sort === 'popular' ? 'page' : undefined}>
-                热门
-              </Link>
-            </nav>
-            <nav className="sort-tabs" aria-label="文章浏览">
-              <Link href="/series">专题</Link>
-            </nav>
-          </div>
         </div>
-        <div className="posts-archive">
-          {groupedPosts.map((group) => (
-            <section key={group.year} className="posts-archive-group" aria-label={`${group.year} 年文章`}>
-              <header className="posts-archive-group__heading">
-                <div>
-                  <h2>{group.year}年</h2>
-                  <span aria-hidden="true" />
-                  <p>{group.items.length} 篇文章</p>
-                </div>
-              </header>
-              <div className="posts-archive-group__list">
-                {group.items.map((item) => {
-                  const cover = getContentCover(item);
-                  const taxonomyItems = getContentTaxonomyLinkGroups(item).flatMap((taxonomyGroup) => taxonomyGroup.items);
-
-                  return (
-                    <Link key={item.id} className="posts-archive-item" href={getContentHref(item)}>
-                      <time className="posts-archive-item__date" dateTime={item.publishedAt}>
-                        {formatPostArchiveDate(item.publishedAt)}
-                      </time>
-                      <span className="posts-archive-item__dot" aria-hidden="true" />
-                      <span className="posts-archive-item__title">
-                        {item.title}
-                        {item.pinned ? <span className="posts-archive-item__pin">置顶</span> : null}
-                      </span>
-                      <span className="posts-archive-item__tags" aria-label="文章标签">
-                        {taxonomyItems.slice(0, 3).map((taxonomyItem) => (
-                          <span key={taxonomyItem.href}>{taxonomyItem.label}</span>
-                        ))}
-                      </span>
-                      <span className="posts-archive-item__stats" aria-label="文章热度">
-                        {item.viewCount ?? 0} 浏览 · {item.likeCount ?? 0} 喜欢
-                      </span>
-                      {cover ? (
-                        <span className="posts-archive-item__cover-preview" aria-hidden="true">
-                          <img src={cover.imageUrl} alt="" />
-                        </span>
-                      ) : null}
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-        </div>
+        <Suspense
+          fallback={
+            <>
+              <ContentArchiveActions
+                sort="latest"
+                sortAriaLabel="文章排序"
+                browseAriaLabel="文章浏览"
+                browseHref="/series"
+                browseLabel="专题"
+                baseHref="/posts"
+              />
+              <ContentArchiveMarkup groups={latestGroups} contentLabel="文章" />
+            </>
+          }
+        >
+          <SortableContentArchive
+            latestGroups={latestGroups}
+            popularGroups={popularGroups}
+            contentLabel="文章"
+            sortAriaLabel="文章排序"
+            browseAriaLabel="文章浏览"
+            browseHref="/series"
+            browseLabel="专题"
+            baseHref="/posts"
+          />
+        </Suspense>
       </main>
     </SiteShell>
   );
 }
 
-function groupPostsByYear(posts: SiteContentItem[]): Array<{ year: string; items: SiteContentItem[] }> {
-  const groups = new Map<string, SiteContentItem[]>();
+function groupPostsByYear(posts: SiteContentItem[]): SortableArchiveGroup[] {
+  const groups = new Map<string, SortableArchiveGroup['items']>();
 
   for (const post of posts) {
     const year = post.publishedAt.slice(0, 4) || '未知';
-    groups.set(year, [...(groups.get(year) ?? []), post]);
+    groups.set(year, [...(groups.get(year) ?? []), toArchiveItem(post)]);
   }
 
   return [...groups.entries()]
     .sort(([yearA], [yearB]) => yearB.localeCompare(yearA))
     .map(([year, items]) => ({ year, items }));
+}
+
+function toArchiveItem(item: SiteContentItem): SortableArchiveGroup['items'][number] {
+  const cover = getContentCover(item);
+  const taxonomyItems = getContentTaxonomyLinkGroups(item).flatMap((taxonomyGroup) => taxonomyGroup.items);
+
+  return {
+    id: item.id,
+    href: getContentHref(item),
+    dateLabel: formatPostArchiveDate(item.publishedAt),
+    dateTime: item.publishedAt,
+    title: item.title,
+    pinned: Boolean(item.pinned),
+    taxonomyItems,
+    statsLabel: `${item.viewCount ?? 0} 浏览 · ${item.likeCount ?? 0} 喜欢`,
+    ...(cover ? { cover: { imageUrl: cover.imageUrl } } : {}),
+  };
 }
 
 function formatPostArchiveDate(value: string): string {
