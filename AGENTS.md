@@ -19,6 +19,7 @@ These instructions apply to the entire repository.
 
 ## Visual Design Guardrails
 
+- For any frontend coding, redesign, or public UI styling task in this repository, use the global Codex skill `design-taste-frontend` before planning or editing. Treat it as an additional design-quality and anti-template check; Starry Summer's product direction, owner-name constraints, and public theme guardrails in this file remain higher priority.
 - When changing or reviewing public page visuals, global public CSS, shared reader components, public forms, or taxonomy/search/archive/guestbook layouts, use the repository skill at `.codex/skills/starry-summer-public-theme-review/SKILL.md` before editing and before reporting completion.
 - Public reader pages such as home, posts, notes, moments, projects, series, categories, tags, archives, search, guestbook, and about must preserve both public themes unless the user explicitly asks for a different theme: light should stay clean, quiet, readable, and content-first; dark should keep the cyber/glass archive atmosphere.
 - Do not mix the old light card system into public pages. Avoid harsh white panels, mismatched form blocks, low-contrast headings, and pale taxonomy chips. In dark theme, use the existing `--cyber-*` tokens, translucent dark panels, subtle borders, and cyan/teal accents.
