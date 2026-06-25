@@ -505,7 +505,7 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero .cyber-home__container')).toContain('align-items: stretch;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('display: block;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-x: 50%;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-y: clamp(382px, calc(50svh + 34px), 404px);');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-y: clamp(404px, 50svh, 540px);');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-gap: 28px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-width: 360px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-height: 260px;');
@@ -517,7 +517,7 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-social-width: 315px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-article-width: 266px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-width: 280px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-top: 42px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-top: clamp(42px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 16px), 178px);');
     expect(readRule(css, '.portfolio-hero__latest-card')).toContain('position: absolute;');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('position: absolute;');
     expect(readRule(css, '.portfolio-hero__actions')).toContain('margin-top: 0;');

@@ -996,7 +996,7 @@ body:has(.cyber-home) .site-footer a {
   display: block;
   flex: 1;
   --reference-center-x: 50%;
-  --reference-center-y: clamp(382px, calc(50svh + 34px), 404px);
+  --reference-center-y: clamp(404px, 50svh, 540px);
   --reference-gap: 28px;
   --reference-hi-width: 360px;
   --reference-hi-height: 260px;
@@ -1012,7 +1012,7 @@ body:has(.cyber-home) .site-footer a {
   --reference-article-width: 266px;
   --reference-nav-width: 280px;
   --reference-nav-height: 398px;
-  --reference-nav-top: 42px;
+  --reference-nav-top: clamp(42px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 16px), 178px);
   --reference-portrait-width: 146px;
   min-height: 100svh;
   padding: 0;

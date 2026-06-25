@@ -946,7 +946,7 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__card-nav');
     expect(homeHeroContentBlock).toContain('display: block;');
     expect(homeHeroContentBlock).toContain('--reference-center-x: 50%;');
-    expect(homeHeroContentBlock).toContain('--reference-center-y: clamp(382px, calc(50svh + 34px), 404px);');
+    expect(homeHeroContentBlock).toContain('--reference-center-y: clamp(404px, 50svh, 540px);');
     expect(homeHeroContentBlock).toContain('--reference-gap: 28px;');
     expect(homeHeroContentBlock).toContain('--reference-hi-width: 360px;');
     expect(homeHeroContentBlock).toContain('--reference-hi-height: 260px;');
@@ -962,7 +962,7 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--reference-article-width: 266px;');
     expect(homeHeroContentBlock).toContain('--reference-nav-width: 280px;');
     expect(homeHeroContentBlock).toContain('--reference-nav-height: 398px;');
-    expect(homeHeroContentBlock).toContain('--reference-nav-top: 42px;');
+    expect(homeHeroContentBlock).toContain('--reference-nav-top: clamp(42px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 16px), 178px);');
     expect(homeHeroContentBlock).toContain('--reference-portrait-width: 146px;');
     expect(homeHeroContentBlock).toContain('padding: 0;');
     expect(homeIntroBlock).toContain('position: absolute;');
