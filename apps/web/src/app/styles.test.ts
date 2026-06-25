@@ -199,6 +199,8 @@ describe('global styles', () => {
     const titleHoverBlock = readStyleBlock(css, '.posts-archive-item:hover .posts-archive-item__title');
     const coverPreviewBlock = readStyleBlock(css, '.posts-archive-item__cover-preview');
     const coverPreviewHoverBlock = readStyleBlock(css, '.posts-archive-item:hover .posts-archive-item__cover-preview');
+    const groupHoverBlock = readStyleBlock(css, '.posts-archive-group:hover');
+    const groupFocusWithinBlock = readStyleBlock(css, '.posts-archive-group:focus-within');
     const dayGroupBlock =
       css.match(/:root\[data-theme='summer-day'\] \.posts-archive-group\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
       '';
@@ -211,7 +213,11 @@ describe('global styles', () => {
     expect(groupBlock).toContain('background: rgba(4, 6, 14, 0.54);');
     expect(groupBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(groupBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.18);');
+    expect(groupBlock).toContain('position: relative;');
+    expect(groupBlock).toContain('z-index: 0;');
     expect(groupBlock).not.toContain('background: #fff;');
+    expect(groupHoverBlock).toContain('z-index: 2;');
+    expect(groupFocusWithinBlock).toContain('z-index: 2;');
     expect(headingBlock).toContain('justify-content: space-between;');
     expect(itemBlock).toContain('grid-template-columns: 52px 18px minmax(0, 1fr) auto auto;');
     expect(itemBlock).toContain('color: rgba(226, 232, 240, 0.86);');
@@ -940,7 +946,7 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__card-nav');
     expect(homeHeroContentBlock).toContain('display: block;');
     expect(homeHeroContentBlock).toContain('--reference-center-x: 50%;');
-    expect(homeHeroContentBlock).toContain('--reference-center-y: clamp(380px, calc(50svh + 31px), 400px);');
+    expect(homeHeroContentBlock).toContain('--reference-center-y: clamp(408px, calc(50svh + 59px), 428px);');
     expect(homeHeroContentBlock).toContain('--reference-gap: 36px;');
     expect(homeHeroContentBlock).toContain('--reference-hi-width: 360px;');
     expect(homeHeroContentBlock).toContain('--reference-hi-height: 288px;');
@@ -1053,7 +1059,7 @@ describe('global styles', () => {
     expect(css).toContain('animation: home-widget-enter');
     expect(homeSkyBlock).not.toContain('grid-area: sky;');
     expect(homeSkyBlock).toContain('overflow: hidden;');
-    expect(homeSkyBlock).toContain('padding: 0;');
+    expect(homeSkyBlock).toContain('padding: 8px;');
     expect(homeSkyBlock).toContain('position: absolute;');
     expect(homeSkyBlock).toContain('left: calc(var(--reference-center-x) - var(--reference-art-width) / 2);');
     expect(homeSkyBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));');
