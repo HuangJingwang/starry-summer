@@ -1143,6 +1143,9 @@ describe('global styles', () => {
     const navLinkBlock = css.match(/\.portfolio-hero__nav-links a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const moduleArriveBlock =
       css.match(/\.site-nav-card--from-home\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const homeReturnBlock =
+      css.match(/\.portfolio-hero__card-nav--from-module \.portfolio-hero__nav-card\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
     const reducedMotionBlock =
       css.match(/@media \(prefers-reduced-motion: reduce\) \{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
@@ -1153,8 +1156,14 @@ describe('global styles', () => {
     expect(moduleArriveBlock).toContain('animation: module-nav-arrive 720ms');
     expect(moduleArriveBlock).toContain('transform-origin: 0 0;');
     expect(moduleArriveBlock).toContain('will-change: opacity, transform;');
+    expect(homeReturnBlock).toContain('animation: home-nav-return 720ms');
+    expect(homeReturnBlock).toContain('transform-origin: 0 0;');
+    expect(homeReturnBlock).toContain('will-change: opacity, transform;');
     expect(css).toContain('@keyframes home-nav-card-press');
     expect(css).toContain('@keyframes home-nav-pending-press');
+    expect(css).toContain('@keyframes home-nav-return');
+    expect(css).toContain('translate3d(var(--home-nav-return-x, -18px), var(--home-nav-return-y, -22px), 0)');
+    expect(css).toContain('scale(var(--home-nav-return-scale-x, 1.04), var(--home-nav-return-scale-y, 0.94))');
     expect(css).not.toContain('@keyframes home-card-nav-exit');
     expect(css).not.toContain('@keyframes home-nav-card-compress');
     expect(css).not.toContain('@keyframes home-nav-pending-pulse');

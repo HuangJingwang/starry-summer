@@ -111,6 +111,28 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
     '--hover-index': hoveredIndex,
     '--nav-count': referenceNavItems.length,
   } as CSSProperties;
+  const handleBrandClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (shouldUseNativeNavigation(event)) {
+      return;
+    }
+
+    const rect = headerRef.current?.getBoundingClientRect();
+
+    window.sessionStorage.setItem(
+      transitionStorageKey,
+      JSON.stringify({
+        href: '/',
+        rect: rect
+          ? {
+              height: rect.height,
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+            }
+          : null,
+      }),
+    );
+  };
 
   useEffect(() => {
     clearHoveredIndexRestore();
@@ -169,7 +191,7 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
       className={`site-header site-nav-card${arrivedFromHome ? ' site-nav-card--from-home' : ''}`}
       style={arrivalStyle}
     >
-      <Link className="brand site-nav-card__brand" href="/" aria-label={`${title} 首页`}>
+      <Link className="brand site-nav-card__brand" href="/" aria-label={`${title} 首页`} onClick={handleBrandClick}>
         <img className="brand-avatar brand-avatar--night" src="/images/aster-profile.png" alt="" aria-hidden="true" />
         <img className="brand-avatar brand-avatar--day" src="/images/aster-day-profile-v2.png" alt="" aria-hidden="true" />
       </Link>
@@ -245,4 +267,8 @@ function readHomeNavTransitionPayload(value: string | null): HomeNavTransitionPa
   }
 
   return null;
+}
+
+function shouldUseNativeNavigation(event: MouseEvent<HTMLAnchorElement>) {
+  return event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
 }

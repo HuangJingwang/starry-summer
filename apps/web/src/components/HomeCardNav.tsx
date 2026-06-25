@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { CSSProperties, MouseEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import {
   getMillisecondsUntilNextThemeBoundary,
@@ -15,6 +15,16 @@ import {
 } from '@/lib/site-theme';
 
 const transitionStorageKey = 'starry-summer-home-nav-transition';
+
+interface HomeNavTransitionPayload {
+  href: string;
+  rect?: {
+    height: number;
+    left: number;
+    top: number;
+    width: number;
+  } | null;
+}
 
 const homeNavItems = [
   {
@@ -51,7 +61,10 @@ const homeNavItems = [
 
 export function HomeCardNav() {
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [returnedFromModule, setReturnedFromModule] = useState(false);
+  const [returnStyle, setReturnStyle] = useState<CSSProperties | undefined>();
   const [theme, setTheme] = useState<SiteTheme>('summer-night');
+  const navCardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let timer: number;
@@ -73,6 +86,49 @@ export function HomeCardNav() {
 
     return () => window.clearTimeout(timer);
   }, []);
+
+  useLayoutEffect(() => {
+    const transitionPayload = readHomeNavTransitionPayload(window.sessionStorage.getItem(transitionStorageKey));
+
+    if (transitionPayload?.href !== '/') {
+      return;
+    }
+
+    window.sessionStorage.removeItem(transitionStorageKey);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const sourceRect = transitionPayload.rect;
+    const destinationRect = navCardRef.current?.getBoundingClientRect();
+
+    if (sourceRect && destinationRect) {
+      setReturnStyle({
+        '--home-nav-return-scale-x': sourceRect.width / destinationRect.width,
+        '--home-nav-return-scale-y': sourceRect.height / destinationRect.height,
+        '--home-nav-return-x': `${sourceRect.left - destinationRect.left}px`,
+        '--home-nav-return-y': `${sourceRect.top - destinationRect.top}px`,
+      } as CSSProperties);
+    } else {
+      setReturnStyle(undefined);
+    }
+
+    setReturnedFromModule(true);
+  }, []);
+
+  useEffect(() => {
+    if (!returnedFromModule) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setReturnedFromModule(false);
+      setReturnStyle(undefined);
+    }, 760);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [returnedFromModule]);
 
   function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
     if (shouldUseNativeNavigation(event)) {
@@ -109,8 +165,13 @@ export function HomeCardNav() {
   }
 
   return (
-    <nav className="portfolio-hero__card-nav" aria-label="主页导航" data-transitioning={pendingHref ? 'true' : undefined}>
-      <div className="portfolio-hero__nav-card">
+    <nav
+      className={`portfolio-hero__card-nav${returnedFromModule ? ' portfolio-hero__card-nav--from-module' : ''}`}
+      aria-label="主页导航"
+      data-transitioning={pendingHref ? 'true' : undefined}
+      style={returnStyle}
+    >
+      <div ref={navCardRef} className="portfolio-hero__nav-card">
         <Link className="portfolio-hero__nav-brand" href="/">
           <img className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--night" src="/images/aster-profile.png" alt="" />
           <img className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--day" src="/images/aster-day-profile-v2.png" alt="" />
@@ -162,4 +223,22 @@ export function HomeCardNav() {
 
 function shouldUseNativeNavigation(event: MouseEvent<HTMLAnchorElement>) {
   return event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+}
+
+function readHomeNavTransitionPayload(value: string | null): HomeNavTransitionPayload | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<HomeNavTransitionPayload>;
+
+    if (typeof parsed.href === 'string') {
+      return parsed as HomeNavTransitionPayload;
+    }
+  } catch {
+    return { href: value };
+  }
+
+  return null;
 }
