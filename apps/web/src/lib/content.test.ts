@@ -67,7 +67,7 @@ describe('web content helpers', () => {
 
   test('uses explicit and default post covers for seed featured items instead of the home workspace image', () => {
     const seedFeaturedCovers = seedContent
-      .filter((item) => item.featured && ['intro-post', 'project-taste-skill'].includes(item.id))
+      .filter((item) => item.featured && ['intro-post', 'project-starry'].includes(item.id))
       .map((item) => item.coverImageUrl);
 
     expect(seedFeaturedCovers).toEqual(['/images/starry-summer-night.png', DEFAULT_POST_COVER.imageUrl]);

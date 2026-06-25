@@ -3,6 +3,8 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
+import { categoryOrder, recommendedShares } from '@/lib/recommended-shares';
+
 function readSource(path: string) {
   return readFileSync(join(process.cwd(), path), 'utf8');
 }
@@ -46,10 +48,14 @@ describe('recommended share page', () => {
     expect(grid).toContain('没有找到相关资源');
     expect(grid).toContain('share-page__stars');
 
-    expect(data).toContain("categoryOrder = ['全部', '图片', '人工智能', 'CSS', 'Github', '图标', '组件', '网站集', '3D', '学习']");
-    expect(data).toContain("name: 'iLoveIMG'");
-    expect(data).toContain("name: 'TinyPNG'");
-    expect(data).toContain("name: 'Magic UI'");
+    expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程']);
+    expect(recommendedShares.map((resource) => resource.name)).toEqual(['Taste Skill', 'Trellis', 'Superpowers']);
+    expect(data).toContain("name: 'Taste Skill'");
+    expect(data).toContain("name: 'Trellis'");
+    expect(data).toContain("name: 'Superpowers'");
+    expect(data).not.toContain("name: 'iLoveIMG'");
+    expect(data).not.toContain("name: 'TinyPNG'");
+    expect(data).not.toContain("name: 'Magic UI'");
   });
 
   test('styles the share page with separate light and dark themes from the YYsuni reference layout', () => {
