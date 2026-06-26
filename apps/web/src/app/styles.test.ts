@@ -1219,6 +1219,14 @@ describe('global styles', () => {
     const juejinBlock = css.match(/\.portfolio-hero__social--juejin\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const guestbookBlock =
       css.match(/\.portfolio-hero__social--guestbook\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const adminWidgetBlock =
+      css.match(/\.portfolio-hero__admin-widget\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const adminWidgetHoverBlock =
+      css.match(/\.portfolio-hero__admin-widget:hover,[\s\S]*?\.portfolio-hero__admin-widget:focus-visible\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayAdminWidgetBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__admin-widget\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
     const emailIconBlock =
       css.match(/\.portfolio-hero__social-icon--email\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayGithubBlock =
@@ -1291,6 +1299,14 @@ describe('global styles', () => {
     expect(guestbookBlock).toContain('transform-origin: center;');
     expect(guestbookBlock).toContain('width: 46px;');
     expect(guestbookBlock).toContain('padding: 0;');
+    expect(adminWidgetBlock).toContain('height: 40px;');
+    expect(adminWidgetBlock).toContain('width: 40px;');
+    expect(adminWidgetBlock).toContain('padding: 0;');
+    expect(adminWidgetBlock).toContain('color: rgba(226, 232, 240, 0.58);');
+    expect(adminWidgetBlock).toContain('text-decoration: none;');
+    expect(adminWidgetHoverBlock).toContain('border-color: rgba(34, 211, 238, 0.38);');
+    expect(adminWidgetHoverBlock).toContain('outline: none;');
+    expect(dayAdminWidgetBlock).toContain('color: rgba(16, 52, 61, 0.54);');
     expect(css).toContain('.portfolio-hero__social--guestbook::after');
     expect(css).toContain("background: radial-gradient(circle, rgba(47, 203, 231, 0.24) 0%, rgba(47, 203, 231, 0.12) 48%, transparent 70%);");
     expect(css).toContain('transform: scale(1.05);');

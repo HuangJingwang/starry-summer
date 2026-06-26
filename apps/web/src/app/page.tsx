@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { FileText, Heart } from 'lucide-react';
+import { FileText, Heart, Settings } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
@@ -117,6 +117,9 @@ export default async function HomePage() {
                   ) : null}
                 </div>
                 <div className="portfolio-hero__action-row portfolio-hero__action-row--secondary">
+                  <a className="portfolio-hero__admin-widget" href="/admin" aria-label="进入后台管理">
+                    <Settings size={20} strokeWidth={1.8} aria-hidden="true" />
+                  </a>
                   <HomeContactButton
                     className="portfolio-hero__social portfolio-hero__social--guestbook"
                     href="/guestbook"
