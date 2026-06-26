@@ -1020,27 +1020,24 @@ body:has(.cyber-home) .site-footer a {
   display: block;
   flex: 1;
   --reference-center-x: 50%;
-  --reference-center-y: clamp(392px, 48svh, 510px);
-  --reference-gap: 24px;
-  --reference-hi-width: 340px;
-  --reference-hi-height: 238px;
-  --reference-art-width: 358px;
-  --reference-art-height: 180px;
+  --reference-center-y: clamp(420px, 47.5svh, 500px);
+  --reference-gap: 36px;
+  --reference-hi-width: 360px;
+  --reference-hi-height: 260px;
+  --reference-art-width: 360px;
+  --reference-art-height: 188px;
   --reference-clock-width: 220px;
   --reference-clock-height: 118px;
-  --reference-clock-offset: 82px;
-  --reference-portrait-clock-gap: 12px;
-  --reference-calendar-width: 340px;
-  --reference-calendar-height: 254px;
-  --reference-social-width: 300px;
-  --reference-article-width: 250px;
-  --reference-nav-width: 278px;
-  --reference-nav-height: 382px;
-  --reference-nav-top: clamp(56px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 10px), 150px);
+  --reference-clock-offset: 62px;
+  --reference-portrait-clock-gap: 24px;
+  --reference-calendar-width: 350px;
+  --reference-calendar-height: 264px;
+  --reference-social-width: 315px;
+  --reference-article-width: 266px;
+  --reference-nav-width: 280px;
+  --reference-nav-height: 398px;
+  --reference-nav-top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 - var(--reference-nav-height));
   --reference-portrait-width: 146px;
-  --reference-orbit-left: 44px;
-  --reference-orbit-right: 54px;
-  --reference-bottom-stagger: 24px;
   min-height: 100svh;
   padding: 0;
   position: relative;
@@ -1073,7 +1070,7 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__card-nav {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
   align-self: start;
-  left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2 - var(--reference-gap) - var(--reference-nav-width) - var(--reference-orbit-left));
+  left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2 - var(--reference-gap) - var(--reference-nav-width));
   max-width: var(--reference-nav-width);
   position: absolute;
   top: var(--reference-nav-top);
@@ -1098,13 +1095,13 @@ body:has(.cyber-home) .site-footer a {
   gap: 10px;
   align-self: stretch;
   justify-self: stretch;
-  left: calc(var(--reference-center-x) - var(--reference-social-width) / 2 - var(--reference-article-width) - var(--reference-gap) - var(--reference-orbit-left));
+  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width) - var(--reference-gap) - var(--reference-article-width));
   margin-right: 0;
   min-height: 160px;
   overflow: hidden;
   padding: 16px 18px;
   position: absolute;
-  top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap) + var(--reference-bottom-stagger));
+  top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));
   width: var(--reference-article-width);
 }
 
@@ -1329,12 +1326,12 @@ body:has(.cyber-home) .site-footer a {
   gap: 18px;
   justify-content: center;
   justify-self: center;
-  left: calc(var(--reference-center-x) - var(--reference-social-width) / 2 + 72px);
+  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width));
   margin-top: 0;
   max-width: var(--reference-social-width);
   padding-top: 0;
   position: absolute;
-  top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap) + 16px);
+  top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));
   width: var(--reference-social-width);
 }
 
@@ -1711,10 +1708,10 @@ body:has(.cyber-home) .site-footer a {
   animation: home-widget-enter 660ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both;
   display: grid;
   justify-self: start;
-  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 + var(--reference-gap) + 16px);
+  left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 + var(--reference-gap));
   max-width: 180px;
   position: absolute;
-  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 30px);
+  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));
   transform: none;
   width: var(--reference-portrait-width);
 }
@@ -1756,14 +1753,14 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__sky-card {
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
   display: grid;
-  left: calc(var(--reference-center-x) - var(--reference-art-width) / 2 - 26px);
+  left: calc(var(--reference-center-x) - var(--reference-art-width) / 2);
   height: var(--reference-art-height);
   justify-self: start;
   min-height: var(--reference-art-height);
   overflow: hidden;
   padding: 8px;
   position: absolute;
-  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) + 8px);
+  top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));
   width: var(--reference-art-width);
 }
 
@@ -1816,13 +1813,13 @@ body:has(.cyber-home) .site-footer a {
   gap: 10px;
   justify-items: center;
   justify-self: start;
-  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-orbit-right) + 12px);
+  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);
   box-sizing: border-box;
   height: var(--reference-clock-height);
   min-height: var(--reference-clock-height);
   padding: 12px;
   position: absolute;
-  top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) + var(--reference-portrait-clock-gap) - 2px);
+  top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height));
   width: var(--reference-clock-width);
 }
 
@@ -1944,11 +1941,11 @@ body:has(.cyber-home) .site-footer a {
   justify-self: start;
   box-sizing: border-box;
   height: var(--reference-calendar-height);
-  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-orbit-right));
+  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);
   min-height: var(--reference-calendar-height);
   padding: 20px;
   position: absolute;
-  top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + 10px);
+  top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap));
   width: var(--reference-calendar-width);
 }
 

@@ -550,23 +550,21 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero .cyber-home__container')).toContain('align-items: stretch;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('display: block;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-x: 50%;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-y: clamp(392px, 48svh, 510px);');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-gap: 24px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-width: 340px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-height: 238px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-art-width: 358px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-art-height: 180px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-center-y: clamp(420px, 47.5svh, 500px);');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-gap: 36px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-width: 360px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-hi-height: 260px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-art-width: 360px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-art-height: 188px;');
     expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-clock-width: 220px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-portrait-clock-gap: 12px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-calendar-width: 340px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-social-width: 300px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-article-width: 250px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-width: 278px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-height: 382px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-top: clamp(56px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 10px), 150px);');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-orbit-left: 44px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-orbit-right: 54px;');
-    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-bottom-stagger: 24px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-clock-offset: 62px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-portrait-clock-gap: 24px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-calendar-width: 350px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-social-width: 315px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-article-width: 266px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-width: 280px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-height: 398px;');
+    expect(readRule(css, '.portfolio-hero__content')).toContain('--reference-nav-top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 - var(--reference-nav-height));');
     expect(readRule(css, '.portfolio-hero__latest-card')).toContain('position: absolute;');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('position: absolute;');
     expect(readRule(css, '.portfolio-hero__actions')).toContain('margin-top: 0;');
@@ -580,7 +578,7 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('height: var(--reference-hi-height);');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('width: var(--reference-hi-width);');
     expect(readRule(css, '.portfolio-hero__visual')).toContain('width: var(--reference-portrait-width);');
-    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('left: calc(var(--reference-center-x) - var(--reference-art-width) / 2 - 26px);');
+    expect(readRule(css, '.portfolio-hero__sky-card')).toContain('left: calc(var(--reference-center-x) - var(--reference-art-width) / 2);');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('height: var(--reference-art-height);');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('padding: 8px;');
     expect(readRule(css, '.portfolio-hero__sky-card')).toContain('width: var(--reference-art-width);');
@@ -614,8 +612,8 @@ describe('home page', () => {
     expect(readRuleContainingSelector(css, '.portfolio-hero__calendar-card')).toContain(
       'border-color: rgba(148, 163, 184, 0.26);',
     );
-    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-orbit-right));');
-    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + 10px);');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);');
+    expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap));');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('height: var(--reference-calendar-height);');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('border-radius: 40px;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('gap: 0;');
