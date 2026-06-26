@@ -187,7 +187,7 @@ describe('home page', () => {
     expect(source).not.toContain('portfolio-hero__stat-icon--content');
     expect(source).not.toContain('portfolio-hero__stat-icon--views');
     expect(source).not.toContain('portfolio-hero__stat-icon--updated');
-    expect(source).toContain("import { FileText, Heart, Settings } from 'lucide-react';");
+    expect(source).toContain("import { FileText, Heart, Mail, Settings } from 'lucide-react';");
     expect(source).toContain("import { HomeContactButton } from '@/components/HomeContactButton';");
     expect(source).toContain('className="portfolio-hero__actions"');
     expect(source).toContain('className="portfolio-hero__action-row portfolio-hero__action-row--primary"');
@@ -219,13 +219,12 @@ describe('home page', () => {
     expect(source).toContain('src="/images/reference-social/github.svg"');
     expect(source).toContain('src="/images/reference-social/juejin.svg"');
     expect(source).toContain('<span>稀土掘金</span>');
-    expect(source).toContain('<EmailIcon />');
-    expect(source).toContain('function EmailIcon()');
-    expect(source).toContain('viewBox="0 0 32 32"');
-    expect(source).toContain('fill="var(--color-brand)"');
-    expect(source).toContain('fill="var(--color-border)"');
-    expect(source).toContain('M1.81799 11.0067V20.7854');
-    expect(source).toContain('M28.4446 7.95602');
+    expect(source).toContain('<Mail className="portfolio-hero__social-icon portfolio-hero__social-icon--email"');
+    expect(source).toContain('strokeWidth={1.8}');
+    expect(source).not.toContain('<EmailIcon />');
+    expect(source).not.toContain('function EmailIcon()');
+    expect(source).not.toContain('viewBox="0 0 32 32"');
+    expect(source).not.toContain('M1.81799 11.0067V20.7854');
     expect(source).not.toContain('className="portfolio-hero__primary"');
     expect(source).not.toContain('className="portfolio-hero__secondary"');
     expect(source).not.toContain('阅读技术文章');
@@ -518,23 +517,29 @@ describe('home page', () => {
 
   test('renders a reference-style mobile scroll-to-top control', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/MobileBackToTop.tsx'), 'utf8');
-    const iconSource = readFileSync(join(process.cwd(), 'public/images/reference-nav/back-to-top.svg'), 'utf8');
 
     expect(source).toContain("'use client';");
+    expect(source).toContain("import { ArrowUp } from 'lucide-react';");
     expect(source).toContain('aria-label="回到顶部"');
     expect(source).toContain('className="mobile-back-to-top"');
-    expect(source).toContain('className="mobile-back-to-top__icon"');
+    expect(source).toContain('<ArrowUp size={24} strokeWidth={1.8} aria-hidden="true" />');
     expect(source).toContain("data-visible={isVisible ? 'true' : undefined}");
     expect(source).toContain('window.scrollY > 160');
     expect(source).toContain("window.addEventListener('scroll', updateVisibility");
     expect(source).toContain("window.removeEventListener('scroll', updateVisibility");
     expect(source).toContain("window.scrollTo({ top: 0, behavior: 'smooth' });");
-    expect(source).not.toContain('lucide-react');
-    expect(source).not.toContain('ArrowUp');
-    expect(iconSource).toContain('viewBox="0 0 28 28"');
-    expect(iconSource).toContain('currentColor');
+    expect(source).not.toContain('mobile-back-to-top__icon');
     expect(source).not.toContain('HomeScrollGate');
     expect(source).not.toContain('portfolio-hero__scroll');
+  });
+
+  test('uses Lucide for simple replaceable home control icons', () => {
+    const homeNavSource = readFileSync(join(process.cwd(), 'src/components/HomeCardNav.tsx'), 'utf8');
+
+    expect(homeNavSource).toContain("import { Moon, Sun } from 'lucide-react';");
+    expect(homeNavSource).toContain("{theme === 'summer-day' ? <Sun size={18} strokeWidth={1.8} aria-hidden=\"true\" /> : <Moon size={18} strokeWidth={1.8} aria-hidden=\"true\" />}");
+    expect(homeNavSource).not.toContain("'☀'");
+    expect(homeNavSource).not.toContain("'☾'");
   });
 
   test('keeps home card geometry consistent across day and night themes', () => {

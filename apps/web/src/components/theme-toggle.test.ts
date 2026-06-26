@@ -24,8 +24,11 @@ describe('ThemeToggle', () => {
     expect(source).toContain('document.documentElement.dataset.theme = nextTheme;');
     expect(source).toContain("aria-label=\"主题切换\"");
     expect(source).toContain('onClick={toggleTheme}');
-    expect(source).toContain('theme-toggle__icon');
-    expect(source).toContain("{theme === 'summer-day' ? '☀' : '☾'}");
+    expect(source).toContain("import { Moon, Sun } from 'lucide-react';");
+    expect(source).toContain("{theme === 'summer-day' ? <Sun size={18} strokeWidth={1.8} aria-hidden=\"true\" /> : <Moon size={18} strokeWidth={1.8} aria-hidden=\"true\" />}");
+    expect(source).not.toContain('theme-toggle__icon');
+    expect(source).not.toContain("'☀'");
+    expect(source).not.toContain("'☾'");
     expect(source).toContain('切换到${themeLabels[nextTheme]}模式');
     expect(source).not.toContain('aria-pressed=');
   });

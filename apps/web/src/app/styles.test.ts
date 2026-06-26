@@ -1429,8 +1429,6 @@ describe('global styles', () => {
     const mobileBackToTopVisibleBlock =
       responsiveCss.match(/\.mobile-back-to-top\[data-visible='true'\]\s*{(?<body>[\s\S]*?)\n  }/)?.groups
         ?.body ?? '';
-    const mobileBackToTopIconBlock =
-      responsiveCss.match(/\.mobile-back-to-top__icon\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const dayMobileBackToTopBlock =
       responsiveCss.match(/:root\[data-theme='summer-day'\] \.mobile-back-to-top\s*{(?<body>[\s\S]*?)\n  }/)
         ?.groups?.body ?? '';
@@ -1499,9 +1497,8 @@ describe('global styles', () => {
     expect(mobileBackToTopVisibleBlock).toContain('opacity: 1;');
     expect(mobileBackToTopVisibleBlock).toContain('transform: translate3d(0, 0, 0) scale(1);');
     expect(mobileBackToTopVisibleBlock).toContain('visibility: visible;');
-    expect(mobileBackToTopIconBlock).toContain('mask: url("/images/reference-nav/back-to-top.svg") center / contain no-repeat;');
-    expect(mobileBackToTopIconBlock).toContain('height: 24px;');
-    expect(mobileBackToTopIconBlock).toContain('width: 24px;');
+    expect(responsiveCss).not.toContain('.mobile-back-to-top__icon');
+    expect(responsiveCss).not.toContain('reference-nav/back-to-top.svg');
     expect(dayMobileBackToTopBlock).toContain('position: fixed;');
     expect(dayMobileBackToTopBlock).toContain('z-index: 40;');
     expect(responsiveCss.replace(/\r\n/g, '\n')).toContain(

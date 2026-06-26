@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ArrowUp } from 'lucide-react';
 
 export function MobileBackToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -28,7 +29,7 @@ export function MobileBackToTop() {
       aria-label="回到顶部"
       onClick={returnToTop}
     >
-      <span className="mobile-back-to-top__icon" aria-hidden="true" />
+      <ArrowUp size={24} strokeWidth={1.8} aria-hidden="true" />
     </button>
   );
 }

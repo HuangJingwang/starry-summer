@@ -734,15 +734,6 @@
     transform: translate3d(0, -2px, 0) scale(1);
   }
 
-  .mobile-back-to-top__icon {
-    background: currentColor;
-    display: block;
-    height: 24px;
-    mask: url("/images/reference-nav/back-to-top.svg") center / contain no-repeat;
-    width: 24px;
-    -webkit-mask: url("/images/reference-nav/back-to-top.svg") center / contain no-repeat;
-  }
-
   :root[data-theme='summer-day'] .mobile-back-to-top {
     background:
       linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(234, 248, 244, 0.72)),

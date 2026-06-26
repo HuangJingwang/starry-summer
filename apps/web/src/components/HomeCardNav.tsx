@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Moon, Sun } from 'lucide-react';
 import type { CSSProperties, MouseEvent } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
@@ -213,7 +214,7 @@ export function HomeCardNav() {
             title={`切换到${theme === 'summer-day' ? '黑夜' : '白天'}模式`}
             onClick={toggleTheme}
           >
-            {theme === 'summer-day' ? '☀' : '☾'}
+            {theme === 'summer-day' ? <Sun size={18} strokeWidth={1.8} aria-hidden="true" /> : <Moon size={18} strokeWidth={1.8} aria-hidden="true" />}
           </button>
         </div>
       </div>

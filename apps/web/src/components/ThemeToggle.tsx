@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
 
 import {
   getMillisecondsUntilNextThemeBoundary,
@@ -64,9 +65,7 @@ export function ThemeToggle() {
   return (
     <div className="theme-toggle" aria-label="主题切换">
       <button type="button" aria-label={`切换到${themeLabels[nextTheme]}模式`} title={`切换到${themeLabels[nextTheme]}模式`} onClick={toggleTheme}>
-        <span className="theme-toggle__icon" aria-hidden="true">
-          {theme === 'summer-day' ? '☀' : '☾'}
-        </span>
+        {theme === 'summer-day' ? <Sun size={18} strokeWidth={1.8} aria-hidden="true" /> : <Moon size={18} strokeWidth={1.8} aria-hidden="true" />}
       </button>
     </div>
   );
