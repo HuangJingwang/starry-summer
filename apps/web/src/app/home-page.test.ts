@@ -187,7 +187,8 @@ describe('home page', () => {
     expect(source).not.toContain('portfolio-hero__stat-icon--content');
     expect(source).not.toContain('portfolio-hero__stat-icon--views');
     expect(source).not.toContain('portfolio-hero__stat-icon--updated');
-    expect(source).toContain("import { FileText, Heart, Mail, Settings } from 'lucide-react';");
+    expect(source).toContain("import { FileText, Heart, Mail } from 'lucide-react';");
+    expect(source).toContain("import { HomeAdminControl } from '@/components/HomeAdminControl';");
     expect(source).toContain("import { HomeContactButton } from '@/components/HomeContactButton';");
     expect(source).toContain('className="portfolio-hero__actions"');
     expect(source).toContain('className="portfolio-hero__action-row portfolio-hero__action-row--primary"');
@@ -195,10 +196,8 @@ describe('home page', () => {
     expect(source).toContain('className="portfolio-hero__social portfolio-hero__social--github"');
     expect(source).toContain('className="portfolio-hero__social portfolio-hero__social--juejin"');
     expect(source).toContain('className="portfolio-hero__social portfolio-hero__social--guestbook"');
-    expect(source).toContain('className="portfolio-hero__admin-widget"');
-    expect(source).toContain('href="/admin"');
-    expect(source).toContain('aria-label="进入后台管理"');
-    expect(source).toContain('<Settings size={20} strokeWidth={1.8} aria-hidden="true" />');
+    expect(source).toContain('<HomeAdminControl />');
+    expect(source).not.toContain('href="/admin" aria-label="进入后台管理"');
     expect(source).not.toContain('<span>管理</span>');
     expect(source).not.toContain('<span>后台</span>');
     expect(source).toContain("const homeGitHubUrl = 'https://github.com/HuangJingwang/starry-summer';");

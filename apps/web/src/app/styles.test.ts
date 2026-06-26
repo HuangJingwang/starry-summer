@@ -1307,6 +1307,15 @@ describe('global styles', () => {
     expect(adminWidgetHoverBlock).toContain('border-color: rgba(34, 211, 238, 0.38);');
     expect(adminWidgetHoverBlock).toContain('outline: none;');
     expect(dayAdminWidgetBlock).toContain('color: rgba(16, 52, 61, 0.54);');
+    expect(css).toContain(".portfolio-hero__admin-widget[aria-expanded='true']");
+    expect(css).toContain('.home-admin-config');
+    expect(css).toContain('.home-admin-config__panel');
+    expect(css).toContain('width: 100vw;');
+    expect(css).toContain('width: 720px;');
+    expect(css).toContain('max-width: calc(100vw - 36px);');
+    expect(css).toContain('.home-admin-config__tabs');
+    expect(css).toContain('.home-admin-config__grid');
+    expect(css).toContain('.home-admin-config__layout-row');
     expect(css).toContain('.portfolio-hero__social--guestbook::after');
     expect(css).toContain("background: radial-gradient(circle, rgba(47, 203, 231, 0.24) 0%, rgba(47, 203, 231, 0.12) 48%, transparent 70%);");
     expect(css).toContain('transform: scale(1.05);');

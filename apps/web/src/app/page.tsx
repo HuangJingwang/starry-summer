@@ -1,9 +1,10 @@
 import Image from 'next/image';
-import { FileText, Heart, Mail, Settings } from 'lucide-react';
+import { FileText, Heart, Mail } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
 import { HomeClockCard } from '@/components/HomeClockCard';
+import { HomeAdminControl } from '@/components/HomeAdminControl';
 import { HomeContactButton } from '@/components/HomeContactButton';
 import { HomeFleetBackground } from '@/components/HomeFleetBackground';
 import { SiteShell } from '@/components/SiteShell';
@@ -117,9 +118,7 @@ export default async function HomePage() {
                   ) : null}
                 </div>
                 <div className="portfolio-hero__action-row portfolio-hero__action-row--secondary">
-                  <a className="portfolio-hero__admin-widget" href="/admin" aria-label="进入后台管理">
-                    <Settings size={20} strokeWidth={1.8} aria-hidden="true" />
-                  </a>
+                  <HomeAdminControl />
                   <HomeContactButton
                     className="portfolio-hero__social portfolio-hero__social--guestbook"
                     href="/guestbook"
