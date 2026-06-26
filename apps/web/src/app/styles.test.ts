@@ -408,18 +408,20 @@ describe('global styles', () => {
     const latestCardBlock = readStyleBlock(css, '.portfolio-hero__latest-card');
     const navBlock = readStyleBlock(css, '.portfolio-hero__card-nav');
 
-    expect(heroContentBlock).toContain('--reference-gap: 28px;');
-    expect(heroContentBlock).toContain('--reference-social-width: 315px;');
-    expect(heroContentBlock).toContain('--reference-article-width: 266px;');
+    expect(heroContentBlock).toContain('--reference-gap: 24px;');
+    expect(heroContentBlock).toContain('--reference-social-width: 300px;');
+    expect(heroContentBlock).toContain('--reference-article-width: 250px;');
+    expect(heroContentBlock).toContain('--reference-orbit-left: 44px;');
+    expect(heroContentBlock).toContain('--reference-bottom-stagger: 24px;');
     expect(latestCardBlock).toContain('position: absolute;');
     expect(latestCardBlock).toContain(
-      'left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width) - var(--reference-gap) - var(--reference-article-width));',
+      'left: calc(var(--reference-center-x) - var(--reference-social-width) / 2 - var(--reference-article-width) - var(--reference-gap) - var(--reference-orbit-left));',
     );
-    expect(latestCardBlock).toContain('top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));');
+    expect(latestCardBlock).toContain('top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap) + var(--reference-bottom-stagger));');
     expect(latestCardBlock).toContain('width: var(--reference-article-width);');
     expect(latestCardBlock).toContain('min-height: 160px;');
     expect(navBlock).toContain(
-      'left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2 - var(--reference-gap) - var(--reference-nav-width));',
+      'left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2 - var(--reference-gap) - var(--reference-nav-width) - var(--reference-orbit-left));',
     );
     expect(navBlock).toContain('top: var(--reference-nav-top);');
   });
@@ -979,24 +981,27 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__card-nav');
     expect(homeHeroContentBlock).toContain('display: block;');
     expect(homeHeroContentBlock).toContain('--reference-center-x: 50%;');
-    expect(homeHeroContentBlock).toContain('--reference-center-y: clamp(404px, 50svh, 540px);');
-    expect(homeHeroContentBlock).toContain('--reference-gap: 28px;');
-    expect(homeHeroContentBlock).toContain('--reference-hi-width: 360px;');
-    expect(homeHeroContentBlock).toContain('--reference-hi-height: 260px;');
-    expect(homeHeroContentBlock).toContain('--reference-art-width: 360px;');
-    expect(homeHeroContentBlock).toContain('--reference-art-height: 188px;');
+    expect(homeHeroContentBlock).toContain('--reference-center-y: clamp(392px, 48svh, 510px);');
+    expect(homeHeroContentBlock).toContain('--reference-gap: 24px;');
+    expect(homeHeroContentBlock).toContain('--reference-hi-width: 340px;');
+    expect(homeHeroContentBlock).toContain('--reference-hi-height: 238px;');
+    expect(homeHeroContentBlock).toContain('--reference-art-width: 358px;');
+    expect(homeHeroContentBlock).toContain('--reference-art-height: 180px;');
     expect(homeHeroContentBlock).toContain('--reference-clock-width: 220px;');
     expect(homeHeroContentBlock).toContain('--reference-clock-height: 118px;');
     expect(homeHeroContentBlock).toContain('--reference-clock-offset: 82px;');
     expect(homeHeroContentBlock).toContain('--reference-portrait-clock-gap: 12px;');
-    expect(homeHeroContentBlock).toContain('--reference-calendar-width: 350px;');
-    expect(homeHeroContentBlock).toContain('--reference-calendar-height: 264px;');
-    expect(homeHeroContentBlock).toContain('--reference-social-width: 315px;');
-    expect(homeHeroContentBlock).toContain('--reference-article-width: 266px;');
-    expect(homeHeroContentBlock).toContain('--reference-nav-width: 280px;');
-    expect(homeHeroContentBlock).toContain('--reference-nav-height: 398px;');
-    expect(homeHeroContentBlock).toContain('--reference-nav-top: clamp(42px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 16px), 178px);');
+    expect(homeHeroContentBlock).toContain('--reference-calendar-width: 340px;');
+    expect(homeHeroContentBlock).toContain('--reference-calendar-height: 254px;');
+    expect(homeHeroContentBlock).toContain('--reference-social-width: 300px;');
+    expect(homeHeroContentBlock).toContain('--reference-article-width: 250px;');
+    expect(homeHeroContentBlock).toContain('--reference-nav-width: 278px;');
+    expect(homeHeroContentBlock).toContain('--reference-nav-height: 382px;');
+    expect(homeHeroContentBlock).toContain('--reference-nav-top: clamp(56px, calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 10px), 150px);');
     expect(homeHeroContentBlock).toContain('--reference-portrait-width: 146px;');
+    expect(homeHeroContentBlock).toContain('--reference-orbit-left: 44px;');
+    expect(homeHeroContentBlock).toContain('--reference-orbit-right: 54px;');
+    expect(homeHeroContentBlock).toContain('--reference-bottom-stagger: 24px;');
     expect(homeHeroContentBlock).toContain('padding: 0;');
     expect(homeIntroBlock).toContain('position: absolute;');
     expect(homeIntroBlock).toContain('left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2);');
@@ -1094,8 +1099,8 @@ describe('global styles', () => {
     expect(homeSkyBlock).toContain('overflow: hidden;');
     expect(homeSkyBlock).toContain('padding: 8px;');
     expect(homeSkyBlock).toContain('position: absolute;');
-    expect(homeSkyBlock).toContain('left: calc(var(--reference-center-x) - var(--reference-art-width) / 2);');
-    expect(homeSkyBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));');
+    expect(homeSkyBlock).toContain('left: calc(var(--reference-center-x) - var(--reference-art-width) / 2 - 26px);');
+    expect(homeSkyBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) + 8px);');
     expect(homeSkyBlock).toContain('height: var(--reference-art-height);');
     expect(homeSkyBlock).toContain('min-height: var(--reference-art-height);');
     expect(homeSkyBlock).toContain('width: var(--reference-art-width);');
@@ -1111,8 +1116,8 @@ describe('global styles', () => {
     expect(homeCalendarBlock).toContain('align-self: start;');
     expect(homeCalendarBlock).toContain('justify-self: start;');
     expect(homeCalendarBlock).toContain('position: absolute;');
-    expect(homeCalendarBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);');
-    expect(homeCalendarBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap));');
+    expect(homeCalendarBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-orbit-right));');
+    expect(homeCalendarBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + 10px);');
     expect(homeCalendarBlock).toContain('height: var(--reference-calendar-height);');
     expect(homeCalendarBlock).toContain('width: var(--reference-calendar-width);');
     expect(homeCalendarBlock).toContain('min-height: var(--reference-calendar-height);');
@@ -1125,7 +1130,7 @@ describe('global styles', () => {
     expect(dayCalendarBlock).toContain('min-height: var(--reference-calendar-height);');
     expect(dayCalendarBlock).toContain('padding: 20px;');
     expect(dayCalendarBlock).toContain('justify-self: start;');
-    expect(dayCalendarBlock).toContain('width: 350px;');
+    expect(dayCalendarBlock).toContain('width: var(--reference-calendar-width);');
     expect(css).toContain('.portfolio-hero__calendar-weekday');
     expect(css).toContain("li[data-empty='true']");
     expect(css).toContain('height: 186px;');
@@ -1137,21 +1142,21 @@ describe('global styles', () => {
     expect(dayCalendarCurrentBlock).toContain('font-weight: 500;');
     expect(homeVisualBlock).toContain('justify-self: start;');
     expect(homeVisualBlock).toContain('position: absolute;');
-    expect(homeVisualBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 + var(--reference-gap));');
-    expect(homeVisualBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap));');
+    expect(homeVisualBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 + var(--reference-gap) + 16px);');
+    expect(homeVisualBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2 - var(--reference-art-height) - var(--reference-gap) - 30px);');
     expect(homeVisualBlock).toContain('width: var(--reference-portrait-width);');
     expect(homeClockBlock).toContain('justify-self: start;');
     expect(homeClockBlock).toContain('position: absolute;');
-    expect(homeClockBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);');
+    expect(homeClockBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-orbit-right) + 12px);');
     expect(homeClockBlock).toContain(
-      'top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) + var(--reference-portrait-clock-gap));',
+      'top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) + var(--reference-portrait-clock-gap) - 2px);',
     );
     expect(homeClockBlock).toContain('height: var(--reference-clock-height);');
     expect(homeClockBlock).toContain('min-height: var(--reference-clock-height);');
     expect(homeClockBlock).toContain('width: var(--reference-clock-width);');
     expect(homeActionsBlock).toContain('position: absolute;');
-    expect(homeActionsBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width));');
-    expect(homeActionsBlock).toContain('top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));');
+    expect(homeActionsBlock).toContain('left: calc(var(--reference-center-x) - var(--reference-social-width) / 2 + 72px);');
+    expect(homeActionsBlock).toContain('top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap) + 16px);');
     expect(homeActionsBlock).toContain('max-width: var(--reference-social-width);');
     expect(homeActionsBlock).toContain('width: var(--reference-social-width);');
     expect(homeCalendarBlock).toContain('justify-self: start;');
