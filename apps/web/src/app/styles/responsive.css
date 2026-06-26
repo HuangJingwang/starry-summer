@@ -196,6 +196,7 @@
   .study-activity-grid,
   .leetcode-list,
   .study-metric-grid,
+  .study-today-summary,
   .study-task-grid,
   .study-round-grid,
   .study-note-grid,
@@ -242,6 +243,10 @@
   .split-panels,
   .asset-item,
   .split-panels:has(section:nth-child(3)) {
+    grid-template-columns: 1fr;
+  }
+
+  .study-today-section .study-task-grid {
     grid-template-columns: 1fr;
   }
 

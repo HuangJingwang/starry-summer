@@ -8,8 +8,10 @@ export function StudyTaskCard({ task }: { task: StudyTask }) {
       <span className={`study-difficulty study-difficulty--${getDifficultyTone(task.difficulty)}`}>
         {normalizeDifficultyLabel(task.difficulty)}
       </span>
-      <strong>{task.title}</strong>
-      <small>{task.category} · 开始 R1</small>
+      <span className="study-task-card__body">
+        <strong>{task.title}</strong>
+        <small>{task.category} · 开始 R1</small>
+      </span>
     </a>
   );
 }
@@ -25,10 +27,12 @@ export function ReviewTaskCard({ task }: { task: StudyReviewTask }) {
       <span className={`study-difficulty study-difficulty--${getDifficultyTone(task.difficulty)}`}>
         {normalizeDifficultyLabel(task.difficulty)}
       </span>
-      <strong>{task.title}</strong>
-      <small>
-        {task.nextRound} · {task.dueDate} 到期 · {task.forcedByMustRepeat ? '重点复刷' : `逾期 ${task.overdueDays} 天`}
-      </small>
+      <span className="study-task-card__body">
+        <strong>{task.title}</strong>
+        <small>
+          {task.nextRound} · {task.dueDate} 到期 · {task.forcedByMustRepeat ? '重点复刷' : `逾期 ${task.overdueDays} 天`}
+        </small>
+      </span>
     </a>
   );
 }

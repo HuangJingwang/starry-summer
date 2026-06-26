@@ -351,6 +351,39 @@ describe('global styles', () => {
     expect(taskCardBlock).toContain('padding: 16px;');
   });
 
+  test('composes the LeetCode today tasks as a starry desk widget panel', () => {
+    const css = readGlobalStyles();
+    const todaySource = readStylesheet('src/app/leetcode/StudyTodaySection.tsx');
+    const cardsSource = readStylesheet('src/app/leetcode/StudyCards.tsx');
+    const todaySectionBlock = readStyleBlock(css, '.study-today-section');
+    const summaryBlock = readStyleBlock(css, '.study-today-summary');
+    const summaryCardBlock = readStyleBlock(css, '.study-today-summary__card');
+    const taskGridBlock = readStyleBlock(css, '.study-today-section .study-task-grid');
+    const taskGroupBlock = readStyleBlock(css, '.study-task-group');
+    const groupHeadingBlock = readStyleBlock(css, '.study-task-group__heading');
+    const cardBodyBlock = readStyleBlock(css, '.study-task-card__body');
+    const returnBlock = readStyleBlock(css, '.study-return-home');
+    const responsiveCss = readStylesheet('src/app/styles/responsive.css');
+
+    expect(todaySource).toContain('className="study-today-section"');
+    expect(todaySource).toContain('study-today-summary');
+    expect(todaySource).toContain('study-task-group__heading');
+    expect(cardsSource).toContain('study-task-card__body');
+    expect(todaySectionBlock).toContain('gap: clamp(18px, 3vw, 28px);');
+    expect(summaryBlock).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
+    expect(summaryCardBlock).toContain('background: var(--study-panel-soft);');
+    expect(summaryCardBlock).toContain('border-radius: 22px;');
+    expect(taskGridBlock).toContain('align-items: start;');
+    expect(taskGridBlock).toContain('grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);');
+    expect(taskGroupBlock).toContain('border-radius: 26px;');
+    expect(taskGroupBlock).toContain('background: rgba(2, 6, 15, 0.24);');
+    expect(groupHeadingBlock).toContain('border-bottom: 1px solid var(--study-line);');
+    expect(cardBodyBlock).toContain('min-width: 0;');
+    expect(returnBlock).toContain('margin: 24px auto clamp(28px, 5vw, 56px);');
+    expect(responsiveCss).toContain('.study-today-section .study-task-grid');
+    expect(responsiveCss).toContain('grid-template-columns: 1fr;');
+  });
+
   test('keeps LeetCode snapshot detail controls grouped instead of splitting them across the hero', () => {
     const css = readGlobalStyles();
     const detailRowBlock = readStyleBlock(css, '.study-snapshot-detail-row');

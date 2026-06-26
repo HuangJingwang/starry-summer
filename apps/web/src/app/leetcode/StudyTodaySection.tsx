@@ -5,20 +5,45 @@ import { PublicContentSection } from '@/components/PublicPageLayout';
 import { ReviewTaskCard, StudyEmptyCard, StudyTaskCard } from './StudyCards';
 
 export function StudyTodaySection({ dashboard }: { dashboard: StudyDashboard }) {
+  const todayCount = dashboard.todayFocus.length;
+  const reviewCount = dashboard.reviewDue.length;
+  const rhythmLabel = `${dashboard.settings.dailyNew}+${dashboard.settings.dailyReview}`;
+
   return (
     <PublicContentSection
       id="today-plan"
       ariaLabel="今日刷题任务"
       eyebrow="今日任务"
       title="新题与复习"
+      className="study-today-section"
       headingRow
       meta={`${dashboard.settings.dailyNew} 新题 / ${dashboard.settings.dailyReview} 复习`}
     >
+      <div className="study-today-summary" aria-label="今日任务摘要">
+        <div className="study-today-summary__card">
+          <span>今日新题</span>
+          <strong>{todayCount}</strong>
+          <small>按计划开始 R1</small>
+        </div>
+        <div className="study-today-summary__card">
+          <span>到期复习</span>
+          <strong>{reviewCount}</strong>
+          <small>先清理逾期轮次</small>
+        </div>
+        <div className="study-today-summary__card">
+          <span>每日节奏</span>
+          <strong>{rhythmLabel}</strong>
+          <small>新题 / 复习</small>
+        </div>
+      </div>
       <div className="study-task-grid">
         <div className="study-task-group">
-          <h3>今日新题</h3>
+          <div className="study-task-group__heading">
+            <h3>今日新题</h3>
+            <span>{todayCount} 题</span>
+          </div>
           <div className="study-task-list">
-            {dashboard.todayFocus.length > 0 ? (
+            {todayCount > 0 ? (
               dashboard.todayFocus.map((task) => <StudyTaskCard key={task.slug} task={task} />)
             ) : (
               <StudyEmptyCard title="今日新题队列为空" body="同步题单后，这里会按计划列出下一批 R1 题目。" />
@@ -26,9 +51,12 @@ export function StudyTodaySection({ dashboard }: { dashboard: StudyDashboard }) 
           </div>
         </div>
         <div className="study-task-group">
-          <h3>到期复习</h3>
+          <div className="study-task-group__heading">
+            <h3>到期复习</h3>
+            <span>{reviewCount} 题</span>
+          </div>
           <div className="study-task-list">
-            {dashboard.reviewDue.length > 0 ? (
+            {reviewCount > 0 ? (
               dashboard.reviewDue.map((task) => (
                 <ReviewTaskCard key={`${task.slug}-${task.nextRound}-${task.dueDate}`} task={task} />
               ))

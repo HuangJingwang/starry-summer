@@ -175,6 +175,27 @@
   width: min(100% - 32px, 1180px);
 }
 
+.study-today-section {
+  gap: clamp(18px, 3vw, 28px);
+  overflow: hidden;
+  position: relative;
+}
+
+.study-today-section::before {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(var(--study-accent-rgb), 0.14), transparent 26%),
+    radial-gradient(circle at 92% 100%, rgba(45, 212, 191, 0.08), transparent 30%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.study-today-section > * {
+  position: relative;
+  z-index: 1;
+}
+
 .study-archive-page .section-heading h2 {
   color: var(--study-ink);
   font-family: var(--font-nav);
@@ -357,13 +378,65 @@
   grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
 }
 
+.study-today-summary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.study-today-summary__card {
+  backdrop-filter: var(--study-glass-blur);
+  background: var(--study-panel-soft);
+  border: 1px solid var(--study-line);
+  border-radius: 22px;
+  box-shadow: var(--study-soft-shadow);
+  color: var(--study-ink);
+  display: grid;
+  gap: 7px;
+  min-height: 104px;
+  padding: 16px;
+}
+
+.study-today-summary__card span,
+.study-task-group__heading span {
+  color: var(--study-accent);
+  font-family: var(--font-nav);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.study-today-summary__card strong {
+  color: var(--study-ink);
+  font-size: clamp(1.8rem, 3vw, 2.65rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+}
+
+.study-today-summary__card small {
+  color: var(--study-muted);
+  line-height: 1.45;
+}
+
+.study-today-section .study-task-grid {
+  align-items: start;
+  gap: 16px;
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+}
+
 .study-note-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .study-task-group {
+  background: rgba(2, 6, 15, 0.24);
+  border: 1px solid var(--study-line);
+  border-radius: 26px;
+  box-shadow: var(--study-soft-shadow);
   display: grid;
   gap: 12px;
+  padding: 14px;
 }
 
 .study-task-group h3 {
@@ -371,6 +444,15 @@
   font-size: 1.04rem;
   font-weight: 700;
   margin: 0;
+}
+
+.study-task-group__heading {
+  align-items: center;
+  border-bottom: 1px solid var(--study-line);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 2px 2px 12px;
 }
 
 .study-metric-card {
@@ -485,13 +567,20 @@
   grid-column: 2;
 }
 
+.study-task-card__body {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
 .study-task-card strong {
   font-size: 1.02rem;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .study-task-card .study-difficulty {
-  grid-row: 1 / span 2;
+  grid-row: 1;
 }
 
 .study-difficulty {
@@ -996,7 +1085,7 @@
 }
 
 .study-return-home {
-  margin: 18px auto 0;
+  margin: 24px auto clamp(28px, 5vw, 56px);
   max-width: 1180px;
   text-align: center;
   width: min(100% - 32px, 1180px);
@@ -1341,9 +1430,16 @@ body:has(.study-archive-page) {
   color: var(--study-ink);
 }
 
+:root[data-theme='summer-day'] .study-task-group {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: var(--study-line);
+  box-shadow: var(--study-soft-shadow);
+}
+
 :root[data-theme='summer-day'] .study-metric-card small,
 :root[data-theme='summer-day'] .study-task-card small,
 :root[data-theme='summer-day'] .study-task-empty p,
+:root[data-theme='summer-day'] .study-today-summary__card small,
 :root[data-theme='summer-day'] .study-round-grid small,
 :root[data-theme='summer-day'] .study-category-grid small,
 :root[data-theme='summer-day'] .study-note-card p,
@@ -1353,6 +1449,7 @@ body:has(.study-archive-page) {
 }
 
 :root[data-theme='summer-day'] .study-metric-card,
+:root[data-theme='summer-day'] .study-today-summary__card,
 :root[data-theme='summer-day'] .study-task-card,
 :root[data-theme='summer-day'] .study-task-empty,
 :root[data-theme='summer-day'] .study-round-grid article,
@@ -1367,6 +1464,7 @@ body:has(.study-archive-page) {
 }
 
 :root[data-theme='summer-day'] .study-task-empty,
+:root[data-theme='summer-day'] .study-today-summary__card,
 :root[data-theme='summer-day'] .study-round-grid article,
 :root[data-theme='summer-day'] .study-category-chip,
 :root[data-theme='summer-day'] .study-note-card,
@@ -1376,6 +1474,7 @@ body:has(.study-archive-page) {
 }
 
 :root[data-theme='summer-day'] .study-metric-card strong,
+:root[data-theme='summer-day'] .study-today-summary__card strong,
 :root[data-theme='summer-day'] .study-task-card strong,
 :root[data-theme='summer-day'] .study-task-empty strong,
 :root[data-theme='summer-day'] .study-round-grid strong,
