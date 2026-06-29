@@ -8,7 +8,7 @@ function readSource(path: string): string {
 }
 
 describe('admin study manager', () => {
-  test('blocks old database study actions in repository mode', () => {
+  test('keeps static repository mode controls interactive while guarding old API actions', () => {
     const source = [
       readSource('src/components/AdminStudyManager.tsx'),
       readSource('src/components/AdminStudySettingsPanel.tsx'),
@@ -18,12 +18,14 @@ describe('admin study manager', () => {
 
     expect(source).toContain('repositoryMode?: boolean;');
     expect(source).toContain('const repositoryActionMessage');
-    expect(source).toContain('仓库模式下不会调用旧数据库学习接口');
+    expect(source).toContain('静态站不会调用旧数据库学习接口');
+    expect(source).toContain('apps/web/content/leetcode/dashboard.json');
     expect(source).toContain('if (repositoryMode)');
-    expect(source).toContain('const actionDisabled = studyBusy || repositoryMode;');
+    expect(source).toContain('const actionDisabled = studyBusy;');
     expect(source).toContain('disabled={actionDisabled}');
-    expect(source).toContain('readOnly={repositoryMode}');
-    expect(source).toContain('disabled={repositoryMode}');
+    expect(source).not.toContain('const actionDisabled = studyBusy || repositoryMode;');
+    expect(source).not.toContain('readOnly={repositoryMode}');
+    expect(source).not.toContain('disabled={repositoryMode}');
   });
 
   test('keeps legacy API error handling behind the repository guard during migration', () => {

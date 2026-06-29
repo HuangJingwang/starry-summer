@@ -4,7 +4,6 @@ interface AdminStudyProblemListProps {
   dashboard: StudyDashboard;
   studyBusy: boolean;
   actionDisabled: boolean;
-  repositoryMode: boolean;
   saveProblem: (problem: StudyProblem, formData: FormData) => Promise<void>;
   createProblemDraft: (slug: string) => Promise<void>;
 }
@@ -13,7 +12,6 @@ export function AdminStudyProblemList({
   actionDisabled,
   createProblemDraft,
   dashboard,
-  repositoryMode,
   saveProblem,
   studyBusy,
 }: AdminStudyProblemListProps) {
@@ -41,18 +39,18 @@ export function AdminStudyProblemList({
             </div>
             <label>
               复习轮次
-              <input name="rounds" defaultValue={problem.rounds.join(',')} readOnly={repositoryMode} />
+              <input name="rounds" defaultValue={problem.rounds.join(',')} />
             </label>
             <label>
               个人笔记
-              <textarea name="notes" rows={3} defaultValue={problem.notes} readOnly={repositoryMode} />
+              <textarea name="notes" rows={3} defaultValue={problem.notes} />
             </label>
             <div className="admin-study-problem__flags">
               <label>
-                <input name="solutionViewed" type="checkbox" defaultChecked={problem.solutionViewed} disabled={repositoryMode} /> 看过题解
+                <input name="solutionViewed" type="checkbox" defaultChecked={problem.solutionViewed} /> 看过题解
               </label>
               <label>
-                <input name="mustRepeat" type="checkbox" defaultChecked={problem.mustRepeat} disabled={repositoryMode} /> 重点复刷
+                <input name="mustRepeat" type="checkbox" defaultChecked={problem.mustRepeat} /> 重点复刷
               </label>
             </div>
             <div className="admin-study-problem__actions">

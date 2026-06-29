@@ -25,15 +25,15 @@ interface AdminStudyManagerProps {
   repositoryMode?: boolean;
 }
 
-const repositoryModeMessage = '仓库模式下学习数据从 content/leetcode/dashboard.json 读取，写入和同步将改由 Worker/GitHub 流程处理。';
-const repositoryActionMessage = '仓库模式下不会调用旧数据库学习接口，请通过后续 Worker 同步或直接提交仓库数据文件。';
+const repositoryModeMessage = '静态站模式下学习数据从 apps/web/content/leetcode/dashboard.json 读取；需要改配置时请提交仓库文件。';
+const repositoryActionMessage = '静态站不会调用旧数据库学习接口。请编辑 apps/web/content/leetcode/dashboard.json 后通过 Git 提交发布。';
 
 export function AdminStudyManager({ initialResult, repositoryMode = false }: AdminStudyManagerProps) {
   const [dashboard, setDashboard] = useState<StudyDashboard | null>(initialResult?.dashboard ?? null);
   const [state, setState] = useState<PanelState>(initialResult ? 'idle' : 'loading');
   const [message, setMessage] = useState(initialResult?.source === 'repository-file' ? repositoryModeMessage : '');
   const studyBusy = state === 'submitting';
-  const actionDisabled = studyBusy || repositoryMode;
+  const actionDisabled = studyBusy;
 
   async function send(request: { url: string; init: RequestInit }, fallback: string) {
     if (repositoryMode) {
@@ -217,7 +217,6 @@ export function AdminStudyManager({ initialResult, repositoryMode = false }: Adm
         dashboard={dashboard}
         studyBusy={studyBusy}
         actionDisabled={actionDisabled}
-        repositoryMode={repositoryMode}
         saveSettings={saveSettings}
         syncSubmissions={syncSubmissions}
       />
@@ -232,7 +231,6 @@ export function AdminStudyManager({ initialResult, repositoryMode = false }: Adm
         dashboard={dashboard}
         studyBusy={studyBusy}
         actionDisabled={actionDisabled}
-        repositoryMode={repositoryMode}
         saveProblem={saveProblem}
         createProblemDraft={createProblemDraft}
       />
