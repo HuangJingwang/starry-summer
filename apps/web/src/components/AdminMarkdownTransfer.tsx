@@ -25,7 +25,7 @@ export function AdminMarkdownTransfer() {
           <ul>
             <li>公开内容索引维护在 apps/web/content/public-content.json。</li>
             <li>正文文件按类型放在 apps/web/content/posts、notes、moments、projects 或 pages 下。</li>
-            <li>后台编辑器保存、发布、归档和恢复会走 /api/repository/content，并提交到 GitHub 仓库。</li>
+            <li>后台编辑器只保留本地草稿和预览，持久化修改需要编辑仓库内容文件并提交 Git。</li>
           </ul>
         </div>
         <label>

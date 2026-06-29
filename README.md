@@ -70,7 +70,7 @@ Starry Summer 现在更偏向“静态友好、仓库驱动”的路线。对一
 - UI: public light/dark themes with cyber archive atmosphere, admin Chinese workspace
 - Workspace: npm workspaces
 - Packages: `@starry-summer/shared`, `@starry-summer/markdown`
-- Ops: Vercel, GitHub repository publishing, shell checks
+- Ops: Vercel static deployment, git-based publishing, shell checks
 
 ## 目录
 
@@ -124,38 +124,19 @@ npm run typecheck
 
 ## 第一次配置
 
-可以一条命令生成本地 `.env`、后台密码 hash 和会话密钥：
+静态站模式不需要后台账号密码，也不需要在 Vercel 保存 GitHub 内容写入 token。站点配置、内容和素材通过修改仓库文件后 `git commit` / `git push` 发布。
+
+如果启用了互动 Worker，可以生成互动签名密钥：
 
 ```bash
-npm run ops:init-env -- "your local admin password"
-```
-
-也可以拆开生成：
-
-```bash
-npm run auth:secret
 npm run auth:interaction-secret
-npm run auth:hash-password -- "your strong password"
 ```
 
-GitHub OAuth 用于读者登录：
-
-```text
-GITHUB_CLIENT_ID
-GITHUB_CLIENT_SECRET
-GITHUB_CALLBACK_URL
-```
-
-生产环境还需要这些核心变量：
+生产环境核心变量：
 
 ```text
 PUBLIC_SITE_URL
-SESSION_SECRET
-GITHUB_CONTENT_OWNER
-GITHUB_CONTENT_REPO
-GITHUB_CONTENT_BRANCH
-GITHUB_CONTENT_TOKEN
-REPOSITORY_PUBLISH_SECRET
+INTERACTION_HASH_SECRET # 仅互动 Worker 需要
 ```
 
 完整配置看 [部署说明](docs/deployment.md) 和 [安全说明](docs/security.md)。
@@ -171,12 +152,11 @@ apps/web/content/assets.json
 apps/web/content/leetcode/dashboard.json
 ```
 
-后台发布会用到这些接口：
+持久化修改直接编辑这些文件或新增 Markdown / 图片文件，然后提交 Git：
 
 ```text
-apps/web/src/app/api/repository/content/route.ts
-apps/web/src/app/api/repository/settings/route.ts
-apps/web/src/app/api/repository/assets/route.ts
+apps/web/content/**/*.md
+apps/web/public/images/**
 ```
 
 导入掘金内容：
@@ -211,35 +191,21 @@ Output Directory: Next.js default
 
 ```text
 PUBLIC_SITE_URL=https://your-domain.example
-ADMIN_EMAIL=your-admin-email@example.com
-ADMIN_PASSWORD_HASH=generated-password-hash
-SESSION_SECRET=generated-session-secret
-INTERACTION_HASH_SECRET=generated-interaction-secret
-
-GITHUB_CONTENT_OWNER=your-github-owner
-GITHUB_CONTENT_REPO=your-repo-name
-GITHUB_CONTENT_BRANCH=main
-GITHUB_CONTENT_TOKEN=github-fine-grained-token
-REPOSITORY_PUBLISH_SECRET=long-random-secret
-
-GITHUB_CLIENT_ID=github-oauth-client-id
-GITHUB_CLIENT_SECRET=github-oauth-client-secret
-GITHUB_CALLBACK_URL=https://your-domain.example/api/auth/github/callback
+INTERACTION_HASH_SECRET=generated-interaction-secret # 可选，仅互动 Worker 需要
 ```
 
 小提醒：
 
-- `GITHUB_CONTENT_TOKEN` 建议用 fine-grained personal access token。
-- token 至少需要 `Contents: Read and write`、`Metadata: Read`。
 - 不要在 Vercel 里手动添加 `NODE_ENV`，让 Vercel 自己管。
-- 换域名后，记得同步改 `PUBLIC_SITE_URL` 和 GitHub OAuth callback URL。
+- 换域名后，记得同步改 `PUBLIC_SITE_URL`。
+- 后台页面不会在线保存内容；修改内容请提交仓库文件。
 
 部署完可以检查：
 
 ```text
 https://your-domain.example
 https://your-domain.example/health
-https://your-domain.example/admin/login
+https://your-domain.example/admin/content
 ```
 
 或者跑：

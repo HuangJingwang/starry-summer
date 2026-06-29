@@ -84,14 +84,6 @@ for (const scriptName of ['ops:docker-preflight', 'ops:deploy']) {
 
 const envExample = readFileSync('.env.example', 'utf8');
 
-if (!/^ADMIN_EMAIL=owner@example\.com$/m.test(envExample)) {
-  fail('.env.example must keep ADMIN_EMAIL as a generic placeholder.');
-}
-
-if (!/^ADMIN_PASSWORD_HASH=replace-with-scrypt-hash$/m.test(envExample)) {
-  fail('.env.example must not contain a real admin password hash.');
-}
-
 if (/^[A-Z_]*(SECRET|TOKEN|PASSWORD|KEY|HASH)=scrypt:/m.test(envExample)) {
   fail('.env.example contains a generated secret or password hash.');
 }
@@ -106,15 +98,18 @@ for (const removedVariable of ['DOMAIN', 'ACME_EMAIL']) {
   }
 }
 
-for (const requiredVariable of [
+for (const removedVariable of [
+  'ADMIN_EMAIL',
+  'ADMIN_PASSWORD_HASH',
+  'SESSION_SECRET',
   'GITHUB_CONTENT_OWNER',
   'GITHUB_CONTENT_REPO',
   'GITHUB_CONTENT_BRANCH',
   'GITHUB_CONTENT_TOKEN',
   'REPOSITORY_PUBLISH_SECRET',
 ]) {
-  if (!new RegExp(`^${requiredVariable}=`, 'm').test(envExample)) {
-    fail(`.env.example must document repository publishing variable ${requiredVariable}.`);
+  if (new RegExp(`^${removedVariable}=`, 'm').test(envExample)) {
+    fail(`.env.example must not document removed online admin or repository publishing variable ${removedVariable}.`);
   }
 }
 

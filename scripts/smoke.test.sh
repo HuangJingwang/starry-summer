@@ -48,7 +48,7 @@ done
 
 printf 'GET %s\n' "$url" >>"${SMOKE_TEST_LOG:?}"
 
-if [[ -n "$header_file" && "$url" != */admin/content ]]; then
+if [[ -n "$header_file" ]]; then
   printf '%b' "${FAKE_SECURITY_HEADERS:-HTTP/1.1 200 OK\r\nStrict-Transport-Security: max-age=31536000; includeSubDomains; preload\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: DENY\r\nReferrer-Policy: strict-origin-when-cross-origin\r\nPermissions-Policy: camera=(), microphone=(), geolocation=()\r\n\r\n}" >"$header_file"
 fi
 
@@ -62,17 +62,14 @@ emit_body() {
 
 case "$url" in
   */admin/content)
-    printf 'HTTP/1.1 307 Temporary Redirect\r\nLocation: https://example.com/admin/login?next=%%2Fadmin%%2Fcontent\r\n\r\n' >"$header_file"
-    printf '307'
+    emit_body '<html>admin content</html>'
+    printf '200'
     ;;
   */health)
     emit_body "${FAKE_WEB_HEALTH_BODY:-{\"status\":\"ok\",\"service\":\"starry-summer-web\",\"release\":{\"version\":\"20260611091500\",\"revision\":\"abc1234\"}}}"
     ;;
   */)
     emit_body '<html>home</html>'
-    ;;
-  */admin/login)
-    emit_body '<html>login</html>'
     ;;
   */rss.xml)
     emit_body "${FAKE_RSS_BODY:-<rss version=\"2.0\"><channel><title>Starry Summer</title></channel></rss>}"
@@ -99,7 +96,6 @@ PATH="$tmp_dir:$PATH" bash "$repo_root/scripts/smoke.sh" "https://example.com"
 for expected_call in \
   'GET https://example.com/health' \
   'GET https://example.com/' \
-  'GET https://example.com/admin/login' \
   'GET https://example.com/admin/content' \
   'GET https://example.com/rss.xml' \
   'GET https://example.com/sitemap.xml'

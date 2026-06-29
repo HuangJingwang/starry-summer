@@ -89,7 +89,7 @@ describe('settings client helpers', () => {
     });
   });
 
-  test('builds repository settings publish payloads for Git-backed settings', () => {
+  test('builds repository settings file payloads without an online publish request', () => {
     const request = buildRepositorySettingsPublishRequest({
       profile: {
         title: 'Repository Site',
@@ -106,22 +106,15 @@ describe('settings client helpers', () => {
       navigation: ['posts', 'projects'],
     });
 
-    expect(request.url).toBe('/api/repository/settings');
-    expect(request.init).toMatchObject({
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-      },
-    });
-    expect(JSON.parse(String(request.init.body))).toMatchObject({
+    expect(request).toBeNull();
+
+    const payload = buildRepositorySettingsPublishPayload({ navigation: ['posts'] });
+    expect(payload).toMatchObject({
       settings: {
         profile: {
-          title: 'Repository Site',
           ownerName: 'Aster.H',
-          description: 'Repository description',
         },
-        navigation: ['posts', 'projects'],
+        navigation: ['posts'],
       },
       files: [
         {
@@ -129,8 +122,6 @@ describe('settings client helpers', () => {
         },
       ],
     });
-
-    const payload = buildRepositorySettingsPublishPayload({ navigation: ['posts'] });
     expect(payload.files[0]?.content).toContain('"navigation": [\n    "posts"\n  ]');
   });
 

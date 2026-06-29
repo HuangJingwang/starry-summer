@@ -4,21 +4,19 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 describe('asset manager upload panel', () => {
-  test('uses a styled file picker with selected file feedback', () => {
+  test('shows static asset workflow guidance instead of upload controls', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/AssetManager.tsx'), 'utf8');
 
-    expect(source).toContain('selectedFileName');
-    expect(source).toContain('asset-file-picker');
-    expect(source).toContain('asset-upload-grid');
-    expect(source).toContain('asset-upload-actions');
-    expect(source).toContain('还没有选择文件');
+    expect(source).toContain('静态站模式');
+    expect(source).toContain('apps/web/public/images');
+    expect(source).toContain('git commit');
+    expect(source).not.toContain('buildAssetUploadRequest');
+    expect(source).not.toContain('type="file"');
   });
 
-  test('loads the active gallery automatically and offers preview copy actions', () => {
+  test('keeps preview copy helpers for repository assets', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/AssetManager.tsx'), 'utf8');
 
-    expect(source).toContain('useEffect');
-    expect(source).toContain('void loadAssets(usage');
     expect(source).toContain('className="asset-thumb"');
     expect(source).toContain('asset.mimeType.startsWith');
     expect(source).toContain('copyAssetUrl');
@@ -28,17 +26,12 @@ describe('asset manager upload panel', () => {
     expect(source).toContain('复制 Markdown');
   });
 
-  test('surfaces specific repository publishing errors when loading and deleting assets', () => {
+  test('does not call repository publishing APIs for assets', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/AssetManager.tsx'), 'utf8');
 
-    expect(source).toContain('readAssetErrorMessage');
-    expect(source).toContain("readAssetErrorMessage(response, '读取图库失败，请确认已登录且仓库发布配置可用。')");
-    expect(source).toContain("readAssetErrorMessage(response, '删除失败，请确认已登录且仓库发布配置可用。')");
-    expect(source).toContain('仓库素材发布未配置，暂时不能上传素材。');
-    expect(source).toContain('仓库素材发布未配置，暂时不能读取素材库。');
-    expect(source).toContain('仓库素材发布未配置，暂时不能删除素材。');
-    expect(source).toContain('error instanceof Error ? error.message');
-    expect(source).not.toContain('throw new Error(`Request failed with ${response.status}`)');
+    expect(source).not.toContain('fetch(');
+    expect(source).not.toContain('readAssetErrorMessage');
+    expect(source).not.toContain('/api/repository/assets');
     expect(source).not.toContain('API 服务可用');
     expect(source).not.toContain('素材 Worker');
   });

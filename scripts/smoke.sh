@@ -15,24 +15,16 @@ check_path() {
   curl --fail --silent --show-error --location --max-time 10 "$SITE_URL$path" >"$response_file"
 }
 
-check_admin_protected_redirect() {
+check_admin_static_workspace() {
   local header_file="/tmp/starry-summer-smoke-headers"
   local status_code
-  local location
 
-  echo "Checking admin protected redirect: $SITE_URL/admin/content"
+  echo "Checking admin static workspace: $SITE_URL/admin/content"
   status_code=$(curl --silent --show-error --output /dev/null --dump-header "$header_file" --write-out "%{http_code}" --max-time 10 "$SITE_URL/admin/content")
-  location=$(awk 'tolower($1) == "location:" { sub(/\r$/, "", $0); sub(/^[^:]+:[[:space:]]*/, "", $0); print $0; exit }' "$header_file")
   rm -f "$header_file"
 
-  if [[ "$status_code" != "307" && "$status_code" != "308" && "$status_code" != "302" && "$status_code" != "301" ]]; then
-    echo "Admin protected route did not redirect. Status: $status_code"
-    exit 1
-  fi
-
-  if [[ "$location" != /admin/login* && "$location" != "$SITE_URL/admin/login"* ]]; then
-    echo "Location header did not point to /admin/login."
-    echo "Location: ${location:-<missing>}"
+  if [[ "$status_code" != "200" ]]; then
+    echo "Admin static route did not return 200. Status: $status_code"
     exit 1
   fi
 }
@@ -138,8 +130,7 @@ check_security_headers() {
 check_health
 check_security_headers
 check_path "/" "home page"
-check_path "/admin/login" "admin login"
-check_admin_protected_redirect
+check_admin_static_workspace
 check_rss
 check_sitemap
 

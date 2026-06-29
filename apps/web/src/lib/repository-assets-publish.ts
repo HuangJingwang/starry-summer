@@ -1,5 +1,10 @@
-import type { GitHubCommitFile } from './github-content-commit';
 import { normalizeStoredAsset, type AssetUploadPayload, type AssetUsage, type StoredAsset } from './assets';
+
+interface GitHubCommitFile {
+  path: string;
+  content: string;
+  encoding?: 'utf-8' | 'base64';
+}
 
 export type RepositoryAssetUploadPayload = AssetUploadPayload;
 

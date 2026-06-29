@@ -35,18 +35,10 @@ const contentDirectoryByType: Record<SiteContentItem['type'], string> = {
 export function buildRepositoryContentPublishRequest(
   input: AdminContentPayload,
   options: RepositoryContentPublishOptions = {},
-): AdminContentRequest {
-  return {
-    url: '/api/repository/content',
-    init: {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(buildRepositoryContentPublishPayload(input, options)),
-    },
-  };
+): AdminContentRequest | null {
+  void input;
+  void options;
+  return null;
 }
 
 export function buildRepositoryContentPublishPayload(

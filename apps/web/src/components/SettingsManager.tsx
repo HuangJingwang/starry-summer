@@ -3,20 +3,20 @@
 import { useState } from 'react';
 
 import {
-  buildRepositorySettingsPublishRequest,
   buildSettingsFormKey,
   formatHeroQuotesText,
   formatSocialLinksText,
   normalizeSiteSettings,
   parseHeroQuotesText,
   parseSocialLinksText,
-  readSettingsErrorMessage,
   type SiteSettings,
 } from '@/lib/settings';
 
 type SaveState = 'idle' | 'loading' | 'submitting' | 'success' | 'error';
 
 const fallbackSettings = normalizeSiteSettings({});
+const STATIC_SETTINGS_WRITE_MESSAGE =
+  '静态站模式下不会在线保存设置。请修改 apps/web/content/site-settings.json，提交 git commit 并推送触发部署。';
 const navigationOptions = [
   { key: 'search', label: '搜索', description: '顶部搜索框和搜索页入口' },
   { key: 'posts', label: '文章', description: '长文和笔记的统一阅读入口' },
@@ -52,23 +52,9 @@ export function SettingsManager({ initialSettings = fallbackSettings }: { initia
       },
       navigation: formData.getAll('navigation').map(String),
     };
-    const request = buildRepositorySettingsPublishRequest(input);
-
-    try {
-      const response = await fetch(request.url, request.init);
-
-      if (!response.ok) {
-        throw new Error(await readSettingsErrorMessage(response, `保存失败，服务器返回 ${response.status}。`));
-      }
-
-      const data = (await response.json()) as Partial<SiteSettings> & { settings?: Partial<SiteSettings> };
-      setSettings(normalizeSiteSettings(data.settings ?? data));
-      setState('success');
-      setMessage('设置已提交到仓库。');
-    } catch (error) {
-      setState('error');
-      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且仓库发布已配置。');
-    }
+    setSettings(normalizeSiteSettings(input));
+    setState('error');
+    setMessage(STATIC_SETTINGS_WRITE_MESSAGE);
   }
 
   return (

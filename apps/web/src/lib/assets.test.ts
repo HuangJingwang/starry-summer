@@ -79,7 +79,7 @@ describe('asset client helpers', () => {
     expect(optimizerCalls).toBe(0);
   });
 
-  test('builds repository asset requests by default without an external asset worker', async () => {
+  test('does not build repository asset mutation requests in static-site mode', async () => {
     const { buildAdminAssetListRequest, buildPublicAssetListRequest, buildRandomAssetRequest } = await import('./assets');
 
     expect(buildAssetUploadRequest({
@@ -88,25 +88,9 @@ describe('asset client helpers', () => {
       base64: 'aGVsbG8=',
       usage: 'cover',
       altText: 'Cover image',
-    })).toEqual({
-      url: '/api/repository/assets',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          filename: 'cover.png',
-          mimeType: 'image/png',
-          base64: 'aGVsbG8=',
-          usage: 'cover',
-          altText: 'Cover image',
-        }),
-      },
-    });
-    expect(buildAdminAssetListRequest({ usage: 'background' })?.url).toBe('/api/repository/assets?usage=background');
-    expect(buildAssetDeleteRequest('asset-1')?.url).toBe('/api/repository/assets/asset-1');
+    })).toBeNull();
+    expect(buildAdminAssetListRequest({ usage: 'background' })).toBeNull();
+    expect(buildAssetDeleteRequest('asset-1')).toBeNull();
     expect(buildPublicAssetListRequest({ usage: 'background' })).toBeNull();
     expect(buildRandomAssetRequest({ usage: 'background' })).toBeNull();
   });

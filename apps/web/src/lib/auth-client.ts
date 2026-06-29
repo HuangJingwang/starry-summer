@@ -1,20 +1,3 @@
-export interface LoginInput {
-  account: string;
-  password: string;
-}
-
-export interface LoginRequest {
-  url: string;
-  init: RequestInit;
-}
-
-export function normalizeLoginInput(input: LoginInput): LoginInput {
-  return {
-    account: input.account.trim().toLowerCase(),
-    password: input.password,
-  };
-}
-
 export function getSafeAdminRedirectPath(value: string | undefined): string {
   if (!value) {
     return '/admin';
@@ -34,41 +17,5 @@ export function getSafeAdminRedirectPath(value: string | undefined): string {
 }
 
 export function buildAdminLoginRedirectPath(value: string | undefined): string {
-  return `/admin/login?next=${encodeURIComponent(getSafeAdminRedirectPath(value))}`;
-}
-
-export function buildLoginRequest(input: LoginInput): LoginRequest {
-  const normalized = normalizeLoginInput(input);
-
-  return {
-    url: '/api/auth/login',
-    init: {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(normalized),
-    },
-  };
-}
-
-export function buildSessionRequest(): LoginRequest {
-  return {
-    url: '/api/auth/me',
-    init: {
-      method: 'GET',
-      credentials: 'include',
-    },
-  };
-}
-
-export function buildLogoutRequest(): LoginRequest {
-  return {
-    url: '/api/auth/logout',
-    init: {
-      method: 'POST',
-      credentials: 'include',
-    },
-  };
+  return getSafeAdminRedirectPath(value);
 }

@@ -4,23 +4,22 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 describe('LoginForm', () => {
-  test('uses a generic account field for admin login', () => {
+  test('shows a static-mode notice instead of credential fields', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/LoginForm.tsx'), 'utf8');
 
-    expect(source).toContain("formData.get('account')");
-    expect(source).toContain('账号');
-    expect(source).toContain('placeholder="owner@example.com"');
-    expect(source).toContain('type="text"');
-    expect(source).not.toContain('type="email"');
-    expect(source).not.toContain('邮箱或密码不正确');
+    expect(source).toContain('静态站模式');
+    expect(source).toContain('通过 git 提交更新');
+    expect(source).not.toContain("formData.get('account')");
+    expect(source).not.toContain('type="password"');
+    expect(source).not.toContain('/api/auth/login');
   });
 
-  test('exposes submitting state on the login form and button', () => {
+  test('keeps the panel accessible without submitting state', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/LoginForm.tsx'), 'utf8');
 
-    expect(source).toContain("const loginBusy = state === 'submitting';");
-    expect(source).toContain('aria-busy={loginBusy}');
-    expect(source).toContain('disabled={loginBusy}');
-    expect(source).toContain('aria-disabled={loginBusy}');
+    expect(source).toContain('login-panel__brand');
+    expect(source).toContain('role="status"');
+    expect(source).toContain('aria-live="polite"');
+    expect(source).not.toContain('submitting');
   });
 });

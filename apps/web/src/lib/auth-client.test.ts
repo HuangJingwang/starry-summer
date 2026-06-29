@@ -2,51 +2,10 @@ import { describe, expect, test } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { buildAdminLoginRedirectPath, buildLoginRequest, buildLogoutRequest, buildSessionRequest, getSafeAdminRedirectPath, normalizeLoginInput } from './auth-client';
+import { buildAdminLoginRedirectPath, getSafeAdminRedirectPath } from './auth-client';
 
 describe('auth client helpers', () => {
-  test('normalizes owner login input', () => {
-    expect(normalizeLoginInput({ account: ' owner@example.com ', password: ' secret ' })).toEqual({
-      account: 'owner@example.com',
-      password: ' secret ',
-    });
-  });
-
-  test('builds a credentialed login request', () => {
-    expect(buildLoginRequest({ account: 'owner@example.com', password: 'secret' })).toEqual({
-      url: '/api/auth/login',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({ account: 'owner@example.com', password: 'secret' }),
-      },
-    });
-  });
-
-  test('builds a credentialed session request', () => {
-    expect(buildSessionRequest()).toEqual({
-      url: '/api/auth/me',
-      init: {
-        method: 'GET',
-        credentials: 'include',
-      },
-    });
-  });
-
-  test('builds a credentialed logout request', () => {
-    expect(buildLogoutRequest()).toEqual({
-      url: '/api/auth/logout',
-      init: {
-        method: 'POST',
-        credentials: 'include',
-      },
-    });
-  });
-
-  test('serves admin auth routes from the web app instead of the old backend API', () => {
+  test('does not ship admin credential API routes in static-site mode', () => {
     const routePaths = [
       'src/app/api/auth/login/route.ts',
       'src/app/api/auth/me/route.ts',
@@ -54,7 +13,7 @@ describe('auth client helpers', () => {
     ];
 
     for (const routePath of routePaths) {
-      expect(readFileSync(join(process.cwd(), routePath), 'utf8')).toContain("export const runtime = 'nodejs';");
+      expect(() => readFileSync(join(process.cwd(), routePath), 'utf8')).toThrow();
     }
   });
 
@@ -68,8 +27,8 @@ describe('auth client helpers', () => {
   });
 
   test('builds safe admin login redirect paths', () => {
-    expect(buildAdminLoginRedirectPath('/admin/projects?status=published')).toBe('/admin/login?next=%2Fadmin%2Fprojects%3Fstatus%3Dpublished');
-    expect(buildAdminLoginRedirectPath('/posts')).toBe('/admin/login?next=%2Fadmin');
-    expect(buildAdminLoginRedirectPath('https://evil.example/admin')).toBe('/admin/login?next=%2Fadmin');
+    expect(buildAdminLoginRedirectPath('/admin/projects?status=published')).toBe('/admin/projects?status=published');
+    expect(buildAdminLoginRedirectPath('/posts')).toBe('/admin');
+    expect(buildAdminLoginRedirectPath('https://evil.example/admin')).toBe('/admin');
   });
 });

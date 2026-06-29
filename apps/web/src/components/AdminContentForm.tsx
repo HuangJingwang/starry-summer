@@ -5,20 +5,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ContentSourceType, ContentStatus, ContentType, ContentVisibility, ProjectMetadata } from '@starry-summer/shared';
 
 import {
-  buildAdminAssetListRequest,
   insertMarkdownAsset,
-  normalizeStoredAsset,
-  type AssetUsage,
   type StoredAsset,
 } from '@/lib/assets';
 import {
-  buildContentPayloadFromFormData,
-  buildRepositoryContentPublishRequest,
   createMarkdownPreview,
   getContentDraftStorageKey,
   getUnsavedContentWarning,
   parseContentDraftSnapshot,
-  readAdminContentErrorMessage,
   serializeContentDraftSnapshot,
   type ContentDraftSnapshot,
 } from '@/lib/admin-content';
@@ -63,7 +57,8 @@ type SaveState = 'idle' | 'submitting' | 'success' | 'error';
 type AssetLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 const fallbackMarkdown = '# 新内容标题\n\n这里写正文。';
-const authoringAssetUsages: AssetUsage[] = ['content', 'attachment', 'cover'];
+const STATIC_REPOSITORY_WRITE_MESSAGE =
+  '静态站模式下不会在线写入仓库。请修改 apps/web/content 下的内容文件、提交 git commit 并推送触发部署。';
 const markdownToolbarCommands: Array<{ command: MarkdownEditorCommand; label: string; icon: string }> = [
   { command: 'heading', label: '标题', icon: 'H' },
   { command: 'bold', label: '加粗', icon: 'B' },
@@ -133,55 +128,11 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
   }, [draftStorageKey]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadAuthoringAssets() {
-      setAssetState('loading');
-      setAssetMessage('');
-
-      try {
-        const responses = await Promise.all(
-          authoringAssetUsages.map((usage) => {
-            const request = buildAdminAssetListRequest({ usage });
-
-            if (!request) {
-              return Promise.resolve(new Response(JSON.stringify([])));
-            }
-
-            return fetch(request.url, request.init);
-          }),
-        );
-
-        if (responses.some((response) => !response.ok)) {
-          throw new Error('Asset list request failed');
-        }
-
-        const lists = await Promise.all(responses.map((response) => response.json()));
-        const assets = dedupeAssets(
-          lists.flatMap((list) => (Array.isArray(list) ? list.map((item) => normalizeStoredAsset(item as Partial<StoredAsset>)) : [])),
-        );
-
-        if (cancelled) {
-          return;
-        }
-
-        setAuthoringAssets(assets);
-        setSelectedAssetId((current) => current || assets[0]?.id || '');
-        setSelectedCoverAssetId((current) => current || assets.find((asset) => asset.usage === 'cover' && asset.mimeType.startsWith('image/'))?.id || '');
-        setAssetState('ready');
-      } catch {
-        if (!cancelled) {
-          setAssetState('error');
-          setAssetMessage('素材列表加载失败，可先到素材管理页面上传或稍后重试。');
-        }
-      }
-    }
-
-    void loadAuthoringAssets();
-
-    return () => {
-      cancelled = true;
-    };
+    setAuthoringAssets([]);
+    setSelectedAssetId('');
+    setSelectedCoverAssetId((current) => current || initialValue?.coverAssetId || '');
+    setAssetState('ready');
+    setAssetMessage('静态站模式下不在线读取素材库；请把图片提交到 apps/web/public/images 后在 Markdown 中引用。');
   }, []);
 
   useEffect(() => {
@@ -356,25 +307,11 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     setLocalDraftMessage('');
   }
 
-  async function send(request: { url: string; init: RequestInit }) {
-    const response = await fetch(request.url, request.init);
-
-    if (!response.ok) {
-      throw new Error(await readAdminContentErrorMessage(response, `请求失败，服务器返回 ${response.status}。`));
-    }
-
-    return response.json().catch(() => null);
-  }
-
   async function saveToRepository(formData: FormData, lifecycle?: 'publish' | 'archive' | 'restore-draft'): Promise<string | undefined> {
     ensureDraftSlug(formData);
-    const payload = buildContentPayloadFromFormData(formData);
-    const result = await send(buildRepositoryContentPublishRequest(payload, {
-      contentId: initialValue?.id,
-      action: lifecycle === 'restore-draft' ? 'restore-draft' : lifecycle ?? 'save',
-    }));
+    void lifecycle;
 
-    return typeof result?.id === 'string' ? result.id : initialValue?.id;
+    throw new Error(STATIC_REPOSITORY_WRITE_MESSAGE);
   }
 
   async function runSave(formData: FormData, lifecycle?: 'publish' | 'archive' | 'restore-draft') {
@@ -386,7 +323,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
       clearSuccessfulSaveState(lifecycle);
     } catch (error) {
       setState('error');
-      setMessage(error instanceof Error ? error.message : '保存失败，请确认已登录且仓库发布服务可用。');
+      setMessage(error instanceof Error ? error.message : STATIC_REPOSITORY_WRITE_MESSAGE);
     }
   }
 

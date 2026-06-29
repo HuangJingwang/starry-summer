@@ -460,7 +460,7 @@ describe('admin content helpers', () => {
     expect(parseContentDraftSnapshot(JSON.stringify({ title: 'Missing body' }))).toBeNull();
   });
 
-  test('builds a repository content publish request without depending on the database API', () => {
+  test('builds repository content file payloads without an online publish request', () => {
     const request = buildRepositoryContentPublishRequest(
       {
         title: ' Repo Post ',
@@ -481,15 +481,29 @@ describe('admin content helpers', () => {
       },
     );
 
-    expect(request.url).toBe('/api/repository/content');
-    expect(request.init).toMatchObject({
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
+    expect(request).toBeNull();
+
+    const payload = buildRepositoryContentPublishPayload(
+      {
+        title: ' Repo Post ',
+        slug: 'Repo Post',
+        type: 'post',
+        summary: ' Stored as files ',
+        bodyMarkdown: '# Repo Post\n\nHello repository.',
+        visibility: 'public',
+        categories: ['Writing'],
+        tags: ['GitHub'],
+        series: ['Migration Log'],
+        allowComments: true,
+        featured: true,
       },
-    });
-    expect(JSON.parse(String(request.init.body))).toMatchObject({
+      {
+        action: 'publish',
+        now: new Date('2026-06-14T08:00:00.000Z'),
+      },
+    );
+
+    expect(payload).toMatchObject({
       action: 'publish',
       content: {
         id: 'repo-post',
@@ -510,8 +524,8 @@ describe('admin content helpers', () => {
         },
       ],
     });
-    expect(String(JSON.parse(String(request.init.body)).files[0].content)).toContain('title: Repo Post');
-    expect(String(JSON.parse(String(request.init.body)).files[0].content)).toContain('# Repo Post');
+    expect(String(payload.files[0]?.content)).toContain('title: Repo Post');
+    expect(String(payload.files[0]?.content)).toContain('# Repo Post');
   });
 
   test('keeps repository draft saves private to the file publishing endpoint', () => {

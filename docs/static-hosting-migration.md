@@ -34,34 +34,24 @@ The admin publishing flow should eventually write repository files instead of da
 
 Publishing flow:
 
-1. Admin edits an article, note, moment, project, or page.
-2. The web app calls a protected publishing action.
-3. The publishing action writes Markdown, metadata JSON, and asset references through the GitHub API.
-4. GitHub receives a commit.
-5. Vercel or Cloudflare rebuilds the public site.
+1. Edit an article, note, moment, project, page, setting, or asset in the Git repository.
+2. Commit and push the change.
+3. Vercel or Cloudflare rebuilds the public site from repository files.
 
 This keeps content portable and versioned. A failed database, server, or vendor account should not trap the writing.
 
 Current implementation notes:
 
-- Admin content now runs in repository mode only; the content list, editor, taxonomy view, and dashboard no longer switch back to the legacy database API with `NEXT_PUBLIC_CONTENT_WRITE_TARGET`.
-- The endpoint is `POST /api/repository/content`.
-- The web app no longer proxies every `/api/*` request to the old backend API through `next.config.ts`; web-owned routes such as `/api/auth/*` and `/api/repository/*` are handled by Next.js directly.
+- Admin content now runs in static repository mode only; the content list, editor, taxonomy view, and dashboard no longer switch back to the legacy database API with `NEXT_PUBLIC_CONTENT_WRITE_TARGET`.
+- Online repository publishing endpoints have been removed.
+- The web app no longer proxies every `/api/*` request to the old backend API through `next.config.ts`.
 - The web `/health` route reports the web deployment itself and no longer depends on the legacy API or PostgreSQL health state.
 - The admin taxonomy page derives categories, tags, and series from repository content metadata instead of calling the old taxonomy database endpoints.
 - The admin home, content list, and content edit pages read repository content files instead of `/api/admin/content`.
-- Admin content bulk actions and permanent delete no longer call the old database API. Single-entry saves, publish, archive, and restore actions go through the repository publishing flow.
-- The admin Markdown import/export screen no longer calls the old `/api/admin/content/import` or `/api/admin/content/export` database endpoints; migration should happen through Git files, the repository editor flow, or a future GitHub import script.
-- Admin login is now available inside the web app through `POST /api/auth/login`, `GET /api/auth/me`, and `POST /api/auth/logout`; these routes use the existing `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, and `SESSION_SECRET` environment variables.
-- Repository publishing accepts either a valid `ss_session` admin cookie or `x-repository-publish-secret` for machine-to-machine calls.
-- Server-side GitHub publishing requires:
-  - `GITHUB_CONTENT_OWNER`
-  - `GITHUB_CONTENT_REPO`
-  - `GITHUB_CONTENT_BRANCH`
-  - `GITHUB_CONTENT_TOKEN`
-  - `REPOSITORY_PUBLISH_SECRET`
-- The route commits the generated Markdown file and updates `apps/web/content/public-content.json`.
-- Production should not expose repository publishing until the admin authentication replacement is finished. The current route requires `REPOSITORY_PUBLISH_SECRET` so it cannot be used as an unauthenticated public write endpoint.
+- Admin content bulk actions and permanent delete no longer call the old database API. Single-entry saves, publish, archive, and restore actions now show static-mode guidance instead of writing remotely.
+- The admin Markdown import/export screen no longer calls the old `/api/admin/content/import` or `/api/admin/content/export` database endpoints; migration should happen through Git files or a local import script.
+- Admin login and admin session routes have been removed. `/admin` is a static workspace for repository content inspection and local draft/preview work.
+- No server-side GitHub publishing token is required in production.
 
 ## Phase 3: Interactions Without PostgreSQL
 
@@ -101,9 +91,8 @@ Current implementation notes:
 
 - `apps/web/content/assets.json` stores versioned public assets that ship with the site, such as avatars, default covers, and curated backgrounds.
 - `apps/web/src/lib/assets-repository.ts` reads that manifest without calling the API backend.
-- `POST /api/repository/assets` commits uploaded files into `apps/web/public/images/uploads/YYYY/MM` and updates `apps/web/content/assets.json`.
-- `GET /api/repository/assets?usage=cover` reads the repository asset index for the admin gallery and cover picker.
-- `DELETE /api/repository/assets/:id` removes the asset from `assets.json`; historical files remain in Git history.
+- New assets are added by committing files under `apps/web/public/images` and updating `apps/web/content/assets.json` when an index entry is needed.
+- The admin asset page explains the static workflow and does not upload or delete files online.
 - GitHub storage is intended for small blog images and attachments. Large galleries, videos, or frequent binary churn should be reconsidered before they bloat the repository.
 
 Suggested D1 tables:
@@ -192,4 +181,4 @@ Those conditions are now the default target for the web deployment. Keep any rem
 
 The default deployment path is Vercel hosting the database-free Next.js web surface. The Nest API, PostgreSQL, Redis, MinIO, migration container, and reverse proxy stack are no longer part of the default production path.
 
-Next-owned routes such as `/api/auth/*` and `/api/repository/*` are handled by the web deployment. Repository publishing creates GitHub commits, and the connected Vercel project rebuilds from those commits.
+The hosted web deployment no longer exposes admin auth or repository publishing routes. Repository commits made through normal Git workflow trigger the connected Vercel rebuild.

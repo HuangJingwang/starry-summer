@@ -41,20 +41,26 @@ if grep -q 'npm.runtongqiuben.com' "$repo_root/package-lock.json"; then
   exit 1
 fi
 
-if ! grep -q '^ADMIN_EMAIL=owner@example.com$' "$repo_root/.env.example"; then
-  echo ".env.example must keep ADMIN_EMAIL as a generic placeholder."
-  exit 1
-fi
-
-if ! grep -q '^ADMIN_PASSWORD_HASH=replace-with-scrypt-hash$' "$repo_root/.env.example"; then
-  echo ".env.example must not contain a real admin password hash."
-  exit 1
-fi
-
 if grep -Eq '^[A-Z_]*(SECRET|TOKEN|PASSWORD|KEY|HASH)=scrypt:' "$repo_root/.env.example"; then
   echo ".env.example contains a generated secret or password hash."
   exit 1
 fi
+
+for removed_variable in \
+  ADMIN_EMAIL \
+  ADMIN_PASSWORD_HASH \
+  SESSION_SECRET \
+  GITHUB_CONTENT_OWNER \
+  GITHUB_CONTENT_REPO \
+  GITHUB_CONTENT_BRANCH \
+  GITHUB_CONTENT_TOKEN \
+  REPOSITORY_PUBLISH_SECRET
+do
+  if grep -q "^${removed_variable}=" "$repo_root/.env.example"; then
+    echo ".env.example must not document removed online admin or repository publishing variable ${removed_variable}."
+    exit 1
+  fi
+done
 
 if grep -Eq '^[A-Z_]*EMAIL=[0-9]{7,}$' "$repo_root/.env.example"; then
   echo ".env.example contains a numeric account identifier where a placeholder email is expected."

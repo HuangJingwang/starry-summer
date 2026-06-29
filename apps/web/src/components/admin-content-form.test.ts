@@ -104,12 +104,12 @@ describe('admin content form markdown editor', () => {
     expect(source).toContain('className={`form-message form-message--${state}`} role="status" aria-live="polite"');
   });
 
-  test('routes content saves only to the repository publishing endpoint', () => {
+  test('blocks remote content saves in static-site mode', () => {
     const source = readSource('src/components/AdminContentForm.tsx');
 
-    expect(source).toContain('buildRepositoryContentPublishRequest');
-    expect(source).toContain('async function saveToRepository');
-    expect(source).toContain('buildRepositoryContentPublishRequest(payload');
+    expect(source).toContain('STATIC_REPOSITORY_WRITE_MESSAGE');
+    expect(source).not.toContain('buildRepositoryContentPublishRequest');
+    expect(source).not.toContain('fetch(request.url');
     expect(source).not.toContain('NEXT_PUBLIC_CONTENT_WRITE_TARGET');
     expect(source).not.toContain('buildCreateDraftRequest');
     expect(source).not.toContain('buildUpdateContentRequest');

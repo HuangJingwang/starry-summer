@@ -136,18 +136,9 @@ function normalizeHeroQuotes(quotes: string[] | undefined): string[] {
   return normalized.length > 0 ? normalized : [defaultSettings.hero.motto];
 }
 
-export function buildRepositorySettingsPublishRequest(input: UpdateSiteSettingsInput): SettingsRequest {
-  return {
-    url: '/api/repository/settings',
-    init: {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(buildRepositorySettingsPublishPayload(input)),
-    },
-  };
+export function buildRepositorySettingsPublishRequest(input: UpdateSiteSettingsInput): SettingsRequest | null {
+  void input;
+  return null;
 }
 
 export function buildRepositorySettingsPublishPayload(input: UpdateSiteSettingsInput): RepositorySettingsPublishPayload {
