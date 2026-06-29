@@ -43,6 +43,7 @@ describe('first paint theme contract', () => {
     expect(layoutSource).not.toContain('getInitialThemeFromCookie');
     expect(layoutSource).toContain("import { getThemeInitScript } from '@/lib/site-theme';");
     expect(layoutSource).toContain('data-theme="summer-night"');
+    expect(layoutSource).toContain('data-scroll-behavior="smooth"');
     expect(layoutSource).toContain('suppressHydrationWarning');
     expect(layoutSource).toContain('<script id="theme-init" dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />');
   });

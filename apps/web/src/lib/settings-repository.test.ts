@@ -65,6 +65,28 @@ describe('repository settings source', () => {
     });
   });
 
+  test('reuses unchanged repository settings instead of reparsing them on every route render', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'starry-settings-cache-'));
+    const settingsFilePath = join(directory, 'site-settings.json');
+
+    writeFileSync(
+      settingsFilePath,
+      JSON.stringify({
+        profile: {
+          title: 'Cached Site',
+          ownerName: 'Aster.H',
+        },
+      }),
+      'utf8',
+    );
+
+    const first = await loadSiteSettings({ settingsFilePath });
+    const second = await loadSiteSettings({ settingsFilePath });
+
+    expect(first.profile.title).toBe('Cached Site');
+    expect(second).toBe(first);
+  });
+
   test('does not keep a public settings API source switch', () => {
     const source = readFileSync(__filename.replace(/\.test\.ts$/, '.ts'), 'utf8');
 

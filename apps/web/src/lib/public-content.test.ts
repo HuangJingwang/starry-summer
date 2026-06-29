@@ -325,6 +325,33 @@ describe('public content API helpers', () => {
     expect(studyPost?.bodyMarkdown).not.toContain('HuangJingwang');
   });
 
+  test('reuses unchanged repository content instead of reparsing it on every route render', async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'starry-content-cache-'));
+    const contentFilePath = join(directory, 'public-content.json');
+
+    writeFileSync(
+      contentFilePath,
+      JSON.stringify([
+        {
+          id: 'cached-post',
+          title: 'Cached Post',
+          type: 'post',
+          status: 'published',
+          visibility: 'public',
+          publishedAt: '2026-06-12',
+          slug: 'cached-post',
+        },
+      ]),
+      'utf8',
+    );
+
+    const first = await loadRepositoryContentItems({ contentFilePath, type: 'post' });
+    const second = await loadRepositoryContentItems({ contentFilePath, type: 'post' });
+
+    expect(first.items[0]?.title).toBe('Cached Post');
+    expect(second.items[0]).toBe(first.items[0]);
+  });
+
   test('includes selected GitHub repositories in project fallback content', async () => {
     const projects = await loadSiteContent('project');
 

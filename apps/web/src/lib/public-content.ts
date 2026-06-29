@@ -1,5 +1,5 @@
 import type { ContentSourceType, ContentStatus, ContentType, ProjectLinks, ProjectMetadata, ProjectStatus } from '@starry-summer/shared';
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { getPublicContent, searchContent, seedContent, type ContentSort, type PublicContentKind, type SiteContentItem } from './content';
@@ -64,6 +64,14 @@ export interface RepositoryContentLoadOptions extends PublicContentFilterOptions
 }
 
 const defaultRepositoryContentPath = join(process.cwd(), 'content', 'public-content.json');
+
+interface RepositoryContentFileCache {
+  contentFilePath: string;
+  signature: string;
+  items: SiteContentItem[];
+}
+
+let repositoryContentFileCache: RepositoryContentFileCache | null = null;
 
 function dateOnly(value: string | null | undefined): string {
   return value?.slice(0, 10) || '';
@@ -262,13 +270,37 @@ export async function loadRepositoryContentItems(options: RepositoryContentLoadO
 }
 
 export function readRepositoryContentFile(contentFilePath = defaultRepositoryContentPath): SiteContentItem[] {
+  const signature = getFileSignature(contentFilePath);
+
+  if (
+    repositoryContentFileCache &&
+    repositoryContentFileCache.contentFilePath === contentFilePath &&
+    repositoryContentFileCache.signature === signature
+  ) {
+    return repositoryContentFileCache.items;
+  }
+
   const data = JSON.parse(readFileSync(contentFilePath, 'utf8')) as unknown;
 
   if (!Array.isArray(data)) {
     throw new Error('Repository content file must contain an array of public content records.');
   }
 
-  return data.map((item) => normalizeRepositoryContentItem(item));
+  const items = data.map((item) => normalizeRepositoryContentItem(item));
+
+  repositoryContentFileCache = {
+    contentFilePath,
+    signature,
+    items,
+  };
+
+  return items;
+}
+
+function getFileSignature(filePath: string): string {
+  const stats = statSync(filePath);
+
+  return `${stats.mtimeMs}:${stats.size}`;
 }
 
 function getFallbackPublicContent(items: SiteContentItem[], options: PublicContentFilterOptions): SiteContentItem[] {

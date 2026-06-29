@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-CN" data-theme="summer-night" suppressHydrationWarning>
+    <html lang="zh-CN" data-theme="summer-night" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />
         <link rel="preconnect" href="https://fonts.googleapis.cn" />
