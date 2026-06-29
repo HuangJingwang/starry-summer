@@ -7,7 +7,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <AdminShell>
-      <section className="admin-panel wide">
+      <section className="admin-panel wide admin-panel--settings">
         <p className="eyebrow">设置</p>
         <h1>站点配置</h1>
         <SettingsManager initialSettings={settings} />

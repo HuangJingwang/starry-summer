@@ -58,8 +58,8 @@ export function SettingsManager({ initialSettings = fallbackSettings }: { initia
   }
 
   return (
-    <form className="content-form" action={save} key={buildSettingsFormKey(settings)} aria-busy={settingsBusy}>
-      <section className="settings-section">
+    <form className="content-form settings-form" action={save} key={buildSettingsFormKey(settings)} aria-busy={settingsBusy}>
+      <section className="settings-section settings-section--primary">
         <div className="settings-section__header">
           <span>Profile</span>
           <h2>公开身份</h2>

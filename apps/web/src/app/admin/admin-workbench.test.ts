@@ -7,6 +7,10 @@ function readAdminPageSource() {
   return readFileSync(join(process.cwd(), 'src/app/admin/page.tsx'), 'utf8');
 }
 
+function readAdminSettingsPageSource() {
+  return readFileSync(join(process.cwd(), 'src/app/admin/settings/page.tsx'), 'utf8');
+}
+
 describe('admin writing workbench', () => {
   test('centers the admin landing page on daily writing workflows', () => {
     const source = readAdminPageSource();
@@ -24,5 +28,16 @@ describe('admin writing workbench', () => {
     expect(source).not.toContain('admin-dashboard-grid');
     expect(source).not.toContain('全部内容');
     expect(source).not.toContain('总浏览');
+  });
+
+  test('keeps settings page hierarchy flat instead of stacking framed panels', () => {
+    const pageSource = readAdminSettingsPageSource();
+    const managerSource = readFileSync(join(process.cwd(), 'src/components/SettingsManager.tsx'), 'utf8');
+    const adminCss = readFileSync(join(process.cwd(), 'src/app/styles/admin.css'), 'utf8');
+
+    expect(pageSource).toContain('admin-panel wide admin-panel--settings');
+    expect(managerSource).toContain('content-form settings-form');
+    expect(adminCss).toContain('.settings-form {\n  background: transparent;');
+    expect(adminCss).toContain('.settings-section--primary');
   });
 });
