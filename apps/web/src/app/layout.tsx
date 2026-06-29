@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { PersistentPublicBackground } from '@/components/PersistentPublicBackground';
 import { buildSiteMetadata, resolvePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
 import { getThemeInitScript } from '@/lib/site-theme';
@@ -36,7 +37,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <PersistentPublicBackground />
+        {children}
+      </body>
     </html>
   );
 }

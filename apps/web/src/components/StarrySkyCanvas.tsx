@@ -115,7 +115,7 @@ const createFeaturedStarship = (width: number, height: number): FeaturedStarship
   y: height * randomBetween(0.22, 0.36),
 });
 
-export function StarrySkyCanvas({ className = '', showFleet = true }: { className?: string; showFleet?: boolean }) {
+export function StarrySkyCanvas({ className = '', showFleet = true, active = true }: { className?: string; showFleet?: boolean; active?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -627,14 +627,24 @@ export function StarrySkyCanvas({ className = '', showFleet = true }: { classNam
     };
 
     resizeCanvas();
+    if (!active) {
+      const width = canvas.offsetWidth || window.innerWidth;
+      const height = canvas.offsetHeight || window.innerHeight;
+
+      context.clearRect(0, 0, width, height);
+      return undefined;
+    }
+
     animationId = window.requestAnimationFrame(draw);
     window.addEventListener('resize', resizeCanvas);
 
     return () => {
-      window.cancelAnimationFrame(animationId);
+      if (animationId) {
+        window.cancelAnimationFrame(animationId);
+      }
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [showFleet]);
+  }, [showFleet, active]);
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />;
 }

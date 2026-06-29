@@ -76,6 +76,18 @@ function readMediaRule(source: string, mediaQuery: string, selector: string) {
 }
 
 describe('home page', () => {
+  test('keeps public module backgrounds persistent while module cards and content change', () => {
+    const rootLayoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
+    const siteShellSource = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+    const persistentBackgroundPath = join(process.cwd(), 'src/components/PersistentPublicBackground.tsx');
+
+    expect(existsSync(persistentBackgroundPath)).toBe(true);
+    expect(rootLayoutSource).toContain("import { PersistentPublicBackground } from '@/components/PersistentPublicBackground';");
+    expect(rootLayoutSource).toContain('<PersistentPublicBackground />');
+    expect(siteShellSource).not.toContain("import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';");
+    expect(siteShellSource).not.toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
+  });
+
   test('renders the README screenshot portfolio hero instead of the immersive landing', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
 

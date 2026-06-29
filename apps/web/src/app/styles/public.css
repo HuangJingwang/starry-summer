@@ -7,6 +7,13 @@
   position: relative;
 }
 
+.persistent-public-background {
+  inset: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 0;
+}
+
 .site-shell > main {
   flex: 1;
   position: relative;
@@ -16,11 +23,16 @@
 .site-shell__canvas {
   height: 100vh;
   inset: 0;
-  opacity: 0.84;
+  opacity: 0;
   pointer-events: none;
   position: fixed;
+  transition: opacity 220ms ease;
   width: 100vw;
   z-index: 0;
+}
+
+.persistent-public-background[data-active='true'] .site-shell__canvas {
+  opacity: 0.84;
 }
 
 .site-header {

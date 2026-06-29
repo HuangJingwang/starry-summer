@@ -253,14 +253,25 @@ describe('global styles', () => {
     const css = readGlobalStyles();
     const leetcodeBeamBlock = css.match(/\.study-archive-page::after\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteCanvasBlock = css.match(/\.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const persistentBackgroundBlock = css.match(/\.persistent-public-background\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const activeBackgroundBlock =
+      css.match(/\.persistent-public-background\[data-active='true'\] \.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const rootLayoutSource = readStylesheet('src/app/layout.tsx');
     const siteShellSource = readStylesheet('src/components/SiteShell.tsx');
     const leetcodeSource = readStylesheet('src/app/leetcode/page.tsx');
 
-    expect(siteShellSource).toContain("import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';");
-    expect(siteShellSource).toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
+    expect(rootLayoutSource).toContain("import { PersistentPublicBackground } from '@/components/PersistentPublicBackground';");
+    expect(rootLayoutSource).toContain('<PersistentPublicBackground />');
+    expect(siteShellSource).not.toContain("import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';");
+    expect(siteShellSource).not.toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
     expect(leetcodeSource).not.toContain('page-main__canvas');
+    expect(persistentBackgroundBlock).toContain('position: fixed;');
+    expect(persistentBackgroundBlock).toContain('pointer-events: none;');
     expect(siteCanvasBlock).toContain('position: fixed;');
+    expect(siteCanvasBlock).toContain('opacity: 0;');
     expect(siteCanvasBlock).toContain('pointer-events: none;');
+    expect(activeBackgroundBlock).toContain('opacity: 0.84;');
     expect(leetcodeBeamBlock).toContain('animation: none;');
     expect(leetcodeBeamBlock).toContain('background: transparent;');
     expect(leetcodeBeamBlock).toContain('filter: none;');
@@ -1603,6 +1614,7 @@ describe('global styles', () => {
     const homeBlock = css.match(/\.portfolio-home,[\s\S]*?\.portfolio-about-panel\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteShellBlock = css.match(/\.site-shell\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteShellCanvasBlock = css.match(/\.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const persistentBackgroundBlock = css.match(/\.persistent-public-background\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const pageMainBlock =
       [...css.matchAll(/\.page-main\s*{(?<body>[\s\S]*?)\n}/g)]
         .map((match) => match.groups?.body ?? '')
@@ -1630,6 +1642,8 @@ describe('global styles', () => {
     expect(siteShellCanvasBlock).toContain('height: 100vh;');
     expect(siteShellCanvasBlock).toContain('width: 100vw;');
     expect(siteShellCanvasBlock).toContain('pointer-events: none;');
+    expect(persistentBackgroundBlock).toContain('position: fixed;');
+    expect(persistentBackgroundBlock).toContain('z-index: 0;');
     expect(pageMainBlock).toContain('rgba(2, 4, 11, 0.74)');
     expect(pageMainBlock).toContain('isolation: isolate;');
     expect(css).toContain('.page-main::before');
