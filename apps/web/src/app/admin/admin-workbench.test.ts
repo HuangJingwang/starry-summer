@@ -40,4 +40,23 @@ describe('admin writing workbench', () => {
     expect(adminCss).toContain('.settings-form {\n  background: transparent;');
     expect(adminCss).toContain('.settings-section--primary');
   });
+
+  test('presents settings as grouped admin controls instead of article-style navigation', () => {
+    const managerSource = readFileSync(join(process.cwd(), 'src/components/SettingsManager.tsx'), 'utf8');
+    const adminCss = readFileSync(join(process.cwd(), 'src/app/styles/admin.css'), 'utf8');
+
+    expect(managerSource).toContain('settings-page-header');
+    expect(managerSource).toContain('settings-header-actions');
+    expect(managerSource).toContain('settings-layout');
+    expect(managerSource).toContain('settings-group');
+    expect(managerSource).toContain('settings-group__copy');
+    expect(managerSource).toContain('settings-card');
+    expect(managerSource).toContain('首页展示');
+    expect(managerSource).toContain('仓库维护');
+    expect(managerSource).not.toContain('settings-directory');
+    expect(managerSource).not.toContain('role="tablist"');
+    expect(adminCss).toContain('.settings-layout');
+    expect(adminCss).toContain('.settings-group');
+    expect(adminCss).toContain('.settings-card');
+  });
 });

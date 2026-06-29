@@ -2019,42 +2019,128 @@
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  display: grid;
+  gap: 18px;
   margin-top: 18px;
   padding: 0;
 }
 
-.settings-section {
-  background: rgba(4, 6, 14, 0.58);
+.settings-page-header {
+  align-items: start;
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.1), transparent 42%),
+    rgba(4, 6, 14, 0.56);
   border: 1px solid rgba(34, 211, 238, 0.12);
   border-radius: 18px;
   box-shadow: 0 18px 54px rgba(0, 0, 0, 0.16);
   display: grid;
   gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
   padding: clamp(16px, 2vw, 22px);
+}
+
+.settings-page-header h2,
+.settings-page-header p {
+  margin: 0;
+}
+
+.settings-page-header h2 {
+  color: var(--cyber-ink);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.08;
+}
+
+.settings-page-header p:not(.eyebrow) {
+  color: var(--cyber-muted);
+  line-height: 1.7;
+  margin-top: 8px;
+  max-width: 68ch;
+}
+
+.settings-header-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.settings-header-actions a,
+.settings-header-actions button {
+  border-radius: 999px;
+  font-weight: 800;
+  min-height: 38px;
+  padding: 9px 13px;
+  white-space: nowrap;
+}
+
+.settings-header-actions a {
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: var(--cyber-ink);
+}
+
+.settings-header-actions button {
+  background: linear-gradient(135deg, var(--cyber-cyan), var(--cyber-teal));
+  border: 0;
+  color: #031018;
+  cursor: pointer;
+}
+
+.settings-header-actions button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.settings-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-section {
+  background: rgba(4, 6, 14, 0.48);
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.14);
+  display: grid;
+  gap: 18px;
+  padding: clamp(16px, 2vw, 22px);
+}
+
+.settings-group {
+  align-items: start;
+  grid-template-columns: minmax(180px, 0.34fr) minmax(0, 1fr);
+}
+
+.settings-group__copy {
+  align-content: start;
 }
 
 .settings-section--primary {
   background:
-    linear-gradient(135deg, rgba(34, 211, 238, 0.1), transparent 38%),
+    linear-gradient(135deg, rgba(34, 211, 238, 0.08), transparent 38%),
     rgba(4, 6, 14, 0.68);
   border-color: rgba(34, 211, 238, 0.18);
-  grid-template-columns: minmax(180px, 0.34fr) minmax(0, 1fr);
 }
 
-.settings-section--primary .settings-section__header {
-  align-content: start;
+.settings-section--primary .settings-group__copy {
   border-right: 1px solid rgba(148, 163, 184, 0.13);
   padding-right: 18px;
-}
-
-.settings-section--primary > :not(.settings-section__header) {
-  grid-column: 2;
 }
 
 .settings-section--compact {
   background: rgba(8, 13, 26, 0.5);
   border-color: rgba(148, 163, 184, 0.13);
   box-shadow: none;
+}
+
+.settings-card {
+  background: rgba(2, 6, 15, 0.44);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+  display: grid;
+  gap: 14px;
+  padding: clamp(14px, 2vw, 18px);
 }
 
 .settings-safety-note {
@@ -2078,6 +2164,16 @@
   margin: 0;
 }
 
+.settings-inline-note {
+  background: rgba(34, 211, 238, 0.06);
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  border-radius: 12px;
+  color: var(--cyber-muted);
+  line-height: 1.7;
+  margin: 0;
+  padding: 10px 12px;
+}
+
 .settings-navigation-grid {
   display: grid;
   gap: 10px;
@@ -2090,13 +2186,23 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.settings-maintenance-grid span {
+.settings-maintenance-grid span,
+.settings-maintenance-grid a {
   background: rgba(4, 6, 14, 0.32);
   border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 12px;
+  color: var(--cyber-ink);
   display: grid;
   gap: 5px;
   padding: 12px;
+  text-decoration: none;
+}
+
+.settings-maintenance-grid a:hover,
+.settings-maintenance-grid a:focus-visible {
+  border-color: rgba(34, 211, 238, 0.34);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+  outline: none;
 }
 
 .settings-maintenance-grid strong {
