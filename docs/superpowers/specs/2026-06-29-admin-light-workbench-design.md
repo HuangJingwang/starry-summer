@@ -26,6 +26,8 @@ The reference project `YYsuni/2025-blog-public` is lightweight because it avoids
 - Blog images are handled in the writing flow: add or paste images, then drag or insert them into the editor.
 - Configuration exists, but it is not the default first-screen experience.
 
+The reference site does expose some visual configuration, but it is scoped. Its config dialog has `网站设置`, `色彩配置`, and `首页布局` tabs. The layout tab edits homepage card width, height, order, offset, and enabled state, with a manual homepage drag mode. The color tab edits theme colors, background colors, card color, border color, and article background color. This is useful as a reference for lightweight homepage and theme controls, but it is not a full typography or article-layout design system. Article font families, heading scale, line height, paragraph rhythm, code block styling, and detail page composition are still mostly code and CSS concerns.
+
 Starry Summer should borrow those interaction ideas, not the reference site's narrower data model. Starry Summer needs a broader personal archive, so the design adapts the reference pattern into four workspaces.
 
 ## 4. Current Admin Problems
@@ -119,7 +121,8 @@ Existing `/admin/comments` and `/admin/guestbook` can remain as filtered views o
 Merge low-frequency maintenance into one workspace with four compact sections:
 
 - `公开身份`: site title, owner display name, SEO description, social links.
-- `首页`: tagline, motto, quotes, fallback background.
+- `首页`: tagline, motto, quotes, fallback background, module visibility, module order, and featured homepage imagery.
+- `外观`: public theme choice, restrained color tokens, homepage module layout presets, and reset-to-default controls.
 - `导航`: public nav ordering and visibility.
 - `维护`: assets, taxonomy index, import, export, repository guidance.
 
@@ -199,6 +202,16 @@ Guidelines:
 - Use compact chips and segmented controls for filters.
 
 The result should feel like a personal console for daily writing, not a product analytics dashboard.
+
+Starry Summer should support a small set of useful appearance controls, inspired by the reference site's scoped configuration:
+
+- Public theme selection and preview, while preserving the two public themes.
+- Homepage module enable/disable and ordering.
+- Homepage cover/background image management.
+- A few semantic color tokens only where they map cleanly to existing theme variables.
+- Reset controls for homepage appearance.
+
+Starry Summer should not expose fine-grained typography and article layout knobs in the admin. Font stack, body width, heading rhythm, code block style, detail page layout, and theme contrast should stay in the design system and CSS tests so the public reading experience remains coherent.
 
 ## 10. Data Flow and Compatibility
 
