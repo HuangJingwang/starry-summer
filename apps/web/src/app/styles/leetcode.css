@@ -380,8 +380,14 @@
 
 .study-today-summary {
   display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 0.82fr) minmax(280px, 1.18fr);
+}
+
+.study-today-summary__stats {
+  display: grid;
   gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .study-today-summary__card {
@@ -397,7 +403,22 @@
   padding: 16px;
 }
 
+.study-rhythm-panel {
+  backdrop-filter: var(--study-glass-blur);
+  background:
+    linear-gradient(135deg, rgba(var(--study-accent-rgb), 0.12), transparent 48%),
+    rgba(4, 6, 14, 0.34);
+  border: 1px solid rgba(var(--study-accent-rgb), 0.22);
+  border-radius: 22px;
+  box-shadow: var(--study-soft-shadow);
+  display: grid;
+  gap: 14px;
+  min-height: 104px;
+  padding: 16px;
+}
+
 .study-today-summary__card span,
+.study-rhythm-panel span,
 .study-task-group__heading span {
   color: var(--study-accent);
   font-family: var(--font-nav);
@@ -406,7 +427,8 @@
   letter-spacing: 0.04em;
 }
 
-.study-today-summary__card strong {
+.study-today-summary__card strong,
+.study-rhythm-panel strong {
   color: var(--study-ink);
   font-size: clamp(1.8rem, 3vw, 2.65rem);
   font-variant-numeric: tabular-nums;
@@ -414,9 +436,48 @@
   line-height: 0.96;
 }
 
-.study-today-summary__card small {
+.study-today-summary__card small,
+.study-rhythm-panel small {
   color: var(--study-muted);
   line-height: 1.45;
+}
+
+.study-rhythm-panel > div:first-child {
+  display: grid;
+  gap: 7px;
+}
+
+.study-rhythm-track {
+  background: rgba(2, 6, 15, 0.3);
+  border: 1px solid var(--study-line);
+  border-radius: 999px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: var(--study-new-share, 3fr) var(--study-review-share, 5fr);
+  min-height: 34px;
+  overflow: hidden;
+  padding: 4px;
+}
+
+.study-rhythm-track span {
+  align-items: center;
+  border-radius: 999px;
+  color: var(--study-ink);
+  display: flex;
+  font-size: 0.72rem;
+  justify-content: center;
+  line-height: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.study-rhythm-track__new {
+  background: rgba(var(--study-accent-rgb), 0.2);
+}
+
+.study-rhythm-track__review {
+  background: rgba(45, 212, 191, 0.12);
 }
 
 .study-today-section .study-task-grid {
@@ -432,11 +493,20 @@
 .study-task-group {
   background: rgba(2, 6, 15, 0.24);
   border: 1px solid var(--study-line);
-  border-radius: 26px;
+  border-radius: 24px;
   box-shadow: var(--study-soft-shadow);
   display: grid;
-  gap: 12px;
+  gap: 10px;
   padding: 14px;
+}
+
+.study-task-group--new {
+  background: transparent;
+  box-shadow: none;
+}
+
+.study-task-group--review {
+  background: rgba(2, 6, 15, 0.24);
 }
 
 .study-task-group h3 {
@@ -538,17 +608,28 @@
 .study-task-card {
   align-items: center;
   backdrop-filter: var(--study-glass-blur);
-  background: var(--study-panel-soft);
+  background: rgba(4, 6, 14, 0.28);
   border: 1px solid var(--study-line);
-  border-radius: 24px;
-  box-shadow: var(--study-soft-shadow);
+  border-radius: 18px;
+  box-shadow: none;
   color: var(--study-ink);
   display: grid;
-  gap: 6px 12px;
-  grid-template-columns: auto minmax(0, 1fr);
-  min-height: 76px;
-  padding: 16px;
+  gap: 10px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  min-height: 72px;
+  padding: 14px;
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.study-task-card--new {
+  background: transparent;
+  border-color: rgba(var(--study-accent-rgb), 0.16);
+}
+
+.study-task-card--review {
+  background:
+    linear-gradient(90deg, rgba(var(--study-accent-rgb), 0.08), transparent 42%),
+    rgba(4, 6, 14, 0.34);
 }
 
 .study-task-card:hover {
@@ -560,11 +641,6 @@
 .study-task-card--review:hover {
   border-color: rgba(var(--study-accent-rgb), 0.42);
   box-shadow: 0 18px 46px rgba(var(--study-accent-rgb), 0.12);
-}
-
-.study-task-card strong,
-.study-task-card small {
-  grid-column: 2;
 }
 
 .study-task-card__body {
@@ -579,8 +655,36 @@
   overflow-wrap: anywhere;
 }
 
-.study-task-card .study-difficulty {
-  grid-row: 1;
+.study-task-card small {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+.study-task-card__round {
+  align-items: center;
+  background: rgba(var(--study-accent-rgb), 0.12);
+  border: 1px solid rgba(var(--study-accent-rgb), 0.26);
+  border-radius: 999px;
+  color: var(--study-accent);
+  display: inline-flex;
+  font-family: var(--font-nav);
+  font-size: 0.74rem;
+  font-weight: 800;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  width: 40px;
+}
+
+.study-task-card__meta {
+  color: var(--study-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.study-task-card__meta--late {
+  color: #facc15;
 }
 
 .study-difficulty {
@@ -1431,9 +1535,38 @@ body:has(.study-archive-page) {
 }
 
 :root[data-theme='summer-day'] .study-task-group {
-  background: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.26);
   border-color: var(--study-line);
   box-shadow: var(--study-soft-shadow);
+}
+
+:root[data-theme='summer-day'] .study-task-group--new {
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme='summer-day'] .study-task-group--review {
+  background:
+    linear-gradient(135deg, rgba(var(--study-accent-rgb), 0.05), transparent 46%),
+    rgba(255, 255, 255, 0.28);
+}
+
+:root[data-theme='summer-day'] .study-rhythm-panel {
+  background:
+    linear-gradient(135deg, rgba(var(--study-accent-rgb), 0.13), transparent 54%),
+    rgba(255, 255, 255, 0.48);
+}
+
+:root[data-theme='summer-day'] .study-rhythm-track {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+:root[data-theme='summer-day'] .study-rhythm-track__new {
+  background: rgba(var(--study-accent-rgb), 0.18);
+}
+
+:root[data-theme='summer-day'] .study-rhythm-track__review {
+  background: rgba(16, 185, 129, 0.12);
 }
 
 :root[data-theme='summer-day'] .study-metric-card small,
@@ -1491,6 +1624,23 @@ body:has(.study-archive-page) {
 :root[data-theme='summer-day'] .study-difficulty {
   border-color: rgba(var(--study-accent-rgb), 0.24);
   color: var(--study-accent);
+}
+
+:root[data-theme='summer-day'] .study-task-card--new {
+  background: transparent;
+  border-color: rgba(var(--study-accent-rgb), 0.18);
+  box-shadow: none;
+}
+
+:root[data-theme='summer-day'] .study-task-card--review {
+  background:
+    linear-gradient(90deg, rgba(var(--study-accent-rgb), 0.08), transparent 44%),
+    rgba(255, 255, 255, 0.52);
+  box-shadow: var(--study-soft-shadow);
+}
+
+:root[data-theme='summer-day'] .study-task-card__meta--late {
+  color: #9a5d0c;
 }
 
 :root[data-theme='summer-day'] .study-difficulty--medium {

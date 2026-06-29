@@ -1,4 +1,5 @@
 import type { StudyDashboard } from '@starry-summer/shared';
+import type { CSSProperties } from 'react';
 
 import { PublicContentSection } from '@/components/PublicPageLayout';
 
@@ -8,6 +9,10 @@ export function StudyTodaySection({ dashboard }: { dashboard: StudyDashboard }) 
   const todayCount = dashboard.todayFocus.length;
   const reviewCount = dashboard.reviewDue.length;
   const rhythmLabel = `${dashboard.settings.dailyNew}+${dashboard.settings.dailyReview}`;
+  const rhythmStyle = {
+    '--study-new-share': `${Math.max(1, dashboard.settings.dailyNew)}fr`,
+    '--study-review-share': `${Math.max(1, dashboard.settings.dailyReview)}fr`,
+  } as CSSProperties;
 
   return (
     <PublicContentSection
@@ -20,24 +25,32 @@ export function StudyTodaySection({ dashboard }: { dashboard: StudyDashboard }) 
       meta={`${dashboard.settings.dailyNew} 新题 / ${dashboard.settings.dailyReview} 复习`}
     >
       <div className="study-today-summary" aria-label="今日任务摘要">
-        <div className="study-today-summary__card">
-          <span>今日新题</span>
-          <strong>{todayCount}</strong>
-          <small>按计划开始 R1</small>
+        <div className="study-today-summary__stats">
+          <div className="study-today-summary__card">
+            <span>今日新题</span>
+            <strong>{todayCount}</strong>
+            <small>按计划开始 R1</small>
+          </div>
+          <div className="study-today-summary__card">
+            <span>到期复习</span>
+            <strong>{reviewCount}</strong>
+            <small>先清理逾期轮次</small>
+          </div>
         </div>
-        <div className="study-today-summary__card">
-          <span>到期复习</span>
-          <strong>{reviewCount}</strong>
-          <small>先清理逾期轮次</small>
-        </div>
-        <div className="study-today-summary__card">
-          <span>每日节奏</span>
-          <strong>{rhythmLabel}</strong>
-          <small>新题 / 复习</small>
+        <div className="study-rhythm-panel">
+          <div>
+            <span>每日节奏</span>
+            <strong>{rhythmLabel}</strong>
+            <small>新题和复习的今日比例</small>
+          </div>
+          <div className="study-rhythm-track" style={rhythmStyle} aria-label={`今日节奏：${rhythmLabel}`}>
+            <span className="study-rhythm-track__new">新题</span>
+            <span className="study-rhythm-track__review">复习</span>
+          </div>
         </div>
       </div>
       <div className="study-task-grid">
-        <div className="study-task-group">
+        <div className="study-task-group study-task-group--new">
           <div className="study-task-group__heading">
             <h3>今日新题</h3>
             <span>{todayCount} 题</span>
@@ -50,7 +63,7 @@ export function StudyTodaySection({ dashboard }: { dashboard: StudyDashboard }) 
             )}
           </div>
         </div>
-        <div className="study-task-group">
+        <div className="study-task-group study-task-group--review">
           <div className="study-task-group__heading">
             <h3>到期复习</h3>
             <span>{reviewCount} 题</span>

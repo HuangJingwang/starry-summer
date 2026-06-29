@@ -282,7 +282,7 @@ describe('global styles', () => {
     expect(metricCardBlock).not.toContain('background: #fff;');
     expect(metricNumberBlock).toContain('font-variant-numeric: tabular-nums;');
     expect(metricNumberBlock).toContain('font-size: clamp(2.35rem, 5vw, 4.25rem);');
-    expect(taskCardBlock).toContain('background: var(--study-panel-soft);');
+    expect(taskCardBlock).toContain('background: rgba(4, 6, 14, 0.28);');
     expect(taskCardBlock).not.toContain('background: #fff;');
     expect(contentSectionBlock).toContain('background: var(--study-panel);');
     expect(contentSectionBlock).toContain('border: 1px solid var(--study-line);');
@@ -347,8 +347,8 @@ describe('global styles', () => {
     expect(contentSectionBlock).toContain('backdrop-filter: var(--study-glass-blur);');
     expect(sectionHeadingBlock).toContain('font-size: clamp(1.35rem, 2.2vw, 2.1rem);');
     expect(studyMetricBlock).toContain('border-radius: 32px;');
-    expect(taskCardBlock).toContain('min-height: 76px;');
-    expect(taskCardBlock).toContain('padding: 16px;');
+    expect(taskCardBlock).toContain('min-height: 72px;');
+    expect(taskCardBlock).toContain('padding: 14px;');
   });
 
   test('composes the LeetCode today tasks as a starry desk widget panel', () => {
@@ -357,30 +357,42 @@ describe('global styles', () => {
     const cardsSource = readStylesheet('src/app/leetcode/StudyCards.tsx');
     const todaySectionBlock = readStyleBlock(css, '.study-today-section');
     const summaryBlock = readStyleBlock(css, '.study-today-summary');
-    const summaryCardBlock = readStyleBlock(css, '.study-today-summary__card');
+    const summaryStatsBlock = readStyleBlock(css, '.study-today-summary__stats');
+    const rhythmTrackBlock = readStyleBlock(css, '.study-rhythm-track');
     const taskGridBlock = readStyleBlock(css, '.study-today-section .study-task-grid');
-    const taskGroupBlock = readStyleBlock(css, '.study-task-group');
+    const newTaskGroupBlock = readStyleBlock(css, '.study-task-group--new');
+    const reviewTaskGroupBlock = readStyleBlock(css, '.study-task-group--review');
     const groupHeadingBlock = readStyleBlock(css, '.study-task-group__heading');
+    const reviewMetaBlock = readStyleBlock(css, '.study-task-card__meta');
     const cardBodyBlock = readStyleBlock(css, '.study-task-card__body');
     const returnBlock = readStyleBlock(css, '.study-return-home');
     const responsiveCss = readStylesheet('src/app/styles/responsive.css');
 
     expect(todaySource).toContain('className="study-today-section"');
     expect(todaySource).toContain('study-today-summary');
+    expect(todaySource).toContain('study-rhythm-track');
+    expect(todaySource).toContain('study-task-group study-task-group--new');
+    expect(todaySource).toContain('study-task-group study-task-group--review');
     expect(todaySource).toContain('study-task-group__heading');
+    expect(todaySource).not.toContain('className="study-today-summary__card">\n          <span>每日节奏</span>');
+    expect(cardsSource).toContain('study-task-card study-task-card--new');
+    expect(cardsSource).toContain('study-task-card__round');
+    expect(cardsSource).toContain('study-task-card__meta');
     expect(cardsSource).toContain('study-task-card__body');
     expect(todaySectionBlock).toContain('gap: clamp(18px, 3vw, 28px);');
-    expect(summaryBlock).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
-    expect(summaryCardBlock).toContain('background: var(--study-panel-soft);');
-    expect(summaryCardBlock).toContain('border-radius: 22px;');
+    expect(summaryBlock).toContain('grid-template-columns: minmax(0, 0.82fr) minmax(280px, 1.18fr);');
+    expect(summaryStatsBlock).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
+    expect(rhythmTrackBlock).toContain('grid-template-columns: var(--study-new-share, 3fr) var(--study-review-share, 5fr);');
     expect(taskGridBlock).toContain('align-items: start;');
     expect(taskGridBlock).toContain('grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);');
-    expect(taskGroupBlock).toContain('border-radius: 26px;');
-    expect(taskGroupBlock).toContain('background: rgba(2, 6, 15, 0.24);');
+    expect(newTaskGroupBlock).toContain('background: transparent;');
+    expect(reviewTaskGroupBlock).toContain('background: rgba(2, 6, 15, 0.24);');
     expect(groupHeadingBlock).toContain('border-bottom: 1px solid var(--study-line);');
+    expect(reviewMetaBlock).toContain('font-variant-numeric: tabular-nums;');
     expect(cardBodyBlock).toContain('min-width: 0;');
     expect(returnBlock).toContain('margin: 24px auto clamp(28px, 5vw, 56px);');
     expect(responsiveCss).toContain('.study-today-section .study-task-grid');
+    expect(responsiveCss).toContain('.study-today-summary');
     expect(responsiveCss).toContain('grid-template-columns: 1fr;');
   });
 

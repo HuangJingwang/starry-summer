@@ -4,13 +4,22 @@ import { getDifficultyTone, getLeetCodeProblemUrl, normalizeDifficultyLabel } fr
 
 export function StudyTaskCard({ task }: { task: StudyTask }) {
   return (
-    <a className="study-task-card" href={getLeetCodeProblemUrl(task.slug)} target="_blank" rel="noreferrer">
-      <span className={`study-difficulty study-difficulty--${getDifficultyTone(task.difficulty)}`}>
-        {normalizeDifficultyLabel(task.difficulty)}
-      </span>
+    <a
+      className="study-task-card study-task-card--new"
+      href={getLeetCodeProblemUrl(task.slug)}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <span className="study-task-card__round">R1</span>
       <span className="study-task-card__body">
         <strong>{task.title}</strong>
-        <small>{task.category} · 开始 R1</small>
+        <small>
+          <span className={`study-difficulty study-difficulty--${getDifficultyTone(task.difficulty)}`}>
+            {normalizeDifficultyLabel(task.difficulty)}
+          </span>
+          <span>{task.category}</span>
+          <span>开始建档</span>
+        </small>
       </span>
     </a>
   );
@@ -24,13 +33,21 @@ export function ReviewTaskCard({ task }: { task: StudyReviewTask }) {
       target="_blank"
       rel="noreferrer"
     >
-      <span className={`study-difficulty study-difficulty--${getDifficultyTone(task.difficulty)}`}>
-        {normalizeDifficultyLabel(task.difficulty)}
-      </span>
+      <span className="study-task-card__round">{task.nextRound}</span>
       <span className="study-task-card__body">
         <strong>{task.title}</strong>
         <small>
-          {task.nextRound} · {task.dueDate} 到期 · {task.forcedByMustRepeat ? '重点复刷' : `逾期 ${task.overdueDays} 天`}
+          <span className={`study-difficulty study-difficulty--${getDifficultyTone(task.difficulty)}`}>
+            {normalizeDifficultyLabel(task.difficulty)}
+          </span>
+          <span className="study-task-card__meta">{task.dueDate} 到期</span>
+          <span
+            className={
+              task.forcedByMustRepeat ? 'study-task-card__meta' : 'study-task-card__meta study-task-card__meta--late'
+            }
+          >
+            {task.forcedByMustRepeat ? '重点复刷' : `逾期 ${task.overdueDays} 天`}
+          </span>
         </small>
       </span>
     </a>
