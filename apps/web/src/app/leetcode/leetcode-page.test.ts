@@ -10,6 +10,7 @@ describe('leetcode archive page', () => {
     const snapshotSource = readFileSync(join(process.cwd(), 'src/app/leetcode/StudySnapshotHero.tsx'), 'utf8');
     const contributionSource = readFileSync(join(process.cwd(), 'src/app/leetcode/StudyContributionGraph.tsx'), 'utf8');
     const dailyCardsSource = readFileSync(join(process.cwd(), 'src/app/leetcode/StudyDailyCards.tsx'), 'utf8');
+    const rootLayoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
     const siteShellSource = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
     const themeSyncSource = readFileSync(join(process.cwd(), 'src/components/ThemeSync.tsx'), 'utf8');
 
@@ -24,7 +25,8 @@ describe('leetcode archive page', () => {
     expect(todayPageSource).toContain('href="/leetcode"');
     expect(source).toContain('<SiteShell>');
     expect(source).not.toContain('hideHeader');
-    expect(siteShellSource).toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
+    expect(rootLayoutSource).toContain('<PersistentPublicBackground />');
+    expect(siteShellSource).not.toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
     expect(siteShellSource).toContain('<ThemeSync />');
     expect(themeSyncSource).toContain('document.documentElement.dataset.theme = nextTheme;');
     expect(themeSyncSource).toContain('window.sessionStorage.getItem(themeStorageKey)');

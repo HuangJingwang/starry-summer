@@ -125,10 +125,19 @@ describe('admin content form markdown editor', () => {
     expect(source).not.toContain("method: 'DELETE'");
   });
 
-  test('creates article content without a separate note type option', () => {
+  test('keeps all public content types available in publish settings', () => {
     const source = readSource('src/components/AdminPublishSettingsPanel.tsx');
 
     expect(source).toContain('<option value="post">');
-    expect(source).not.toContain('<option value="note">');
+    expect(source).toContain('<option value="note">');
+    expect(source).toContain('<option value="moment">');
+    expect(source).toContain('<option value="project">');
+  });
+
+  test('describes the lightweight paste and drag image flow in the editor', () => {
+    const source = readSource('src/components/AdminContentForm.tsx');
+
+    expect(source).toContain('可以先粘贴或拖拽图片到正文');
+    expect(source).toContain('图片提交到 apps/web/public/images');
   });
 });

@@ -209,6 +209,10 @@
   .admin-panel--hero,
   .admin-dashboard-grid,
   .admin-ops-grid,
+  .admin-ops-grid--two,
+  .admin-workbench-hero,
+  .admin-workbench-grid,
+  .admin-quick-create,
   .admin-study-grid,
   .admin-study-settings,
   .admin-study-task-grid,
@@ -216,11 +220,17 @@
   .search-form,
   .admin-layout,
   .admin-filter,
+  .admin-filter-search,
+  .admin-filter-more__form,
   .admin-status-grid,
   .admin-study-problem,
   .admin-table-bulkbar,
   .admin-content-summary,
+  .settings-page-header,
+  .settings-group,
   .settings-navigation-grid,
+  .settings-maintenance-grid,
+  .settings-section--primary,
   .publish-quality-list,
   .admin-content-summary li,
   .admin-table__row,
@@ -277,12 +287,15 @@
   }
 
   .admin-command-bar,
-  .admin-command-bar__actions {
+  .admin-command-bar__actions,
+  .settings-header-actions {
     align-items: stretch;
     display: grid;
   }
 
-  .admin-command-bar__actions a {
+  .admin-command-bar__actions a,
+  .settings-header-actions a,
+  .settings-header-actions button {
     text-align: center;
   }
 
@@ -295,6 +308,23 @@
     overflow-y: visible;
     padding: 14px 16px;
     position: static;
+  }
+
+  .admin-layout,
+  .admin-sidebar,
+  .admin-content,
+  .admin-command-bar,
+  .admin-command-bar__actions,
+  .admin-panel,
+  .admin-panel.wide,
+  .content-form,
+  .form-grid {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-content {
+    overflow-x: hidden;
   }
 
   .admin-sidebar .brand {
@@ -310,9 +340,11 @@
   .admin-primary-nav {
     display: flex;
     gap: 6px;
+    max-width: 100%;
     overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: none;
+    width: 100%;
   }
 
   .admin-primary-nav::-webkit-scrollbar {
@@ -340,9 +372,11 @@
     border-radius: 12px;
     display: flex;
     gap: 6px;
+    max-width: 100%;
     overflow-x: auto;
     padding: 6px;
     scrollbar-width: none;
+    width: 100%;
   }
 
   .admin-subnav::-webkit-scrollbar {
@@ -397,6 +431,57 @@
   .admin-session button {
     min-height: 34px;
     padding: 7px 12px;
+  }
+
+  .settings-section--primary .settings-section__header,
+  .settings-section--primary .settings-group__copy {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.13);
+    border-right: 0;
+    padding-bottom: 14px;
+    padding-right: 0;
+  }
+
+  .settings-section--primary > :not(.settings-section__header) {
+    grid-column: auto;
+  }
+
+  .settings-page-header,
+  .settings-card,
+  .settings-section,
+  .settings-layout,
+  .settings-form {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .settings-page-header > *,
+  .settings-section > *,
+  .settings-card > *,
+  .settings-navigation-grid > *,
+  .settings-maintenance-grid > * {
+    min-width: 0;
+  }
+
+  .settings-card input,
+  .settings-card textarea,
+  .settings-group__copy,
+  .settings-group__copy p {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .settings-page-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settings-header-actions {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  .settings-header-actions a,
+  .settings-header-actions button {
+    width: 100%;
   }
 
   .asset-upload-actions {

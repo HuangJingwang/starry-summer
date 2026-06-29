@@ -125,13 +125,16 @@ describe('global styles', () => {
     expect(css).toContain('.admin-command-bar');
     expect(css).toContain('.admin-command-bar__actions .theme-toggle');
     expect(css).toContain('.admin-primary-nav a[aria-current="page"]');
-    expect(css).toContain('.admin-stat-card');
-    expect(css).toContain('.admin-workflow-grid');
+    expect(css).toContain('.admin-workbench-grid');
+    expect(css).toContain('.admin-workbench-card');
+    expect(css).toContain('.admin-quick-create');
+    expect(css).toContain('.admin-filter-bar');
+    expect(css).toContain('.admin-type-segments');
+    expect(css).toContain('.admin-status-chips');
+    expect(css).toContain('.settings-maintenance-grid');
     expect(css).toContain('.admin-ops-grid');
     expect(css).toContain('.admin-ops-card');
     expect(css).toContain('.admin-panel');
-    expect(css).toContain('.admin-table-bulkbar');
-    expect(css).toContain('.admin-table-select');
     expect(css).toContain('background: rgba(4, 6, 14, 0.62);');
     expect(css).not.toContain('.admin-grid span {\n  background: #fff;');
   });
@@ -189,6 +192,16 @@ describe('global styles', () => {
     expect(dayActiveTabBlock).toContain('border-color: rgba(8, 116, 127, 0.28);');
   });
 
+  test('keeps the about page container visibly rounded when it carries a panel background', () => {
+    const aboutPageSource = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
+    const css = readGlobalStyles();
+    const aboutPageBlock = readStyleBlock(css, '.about-page');
+
+    expect(aboutPageSource).toContain('page-main narrow about-page');
+    expect(aboutPageBlock).toContain('border-radius:');
+    expect(aboutPageBlock).toContain('overflow: hidden;');
+  });
+
   test('styles the posts archive as a YYsuni-inspired dark grouped timeline', () => {
     const css = readGlobalStyles();
     const archiveBlock = readStyleBlock(css, '.posts-archive');
@@ -240,14 +253,25 @@ describe('global styles', () => {
     const css = readGlobalStyles();
     const leetcodeBeamBlock = css.match(/\.study-archive-page::after\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteCanvasBlock = css.match(/\.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const persistentBackgroundBlock = css.match(/\.persistent-public-background\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const activeBackgroundBlock =
+      css.match(/\.persistent-public-background\[data-active='true'\] \.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const rootLayoutSource = readStylesheet('src/app/layout.tsx');
     const siteShellSource = readStylesheet('src/components/SiteShell.tsx');
     const leetcodeSource = readStylesheet('src/app/leetcode/page.tsx');
 
-    expect(siteShellSource).toContain("import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';");
-    expect(siteShellSource).toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
+    expect(rootLayoutSource).toContain("import { PersistentPublicBackground } from '@/components/PersistentPublicBackground';");
+    expect(rootLayoutSource).toContain('<PersistentPublicBackground />');
+    expect(siteShellSource).not.toContain("import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';");
+    expect(siteShellSource).not.toContain('<StarrySkyCanvas className="site-shell__canvas" showFleet={false} />');
     expect(leetcodeSource).not.toContain('page-main__canvas');
+    expect(persistentBackgroundBlock).toContain('position: fixed;');
+    expect(persistentBackgroundBlock).toContain('pointer-events: none;');
     expect(siteCanvasBlock).toContain('position: fixed;');
+    expect(siteCanvasBlock).toContain('opacity: 0;');
     expect(siteCanvasBlock).toContain('pointer-events: none;');
+    expect(activeBackgroundBlock).toContain('opacity: 0.84;');
     expect(leetcodeBeamBlock).toContain('animation: none;');
     expect(leetcodeBeamBlock).toContain('background: transparent;');
     expect(leetcodeBeamBlock).toContain('filter: none;');
@@ -1590,6 +1614,7 @@ describe('global styles', () => {
     const homeBlock = css.match(/\.portfolio-home,[\s\S]*?\.portfolio-about-panel\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteShellBlock = css.match(/\.site-shell\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const siteShellCanvasBlock = css.match(/\.site-shell__canvas\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const persistentBackgroundBlock = css.match(/\.persistent-public-background\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const pageMainBlock =
       [...css.matchAll(/\.page-main\s*{(?<body>[\s\S]*?)\n}/g)]
         .map((match) => match.groups?.body ?? '')
@@ -1617,6 +1642,8 @@ describe('global styles', () => {
     expect(siteShellCanvasBlock).toContain('height: 100vh;');
     expect(siteShellCanvasBlock).toContain('width: 100vw;');
     expect(siteShellCanvasBlock).toContain('pointer-events: none;');
+    expect(persistentBackgroundBlock).toContain('position: fixed;');
+    expect(persistentBackgroundBlock).toContain('z-index: 0;');
     expect(pageMainBlock).toContain('rgba(2, 4, 11, 0.74)');
     expect(pageMainBlock).toContain('isolation: isolate;');
     expect(css).toContain('.page-main::before');

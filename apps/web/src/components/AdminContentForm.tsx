@@ -132,7 +132,7 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
     setSelectedAssetId('');
     setSelectedCoverAssetId((current) => current || initialValue?.coverAssetId || '');
     setAssetState('ready');
-    setAssetMessage('静态站模式下不在线读取素材库；请把图片提交到 apps/web/public/images 后在 Markdown 中引用。');
+    setAssetMessage('静态站模式下不在线读取素材库。可以先粘贴或拖拽图片到正文区域整理位置；请把图片提交到 apps/web/public/images 后在 Markdown 中引用。');
   }, []);
 
   useEffect(() => {
@@ -524,19 +524,19 @@ export function AdminContentForm({ mode, initialValue }: AdminContentFormProps) 
             <div className="admin-markdown-preview detail__body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
             <dl className="editor-stats">
               <div>
-                <dt>瀛楁暟</dt>
+                <dt>字数</dt>
                 <dd>{preview.wordCount}</dd>
               </div>
               <div>
-                <dt>琛屾暟</dt>
+                <dt>行数</dt>
                 <dd>{editorStats.lineCount}</dd>
               </div>
               <div>
-                <dt>瀛楃</dt>
+                <dt>字符</dt>
                 <dd>{editorStats.characterCount}</dd>
               </div>
               <div>
-                <dt>闃呰</dt>
+                <dt>阅读</dt>
                 <dd>{editorStats.readingTime}</dd>
               </div>
             </dl>

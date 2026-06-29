@@ -1946,6 +1946,13 @@ body:has(.search-page) .site-footer a {
   gap: 16px;
 }
 
+.about-page {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 26px;
+  box-shadow: 0 28px 82px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
 .about-social {
   display: flex;
   flex-wrap: wrap;
@@ -3069,6 +3076,14 @@ body:has(.search-page) .site-footer a {
   border-color: rgba(45, 109, 116, 0.18);
   box-shadow: inset 0 1px 0 var(--summer-glint), 0 12px 30px rgba(44, 106, 116, 0.08);
   color: var(--summer-accent);
+}
+
+:root[data-theme='summer-day'] .about-page {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(234, 248, 244, 0.2)),
+    rgba(255, 255, 255, 0.16);
+  border-color: rgba(45, 109, 116, 0.12);
+  box-shadow: inset 0 1px 0 var(--summer-glint), 0 22px 64px rgba(44, 106, 116, 0.1);
 }
 
 :root[data-theme='summer-day'] .about-social a:hover,

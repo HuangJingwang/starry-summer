@@ -45,25 +45,36 @@ describe('admin detail polish', () => {
     }
   });
 
-  test('keeps taxonomy management dense, localized, and repository-aware', () => {
+  test('presents taxonomy as a repository-derived index when repository mode is enabled', () => {
     const source = readSource('src/components/TaxonomyManager.tsx');
     const pageSource = readSource('src/app/admin/taxonomy/page.tsx');
 
     expect(source).toContain('taxonomy-panel');
-    expect(source).toContain('术语管理');
-    expect(source).toContain('自动生成，可手动填写');
+    expect(source).toContain('派生索引');
+    expect(source).toContain('由内容元数据生成');
     expect(source).toContain('readTaxonomyErrorMessage');
     expect(source).toContain('error instanceof Error ? error.message');
     expect(source).toContain("send(buildListTaxonomyTermsRequest(type), '读取列表失败，请确认 API 服务可用。')");
     expect(source).toContain("send(request, '保存失败，请确认已登录且 API 服务可用。')");
     expect(source).toContain("send(buildDeleteTaxonomyTermRequest(type, id), '删除失败，请确认已登录且 API 服务可用。')");
-    expect(source).toContain('仓库模式：这里展示从内容元数据派生出的术语，不再写入数据库表。');
+    expect(source).toContain('仓库模式：分类、标签和系列由内容元数据自动生成。');
     expect(source).toContain('repositoryMode ? null : (');
     expect(pageSource).toContain('buildTaxonomyTermsFromContent(await loadSiteContent())');
     expect(pageSource).toContain('<TaxonomyManager initialTerms={initialTerms} repositoryMode />');
     expect(pageSource).not.toContain('NEXT_PUBLIC_CONTENT_WRITE_TARGET');
     expect(source).not.toContain('<span>Taxonomy</span>');
     expect(source).not.toContain('leave blank to auto-generate');
+  });
+
+  test('frames settings as lightweight site maintenance', () => {
+    const source = readSource('src/components/SettingsManager.tsx');
+
+    expect(source).toContain('公开身份');
+    expect(source).toContain('首页');
+    expect(source).toContain('外观');
+    expect(source).toContain('导航');
+    expect(source).toContain('维护');
+    expect(source).toContain('不开放细粒度文章排版');
   });
 
   test('exposes admin submitting and loading states accessibly', () => {
