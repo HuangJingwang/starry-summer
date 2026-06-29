@@ -119,6 +119,7 @@ export function AdminPublishSettingsPanel({
             }}
           >
             <option value="post">文章</option>
+            <option value="note">笔记</option>
             <option value="moment">日常</option>
             <option value="project">项目</option>
             <option value="page">页面</option>

@@ -131,12 +131,12 @@ function TaxonomyPanel({
     <section className="taxonomy-panel">
       <div className="taxonomy-panel__header">
         <div>
-          <span>术语管理</span>
+          <span>{repositoryMode ? '派生索引' : '术语管理'}</span>
           <h2>{copy.title}</h2>
         </div>
         <strong>{terms.length}</strong>
       </div>
-      {repositoryMode ? <p className="taxonomy-panel__notice">仓库模式：这里展示从内容元数据派生出的术语，不再写入数据库表。</p> : null}
+      {repositoryMode ? <p className="taxonomy-panel__notice">仓库模式：分类、标签和系列由内容元数据自动生成。这里是由内容元数据生成的只读索引；要调整条目，请回到内容编辑页修改元数据。</p> : null}
       <div className="taxonomy-list" aria-label={`${copy.title}列表`}>
         {state === 'loading' ? <p className="empty-state">加载中...</p> : null}
         {terms.length === 0 && state !== 'loading' ? <p className="empty-state">暂无条目</p> : null}

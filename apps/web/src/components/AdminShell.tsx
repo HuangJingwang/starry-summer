@@ -29,7 +29,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <span className="brand-mark">S</span>
           <span>
             后台
-            <small>Starry Console</small>
+            <small>Light Workbench</small>
           </span>
         </Link>
         <nav className="admin-primary-nav" aria-label="后台主导航">
@@ -71,8 +71,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <main className="admin-content">
         <div className="admin-command-bar" aria-label="后台快捷操作">
           <div>
-            <span>控制台</span>
-            <strong>内容系统工作台</strong>
+            <span>写作</span>
+            <strong>内容轻工作台</strong>
           </div>
           <div className="admin-command-bar__actions">
             <Link href="/admin/content/new">新建内容</Link>

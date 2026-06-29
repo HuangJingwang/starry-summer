@@ -16,26 +16,25 @@ const navigationByKey: Record<string, NavigationItem> = {
 };
 
 const adminNavigation: NavigationItem[] = [
-  { href: '/admin', label: '概览' },
+  { href: '/admin', label: '写作' },
   { href: '/admin/content', label: '内容' },
-  { href: '/admin/projects', label: '项目' },
-  { href: '/admin/study', label: '学习' },
   {
     href: '/admin/comments',
     label: '互动',
     children: [
-      { href: '/admin/comments', label: '评论管理' },
+      { href: '/admin/comments', label: '评论与留言' },
       { href: '/admin/guestbook', label: '留言管理' },
     ],
   },
-  { href: '/admin/assets', label: '素材' },
   {
     href: '/admin/settings',
-    label: '设置',
+    label: '站点',
     children: [
-      { href: '/admin/taxonomy', label: '分类标签' },
+      { href: '/admin/assets', label: '素材维护' },
+      { href: '/admin/taxonomy', label: '分类索引' },
       { href: '/admin/export', label: '导入导出' },
       { href: '/admin/settings', label: '站点设置' },
+      { href: '/admin/study', label: '学习工具' },
     ],
   },
 ];

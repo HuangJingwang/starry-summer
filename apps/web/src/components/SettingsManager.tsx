@@ -62,7 +62,7 @@ export function SettingsManager({ initialSettings = fallbackSettings }: { initia
       <section className="settings-section">
         <div className="settings-section__header">
           <span>Profile</span>
-          <h2>站点身份</h2>
+          <h2>公开身份</h2>
           <p>控制公开页面的站点名称、站主名称、SEO 描述和社交入口。</p>
         </div>
         <div className="form-grid">
@@ -96,8 +96,8 @@ export function SettingsManager({ initialSettings = fallbackSettings }: { initia
       <section className="settings-section">
         <div className="settings-section__header">
           <span>Home</span>
-          <h2>首页展示</h2>
-          <p>管理首页短句、箴言和备用背景，影响前台首页第一屏观感。</p>
+          <h2>首页</h2>
+          <p>管理首页短句、箴言和备用背景，影响前台首页第一屏观感。首页模块排序和开关会在外观维护中逐步收拢。</p>
         </div>
         <label>
           首页短句
@@ -123,8 +123,29 @@ export function SettingsManager({ initialSettings = fallbackSettings }: { initia
       </section>
       <section className="settings-section settings-section--compact">
         <div className="settings-section__header">
+          <span>Appearance</span>
+          <h2>外观</h2>
+          <p>只保留主题、首页模块和背景图这类高价值控制。不开放细粒度文章排版，正文宽度、字号、行高和代码块样式继续由公共主题统一保证。</p>
+        </div>
+        <div className="settings-maintenance-grid" aria-label="外观维护">
+          <span>
+            <strong>公开主题</strong>
+            <small>保留夏日白昼和赛博夜档案两套公开主题。</small>
+          </span>
+          <span>
+            <strong>首页模块</strong>
+            <small>后续支持模块开关、顺序和默认布局重置。</small>
+          </span>
+          <span>
+            <strong>背景图片</strong>
+            <small>当前可通过备用首页背景字段维护。</small>
+          </span>
+        </div>
+      </section>
+      <section className="settings-section settings-section--compact">
+        <div className="settings-section__header">
           <span>Navigation</span>
-          <h2>导航与入口</h2>
+          <h2>导航</h2>
           <p>勾选公开导航入口，保存后影响前台顶部导航。搜索入口会保留顶部搜索框，其他入口按下方顺序展示。</p>
         </div>
         <div className="settings-navigation-grid" aria-label="公开导航入口">
@@ -143,6 +164,14 @@ export function SettingsManager({ initialSettings = fallbackSettings }: { initia
             </label>
           ))}
         </div>
+      </section>
+      <section className="settings-section settings-section--compact">
+        <div className="settings-section__header">
+          <span>Maintenance</span>
+          <h2>维护</h2>
+          <p>素材、分类索引、导入导出和仓库保存说明属于低频维护，不进入默认写作路径。</p>
+        </div>
+        <p className="settings-safety-note">静态站模式下，设置保存会提示修改仓库文件并提交部署。</p>
       </section>
       <button type="submit" disabled={settingsBusy} aria-disabled={settingsBusy}>
         {state === 'submitting' ? '保存中' : '保存设置'}
