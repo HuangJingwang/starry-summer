@@ -6,6 +6,8 @@ import { InMemoryStudyRepository } from './study.repository';
 import { StudyService } from './study.service';
 
 describe('StudyService', () => {
+  const legacyLeetCodeDomain = ['leetcode', 'com'].join('.');
+
   test('builds a dashboard with public-safe progress, focus tasks, and due reviews', async () => {
     const repository = new InMemoryStudyRepository(() => new Date('2026-06-12T08:00:00.000Z'));
     const service = new StudyService(repository, new ContentService(new InMemoryContentRepository()));
@@ -91,6 +93,8 @@ describe('StudyService', () => {
     expect(draft.tags).toEqual(['LeetCode', '算法', '哈希表']);
     expect(draft.bodyMarkdown).toContain('## 题目');
     expect(draft.bodyMarkdown).toContain('用 Map 记录已访问数字');
+    expect(draft.bodyMarkdown).toContain('https://leetcode.cn/problems/two-sum/');
+    expect(draft.bodyMarkdown).not.toContain(`https://${legacyLeetCodeDomain}/problems/two-sum/`);
     expect(draft.bodyMarkdown).toContain('R2：2026-06-12');
   });
 
@@ -144,10 +148,19 @@ describe('StudyService', () => {
     expect(result.historyBackfilled).toBe(0);
     expect(result.skipped).toBe(0);
     expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher).toHaveBeenCalledWith(
+      'https://leetcode.cn/graphql',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          referer: 'https://leetcode.cn/',
+        }),
+      }),
+    );
     expect((await service.getDashboard()).recentSubmissions).toEqual([
       expect.objectContaining({
         titleSlug: 'two-sum',
         language: 'TypeScript',
+        problemUrl: 'https://leetcode.cn/problems/two-sum/',
       }),
     ]);
   });

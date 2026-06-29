@@ -93,7 +93,7 @@ describe('leetcode archive view model', () => {
   test('keeps public link labels stable and compact', () => {
     expect(buildCategoryAnchor('双指针 / Sliding Window')).toBe('category-双指针-sliding-window');
     expect(buildCategoryAnchor('  !!!  ')).toBe('category-uncategorized');
-    expect(getLeetCodeProblemUrl('two-sum')).toBe('https://leetcode.com/problems/two-sum/');
+    expect(getLeetCodeProblemUrl('two-sum')).toBe('https://leetcode.cn/problems/two-sum/');
     expect(normalizeDifficultyLabel('中等')).toBe('中等');
     expect(normalizeDifficultyLabel('unknown')).toBe('未标注');
     expect(getDifficultyTone('困难')).toBe('hard');

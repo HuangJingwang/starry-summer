@@ -42,7 +42,7 @@ export interface StudySyncResult {
   error?: string;
 }
 
-const LEETCODE_GRAPHQL_URL = 'https://leetcode.com/graphql';
+const LEETCODE_GRAPHQL_URL = 'https://leetcode.cn/graphql';
 
 @Injectable()
 export class StudyService {
@@ -107,7 +107,7 @@ export class StudyService {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        referer: 'https://leetcode.com/',
+        referer: 'https://leetcode.cn/',
       },
       body: JSON.stringify({
         query: `
@@ -396,7 +396,7 @@ function buildProblemDraftMarkdown(problem: StudyProblem): string {
     `- 标题：${problem.title}`,
     `- 难度：${problem.difficulty}`,
     `- 分类：${problem.category}`,
-    `- 链接：https://leetcode.com/problems/${problem.slug}/`,
+    `- 链接：https://leetcode.cn/problems/${problem.slug}/`,
     '',
     '## 思路',
     '',
@@ -468,7 +468,7 @@ function normalizeSubmission(input: LeetCodeSubmissionPayload): StudySubmission 
     language: input.lang?.trim() || 'Unknown',
     submittedAt,
     submittedAtLabel: submittedAt.slice(0, 10),
-    problemUrl: `https://leetcode.com/problems/${titleSlug}/`,
+    problemUrl: `https://leetcode.cn/problems/${titleSlug}/`,
   };
 }
 

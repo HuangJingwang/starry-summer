@@ -66,7 +66,7 @@ export function buildCategoryAnchor(name: string) {
 }
 
 export function getLeetCodeProblemUrl(slug: string) {
-  return `https://leetcode.com/problems/${slug}/`;
+  return `https://leetcode.cn/problems/${slug}/`;
 }
 
 export function normalizeDifficultyLabel(difficulty: string) {

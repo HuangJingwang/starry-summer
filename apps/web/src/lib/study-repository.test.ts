@@ -32,7 +32,7 @@ describe('repository study dashboard', () => {
             language: 'TypeScript',
             submittedAt: '2026-06-14T08:20:00.000Z',
             submittedAtLabel: '2026-06-14',
-            problemUrl: 'https://leetcode.com/problems/two-sum/',
+            problemUrl: 'https://leetcode.cn/problems/two-sum/',
           },
         ],
       }),

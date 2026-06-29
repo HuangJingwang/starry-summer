@@ -10,11 +10,11 @@ describe('leetcode recent submissions', () => {
   test('builds a GraphQL request for recent public submissions', () => {
     const request = buildLeetCodeRecentSubmissionsRequest({ username: 'summer', limit: 5 });
 
-    expect(request.url).toBe('https://leetcode.com/graphql');
+    expect(request.url).toBe('https://leetcode.cn/graphql');
     expect(request.init.method).toBe('POST');
     expect(request.init.headers).toEqual({
       'content-type': 'application/json',
-      referer: 'https://leetcode.com/',
+      referer: 'https://leetcode.cn/',
     });
     expect(JSON.parse(String(request.init.body))).toMatchObject({
       variables: {
@@ -40,7 +40,7 @@ describe('leetcode recent submissions', () => {
       language: 'TypeScript',
       submittedAt: '2026-06-10T21:20:00.000Z',
       submittedAtLabel: '2026-06-10',
-      problemUrl: 'https://leetcode.com/problems/two-sum/',
+      problemUrl: 'https://leetcode.cn/problems/two-sum/',
     });
   });
 
@@ -66,7 +66,7 @@ describe('leetcode recent submissions', () => {
         title: 'Valid Palindrome',
         status: 'Accepted',
         language: 'JavaScript',
-        problemUrl: 'https://leetcode.com/problems/valid-palindrome/',
+        problemUrl: 'https://leetcode.cn/problems/valid-palindrome/',
       }),
     ]);
     expect(fetcher).toHaveBeenCalledTimes(1);

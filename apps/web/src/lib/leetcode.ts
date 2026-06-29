@@ -33,7 +33,7 @@ interface LeetCodeRecentSubmissionsResponse {
   };
 }
 
-const LEETCODE_GRAPHQL_URL = 'https://leetcode.com/graphql';
+const LEETCODE_GRAPHQL_URL = 'https://leetcode.cn/graphql';
 const DEFAULT_LIMIT = 6;
 
 export function buildLeetCodeRecentSubmissionsRequest(options: LeetCodeRecentSubmissionsOptions): LeetCodeRequest {
@@ -45,7 +45,7 @@ export function buildLeetCodeRecentSubmissionsRequest(options: LeetCodeRecentSub
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        referer: 'https://leetcode.com/',
+        referer: 'https://leetcode.cn/',
       },
       body: JSON.stringify({
         query: `
@@ -125,7 +125,7 @@ export function normalizeLeetCodeSubmission(input: LeetCodeSubmissionPayload): L
     language: input.lang?.trim() || 'Unknown',
     submittedAt: submittedAt.toISOString(),
     submittedAtLabel: submittedAt.toISOString().slice(0, 10),
-    problemUrl: `https://leetcode.com/problems/${titleSlug}/`,
+    problemUrl: `https://leetcode.cn/problems/${titleSlug}/`,
   };
 }
 
