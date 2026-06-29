@@ -192,6 +192,16 @@ describe('global styles', () => {
     expect(dayActiveTabBlock).toContain('border-color: rgba(8, 116, 127, 0.28);');
   });
 
+  test('keeps the about page container visibly rounded when it carries a panel background', () => {
+    const aboutPageSource = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
+    const css = readGlobalStyles();
+    const aboutPageBlock = readStyleBlock(css, '.about-page');
+
+    expect(aboutPageSource).toContain('page-main narrow about-page');
+    expect(aboutPageBlock).toContain('border-radius:');
+    expect(aboutPageBlock).toContain('overflow: hidden;');
+  });
+
   test('styles the posts archive as a YYsuni-inspired dark grouped timeline', () => {
     const css = readGlobalStyles();
     const archiveBlock = readStyleBlock(css, '.posts-archive');

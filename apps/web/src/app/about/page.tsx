@@ -17,7 +17,7 @@ export default async function AboutPage() {
 
   return (
     <SiteShell>
-      <main className="page-main narrow">
+      <main className="page-main narrow about-page">
         <div className="page-title">
           <p className="eyebrow">关于</p>
           <h1>{settings.profile.ownerName}</h1>
