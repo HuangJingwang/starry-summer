@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { FileText, Heart, Mail } from 'lucide-react';
+import { Braces, FileText, Heart, Mail } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
@@ -11,16 +11,19 @@ import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 import { getContentHref } from '@/lib/content';
 import { getContentCover } from '@/lib/content-cover';
+import { buildHomeLeetCodeRecommendation, type HomeLeetCodeRecommendation } from '@/lib/home-leetcode-recommendation';
 import { buildHomeProfileModel } from '@/lib/home-profile';
 import { loadSiteContent } from '@/lib/public-content';
 import { loadSiteSettings } from '@/lib/settings-repository';
+import { loadRepositoryStudyDashboard } from '@/lib/study-repository';
 
 const homeGitHubUrl = 'https://github.com/HuangJingwang/starry-summer';
 
 export default async function HomePage() {
-  const [content, settings] = await Promise.all([
+  const [content, settings, study] = await Promise.all([
     loadSiteContent(),
     loadSiteSettings(),
+    loadRepositoryStudyDashboard(),
   ]);
   const profile = buildHomeProfileModel(settings, content);
   const stats = profile.stats;
@@ -29,6 +32,8 @@ export default async function HomePage() {
   const latestArticle = profile.latestArticle;
   const latestArticleCover = latestArticle ? getContentCover(latestArticle) : null;
   const juejinLink = settings.profile.socialLinks.find((link) => link.href.includes('juejin.cn'));
+  const studyDashboard = study.dashboard;
+  const recommendedProblem = buildHomeLeetCodeRecommendation(studyDashboard);
   const homeNow = new Date();
   const calendarDays = buildHomeCalendarDays(homeNow);
 
@@ -136,6 +141,8 @@ export default async function HomePage() {
               </div>
             </div>
 
+            <HomeLeetCodeCard recommendation={recommendedProblem} />
+
             <HomeClockCard />
 
             <aside className="portfolio-hero__calendar-card" aria-label="Calendar">
@@ -192,6 +199,32 @@ export default async function HomePage() {
         </section>
       </main>
     </SiteShell>
+  );
+}
+
+function HomeLeetCodeCard({ recommendation }: { recommendation: HomeLeetCodeRecommendation | null }) {
+  return (
+    <aside className="portfolio-hero__leetcode-card" aria-label="今日推荐 LeetCode 题目">
+      <div className="portfolio-hero__leetcode-head">
+        <span className="portfolio-hero__leetcode-icon" aria-hidden="true">
+          <Braces size={22} strokeWidth={1.8} />
+        </span>
+        <span>今日推荐</span>
+      </div>
+      {recommendation ? (
+        <a href={recommendation.href} target="_blank" rel="noreferrer">
+          <span className="portfolio-hero__leetcode-meta">
+            <strong>{recommendation.label}</strong>
+            <small>{recommendation.difficulty} · {recommendation.category}</small>
+          </span>
+          <b>{recommendation.title}</b>
+          <span className="portfolio-hero__leetcode-description-label">题目描述</span>
+          <p>{recommendation.description}</p>
+        </a>
+      ) : (
+        <p>题目描述：同步刷题数据后，这里会推荐未刷过的新题或到期复习题。</p>
+      )}
+    </aside>
   );
 }
 

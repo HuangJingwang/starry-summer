@@ -594,6 +594,7 @@ body:has(.cyber-home) .site-footer a {
   .portfolio-hero__visual,
   .portfolio-hero__clock-card,
   .portfolio-hero__latest-card,
+  .portfolio-hero__leetcode-card,
   .portfolio-hero__calendar-card,
   .portfolio-hero__actions,
   .portfolio-hero__like-row {
@@ -1184,6 +1185,118 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__latest-card p {
   margin: 0;
+}
+
+.portfolio-hero__leetcode-card {
+  animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 470ms both;
+  backdrop-filter: blur(18px) saturate(1.08);
+  background:
+    linear-gradient(135deg, rgba(34, 211, 238, 0.08), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent),
+    rgba(4, 6, 14, 0.54);
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  border-radius: 32px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 64px rgba(0, 0, 0, 0.22);
+  color: rgba(226, 232, 240, 0.9);
+  display: grid;
+  gap: 6px;
+  height: 130px;
+  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 - 162px);
+  overflow: hidden;
+  padding: 12px 14px;
+  position: absolute;
+  top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + var(--reference-calendar-height) + 62px);
+  width: var(--reference-calendar-width);
+}
+
+.portfolio-hero__leetcode-card a {
+  color: inherit;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.portfolio-hero__leetcode-card a:hover,
+.portfolio-hero__leetcode-card a:focus-visible {
+  color: #f8fafc;
+  outline: none;
+}
+
+.portfolio-hero__leetcode-head,
+.portfolio-hero__leetcode-meta {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.portfolio-hero__leetcode-head {
+  color: rgba(148, 163, 184, 0.82);
+  font-family: var(--font-nav);
+  font-size: 0.84rem;
+  justify-content: flex-start;
+  line-height: 1;
+}
+
+.portfolio-hero__leetcode-icon {
+  align-items: center;
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 12px;
+  color: var(--cyber-cyan);
+  display: inline-flex;
+  height: 30px;
+  justify-content: center;
+  width: 30px;
+}
+
+.portfolio-hero__leetcode-meta {
+  flex-wrap: wrap;
+}
+
+.portfolio-hero__leetcode-meta strong,
+.portfolio-hero__leetcode-description-label {
+  color: var(--cyber-cyan);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.portfolio-hero__leetcode-meta small {
+  color: rgba(148, 163, 184, 0.86);
+  font-size: 0.72rem;
+}
+
+.portfolio-hero__leetcode-card b {
+  color: #f8fafc;
+  display: -webkit-box;
+  font-size: 0.96rem;
+  line-height: 1.18;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.portfolio-hero__leetcode-description-label {
+  color: rgba(148, 163, 184, 0.82);
+  display: none;
+  margin-top: 2px;
+}
+
+.portfolio-hero__leetcode-card p {
+  color: rgba(226, 232, 240, 0.72);
+  display: -webkit-box;
+  font-size: 0.75rem;
+  line-height: 1.32;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .portfolio-hero__center-stack {
@@ -3591,6 +3704,7 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .portfolio-hero__portrait,
 :root[data-theme='summer-day'] .portfolio-hero__sky-card,
 :root[data-theme='summer-day'] .portfolio-hero__clock-card,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-card,
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card,
 :root[data-theme='summer-day'] .portfolio-home .content-card,
 :root[data-theme='summer-day'] .home-photo-album__viewport {
@@ -3635,19 +3749,34 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__latest-card > span,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-head,
 :root[data-theme='summer-day'] .portfolio-hero__sky-card span,
 :root[data-theme='summer-day'] .portfolio-hero__clock-card span,
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card span,
 :root[data-theme='summer-day'] .portfolio-hero__latest-card small,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-meta small,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-description-label,
 :root[data-theme='summer-day'] .portfolio-hero__latest-card time,
-:root[data-theme='summer-day'] .portfolio-hero__latest-card p {
+:root[data-theme='summer-day'] .portfolio-hero__latest-card p,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-card p {
   color: #7b888e;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__latest-card strong,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-card b,
 :root[data-theme='summer-day'] .portfolio-hero__sky-card strong,
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card strong {
   color: var(--summer-ink);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-icon {
+  background: rgba(8, 116, 127, 0.08);
+  border-color: rgba(8, 116, 127, 0.18);
+  color: #0f94a7;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-meta strong {
+  color: #0f94a7;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__clock-digits {

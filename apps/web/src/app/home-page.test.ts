@@ -165,6 +165,13 @@ describe('home page', () => {
     expect(source).not.toContain("import { MobileBackToTop } from '@/components/MobileBackToTop';");
     expect(source).toContain("import { getContentHref } from '@/lib/content';");
     expect(source).toContain("import { getContentCover } from '@/lib/content-cover';");
+    expect(source).toContain('buildHomeLeetCodeRecommendation');
+    expect(source).toContain("import { loadRepositoryStudyDashboard } from '@/lib/study-repository';");
+    expect(source).toContain('const recommendedProblem = buildHomeLeetCodeRecommendation(studyDashboard);');
+    expect(source).toContain('className="portfolio-hero__leetcode-card"');
+    expect(source).toContain('aria-label="今日推荐 LeetCode 题目"');
+    expect(source).toContain('题目描述');
+    expect(source).toContain('<Braces');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--dashboard"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--featured"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--popular"');
@@ -199,7 +206,7 @@ describe('home page', () => {
     expect(source).not.toContain('portfolio-hero__stat-icon--content');
     expect(source).not.toContain('portfolio-hero__stat-icon--views');
     expect(source).not.toContain('portfolio-hero__stat-icon--updated');
-    expect(source).toContain("import { FileText, Heart, Mail } from 'lucide-react';");
+    expect(source).toContain("import { Braces, FileText, Heart, Mail } from 'lucide-react';");
     expect(source).toContain("import { HomeAdminControl } from '@/components/HomeAdminControl';");
     expect(source).toContain("import { HomeContactButton } from '@/components/HomeContactButton';");
     expect(source).toContain('className="portfolio-hero__actions"');
@@ -655,7 +662,8 @@ describe('home page', () => {
 
     expect(heroContentBlock).toContain('grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);');
     expect(heroContentBlock).toContain('"nav intro"');
-    expect(heroContentBlock).toContain('"latest actions"');
+    expect(heroContentBlock).toContain('"latest recommendation"');
+    expect(heroContentBlock).toContain('". actions"');
     expect(navBlock).toContain('translate: none;');
     expect(clockBlock).toContain('width: 100%;');
     expect(calendarBlock).toContain('width: 100%;');

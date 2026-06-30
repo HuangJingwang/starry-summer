@@ -1015,6 +1015,10 @@ describe('global styles', () => {
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__sky-image--night\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
     const homeActionsBlock = css.match(/^\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeLeetCodeBlock =
+      css.match(/^\.portfolio-hero__leetcode-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeLeetCodeDescriptionBlock =
+      css.match(/^\.portfolio-hero__leetcode-card p\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
       [...css.matchAll(/^\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/gm)]
@@ -1161,6 +1165,7 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__nav-links a');
     expect(css).not.toContain('.portfolio-hero__pulse-card');
     expect(css).toContain('.portfolio-hero__sky-card');
+    expect(css).toContain('.portfolio-hero__leetcode-card');
     expect(css).toContain('.portfolio-hero__sky-image');
     expect(css).not.toContain('.portfolio-hero__sky-card::after');
     expect(css).toContain('.portfolio-hero__clock-card');
@@ -1232,6 +1237,14 @@ describe('global styles', () => {
     expect(homeActionsBlock).toContain('top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));');
     expect(homeActionsBlock).toContain('max-width: var(--reference-social-width);');
     expect(homeActionsBlock).toContain('width: var(--reference-social-width);');
+    expect(homeLeetCodeBlock).toContain('animation: home-widget-enter');
+    expect(homeLeetCodeBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
+    expect(homeLeetCodeBlock).toContain('border-radius: 32px;');
+    expect(homeLeetCodeBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 - 162px);');
+    expect(homeLeetCodeBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + var(--reference-calendar-height) + 62px);');
+    expect(homeLeetCodeBlock).toContain('width: var(--reference-calendar-width);');
+    expect(homeLeetCodeDescriptionBlock).toContain('display: -webkit-box;');
+    expect(homeLeetCodeDescriptionBlock).toContain('-webkit-line-clamp: 2;');
     expect(homeCalendarBlock).toContain('justify-self: start;');
     expect(css).not.toContain('grid-area: recommend;');
     expect(css).not.toContain('grid-area: pulse;');
@@ -1484,6 +1497,8 @@ describe('global styles', () => {
       responsiveCss.match(/\.portfolio-hero__center-stack\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileLatestCardBlock =
       responsiveCss.match(/\.portfolio-hero__latest-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
+    const mobileLeetCodeCardBlock =
+      responsiveCss.match(/\.portfolio-hero__leetcode-card\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileLatestCardLinkBlock =
       responsiveCss.match(/\.portfolio-hero__latest-card a\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '';
     const mobileLatestCoverBlock =
@@ -1528,9 +1543,10 @@ describe('global styles', () => {
     expect(mobileHeroContentBlock).toContain('grid-template-areas:');
     expect(mobileHeroContentBlock).toContain('"nav"');
     expect(mobileHeroContentBlock).toContain('"intro"');
+    expect(mobileHeroContentBlock).toContain('"recommendation"');
     expect(mobileHeroContentBlock).toContain('"latest"');
     expect(mobileHeroContentBlock).toContain('"actions"');
-    expect(mobileHeroContentBlock).toMatch(/"intro"\s*"latest"\s*"actions"/);
+    expect(mobileHeroContentBlock).toMatch(/"intro"\s*"recommendation"\s*"latest"\s*"actions"/);
     expect(mobileHeroContentBlock).not.toContain('"sky"');
     expect(mobileHeroContentBlock).not.toContain('"clock"');
     expect(mobileHeroContentBlock).not.toContain('"calendar"');
@@ -1566,6 +1582,11 @@ describe('global styles', () => {
     expect(mobileLatestCardBlock).toContain('padding: 12px 14px;');
     expect(mobileLatestCardBlock).toContain('translate: none;');
     expect(mobileLatestCardBlock).toContain('width: min(340px, 100%);');
+    expect(mobileLeetCodeCardBlock).toContain('grid-area: recommendation;');
+    expect(mobileLeetCodeCardBlock).toContain('justify-self: center;');
+    expect(mobileLeetCodeCardBlock).toContain('padding: 14px;');
+    expect(mobileLeetCodeCardBlock).toContain('translate: none;');
+    expect(mobileLeetCodeCardBlock).toContain('width: min(340px, 100%);');
     expect(mobileLatestCardLinkBlock).toContain('grid-template-columns: 44px minmax(0, 1fr);');
     expect(mobileLatestCoverBlock).toContain('width: 44px;');
     expect(mobileSkyCardBlock).not.toContain('grid-area: sky;');
@@ -1589,7 +1610,7 @@ describe('global styles', () => {
     expect(dayMobileBackToTopBlock).toContain('position: fixed;');
     expect(dayMobileBackToTopBlock).toContain('z-index: 40;');
     expect(responsiveCss.replace(/\r\n/g, '\n')).toContain(
-      'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card {\n    translate: none;\n  }',
+      'body:has(.portfolio-home) .portfolio-hero__card-nav,\n  body:has(.portfolio-home) .portfolio-hero__latest-card,\n  body:has(.portfolio-home) .portfolio-hero__leetcode-card {\n    translate: none;\n  }',
     );
     expect(mobileLikeRowBlock).toContain('grid-area: auto;');
     expect(mobileLikeRowBlock).toContain('translate: none;');
