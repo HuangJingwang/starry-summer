@@ -1001,6 +1001,18 @@ describe('global styles', () => {
     const homeNavKickerBlock = css.match(/^\.portfolio-hero__nav-kicker\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeHeroContentBlock = css.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeIntroBlock = css.match(/^\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHiAvatarBlock =
+      css.match(/^\.portfolio-hero__hi-avatar\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHiAvatarImageBlock =
+      css.match(/^\.portfolio-hero__hi-avatar img\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHiGreetingBlock =
+      css.match(/^\.portfolio-hero__hi-greeting\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHiLineBlock =
+      css.match(/^\.portfolio-hero__hi-line\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHiMeetLineBlock =
+      css.match(/^\.portfolio-hero__hi-line--meet\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeHiNameBlock =
+      css.match(/^\.portfolio-hero__hi-name\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeVisualBlock = css.match(/^\.portfolio-hero__visual\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyBlock = css.match(/^\.portfolio-hero__sky-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeSkyImageBlock = css.match(/^\.portfolio-hero__sky-image\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
@@ -1091,6 +1103,18 @@ describe('global styles', () => {
     expect(homeIntroBlock).toContain('rgba(4, 6, 14, 0.54)');
     expect(homeIntroBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.22)');
     expect(homeIntroBlock).not.toContain('border: 1px solid #ffffff;');
+    expect(homeHiAvatarBlock).toContain('height: 82px;');
+    expect(homeHiAvatarBlock).toContain('width: 82px;');
+    expect(homeHiAvatarBlock).toContain('border-radius: 50%;');
+    expect(homeHiAvatarImageBlock).toContain('object-fit: cover;');
+    expect(homeHiGreetingBlock).toContain('font-family: var(--font-display);');
+    expect(homeHiGreetingBlock).toContain('font-size: clamp(1.55rem, 2.45vw, 1.8rem);');
+    expect(homeHiLineBlock).toContain('overflow-wrap: anywhere;');
+    expect(homeHiMeetLineBlock).toContain('max-width: 8.2ch;');
+    expect(homeHiNameBlock).toContain('background: linear-gradient(92deg, #22d3ee 0%, #38bdf8 44%, #a78bfa 100%);');
+    expect(homeHiNameBlock).toContain('background-clip: text;');
+    expect(homeHiNameBlock).toContain('-webkit-text-fill-color: transparent;');
+    expect(homeHiNameBlock).toContain('overflow-wrap: anywhere;');
     expect(homeNavBlock).toContain('display: grid;');
     expect(homeNavBlock).toContain('gap: 0;');
     expect(homeNavBlock).toContain('align-content: start;');

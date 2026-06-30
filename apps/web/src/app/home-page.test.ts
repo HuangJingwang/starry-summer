@@ -90,17 +90,35 @@ describe('home page', () => {
 
   test('renders the README screenshot portfolio hero instead of the immersive landing', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
+    const introSource = readFileSync(join(process.cwd(), 'src/components/HomeIntroCard.tsx'), 'utf8');
+    const greetingSource = readFileSync(join(process.cwd(), 'src/lib/home-greeting.ts'), 'utf8');
 
     expect(source).toContain('className="portfolio-home"');
     expect(source).not.toContain('data-scroll-locked="true"');
     expect(source).toContain('className="portfolio-hero"');
     expect(source).toContain('className="portfolio-hero__content cyber-home__container"');
     expect(source).not.toContain('className="home-content-flow cyber-home__container"');
-    expect(source).toContain('<h1 className="portfolio-hero__name">{profile.ownerName}</h1>');
-    expect(source).toContain('技术写作 / 笔记 / 推荐分享');
-    expect(source).toContain('WRITING');
-    expect(source).toContain('<p className="portfolio-hero__role">Technical Notes & Summer Moments</p>');
-    expect(source).toContain('写技术文章，也记录一些生活里的光。');
+    expect(source).toContain("import { HomeIntroCard } from '@/components/HomeIntroCard';");
+    expect(source).toContain('<HomeIntroCard ownerName={profile.ownerName} lead={heroLead} />');
+    expect(introSource).toContain("'use client';");
+    expect(introSource).toContain("import { getHomeGreeting } from '@/lib/home-greeting';");
+    expect(greetingSource).toContain('export function getHomeGreeting(date = new Date())');
+    expect(greetingSource).toContain("return 'Good Morning';");
+    expect(greetingSource).toContain("return 'Good Afternoon';");
+    expect(greetingSource).toContain("return 'Good Evening';");
+    expect(greetingSource).toContain("return 'Good Night';");
+    expect(introSource).toContain('window.setInterval(syncGreeting, 60 * 1000)');
+    expect(introSource).toContain('className="portfolio-hero__hi-avatar"');
+    expect(introSource).toContain('className="portfolio-hero__hi-avatar-night"');
+    expect(introSource).toContain('className="portfolio-hero__hi-avatar-day"');
+    expect(introSource).toContain('className="portfolio-hero__hi-line" suppressHydrationWarning');
+    expect(introSource).toContain('{greeting}');
+    expect(introSource).toContain('I&apos;m <strong className="portfolio-hero__hi-name">{ownerName}</strong>,');
+    expect(introSource).toContain('<span className="portfolio-hero__hi-line portfolio-hero__hi-line--meet">nice to meet you!</span>');
+    expect(source).toContain('在这里记录技术文章、工程实践和一些生活里的光。');
+    expect(source).not.toContain('WRITING');
+    expect(source).not.toContain('<p className="portfolio-hero__role">Technical Notes & Summer Moments</p>');
+    expect(source).not.toContain('把每一次实践沉淀成未来可以复用的认知。');
     expect(source).not.toContain('PORTFOLIO');
     expect(source).not.toContain('Content Builder');
     expect(source).toContain('className="portfolio-hero__visual"');
@@ -110,7 +128,7 @@ describe('home page', () => {
     expect(source).toContain('<HomeCardNav />');
     expect(source).toContain('className="portfolio-hero__left-stack"');
     expect(source).toContain('className="portfolio-hero__center-stack"');
-    expect(source).toContain('className="portfolio-hero__intro-card"');
+    expect(introSource).toContain('className="portfolio-hero__intro-card"');
     expect(source).toContain('className="portfolio-hero__latest-card"');
     expect(source).not.toContain('className="portfolio-hero__pulse-card"');
     expect(source).toContain('<HomeFleetBackground />');

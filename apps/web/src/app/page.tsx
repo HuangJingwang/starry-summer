@@ -7,6 +7,7 @@ import { HomeClockCard } from '@/components/HomeClockCard';
 import { HomeAdminControl } from '@/components/HomeAdminControl';
 import { HomeContactButton } from '@/components/HomeContactButton';
 import { HomeFleetBackground } from '@/components/HomeFleetBackground';
+import { HomeIntroCard } from '@/components/HomeIntroCard';
 import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 import { getContentHref } from '@/lib/content';
@@ -27,8 +28,7 @@ export default async function HomePage() {
   ]);
   const profile = buildHomeProfileModel(settings, content);
   const stats = profile.stats;
-  const heroLead = '这里主要存放技术文章、工程实践和一些偶尔出现的照片与思考。';
-  const heroMotto = profile.motto || '写技术文章，也记录一些生活里的光。';
+  const heroLead = '在这里记录技术文章、工程实践和一些生活里的光。';
   const latestArticle = profile.latestArticle;
   const latestArticleCover = latestArticle ? getContentCover(latestArticle) : null;
   const juejinLink = settings.profile.socialLinks.find((link) => link.href.includes('juejin.cn'));
@@ -84,18 +84,7 @@ export default async function HomePage() {
             </aside>
 
             <div className="portfolio-hero__center-stack">
-              <div className="portfolio-hero__intro-card">
-                <p className="portfolio-hero__badge">技术写作 / 笔记 / 推荐分享</p>
-                <div className="portfolio-hero__title">
-                  <h1 className="portfolio-hero__name">{profile.ownerName}</h1>
-                  <span className="portfolio-hero__outline" aria-hidden="true">
-                    WRITING
-                  </span>
-                </div>
-                <p className="portfolio-hero__role">Technical Notes & Summer Moments</p>
-                <p className="portfolio-hero__lead">{heroLead}</p>
-                <p className="portfolio-hero__motto">{heroMotto}</p>
-              </div>
+              <HomeIntroCard ownerName={profile.ownerName} lead={heroLead} />
 
               <div className="portfolio-hero__actions" aria-label="首页快捷入口">
                 <div className="portfolio-hero__action-row portfolio-hero__action-row--primary">

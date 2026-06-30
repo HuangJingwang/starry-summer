@@ -1331,7 +1331,7 @@ body:has(.cyber-home) .site-footer a {
   left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2);
   min-height: var(--reference-hi-height);
   overflow: hidden;
-  padding: 20px;
+  padding: 16px 20px;
   position: absolute;
   text-align: center;
   top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2);
@@ -1350,6 +1350,68 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__intro-card .portfolio-hero__badge {
   margin-bottom: 8px;
+}
+
+.portfolio-hero__hi-avatar {
+  border: 1px solid rgba(34, 211, 238, 0.34);
+  border-radius: 50%;
+  box-shadow:
+    0 18px 38px -24px rgba(34, 211, 238, 0.52),
+    0 0 0 7px rgba(15, 23, 42, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  display: grid;
+  height: 82px;
+  overflow: hidden;
+  place-items: center;
+  position: relative;
+  width: 82px;
+}
+
+.portfolio-hero__hi-avatar img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.portfolio-hero__hi-avatar .portfolio-hero__hi-avatar-day {
+  display: none;
+}
+
+.portfolio-hero__hi-greeting {
+  color: #f8fafc;
+  display: grid;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 2.45vw, 1.8rem);
+  font-weight: 400;
+  gap: 2px;
+  line-height: 0.92;
+  margin: 6px 0 0;
+}
+
+.portfolio-hero__hi-line {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.portfolio-hero__hi-name {
+  -webkit-box-decoration-break: clone;
+  background: linear-gradient(92deg, #22d3ee 0%, #38bdf8 44%, #a78bfa 100%);
+  background-clip: text;
+  box-decoration-break: clone;
+  color: var(--cyber-cyan);
+  font-size: 1.22em;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 34px rgba(34, 211, 238, 0.18);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.portfolio-hero__hi-line--meet {
+  justify-self: center;
+  max-width: 8.2ch;
 }
 
 .portfolio-hero__title {
@@ -1413,10 +1475,10 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__intro-card .portfolio-hero__lead,
 .portfolio-hero__intro-card .portfolio-hero__motto {
-  font-size: 0.88rem;
-  line-height: 1.4;
-  margin-top: 10px;
-  max-width: 380px;
+  font-size: 0.8rem;
+  line-height: 1.28;
+  margin-top: 6px;
+  max-width: 300px;
 }
 
 .portfolio-hero__intro-card .portfolio-hero__motto {
@@ -3668,11 +3730,37 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__name,
+:root[data-theme='summer-day'] .portfolio-hero__hi-greeting,
 :root[data-theme='summer-day'] .portfolio-about-panel h1,
 :root[data-theme='summer-day'] .section-heading h2,
 :root[data-theme='summer-day'] .page-title h1 {
   color: var(--summer-ink);
   text-shadow: 0 12px 42px rgba(34, 211, 238, 0.12);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__hi-name {
+  background: linear-gradient(92deg, #0f94a7 0%, #22c7b8 48%, #f2a93b 100%);
+  background-clip: text;
+  color: #0f94a7;
+  text-shadow: 0 12px 42px rgba(34, 211, 238, 0.14);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__hi-avatar {
+  border-color: rgba(8, 116, 127, 0.22);
+  box-shadow:
+    0 18px 34px -26px rgba(8, 116, 127, 0.34),
+    0 0 0 7px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__hi-avatar .portfolio-hero__hi-avatar-night {
+  display: none;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__hi-avatar .portfolio-hero__hi-avatar-day {
+  display: block;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__role,
