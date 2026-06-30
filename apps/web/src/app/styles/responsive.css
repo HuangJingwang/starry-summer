@@ -872,53 +872,6 @@
     translate: none;
   }
 
-  .portfolio-hero__scroll {
-    bottom: 18px;
-  }
-
-  :root[data-theme='summer-day'] .portfolio-hero__scroll {
-    min-height: 112px;
-    padding-bottom: 36px;
-  }
-
-  .portfolio-hero__wave-svg {
-    height: 118px;
-  }
-
-  .summer-detail-field {
-    opacity: 0.48;
-  }
-
-  .summer-detail-field--dashboard .summer-detail--cola {
-    bottom: 18px;
-    right: 18px;
-    transform: rotate(-8deg) scale(0.78);
-  }
-
-  .summer-detail-field--dashboard .summer-detail--lemon,
-  .summer-detail-field--popular .summer-detail--sun-glass {
-    display: none;
-  }
-
-  .summer-detail-field--featured .summer-detail--surfboard {
-    right: -58px;
-    top: 22px;
-    transform: rotate(-12deg) scale(0.72);
-  }
-
-  .summer-detail-field--featured .summer-detail--ice {
-    bottom: 16px;
-    left: 16px;
-    transform: rotate(9deg) scale(0.82);
-  }
-
-  .summer-detail-field--popular .summer-detail--lemon {
-    bottom: 18px;
-    left: auto;
-    right: 18px;
-    transform: rotate(-14deg) scale(0.78);
-  }
-
   .author-bio-card,
   .author-profile-card {
     border-radius: 18px;

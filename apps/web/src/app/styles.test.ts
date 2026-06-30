@@ -665,60 +665,23 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__actions");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__night-avatar");
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__day-avatar");
-    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__signal");
-    expect(css).toContain('.portfolio-hero__scroll');
-    expect(css).toContain(".portfolio-home[data-scroll-locked='true'] .portfolio-hero__scroll");
-    expect(css).toContain('.portfolio-home .content-section[data-anchor-active=\'true\']');
-    expect(css).toContain('animation: home-anchor-rise 760ms cubic-bezier(0.16, 1, 0.3, 1);');
-    expect(css).toContain('@keyframes home-anchor-rise');
-    expect(css).toContain('position: fixed;');
-    expect(css).toContain('.portfolio-hero__scroll-orb');
-    expect(css).toContain('.portfolio-hero__scroll-star');
-    expect(css).toContain('.portfolio-hero__scroll-tide');
-    expect(css).toContain('.portfolio-hero__wave-svg');
-    expect(css).toContain('.portfolio-hero__wave-layer');
-    expect(css).toContain('.portfolio-hero__wave-layer--back');
-    expect(css).toContain('.portfolio-hero__wave-layer--mid');
-    expect(css).toContain('.portfolio-hero__wave-layer--wash');
-    expect(css).toContain('.portfolio-hero__wave-layer--front');
-    expect(css).toContain('.portfolio-hero__wave-layer--foam');
-    expect(css).toContain('.portfolio-hero__wave-layer--lace');
-    expect(css).toContain('.portfolio-hero__shore-surge');
-    expect(css).toContain('.portfolio-hero__shore-surge--wash');
-    expect(css).toContain('.portfolio-hero__shore-surge--foam');
-    expect(css).toContain('.portfolio-hero__scroll-label');
-    expect(css).toContain('.portfolio-hero__scroll-arrow');
-    expect(css).toContain('.portfolio-hero__scroll-arrow--one');
-    expect(css).toContain('.portfolio-hero__scroll-arrow--two');
-    expect(css).toContain('.portfolio-hero__scroll-arrow--three');
-    expect(css).toContain('animation: scroll-entry-breathe');
-    expect(css).toContain('animation: scroll-arrow-drop');
-    expect(css).toContain('animation: scroll-star-fall');
-    expect(css).toContain('animation: scroll-wave-drift');
-    expect(css).toContain('animation: shore-wave-runup');
-    expect(css).toContain('animation: shore-foam-runup');
-    expect(css).toContain('animation: shore-crest-sweep');
-    expect(css).toContain('animation: shore-surge-wash');
-    expect(css).toContain('animation: shore-surge-foam');
-    expect(css).toContain('@keyframes scroll-entry-breathe');
-    expect(css).toContain('@keyframes scroll-arrow-drop');
-    expect(css).toContain('@keyframes scroll-star-fall');
-    expect(css).toContain('@keyframes scroll-wave-drift');
-    expect(css).toContain('@keyframes shore-wave-runup');
-    expect(css).toContain('@keyframes shore-wave-return');
-    expect(css).toContain('@keyframes shore-foam-runup');
-    expect(css).toContain('@keyframes shore-wet-sheen');
-    expect(css).toContain('@keyframes shore-crest-sweep');
-    expect(css).toContain('@keyframes shore-surge-wash');
-    expect(css).toContain('@keyframes shore-surge-foam');
-    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__scroll {");
-    expect(css).toContain('min-height: 104px;');
-    expect(css).toContain('background: transparent;');
-    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__scroll-orb");
-    expect(css).toContain(":root[data-theme='summer-day'] .portfolio-hero__scroll-tide");
-    expect(css).toContain('display: none;');
+    expect(css).not.toContain('.portfolio-hero__signal');
+    expect(css).not.toContain('.portfolio-hero__scroll');
+    expect(css).not.toContain('data-scroll-locked');
+    expect(css).not.toContain("data-anchor-active='true'");
+    expect(css).not.toContain('@keyframes home-anchor-rise');
+    expect(css).not.toContain('@keyframes scroll-entry-breathe');
+    expect(css).not.toContain('@keyframes scroll-arrow-drop');
+    expect(css).not.toContain('@keyframes scroll-star-fall');
+    expect(css).not.toContain('@keyframes scroll-wave-drift');
+    expect(css).not.toContain('@keyframes shore-wave-runup');
+    expect(css).not.toContain('@keyframes shore-wave-return');
+    expect(css).not.toContain('@keyframes shore-foam-runup');
+    expect(css).not.toContain('@keyframes shore-wet-sheen');
+    expect(css).not.toContain('@keyframes shore-crest-sweep');
+    expect(css).not.toContain('@keyframes shore-surge-wash');
+    expect(css).not.toContain('@keyframes shore-surge-foam');
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
-    expect(css).toContain(".portfolio-home .content-section[data-anchor-active='true']");
     expect(readStylesheet('src/app/page.tsx')).toContain('BlurredBubblesCanvas');
     expect(css).toContain('.portfolio-hero__bubbles');
     expect(css).toContain('filter: blur(50px) saturate(1.12);');
@@ -821,9 +784,8 @@ describe('global styles', () => {
     const css = readGlobalStyles();
     const nightAvatarBlock = css.match(/\.portfolio-hero__night-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const summerDayHiddenNightBlock =
-      css.match(
-        /:root\[data-theme='summer-day'\] \.portfolio-hero__night-avatar,\s*:root\[data-theme='summer-day'\] \.portfolio-hero__signal\s*{(?<body>[\s\S]*?)\n}/,
-      )?.groups?.body ?? '';
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__night-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
     const summerDayAvatarBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__day-avatar\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
@@ -910,27 +872,16 @@ describe('global styles', () => {
     expect(responsiveCss).toContain('.home-archive-links');
   });
 
-  test('adds non-interactive summer details across the day home sections', () => {
+  test('removes unused non-interactive summer detail decorations', () => {
     const css = readGlobalStyles();
-    const detailFieldBlock = css.match(/\.summer-detail-field\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
-    const dayDetailFieldBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.summer-detail-field\s*{(?<body>[\s\S]*?)\n}/)?.groups
-        ?.body ?? '';
 
-    expect(css).toContain('.summer-detail-field');
-    expect(css).toContain('.summer-detail');
-    expect(css).toContain('.summer-detail--cola');
-    expect(css).toContain('.summer-detail--lemon');
-    expect(css).toContain('.summer-detail--surfboard');
-    expect(css).toContain('.summer-detail--ice');
-    expect(css).toContain('.summer-detail--sun-glass');
-    expect(css).toContain('.summer-detail-field--dashboard');
-    expect(css).toContain('.summer-detail-field--featured');
-    expect(css).toContain('.summer-detail-field--popular');
-    expect(css).toContain(":root[data-theme='summer-day'] .summer-detail-field");
-    expect(detailFieldBlock).toContain('display: none;');
-    expect(detailFieldBlock).toContain('pointer-events: none;');
-    expect(dayDetailFieldBlock).toContain('display: block;');
+    expect(css).not.toContain('.summer-detail-field');
+    expect(css).not.toContain('.summer-detail--cola');
+    expect(css).not.toContain('.summer-detail--lemon');
+    expect(css).not.toContain('.summer-detail--surfboard');
+    expect(css).not.toContain('.summer-detail--ice');
+    expect(css).not.toContain('.summer-detail--sun-glass');
+    expect(css).not.toContain('@keyframes summer-detail-bob');
   });
 
   test('keeps the portfolio home navigation visible while preserving the full-screen hero', () => {

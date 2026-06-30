@@ -542,13 +542,7 @@ describe('home page', () => {
     expect(pageSource).not.toContain('进入下方内容');
     expect(pageSource).not.toContain('home-dashboard');
     expect(pageSource).not.toContain('content-empty-card');
-  });
-
-  test('recognizes home as the readable top hash while keeping top hash compatibility', () => {
-    const source = readFileSync(join(process.cwd(), 'src/components/HomeScrollGate.tsx'), 'utf8');
-
-    expect(source).toContain('a[href="#home"], a[href="/#home"], a[href="#top"], a[href="/#top"]');
-    expect(source).toContain("window.location.hash === '#home' || window.location.hash === '#top'");
+    expect(existsSync(join(process.cwd(), 'src/components/HomeScrollGate.tsx'))).toBe(false);
   });
 
   test('provides a clean /home route as an alias for the root home page', () => {

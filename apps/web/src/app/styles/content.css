@@ -774,17 +774,6 @@ body:has(.guestbook-page) .site-footer a {
   color: #b9c4c2;
 }
 
-@keyframes summer-detail-bob {
-  0%,
-  100% {
-    margin-top: 0;
-  }
-
-  50% {
-    margin-top: -8px;
-  }
-}
-
 .content-section,
 .page-main {
   padding: clamp(42px, 8vw, 96px) clamp(16px, 5vw, 72px);
