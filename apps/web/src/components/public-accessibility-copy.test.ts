@@ -8,13 +8,13 @@ function readSources(paths: string[]) {
 }
 
 describe('public accessibility copy', () => {
-  test('turns public about summary cards into navigation links', () => {
+  test('keeps the public about note concise and labelled', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
 
-    expect(source).toContain('href="/posts"');
-    expect(source).toContain('href="/notes"');
-    expect(source).toContain('href="/projects"');
-    expect(source).toContain('className="about-list__item"');
+    expect(source).toContain('aria-label="关于 Starry Summer"');
+    expect(source).toContain('aria-label="站点内容"');
+    expect(source).toContain('className="about-note"');
+    expect(source).not.toContain('className="about-list__item"');
   });
 
   test('uses Chinese labels for public reading and interaction landmarks', () => {

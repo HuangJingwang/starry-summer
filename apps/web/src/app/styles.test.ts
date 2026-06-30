@@ -202,39 +202,37 @@ describe('global styles', () => {
     expect(aboutPageBlock).toContain('overflow: hidden;');
   });
 
-  test('keeps the public about page substantial and site-focused', () => {
+  test('keeps the public about page concise and site-focused', () => {
     const aboutPageSource = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
 
     expect(aboutPageSource).toContain('关于本站');
     expect(aboutPageSource).toContain('个人内容平台');
-    expect(aboutPageSource).toContain('内容结构');
-    expect(aboutPageSource).toContain('运行方式');
-    expect(aboutPageSource).toContain('阅读路径');
     expect(aboutPageSource).toContain('仓库');
-    expect(aboutPageSource).toContain('静态发布');
-    expect(aboutPageSource).toContain('className="about-site-grid"');
-    expect(aboutPageSource).toContain('className="about-site-card"');
-    expect(aboutPageSource).toContain('className="about-flow"');
+    expect(aboutPageSource).toContain('className="about-note"');
+    expect(aboutPageSource).toContain('className="about-note__list"');
+    expect(aboutPageSource).not.toContain('className="about-site-grid"');
+    expect(aboutPageSource).not.toContain('className="about-site-card"');
+    expect(aboutPageSource).not.toContain('className="about-flow"');
+    expect(aboutPageSource).not.toContain('内容结构');
+    expect(aboutPageSource).not.toContain('运行方式');
+    expect(aboutPageSource).not.toContain('阅读路径');
     expect(aboutPageSource).not.toContain('不是');
     expect(aboutPageSource).not.toContain('而是');
     expect(aboutPageSource).not.toContain('AI 产品');
     expect(aboutPageSource).not.toContain('招聘');
   });
 
-  test('aligns about cards with the leetcode glass panel material', () => {
+  test('aligns the concise about note with the public theme material', () => {
     const css = readGlobalStyles();
     const aboutPageBlock = readStyleBlock(css, '.about-page');
-    const aboutCardBlock = readStyleBlock(css, '.about-site-card');
-    const aboutListItemBlock = readStyleBlock(css, '.about-list__item');
+    const aboutNoteBlock = readStyleBlock(css, '.about-note');
     const dayAboutCardBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.about-site-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
-        ?.body ?? '';
+      css.match(/:root\[data-theme='summer-day'\] \.about-note\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
 
     expect(aboutPageBlock).toContain('linear-gradient(135deg, rgba(34, 211, 238, 0.11), transparent 36%)');
     expect(aboutPageBlock).toContain('linear-gradient(180deg, rgba(15, 23, 42, 0.6), rgba(2, 6, 23, 0.42))');
-    expect(aboutCardBlock).toContain('background: rgba(15, 23, 42, 0.42);');
-    expect(aboutCardBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
-    expect(aboutListItemBlock).toContain('background: rgba(15, 23, 42, 0.42);');
+    expect(aboutNoteBlock).toContain('background: rgba(15, 23, 42, 0.42);');
+    expect(aboutNoteBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
     expect(dayAboutCardBlock).toContain('background: var(--summer-panel-sheen), var(--summer-panel);');
     expect(dayAboutCardBlock).toContain('border-color: var(--summer-line);');
   });
@@ -1716,46 +1714,30 @@ describe('global styles', () => {
 
   test('keeps the public about page inside the cyber glass visual system', () => {
     const css = readGlobalStyles();
-    const aboutItemBlock = css.match(/\.about-list__item\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
-    const aboutItemInteractiveBlock =
-      css.match(/\.about-list__item:hover,[\s\S]*?\.about-list__item:focus-visible\s*{(?<body>[\s\S]*?)\n}/)
-        ?.groups?.body ?? '';
+    const aboutNoteBlock = css.match(/\.about-note\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutNoteListBlock = css.match(/\.about-note__list\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayAboutSocialBlock =
       css.match(/:root\[data-theme='summer-day'\] \.about-social a\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
-    const dayAboutItemBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.about-list__item\s*{(?<body>[\s\S]*?)\n}/)?.groups
-        ?.body ?? '';
-    const dayAboutItemInteractiveBlock =
-      css.match(
-        /:root\[data-theme='summer-day'\] \.about-list__item:hover,[\s\S]*?:root\[data-theme='summer-day'\] \.about-list__item:focus-visible\s*{(?<body>[\s\S]*?)\n}/,
-      )?.groups?.body ?? '';
-    const dayAboutHeadingBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.about-list h2\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
+    const dayAboutNoteBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-note\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
       '';
     const dayAboutCopyBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.about-list p\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
+      css.match(/:root\[data-theme='summer-day'\] \.about-note p\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
       '';
 
-    expect(css).toContain('.about-list__item');
-    expect(aboutItemBlock).toContain('background: rgba(15, 23, 42, 0.42);');
-    expect(aboutItemBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
-    expect(aboutItemBlock).toContain('color: inherit;');
-    expect(aboutItemBlock).toContain('display: block;');
-    expect(aboutItemBlock).toContain('text-decoration: none;');
-    expect(aboutItemInteractiveBlock).toContain('border-color: rgba(34, 211, 238, 0.26);');
-    expect(aboutItemInteractiveBlock).toContain('transform: translateY(-1px);');
-    expect(aboutItemBlock).not.toContain('background: #fff;');
+    expect(css).toContain('.about-note');
+    expect(aboutNoteBlock).toContain('background: rgba(15, 23, 42, 0.42);');
+    expect(aboutNoteBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
+    expect(aboutNoteBlock).not.toContain('background: #fff;');
+    expect(aboutNoteListBlock).toContain('list-style: none;');
     expect(dayAboutSocialBlock).toContain('color: var(--summer-accent);');
     expect(dayAboutSocialBlock).toContain('border-color: rgba(45, 109, 116, 0.18);');
-    expect(dayAboutItemBlock).toContain('var(--summer-panel-sheen)');
-    expect(dayAboutItemBlock).toContain('var(--summer-panel)');
-    expect(dayAboutItemBlock).toContain('border-color: var(--summer-line);');
-    expect(dayAboutItemBlock).toContain('color: var(--summer-ink);');
-    expect(dayAboutItemBlock).not.toContain('rgba(4, 6, 14, 0.46)');
-    expect(dayAboutItemInteractiveBlock).toContain('background: rgba(255, 213, 105, 0.16);');
-    expect(dayAboutItemInteractiveBlock).toContain('color: var(--summer-ink);');
-    expect(dayAboutHeadingBlock).toContain('color: var(--summer-ink);');
+    expect(dayAboutNoteBlock).toContain('var(--summer-panel-sheen)');
+    expect(dayAboutNoteBlock).toContain('var(--summer-panel)');
+    expect(dayAboutNoteBlock).toContain('border-color: var(--summer-line);');
+    expect(dayAboutNoteBlock).toContain('color: var(--summer-ink);');
+    expect(dayAboutNoteBlock).not.toContain('rgba(4, 6, 14, 0.46)');
     expect(dayAboutCopyBlock).toContain('color: var(--summer-muted);');
   });
 

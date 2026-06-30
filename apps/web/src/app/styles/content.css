@@ -1941,11 +1941,6 @@ body:has(.search-page) .site-footer a {
   border-color: rgba(148, 163, 184, 0.2);
 }
 
-.about-list {
-  display: grid;
-  gap: 16px;
-}
-
 .about-page {
   background:
     linear-gradient(135deg, rgba(34, 211, 238, 0.11), transparent 36%),
@@ -1956,11 +1951,50 @@ body:has(.search-page) .site-footer a {
   overflow: hidden;
 }
 
+.about-note {
+  background: rgba(15, 23, 42, 0.42);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  padding: clamp(20px, 4vw, 28px);
+}
+
+.about-note p {
+  color: rgba(226, 232, 240, 0.74);
+  font-size: 1rem;
+  line-height: 1.85;
+  margin: 0;
+  max-width: 62ch;
+}
+
+.about-note__list {
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 2px 0 0;
+}
+
+.about-note__list li {
+  color: var(--cyber-ink);
+  font-weight: 760;
+  line-height: 1.5;
+  padding: 12px 0;
+}
+
+.about-note__list li + li {
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
 .about-social {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: -6px 0 24px;
+  margin-top: 18px;
 }
 
 .about-social a {
@@ -1971,158 +2005,6 @@ body:has(.search-page) .site-footer a {
   font-weight: 800;
   min-height: 40px;
   padding: 10px 14px;
-}
-
-.about-section,
-.about-flow {
-  display: grid;
-  gap: 14px;
-  margin-top: 26px;
-}
-
-.about-section h2,
-.about-flow h2 {
-  color: var(--cyber-ink);
-  font-size: clamp(1.35rem, 2.8vw, 2rem);
-  line-height: 1.15;
-  margin: 0;
-}
-
-.about-section p,
-.about-flow p {
-  color: rgba(226, 232, 240, 0.72);
-  line-height: 1.8;
-  margin: 0;
-  max-width: 68ch;
-}
-
-.about-site-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 4px;
-}
-
-.about-site-card,
-.about-flow,
-.about-section--compact {
-  border-radius: 18px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  padding: 18px;
-}
-
-.about-site-card {
-  background: rgba(15, 23, 42, 0.42);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  display: grid;
-  gap: 8px;
-  min-height: 168px;
-}
-
-.about-flow,
-.about-section--compact {
-  background: rgba(15, 23, 42, 0.42);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.about-site-card span {
-  color: var(--cyber-cyan);
-  font-family: var(--font-nav);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.about-site-card h3 {
-  color: var(--cyber-ink);
-  font-size: 1.12rem;
-  margin: 0;
-}
-
-.about-site-card p {
-  color: rgba(226, 232, 240, 0.68);
-  line-height: 1.7;
-  margin: 0;
-}
-
-.about-list--content {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-top: 14px;
-}
-
-.about-list__item {
-  background: rgba(15, 23, 42, 0.42);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 16px;
-  color: inherit;
-  display: block;
-  padding: 20px;
-  text-decoration: none;
-  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
-}
-
-.about-list__item:hover,
-.about-list__item:focus-visible {
-  background: rgba(15, 23, 42, 0.58);
-  border-color: rgba(34, 211, 238, 0.26);
-  outline: 0;
-  transform: translateY(-1px);
-}
-
-.about-list h2 {
-  color: var(--cyber-ink);
-  margin: 0 0 8px;
-}
-
-.about-list p {
-  color: rgba(226, 232, 240, 0.68);
-  line-height: 1.7;
-  margin: 0;
-}
-
-.about-flow {
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
-}
-
-.about-flow__steps {
-  align-content: start;
-  display: grid;
-  gap: 10px;
-}
-
-.about-flow__steps span {
-  background: rgba(2, 6, 23, 0.42);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 999px;
-  color: var(--cyber-ink);
-  font-weight: 800;
-  min-height: 40px;
-  padding: 9px 13px;
-}
-
-.about-reading-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.about-reading-links a {
-  background: rgba(15, 23, 42, 0.42);
-  border: 1px solid rgba(34, 211, 238, 0.18);
-  border-radius: 999px;
-  color: #cffafe;
-  font-weight: 800;
-  min-height: 38px;
-  padding: 9px 13px;
-  text-decoration: none;
-}
-
-.about-reading-links a:hover,
-.about-reading-links a:focus-visible {
-  background: rgba(34, 211, 238, 0.12);
-  border-color: rgba(34, 211, 238, 0.34);
-  outline: 0;
 }
 
 .detail {
@@ -3220,76 +3102,27 @@ body:has(.search-page) .site-footer a {
   outline: 0;
 }
 
-:root[data-theme='summer-day'] .about-list__item {
-  background:
-    var(--summer-panel-sheen),
-    var(--summer-panel);
-  backdrop-filter: blur(18px) saturate(1.06);
-  border-color: var(--summer-line);
-  box-shadow: inset 0 1px 0 var(--summer-glint), 0 16px 46px var(--summer-shadow);
-  color: var(--summer-ink);
-}
-
-:root[data-theme='summer-day'] .about-site-card,
-:root[data-theme='summer-day'] .about-flow,
-:root[data-theme='summer-day'] .about-section--compact {
-  box-shadow: inset 0 1px 0 var(--summer-glint), 0 16px 46px var(--summer-shadow);
-  color: var(--summer-ink);
-}
-
-:root[data-theme='summer-day'] .about-site-card {
+:root[data-theme='summer-day'] .about-note {
   background: var(--summer-panel-sheen), var(--summer-panel);
+  box-shadow: inset 0 1px 0 var(--summer-glint), 0 16px 46px var(--summer-shadow);
   border-color: var(--summer-line);
-}
-
-:root[data-theme='summer-day'] .about-flow,
-:root[data-theme='summer-day'] .about-section--compact {
-  background: var(--summer-panel-sheen), var(--summer-panel);
-  border-color: var(--summer-line);
-}
-
-:root[data-theme='summer-day'] .about-site-card span {
-  color: var(--summer-accent);
-}
-
-:root[data-theme='summer-day'] .about-section h2,
-:root[data-theme='summer-day'] .about-flow h2,
-:root[data-theme='summer-day'] .about-site-card h3 {
   color: var(--summer-ink);
 }
 
-:root[data-theme='summer-day'] .about-section p,
-:root[data-theme='summer-day'] .about-flow p,
-:root[data-theme='summer-day'] .about-site-card p {
+:root[data-theme='summer-day'] .about-note p {
   color: var(--summer-muted);
 }
 
-:root[data-theme='summer-day'] .about-list__item:hover,
-:root[data-theme='summer-day'] .about-list__item:focus-visible {
-  background: rgba(255, 213, 105, 0.16);
-  border-color: rgba(8, 116, 127, 0.22);
+:root[data-theme='summer-day'] .about-note__list {
+  border-top-color: var(--summer-line);
+}
+
+:root[data-theme='summer-day'] .about-note__list li {
   color: var(--summer-ink);
 }
 
-:root[data-theme='summer-day'] .about-list h2 {
-  color: var(--summer-ink);
-}
-
-:root[data-theme='summer-day'] .about-list p {
-  color: var(--summer-muted);
-}
-
-:root[data-theme='summer-day'] .about-flow__steps span,
-:root[data-theme='summer-day'] .about-reading-links a {
-  background: rgba(255, 255, 255, 0.48);
-  border-color: rgba(45, 109, 116, 0.16);
-  color: var(--summer-ink);
-}
-
-:root[data-theme='summer-day'] .about-reading-links a:hover,
-:root[data-theme='summer-day'] .about-reading-links a:focus-visible {
-  background: rgba(255, 213, 105, 0.16);
-  border-color: rgba(8, 116, 127, 0.24);
+:root[data-theme='summer-day'] .about-note__list li + li {
+  border-top-color: var(--summer-line);
 }
 
 :root[data-theme='summer-day'] .detail__body {
