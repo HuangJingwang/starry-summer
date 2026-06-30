@@ -1062,6 +1062,19 @@ describe('global styles', () => {
     const dayHomeLikeBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__like-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
+    const dayHomeClockBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHomeClockDigitsBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-digits\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHomeClockSegmentBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-digit i\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
+    const dayHomeClockActiveSegmentBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__clock-digit i\[data-active='true'\]\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
     const dayCalendarBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
@@ -1143,6 +1156,17 @@ describe('global styles', () => {
     expect(dayHomeLikeBlock).toContain('backdrop-filter: blur(18px) saturate(1.08);');
     expect(dayHomeLikeBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
     expect(dayHomeLikeBlock).toContain('inset 0 0 0 1px rgba(255, 255, 255, 0.3)');
+    expect(dayHomeClockBlock).toContain('backdrop-filter: blur(4px);');
+    expect(dayHomeClockBlock).toContain('border-radius: 40px;');
+    expect(dayHomeClockBlock).toContain('padding: 8px;');
+    expect(dayHomeClockBlock).toContain('0 40px 50px -32px rgba(0, 0, 0, 0.05)');
+    expect(dayHomeClockDigitsBlock).toContain('border-radius: 40px;');
+    expect(dayHomeClockDigitsBlock).toContain('background: rgba(127, 143, 151, 0.12);');
+    expect(dayHomeClockDigitsBlock).toContain('gap: 6px;');
+    expect(dayHomeClockSegmentBlock).toContain('--clock-segment-off: rgba(0, 0, 0, 0.05);');
+    expect(dayHomeClockSegmentBlock).toContain('clip-path: polygon(');
+    expect(dayHomeClockActiveSegmentBlock).toContain('background: var(--clock-segment-on);');
+    expect(dayHomeClockActiveSegmentBlock).not.toContain('box-shadow: 0 0 14px');
     expect(dayHomeNavLinkBlock).toContain('color: rgba(91, 66, 63, 0.68);');
     expect(dayHomeNavActiveBlock).toContain('linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%)');
     expect(dayHomeNavActiveBlock).toContain('color: var(--summer-ink);');
