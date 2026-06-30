@@ -8,6 +8,7 @@ interface Bubble {
   x: number;
   y: number;
   r: number;
+  alpha: number;
   color: string;
   vx: number;
   vy: number;
@@ -15,7 +16,8 @@ interface Bubble {
   blur: number;
 }
 
-const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];
+const referenceDayColors = ['#f7da3952', '#8fdbe9', '#fffef8'];
+const warmGlowColor = referenceDayColors[0];
 
 function getTheme(): BubbleTheme {
   return document.documentElement.dataset.theme === 'summer-day' ? 'summer-day' : 'summer-night';
@@ -173,7 +175,9 @@ export function BlurredBubblesCanvas({ className = '' }: { className?: string })
 
       while (nextBubbles.length < count && tries < 5000) {
         tries += 1;
-        const r = rand(minRadius, maxRadius);
+        const color = referenceDayColors[nextBubbles.length % referenceDayColors.length] ?? '#8fdbe9';
+        const isWarmGlow = color === warmGlowColor;
+        const r = isWarmGlow ? rand(150, 240) : rand(minRadius, maxRadius);
         const x = rand(-r / 2, width + r / 2);
         const y = rand(height * bottomBandStart, height * 1.2);
         const ok = nextBubbles.every((bubble) => {
@@ -184,8 +188,9 @@ export function BlurredBubblesCanvas({ className = '' }: { className?: string })
 
         if (ok) {
           nextBubbles.push({
-            blur: rand(200, 400),
-            color: referenceDayColors[nextBubbles.length % referenceDayColors.length] ?? '#8fdbe9',
+            alpha: isWarmGlow ? 0.42 : 0.8,
+            blur: isWarmGlow ? rand(120, 220) : rand(200, 400),
+            color,
             jitter: rand(0.6, 1.2),
             r,
             vx: rand(-0.2, 0.2),
@@ -285,7 +290,7 @@ export function BlurredBubblesCanvas({ className = '' }: { className?: string })
       bubbles.forEach((bubble) => {
         context.save();
         context.filter = `blur(${bubble.blur}px)`;
-        context.globalAlpha = 0.8;
+        context.globalAlpha = bubble.alpha;
         context.fillStyle = bubble.color;
         context.beginPath();
         context.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);

@@ -752,7 +752,12 @@ describe('global styles', () => {
     expect(css).toContain('--summer-sky');
     expect(css).toContain('--summer-cloud');
     expect(css).toContain('--summer-sea');
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const referenceDayColors = ['#f7da3952', '#8fdbe9', '#fffef8'];");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const warmGlowColor = referenceDayColors[0];');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const r = isWarmGlow ? rand(150, 240) : rand(minRadius, maxRadius);');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('alpha: isWarmGlow ? 0.42 : 0.8,');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('blur: isWarmGlow ? rand(120, 220) : rand(200, 400),');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('context.globalAlpha = bubble.alpha;');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const bottomBandStart = 0.8;');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const targetFrameMs = 1000 / 6;');
     expect(css).toContain(":root[data-theme='summer-day'] .portfolio-home::before");
