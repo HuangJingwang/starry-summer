@@ -1120,6 +1120,9 @@ describe('global styles', () => {
       css.match(
         /:root\[data-theme='summer-day'\] \.portfolio-hero__clock-segment\[data-active='true'\]\s*{(?<body>[\s\S]*?)\n}/,
       )?.groups?.body ?? '';
+    const dayHomeClockColonBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-colon i\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
     const dayCalendarBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
@@ -1212,6 +1215,8 @@ describe('global styles', () => {
     expect(dayHomeClockSegmentBlock).toContain('fill: rgba(91, 66, 63, 0.04);');
     expect(dayHomeClockActiveSegmentBlock).toContain('fill: rgba(91, 66, 63, 0.9);');
     expect(dayHomeClockActiveSegmentBlock).not.toContain('box-shadow: 0 0 14px');
+    expect(dayHomeClockColonBlock).toContain('background: rgba(91, 66, 63, 0.9);');
+    expect(dayHomeClockColonBlock).toContain('box-shadow: none;');
     expect(dayHomeNavLinkBlock).toContain('color: rgba(91, 66, 63, 0.68);');
     expect(dayHomeNavActiveBlock).toContain('linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%)');
     expect(dayHomeNavActiveBlock).toContain('color: var(--summer-ink);');

@@ -3823,6 +3823,11 @@ body:has(.cyber-home) .site-footer a {
   filter: none;
 }
 
+:root[data-theme='summer-day'] .portfolio-hero__clock-colon i {
+  background: rgba(91, 66, 63, 0.9);
+  box-shadow: none;
+}
+
 :root[data-theme='summer-day'] .portfolio-hero__clock-card {
   background:
     var(--summer-panel-sheen),
