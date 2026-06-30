@@ -3486,10 +3486,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] body:has(.portfolio-home) {
-  background:
-    radial-gradient(circle at 48% 0%, rgba(255, 255, 255, 0.7), transparent 22%),
-    radial-gradient(circle at 76% 92%, rgba(238, 221, 142, 0.26), transparent 30%),
-    linear-gradient(135deg, #cfe8f2 0%, #ddf3f4 52%, #edf8e8 100%);
+  background: #d4e8f3;
 }
 
 :root[data-theme='summer-day'] body:has(.portfolio-home) .site-header {
@@ -3547,10 +3544,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-home {
-  background:
-    radial-gradient(circle at 48% 0%, rgba(255, 255, 255, 0.72), transparent 22%),
-    radial-gradient(circle at 76% 92%, rgba(238, 221, 142, 0.26), transparent 30%),
-    linear-gradient(135deg, #cfe8f2 0%, #ddf3f4 52%, #edf8e8 100%);
+  background: #d4e8f3;
   color: var(--summer-ink);
   isolation: isolate;
   overflow: hidden;
