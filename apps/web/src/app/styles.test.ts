@@ -33,6 +33,40 @@ function readCssDeclaration(block: string, property: string) {
   return block.match(new RegExp(`${property}:\\s*(?<value>[^;]+);`))?.groups?.value?.trim() ?? '';
 }
 
+function readMediaRule(source: string, mediaQuery: string, selector: string) {
+  const mediaStart = source.indexOf(`@media ${mediaQuery} {`);
+
+  if (mediaStart === -1) {
+    return '';
+  }
+
+  let depth = 0;
+  let mediaEnd = source.length;
+  let started = false;
+
+  for (let index = mediaStart; index < source.length; index += 1) {
+    const char = source[index];
+
+    if (char === '{') {
+      depth += 1;
+      started = true;
+    }
+
+    if (char === '}') {
+      depth -= 1;
+    }
+
+    if (started && depth === 0) {
+      mediaEnd = index + 1;
+      break;
+    }
+  }
+
+  const mediaBlock = source.slice(mediaStart, mediaEnd).replace(/^[ \t]+/gm, '');
+
+  return readStyleBlock(mediaBlock, selector);
+}
+
 function parsePxTrackList(value: string) {
   return [...value.matchAll(/(-?\d+(?:\.\d+)?)px/g)].map((match) => Number(match[1]));
 }
@@ -1370,6 +1404,11 @@ describe('global styles', () => {
       css.match(/\.portfolio-hero__social--guestbook\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const adminWidgetBlock =
       css.match(/\.portfolio-hero__admin-widget\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const adminGridIconBlock =
+      css.match(/\.portfolio-hero__admin-grid-icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const adminGridIconDotBlock =
+      css.match(/\.portfolio-hero__admin-grid-icon span\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const responsiveAdminWidgetBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__admin-widget');
     const adminWidgetHoverBlock =
       css.match(/\.portfolio-hero__admin-widget:hover,[\s\S]*?\.portfolio-hero__admin-widget:focus-visible\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
@@ -1449,10 +1488,29 @@ describe('global styles', () => {
     expect(guestbookBlock).toContain('width: 46px;');
     expect(guestbookBlock).toContain('padding: 0;');
     expect(adminWidgetBlock).toContain('height: 40px;');
+    expect(adminWidgetBlock).toContain(
+      'left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-clock-width) / 2 - 20px);',
+    );
+    expect(adminWidgetBlock).toContain('position: absolute;');
+    expect(adminWidgetBlock).toContain(
+      'top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) - 56px);',
+    );
     expect(adminWidgetBlock).toContain('width: 40px;');
     expect(adminWidgetBlock).toContain('padding: 0;');
     expect(adminWidgetBlock).toContain('color: rgba(226, 232, 240, 0.58);');
     expect(adminWidgetBlock).toContain('text-decoration: none;');
+    expect(adminGridIconBlock).toContain('display: grid;');
+    expect(adminGridIconBlock).toContain('gap: 3px;');
+    expect(adminGridIconBlock).toContain('grid-template-columns: repeat(3, 4px);');
+    expect(adminGridIconDotBlock).toContain('background: currentColor;');
+    expect(adminGridIconDotBlock).toContain('border-radius: 999px;');
+    expect(adminGridIconDotBlock).toContain('height: 4px;');
+    expect(adminGridIconDotBlock).toContain('width: 4px;');
+    expect(responsiveAdminWidgetBlock).toContain('height: 40px;');
+    expect(responsiveAdminWidgetBlock).toContain('left: auto;');
+    expect(responsiveAdminWidgetBlock).toContain('position: static;');
+    expect(responsiveAdminWidgetBlock).toContain('top: auto;');
+    expect(responsiveAdminWidgetBlock).toContain('width: 40px;');
     expect(adminWidgetHoverBlock).toContain('border-color: rgba(34, 211, 238, 0.38);');
     expect(adminWidgetHoverBlock).toContain('outline: none;');
     expect(dayAdminWidgetBlock).toContain('color: rgba(16, 52, 61, 0.54);');

@@ -149,6 +149,9 @@ describe('home page', () => {
     expect(existsSync(join(process.cwd(), 'public/images/starry-night-atmosphere.webp'))).toBe(true);
     expect(existsSync(join(process.cwd(), 'public/images/yysuni-atmosphere.jpg'))).toBe(true);
     expect(source).toContain("import { HomeClockCard } from '@/components/HomeClockCard';");
+    expect(source).toContain("import { HomeAdminControl } from '@/components/HomeAdminControl';");
+    expect(source).toContain('<HomeLeetCodeCard recommendation={recommendedProblem} />\n\n            <HomeAdminControl />\n            <HomeClockCard />');
+    expect(source).not.toContain('<div className="portfolio-hero__action-row portfolio-hero__action-row--secondary">\n                  <HomeAdminControl />');
     expect(source).toContain('<HomeClockCard />');
     expect(source).not.toContain('formatHomeClock(homeNow)');
     expect(source).not.toContain('RECOMMEND');

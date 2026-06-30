@@ -11,7 +11,6 @@ import {
   LayoutGrid,
   MessageSquareText,
   Palette,
-  Settings,
   SlidersHorizontal,
   Sparkles,
   Tags,
@@ -160,7 +159,17 @@ export function HomeAdminControl() {
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        <Settings size={20} strokeWidth={1.8} aria-hidden="true" />
+        <span className="portfolio-hero__admin-grid-icon" aria-hidden="true">
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+          <span aria-hidden="true" />
+        </span>
       </button>
 
       {mounted && open ? createPortal(adminPanel, document.body) : null}

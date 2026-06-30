@@ -112,7 +112,6 @@ export default async function HomePage() {
                   ) : null}
                 </div>
                 <div className="portfolio-hero__action-row portfolio-hero__action-row--secondary">
-                  <HomeAdminControl />
                   <HomeContactButton
                     className="portfolio-hero__social portfolio-hero__social--guestbook"
                     href="/guestbook"
@@ -132,6 +131,7 @@ export default async function HomePage() {
 
             <HomeLeetCodeCard recommendation={recommendedProblem} />
 
+            <HomeAdminControl />
             <HomeClockCard />
 
             <aside className="portfolio-hero__calendar-card" aria-label="Calendar">

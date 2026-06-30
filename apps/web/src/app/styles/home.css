@@ -1677,6 +1677,7 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__admin-widget {
   align-items: center;
+  animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 320ms both;
   backdrop-filter: blur(14px) saturate(1.06);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent),
@@ -1691,14 +1692,32 @@ body:has(.cyber-home) .site-footer a {
   display: inline-flex;
   height: 40px;
   justify-content: center;
+  left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-clock-width) / 2 - 20px);
   padding: 0;
+  position: absolute;
   text-decoration: none;
+  top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) - 56px);
   transition:
     background 180ms ease,
     border-color 180ms ease,
     color 180ms ease,
     transform 180ms ease;
   width: 40px;
+  z-index: 4;
+}
+
+.portfolio-hero__admin-grid-icon {
+  display: grid;
+  gap: 3px;
+  grid-template-columns: repeat(3, 4px);
+}
+
+.portfolio-hero__admin-grid-icon span {
+  background: currentColor;
+  border-radius: 999px;
+  display: block;
+  height: 4px;
+  width: 4px;
 }
 
 .portfolio-hero__admin-widget[aria-expanded='true'] {
