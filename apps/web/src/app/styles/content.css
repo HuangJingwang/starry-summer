@@ -1990,6 +1990,36 @@ body:has(.search-page) .site-footer a {
   border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
+.about-note__item {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.about-note__item-icon {
+  align-items: center;
+  background: rgba(34, 211, 238, 0.09);
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  border-radius: 999px;
+  color: #cffafe;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.about-note__item strong {
+  display: block;
+}
+
+.about-note__item p {
+  color: rgba(226, 232, 240, 0.66);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin-top: 4px;
+  max-width: 56ch;
+}
+
 .about-note__meta {
   display: grid;
   gap: 12px;
@@ -2012,15 +2042,22 @@ body:has(.search-page) .site-footer a {
 }
 
 .about-stack li {
+  align-items: center;
   background: rgba(34, 211, 238, 0.08);
   border: 1px solid rgba(34, 211, 238, 0.18);
   border-radius: 999px;
   color: #cffafe;
+  display: inline-flex;
   font-family: var(--font-nav);
   font-size: 0.78rem;
   font-weight: 800;
+  gap: 6px;
   line-height: 1.1;
   padding: 7px 10px;
+}
+
+.about-stack__icon {
+  flex: 0 0 auto;
 }
 
 .about-social {
@@ -3156,6 +3193,16 @@ body:has(.search-page) .site-footer a {
 
 :root[data-theme='summer-day'] .about-note__list li + li {
   border-top-color: var(--summer-line);
+}
+
+:root[data-theme='summer-day'] .about-note__item-icon {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(45, 109, 116, 0.16);
+  color: var(--summer-accent);
+}
+
+:root[data-theme='summer-day'] .about-note__item p {
+  color: var(--summer-muted);
 }
 
 :root[data-theme='summer-day'] .about-note__meta h2 {

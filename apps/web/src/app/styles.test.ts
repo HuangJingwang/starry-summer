@@ -211,7 +211,12 @@ describe('global styles', () => {
     expect(aboutPageSource).toContain('技术栈');
     expect(aboutPageSource).toContain('className="about-note"');
     expect(aboutPageSource).toContain('className="about-note__list"');
+    expect(aboutPageSource).toContain('className="about-note__item"');
+    expect(aboutPageSource).toContain('className="about-note__item-icon"');
     expect(aboutPageSource).toContain('className="about-stack"');
+    expect(aboutPageSource).toContain('className="about-stack__icon"');
+    expect(aboutPageSource).toContain('aria-hidden="true"');
+    expect(aboutPageSource).toContain("from 'lucide-react'");
     expect(aboutPageSource).not.toContain('className="about-site-grid"');
     expect(aboutPageSource).not.toContain('className="about-site-card"');
     expect(aboutPageSource).not.toContain('className="about-flow"');
@@ -1718,8 +1723,14 @@ describe('global styles', () => {
     const css = readGlobalStyles();
     const aboutNoteBlock = css.match(/\.about-note\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const aboutNoteListBlock = css.match(/\.about-note__list\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutNoteItemBlock = css.match(/\.about-note__item\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutNoteItemIconBlock =
+      css.match(/\.about-note__item-icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutNoteItemCopyBlock =
+      css.match(/\.about-note__item p\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const aboutStackBlock = css.match(/\.about-stack\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const aboutStackItemBlock = css.match(/\.about-stack li\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutStackIconBlock = css.match(/\.about-stack__icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayAboutSocialBlock =
       css.match(/:root\[data-theme='summer-day'\] \.about-social a\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
@@ -1735,9 +1746,15 @@ describe('global styles', () => {
     expect(aboutNoteBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
     expect(aboutNoteBlock).not.toContain('background: #fff;');
     expect(aboutNoteListBlock).toContain('list-style: none;');
+    expect(aboutNoteItemBlock).toContain('display: grid;');
+    expect(aboutNoteItemBlock).toContain('grid-template-columns: auto minmax(0, 1fr);');
+    expect(aboutNoteItemIconBlock).toContain('border-radius: 999px;');
+    expect(aboutNoteItemCopyBlock).toContain('color: rgba(226, 232, 240, 0.66);');
     expect(aboutStackBlock).toContain('display: flex;');
     expect(aboutStackBlock).toContain('flex-wrap: wrap;');
+    expect(aboutStackItemBlock).toContain('display: inline-flex;');
     expect(aboutStackItemBlock).toContain('border-radius: 999px;');
+    expect(aboutStackIconBlock).toContain('flex: 0 0 auto;');
     expect(dayAboutSocialBlock).toContain('color: var(--summer-accent);');
     expect(dayAboutSocialBlock).toContain('border-color: rgba(45, 109, 116, 0.18);');
     expect(dayAboutNoteBlock).toContain('var(--summer-panel-sheen)');

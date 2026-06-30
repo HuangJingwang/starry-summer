@@ -1,6 +1,35 @@
+import { Atom, BookOpen, Braces, Code2, FileText, FolderGit2, GitBranch, Rocket, StickyNote } from 'lucide-react';
+
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteSettings } from '@/lib/settings-repository';
+
+const contentSections = [
+  {
+    title: '文章和技术笔记',
+    description: '把长一点的想法、教程和阶段复盘留成可以回看的文本。',
+    Icon: BookOpen,
+  },
+  {
+    title: '片刻、推荐和生活记录',
+    description: '保存更轻的日常、链接和当下发现，不必每次都写成长文。',
+    Icon: StickyNote,
+  },
+  {
+    title: '项目过程与阶段复盘',
+    description: '记录项目从想法到落地的过程，留下取舍、结果和后续线索。',
+    Icon: FolderGit2,
+  },
+] as const;
+
+const stackItems = [
+  { label: 'Next.js', Icon: Code2 },
+  { label: 'React', Icon: Atom },
+  { label: 'TypeScript', Icon: Braces },
+  { label: 'Markdown', Icon: FileText },
+  { label: 'GitHub', Icon: GitBranch },
+  { label: 'Vercel', Icon: Rocket },
+] as const;
 
 export function generateMetadata() {
   return loadPublicPageMetadata({
@@ -26,19 +55,27 @@ export default async function AboutPage() {
             这里长期保存公开写作、笔记、日常和项目。内容尽量跟着仓库走，方便以后迁移、回看和继续整理。
           </p>
           <ul className="about-note__list" aria-label="站点内容">
-            <li>文章和技术笔记</li>
-            <li>片刻、推荐和生活记录</li>
-            <li>项目过程与阶段复盘</li>
+            {contentSections.map(({ title, description, Icon }) => (
+              <li className="about-note__item" key={title}>
+                <span className="about-note__item-icon" aria-hidden="true">
+                  <Icon size={16} strokeWidth={1.8} />
+                </span>
+                <div>
+                  <strong>{title}</strong>
+                  <p>{description}</p>
+                </div>
+              </li>
+            ))}
           </ul>
           <div className="about-note__meta">
             <h2>技术栈</h2>
             <ul className="about-stack" aria-label="技术栈">
-              <li>Next.js</li>
-              <li>React</li>
-              <li>TypeScript</li>
-              <li>Markdown</li>
-              <li>GitHub</li>
-              <li>Vercel</li>
+              {stackItems.map(({ label, Icon }) => (
+                <li key={label}>
+                  <Icon className="about-stack__icon" size={13} strokeWidth={1.9} aria-hidden="true" />
+                  {label}
+                </li>
+              ))}
             </ul>
           </div>
         </section>
