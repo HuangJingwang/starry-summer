@@ -16,9 +16,19 @@ interface Bubble {
   blur: number;
 }
 
-const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];
-const dayGlowColors = ['#fff0a3a8', referenceDayColors[1], referenceDayColors[2]];
-const warmGlowColor = dayGlowColors[0];
+const fallbackDayGlowColors = ['#fff0a3a8', '#8fdbe9', '#fffef8'];
+
+function readRootColor(name: string, fallback: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+}
+
+function getDayGlowColors() {
+  return [
+    readRootColor('--summer-glow-warm', fallbackDayGlowColors[0] ?? '#fff0a3a8'),
+    readRootColor('--summer-glow-sea', fallbackDayGlowColors[1] ?? '#8fdbe9'),
+    readRootColor('--summer-glow-cloud', fallbackDayGlowColors[2] ?? '#fffef8'),
+  ];
+}
 
 function getTheme(): BubbleTheme {
   return document.documentElement.dataset.theme === 'summer-day' ? 'summer-day' : 'summer-night';
@@ -172,6 +182,8 @@ export function BlurredBubblesCanvas({ className = '' }: { className?: string })
       const maxRadius = 400;
       const minDist = Math.max(minRadius * 0.2, 80);
       const nextBubbles: Bubble[] = [];
+      const dayGlowColors = getDayGlowColors();
+      const warmGlowColor = dayGlowColors[0] ?? '#fff0a3a8';
       let tries = 0;
 
       while (nextBubbles.length < count && tries < 5000) {

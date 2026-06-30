@@ -752,9 +752,11 @@ describe('global styles', () => {
     expect(css).toContain('--summer-sky');
     expect(css).toContain('--summer-cloud');
     expect(css).toContain('--summer-sea');
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];");
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const dayGlowColors = ['#fff0a3a8', referenceDayColors[1], referenceDayColors[2]];");
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const warmGlowColor = dayGlowColors[0];');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const fallbackDayGlowColors = ['#fff0a3a8', '#8fdbe9', '#fffef8'];");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("readRootColor('--summer-glow-warm'");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("readRootColor('--summer-glow-sea'");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("readRootColor('--summer-glow-cloud'");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const warmGlowColor = dayGlowColors[0] ?? '#fff0a3a8';");
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const color = dayGlowColors[nextBubbles.length % dayGlowColors.length]');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const r = isWarmGlow ? rand(250, 360) : rand(minRadius, maxRadius);');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const x = isWarmGlow ? rand(-r * 0.3, width * 0.68) : rand(-r / 2, width + r / 2);');
@@ -865,7 +867,10 @@ describe('global styles', () => {
     expect(css).toContain(":root[data-theme='summer-day'] .home-dashboard");
     expect(css).toContain(":root[data-theme='summer-day'] .home-profile h2");
     expect(css).toContain(":root[data-theme='summer-day'] .home-focus a");
-    expect(dayDashboardBlock).toContain('rgba(250, 255, 239');
+    expect(css).toContain('--summer-glow-warm: #fff0a3a8;');
+    expect(css).toContain('--summer-warm-rgb: 255, 240, 163;');
+    expect(css).toContain('--summer-sea-rgb: 8, 116, 127;');
+    expect(dayDashboardBlock).toContain('rgba(var(--summer-warm-rgb), 0.2)');
     expect(dayDashboardBlock).toContain('var(--summer-archive-grid)');
     expect(dayDashboardBlock).toContain('background-size: 160% 100%');
     expect(dayDashboardBlock).not.toContain('#07100f');
@@ -883,6 +888,10 @@ describe('global styles', () => {
       css.match(
         /:root\[data-theme='summer-day'\] \.home-journal-list a,[\s\S]*?\.home-archive-links a\s*{(?<body>[\s\S]*?)\n}/,
       )?.groups?.body ?? '';
+    const dayJournalMetaBlock =
+      css.match(
+        /:root\[data-theme='summer-day'\] \.home-journal-list span,[\s\S]*?\.home-archive-links span\s*{(?<body>[\s\S]*?)\n}/,
+      )?.groups?.body ?? '';
 
     expect(css).toContain('.home-journal-list');
     expect(css).toContain('.home-moment-strip');
@@ -893,8 +902,9 @@ describe('global styles', () => {
     expect(journalItemBlock).toContain('grid-template-columns: minmax(90px, 0.18fr) minmax(160px, 0.32fr) minmax(0, 1fr);');
     expect(journalItemBlock).toContain('min-height: 84px;');
     expect(css).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
-    expect(dayJournalBlock).toContain('rgba(255, 255, 244');
+    expect(dayJournalBlock).toContain('rgba(var(--summer-warm-rgb), 0.22)');
     expect(dayJournalBlock).toContain('var(--summer-line)');
+    expect(dayJournalMetaBlock).toContain('color: #9a6a00;');
     expect(responsiveCss).toContain('.home-journal-list a');
     expect(responsiveCss).toContain('.home-moment-strip');
     expect(responsiveCss).toContain('.home-archive-links');

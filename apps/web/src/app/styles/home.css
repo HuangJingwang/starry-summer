@@ -3126,15 +3126,15 @@ body:has(.cyber-home) .site-footer a {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0 18%, rgba(117, 61, 24, 0.3) 18% 100%),
     linear-gradient(90deg, rgba(255, 255, 255, 0.34), transparent 42%);
-  border: 1px solid rgba(8, 116, 127, 0.18);
+  border: 1px solid rgba(var(--summer-sea-rgb, 8, 116, 127), 0.18);
   border-radius: 12px 12px 18px 18px;
-  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.18), 0 18px 34px rgba(44, 106, 116, 0.16);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.18), 0 18px 34px rgba(var(--summer-shadow-rgb, 44, 106, 116), 0.16);
   height: 78px;
   width: 50px;
 }
 
 .summer-detail--cola::before {
-  background: linear-gradient(180deg, rgba(8, 116, 127, 0.42), rgba(8, 116, 127, 0.08));
+  background: linear-gradient(180deg, rgba(var(--summer-sea-rgb, 8, 116, 127), 0.42), rgba(var(--summer-sea-rgb, 8, 116, 127), 0.08));
   border-radius: 999px;
   content: '';
   height: 82px;
@@ -3158,10 +3158,10 @@ body:has(.cyber-home) .site-footer a {
 .summer-detail--lemon {
   background:
     radial-gradient(circle at 50% 50%, rgba(230, 250, 253, 0.9) 0 11%, transparent 12%),
-    repeating-conic-gradient(from 6deg, rgba(255, 213, 105, 0.88) 0 18deg, rgba(255, 248, 171, 0.84) 18deg 34deg);
-  border: 5px solid rgba(255, 213, 105, 0.72);
+    repeating-conic-gradient(from 6deg, rgba(var(--summer-warm-strong-rgb, 255, 213, 105), 0.68) 0 18deg, rgba(var(--summer-warm-rgb, 255, 240, 163), 0.84) 18deg 34deg);
+  border: 5px solid rgba(var(--summer-warm-rgb, 255, 240, 163), 0.72);
   border-radius: 50%;
-  box-shadow: 0 16px 34px rgba(255, 213, 105, 0.18);
+  box-shadow: 0 16px 34px rgba(var(--summer-warm-rgb, 255, 240, 163), 0.18);
   height: 74px;
   width: 74px;
 }
@@ -3169,10 +3169,10 @@ body:has(.cyber-home) .site-footer a {
 .summer-detail--surfboard {
   background:
     linear-gradient(90deg, transparent 0 44%, rgba(230, 250, 253, 0.82) 44% 49%, transparent 49%),
-    linear-gradient(135deg, rgba(255, 213, 105, 0.86), rgba(45, 212, 191, 0.62) 48%, rgba(125, 211, 252, 0.72));
-  border: 1px solid rgba(8, 116, 127, 0.22);
+    linear-gradient(135deg, rgba(var(--summer-warm-rgb, 255, 240, 163), 0.82), rgba(var(--summer-sea-soft-rgb, 69, 200, 190), 0.62) 48%, rgba(125, 211, 252, 0.72));
+  border: 1px solid rgba(var(--summer-sea-rgb, 8, 116, 127), 0.22);
   border-radius: 999px 999px 999px 999px / 62% 62% 38% 38%;
-  box-shadow: 0 18px 42px rgba(44, 106, 116, 0.18);
+  box-shadow: 0 18px 42px rgba(var(--summer-shadow-rgb, 44, 106, 116), 0.18);
   height: 42px;
   transform: rotate(-9deg);
   width: 176px;
@@ -3187,7 +3187,7 @@ body:has(.cyber-home) .site-footer a {
   box-shadow:
     42px 26px 0 -7px rgba(255, 255, 255, 0.5),
     42px 26px 0 -6px rgba(125, 211, 252, 0.22),
-    0 20px 34px rgba(44, 106, 116, 0.12);
+    0 20px 34px rgba(var(--summer-shadow-rgb, 44, 106, 116), 0.12);
   height: 34px;
   transform: rotate(11deg);
   width: 34px;
@@ -3402,6 +3402,17 @@ body:has(.cyber-home) .site-footer a {
   background: rgba(34, 211, 238, 0.08);
   border-color: rgba(34, 211, 238, 0.25);
   color: #cffafe;
+}
+
+:root[data-theme='summer-day'] {
+  --summer-glow-warm: #fff0a3a8;
+  --summer-glow-sea: #8fdbe9;
+  --summer-glow-cloud: #fffef8;
+  --summer-warm-rgb: 255, 240, 163;
+  --summer-warm-strong-rgb: 255, 213, 105;
+  --summer-sea-rgb: 8, 116, 127;
+  --summer-sea-soft-rgb: 69, 200, 190;
+  --summer-shadow-rgb: 44, 106, 116;
 }
 
 :root[data-theme='summer-day'] body:has(.portfolio-home) {
@@ -4088,29 +4099,29 @@ body:has(.cyber-home) .site-footer a {
 
 :root[data-theme='summer-day'] .portfolio-hero__signal {
   background:
-    radial-gradient(circle at 24% 24%, rgba(255, 213, 105, 0.38), transparent 26%),
+    radial-gradient(circle at 24% 24%, rgba(var(--summer-warm-rgb), 0.38), transparent 26%),
     radial-gradient(circle at 72% 34%, rgba(125, 211, 252, 0.32), transparent 28%),
     linear-gradient(135deg, rgba(230, 250, 253, 0.86), rgba(216, 247, 244, 0.72));
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__signal::before {
   background:
-    linear-gradient(90deg, rgba(8, 116, 127, 0.12) 1px, transparent 1px),
-    linear-gradient(rgba(8, 116, 127, 0.1) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(var(--summer-sea-rgb), 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(var(--summer-sea-rgb), 0.1) 1px, transparent 1px);
   background-size: 42px 42px;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__signal::after {
   background:
-    radial-gradient(circle at 22% 28%, rgba(255, 213, 105, 0.92) 0 2px, transparent 3px),
-    radial-gradient(circle at 54% 42%, rgba(8, 116, 127, 0.58) 0 2px, transparent 3px),
+    radial-gradient(circle at 22% 28%, rgba(var(--summer-warm-rgb), 0.86) 0 2px, transparent 3px),
+    radial-gradient(circle at 54% 42%, rgba(var(--summer-sea-rgb), 0.58) 0 2px, transparent 3px),
     radial-gradient(circle at 78% 66%, rgba(45, 212, 191, 0.52) 0 2px, transparent 3px),
-    linear-gradient(135deg, transparent 26%, rgba(8, 116, 127, 0.22) 27%, transparent 28% 46%, rgba(255, 213, 105, 0.24) 47%, transparent 48%);
+    linear-gradient(135deg, transparent 26%, rgba(var(--summer-sea-rgb), 0.22) 27%, transparent 28% 46%, rgba(var(--summer-warm-rgb), 0.24) 47%, transparent 48%);
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__signal span {
-  background: linear-gradient(135deg, rgba(8, 116, 127, 0.14), rgba(255, 213, 105, 0.14));
-  border-color: rgba(8, 116, 127, 0.16);
+  background: linear-gradient(135deg, rgba(var(--summer-sea-rgb), 0.14), rgba(var(--summer-warm-rgb), 0.14));
+  border-color: rgba(var(--summer-sea-rgb), 0.16);
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__signal strong {
@@ -4172,8 +4183,8 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .portfolio-about-panel,
 :root[data-theme='summer-day'] .portfolio-home .content-section {
   background:
-    linear-gradient(112deg, rgba(255, 213, 105, 0.12), transparent 34%),
-    repeating-linear-gradient(96deg, rgba(8, 116, 127, 0.032) 0 1px, transparent 1px 74px),
+    linear-gradient(112deg, rgba(var(--summer-warm-rgb), 0.14), transparent 34%),
+    repeating-linear-gradient(96deg, rgba(var(--summer-sea-rgb), 0.032) 0 1px, transparent 1px 74px),
     linear-gradient(180deg, var(--summer-sky-soft) 0%, #eefcff 100%);
   color: var(--summer-ink);
 }
@@ -4181,9 +4192,9 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .home-dashboard {
   background:
     linear-gradient(72deg, transparent 0 28%, rgba(255, 255, 255, 0.22) 38%, transparent 50%),
-    linear-gradient(112deg, rgba(69, 200, 190, 0.08), transparent 42%),
+    linear-gradient(112deg, rgba(var(--summer-sea-soft-rgb), 0.08), transparent 42%),
     var(--summer-archive-grid),
-    linear-gradient(180deg, rgba(250, 255, 239, 0.64), rgba(234, 248, 244, 0.76));
+    linear-gradient(180deg, rgba(var(--summer-warm-rgb), 0.2), rgba(234, 248, 244, 0.76));
   background-size: 160% 100%, auto, auto, auto;
   border-bottom-color: var(--summer-line);
   color: var(--summer-ink);
@@ -4227,7 +4238,7 @@ body:has(.cyber-home) .site-footer a {
     var(--summer-panel);
   backdrop-filter: blur(16px) saturate(1.06);
   border-color: var(--summer-line);
-  box-shadow: inset 0 1px 0 var(--summer-glint), 0 14px 42px rgba(44, 106, 116, 0.07);
+  box-shadow: inset 0 1px 0 var(--summer-glint), 0 14px 42px rgba(var(--summer-shadow-rgb), 0.07);
   color: var(--summer-ink);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
@@ -4242,18 +4253,18 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .home-moment-strip a,
 :root[data-theme='summer-day'] .home-archive-links a {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(250, 255, 239, 0.34)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(var(--summer-warm-rgb), 0.22)),
     rgba(255, 255, 244, 0.58);
   border-color: var(--summer-line);
-  box-shadow: inset 0 1px 0 var(--summer-glint), 0 14px 40px rgba(44, 106, 116, 0.06);
+  box-shadow: inset 0 1px 0 var(--summer-glint), 0 14px 40px rgba(var(--summer-shadow-rgb), 0.06);
   color: var(--summer-ink);
 }
 
 :root[data-theme='summer-day'] .home-journal-list a:hover,
 :root[data-theme='summer-day'] .home-moment-strip a:hover,
 :root[data-theme='summer-day'] .home-archive-links a:hover {
-  border-color: rgba(8, 116, 127, 0.22);
-  box-shadow: inset 0 1px 0 var(--summer-glint), 0 18px 52px rgba(34, 91, 102, 0.1);
+  border-color: rgba(var(--summer-sea-rgb), 0.22);
+  box-shadow: inset 0 1px 0 var(--summer-glint), 0 18px 52px rgba(var(--summer-shadow-rgb), 0.1);
 }
 
 :root[data-theme='summer-day'] .home-journal-list span,
