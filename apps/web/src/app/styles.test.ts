@@ -202,6 +202,43 @@ describe('global styles', () => {
     expect(aboutPageBlock).toContain('overflow: hidden;');
   });
 
+  test('keeps the public about page substantial and site-focused', () => {
+    const aboutPageSource = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
+
+    expect(aboutPageSource).toContain('关于本站');
+    expect(aboutPageSource).toContain('个人内容平台');
+    expect(aboutPageSource).toContain('内容结构');
+    expect(aboutPageSource).toContain('运行方式');
+    expect(aboutPageSource).toContain('阅读路径');
+    expect(aboutPageSource).toContain('仓库');
+    expect(aboutPageSource).toContain('静态发布');
+    expect(aboutPageSource).toContain('className="about-site-grid"');
+    expect(aboutPageSource).toContain('className="about-site-card"');
+    expect(aboutPageSource).toContain('className="about-flow"');
+    expect(aboutPageSource).not.toContain('不是');
+    expect(aboutPageSource).not.toContain('而是');
+    expect(aboutPageSource).not.toContain('AI 产品');
+    expect(aboutPageSource).not.toContain('招聘');
+  });
+
+  test('aligns about cards with the leetcode glass panel material', () => {
+    const css = readGlobalStyles();
+    const aboutPageBlock = readStyleBlock(css, '.about-page');
+    const aboutCardBlock = readStyleBlock(css, '.about-site-card');
+    const aboutListItemBlock = readStyleBlock(css, '.about-list__item');
+    const dayAboutCardBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-site-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
+        ?.body ?? '';
+
+    expect(aboutPageBlock).toContain('linear-gradient(135deg, rgba(34, 211, 238, 0.11), transparent 36%)');
+    expect(aboutPageBlock).toContain('linear-gradient(180deg, rgba(15, 23, 42, 0.6), rgba(2, 6, 23, 0.42))');
+    expect(aboutCardBlock).toContain('background: rgba(15, 23, 42, 0.42);');
+    expect(aboutCardBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
+    expect(aboutListItemBlock).toContain('background: rgba(15, 23, 42, 0.42);');
+    expect(dayAboutCardBlock).toContain('background: var(--summer-panel-sheen), var(--summer-panel);');
+    expect(dayAboutCardBlock).toContain('border-color: var(--summer-line);');
+  });
+
   test('styles the posts archive as a YYsuni-inspired dark grouped timeline', () => {
     const css = readGlobalStyles();
     const archiveBlock = readStyleBlock(css, '.posts-archive');
@@ -1701,12 +1738,12 @@ describe('global styles', () => {
       '';
 
     expect(css).toContain('.about-list__item');
-    expect(aboutItemBlock).toContain('background: rgba(4, 6, 14, 0.46);');
+    expect(aboutItemBlock).toContain('background: rgba(15, 23, 42, 0.42);');
     expect(aboutItemBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
     expect(aboutItemBlock).toContain('color: inherit;');
     expect(aboutItemBlock).toContain('display: block;');
     expect(aboutItemBlock).toContain('text-decoration: none;');
-    expect(aboutItemInteractiveBlock).toContain('border-color: rgba(148, 163, 184, 0.34);');
+    expect(aboutItemInteractiveBlock).toContain('border-color: rgba(34, 211, 238, 0.26);');
     expect(aboutItemInteractiveBlock).toContain('transform: translateY(-1px);');
     expect(aboutItemBlock).not.toContain('background: #fff;');
     expect(dayAboutSocialBlock).toContain('color: var(--summer-accent);');
