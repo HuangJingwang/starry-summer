@@ -5,6 +5,8 @@ These instructions apply to the entire repository.
 ## Constraint Authority
 
 - This `AGENTS.md` is the canonical instruction source for Starry Summer.
+- DO NOT send optional commentary.
+- Use Asia/Shanghai time for all date and time behavior, examples, assumptions, and scheduling unless the user explicitly requests another timezone.
 - Do not create or maintain separate product-positioning instructions in subdirectories. If a tool requires a local `CLAUDE.md`, `GEMINI.md`, or similar file, keep it as a short pointer back to this file.
 - Older generated, imported, or experimental directories remain subordinate to this file. Their local notes must not redefine Starry Summer as a portfolio, AI product, recruiting site, or design showcase.
 
