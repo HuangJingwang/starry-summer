@@ -27,7 +27,6 @@ export default async function HomePage() {
   ]);
   const profile = buildHomeProfileModel(settings, content);
   const stats = profile.stats;
-  const heroLead = '在这里记录技术文章、工程实践和一些生活里的光。';
   const latestArticle = profile.latestArticle;
   const latestArticleCover = latestArticle ? getContentCover(latestArticle) : null;
   const juejinLink = settings.profile.socialLinks.find((link) => link.href.includes('juejin.cn'));
@@ -83,7 +82,7 @@ export default async function HomePage() {
             </aside>
 
             <div className="portfolio-hero__center-stack">
-              <HomeIntroCard ownerName={profile.ownerName} lead={heroLead} />
+              <HomeIntroCard ownerName={profile.ownerName} />
 
               <div className="portfolio-hero__actions" aria-label="首页快捷入口">
                 <div className="portfolio-hero__action-row portfolio-hero__action-row--primary">

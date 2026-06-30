@@ -7,10 +7,9 @@ import { getHomeGreeting } from '@/lib/home-greeting';
 
 type HomeIntroCardProps = {
   ownerName: string;
-  lead: string;
 };
 
-export function HomeIntroCard({ ownerName, lead }: HomeIntroCardProps) {
+export function HomeIntroCard({ ownerName }: HomeIntroCardProps) {
   const [greeting, setGreeting] = useState(() => getHomeGreeting());
 
   useEffect(() => {
@@ -51,9 +50,8 @@ export function HomeIntroCard({ ownerName, lead }: HomeIntroCardProps) {
         <span className="portfolio-hero__hi-line">
           I&apos;m <strong className="portfolio-hero__hi-name">{ownerName}</strong>,
         </span>
-        <span className="portfolio-hero__hi-line portfolio-hero__hi-line--meet">nice to meet you!</span>
+        <span className="portfolio-hero__hi-line portfolio-hero__hi-line--meet">Nice to meet you!</span>
       </h1>
-      <p className="portfolio-hero__lead">{lead}</p>
     </div>
   );
 }

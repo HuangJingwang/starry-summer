@@ -394,6 +394,10 @@ body:has(.cyber-home) .site-footer a {
   position: relative;
 }
 
+.portfolio-home {
+  font-family: var(--font-nav);
+}
+
 .portfolio-hero::before,
 .portfolio-hero::after {
   content: '';
@@ -621,7 +625,7 @@ body:has(.cyber-home) .site-footer a {
   height: var(--reference-nav-height);
   min-height: var(--reference-nav-height);
   min-width: 0;
-  padding: 18px;
+  padding: 24px;
 }
 
 .portfolio-hero__nav-card:hover,
@@ -696,7 +700,7 @@ body:has(.cyber-home) .site-footer a {
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.25;
-  margin: 12px 0 0;
+  margin: 18px 0 0;
   text-transform: uppercase;
 }
 
@@ -731,8 +735,8 @@ body:has(.cyber-home) .site-footer a {
   justify-content: flex-start;
   letter-spacing: 0;
   line-height: 1.5;
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 52px;
+  padding: 0 20px;
   position: relative;
   text-decoration: none;
   transition:
@@ -800,8 +804,8 @@ body:has(.cyber-home) .site-footer a {
   border-top: 1px solid rgba(148, 163, 184, 0.14);
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
 }
 
 .portfolio-hero__nav-footer span {
@@ -824,12 +828,12 @@ body:has(.cyber-home) .site-footer a {
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 1.02rem;
-  height: 40px;
+  height: 34px;
   justify-content: center;
   line-height: 1;
   padding: 0;
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
-  width: 40px;
+  width: 34px;
 }
 
 .portfolio-hero__nav-theme:hover,
@@ -1020,20 +1024,21 @@ body:has(.cyber-home) .site-footer a {
   --reference-center-y: clamp(420px, 47.5svh, 500px);
   --reference-gap: 36px;
   --reference-hi-width: 360px;
-  --reference-hi-height: 260px;
+  --reference-hi-height: 288px;
   --reference-art-width: 360px;
-  --reference-art-height: 188px;
+  --reference-art-height: 200px;
   --reference-clock-width: 232px;
   --reference-clock-height: 132px;
   --reference-clock-offset: 92px;
   --reference-portrait-clock-gap: 24px;
   --reference-calendar-width: 350px;
   --reference-leetcode-width: 280px;
-  --reference-calendar-height: 264px;
+  --reference-calendar-height: 286px;
   --reference-social-width: 315px;
   --reference-article-width: 266px;
+  --reference-article-height: 160px;
   --reference-nav-width: 280px;
-  --reference-nav-height: 398px;
+  --reference-nav-height: 434px;
   --reference-nav-top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 - var(--reference-nav-height));
   --reference-portrait-width: 146px;
   min-height: 100svh;
@@ -1095,9 +1100,11 @@ body:has(.cyber-home) .site-footer a {
   justify-self: stretch;
   left: calc(var(--reference-center-x) + var(--reference-hi-width) / 2 - var(--reference-social-width) - var(--reference-gap) - var(--reference-article-width));
   margin-right: 0;
-  min-height: 160px;
+  box-sizing: border-box;
+  height: var(--reference-article-height);
+  min-height: var(--reference-article-height);
   overflow: hidden;
-  padding: 16px 18px;
+  padding: 24px;
   position: absolute;
   top: calc(var(--reference-center-y) + var(--reference-hi-height) / 2 + var(--reference-gap));
   width: var(--reference-article-width);
@@ -1335,7 +1342,7 @@ body:has(.cyber-home) .site-footer a {
   left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2);
   min-height: var(--reference-hi-height);
   overflow: hidden;
-  padding: 16px 20px;
+  padding: 24px;
   position: absolute;
   text-align: center;
   top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2);
@@ -1360,15 +1367,15 @@ body:has(.cyber-home) .site-footer a {
   border: 1px solid rgba(34, 211, 238, 0.34);
   border-radius: 50%;
   box-shadow:
-    0 18px 38px -24px rgba(34, 211, 238, 0.52),
+    0 16px 32px -5px rgba(34, 211, 238, 0.18),
     0 0 0 7px rgba(15, 23, 42, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   display: grid;
-  height: 82px;
+  height: 120px;
   overflow: hidden;
   place-items: center;
   position: relative;
-  width: 82px;
+  width: 120px;
 }
 
 .portfolio-hero__hi-avatar img {
@@ -1386,11 +1393,11 @@ body:has(.cyber-home) .site-footer a {
   color: #f8fafc;
   display: grid;
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 2.45vw, 1.8rem);
+  font-size: 1.5rem;
   font-weight: 400;
   gap: 2px;
-  line-height: 0.92;
-  margin: 6px 0 0;
+  line-height: 1;
+  margin: 12px 0 0;
 }
 
 .portfolio-hero__hi-line {
@@ -1401,16 +1408,11 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__hi-name {
   -webkit-box-decoration-break: clone;
-  background: linear-gradient(92deg, #22d3ee 0%, #38bdf8 44%, #a78bfa 100%);
-  background-clip: text;
-  box-decoration-break: clone;
   color: var(--cyber-cyan);
-  font-size: 1.22em;
+  font-size: 32px;
   font-weight: 400;
   overflow-wrap: anywhere;
   text-shadow: 0 0 34px rgba(34, 211, 238, 0.18);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .portfolio-hero__hi-line--meet {
@@ -2317,7 +2319,7 @@ body:has(.cyber-home) .site-footer a {
   height: var(--reference-calendar-height);
   left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);
   min-height: var(--reference-calendar-height);
-  padding: 20px;
+  padding: 24px;
   position: absolute;
   top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap));
   width: var(--reference-calendar-width);
@@ -2340,7 +2342,7 @@ body:has(.cyber-home) .site-footer a {
   flex: 1;
   gap: 6px 8px;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  height: 186px;
+  height: 206px;
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
@@ -3128,12 +3130,8 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__hi-name {
-  background: linear-gradient(92deg, #0f94a7 0%, #22c7b8 48%, #f2a93b 100%);
-  background-clip: text;
-  color: #0f94a7;
+  color: #35bfab;
   text-shadow: 0 12px 42px rgba(34, 211, 238, 0.14);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__hi-avatar {
@@ -3287,7 +3285,7 @@ body:has(.cyber-home) .site-footer a {
   gap: 0;
   justify-self: start;
   min-height: var(--reference-calendar-height);
-  padding: 20px;
+  padding: 24px;
   width: var(--reference-calendar-width);
 }
 
@@ -3305,10 +3303,14 @@ body:has(.cyber-home) .site-footer a {
   line-height: 1.25rem;
 }
 
+:root[data-theme='summer-day'] .portfolio-hero__calendar-card span {
+  font-family: var(--font-nav);
+}
+
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card ol {
   flex: 1;
   gap: 6px 8px;
-  height: 186px;
+  height: 206px;
   margin-top: 10px;
 }
 
