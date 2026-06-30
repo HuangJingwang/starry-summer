@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Braces, FileText, Heart, Mail } from 'lucide-react';
+import { FileText, Heart, Mail } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
 import { HomeCardNav } from '@/components/HomeCardNav';
@@ -196,22 +196,17 @@ function HomeLeetCodeCard({ recommendation }: { recommendation: HomeLeetCodeReco
     <aside className="portfolio-hero__leetcode-card" aria-label="今日推荐 LeetCode 题目">
       <div className="portfolio-hero__leetcode-head">
         <span className="portfolio-hero__leetcode-icon" aria-hidden="true">
-          <Braces size={22} strokeWidth={1.8} />
+          <span className="portfolio-hero__leetcode-mark" />
         </span>
         <span>今日推荐</span>
       </div>
       {recommendation ? (
         <a href={recommendation.href} target="_blank" rel="noreferrer">
-          <span className="portfolio-hero__leetcode-meta">
-            <strong>{recommendation.label}</strong>
-            <small>{recommendation.difficulty} · {recommendation.category}</small>
-          </span>
           <b>{recommendation.title}</b>
-          <span className="portfolio-hero__leetcode-description-label">题目描述</span>
-          <p>{recommendation.description}</p>
+          <span className="portfolio-hero__leetcode-status">{recommendation.label} · {recommendation.difficulty}</span>
         </a>
       ) : (
-        <p>题目描述：同步刷题数据后，这里会推荐未刷过的新题或到期复习题。</p>
+        <p className="portfolio-hero__leetcode-status">同步刷题数据后，这里会推荐下一题。</p>
       )}
     </aside>
   );

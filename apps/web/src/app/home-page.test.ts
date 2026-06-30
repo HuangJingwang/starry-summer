@@ -188,8 +188,11 @@ describe('home page', () => {
     expect(source).toContain('const recommendedProblem = buildHomeLeetCodeRecommendation(studyDashboard);');
     expect(source).toContain('className="portfolio-hero__leetcode-card"');
     expect(source).toContain('aria-label="今日推荐 LeetCode 题目"');
-    expect(source).toContain('题目描述');
-    expect(source).toContain('<Braces');
+    expect(source).toContain('className="portfolio-hero__leetcode-mark"');
+    expect(source).toContain('className="portfolio-hero__leetcode-status"');
+    expect(source).toContain('同步刷题数据后，这里会推荐下一题。');
+    expect(source).not.toContain('题目描述');
+    expect(source).not.toContain('<Braces');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--dashboard"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--featured"');
     expect(source).not.toContain('className="summer-detail-field summer-detail-field--popular"');
@@ -224,7 +227,8 @@ describe('home page', () => {
     expect(source).not.toContain('portfolio-hero__stat-icon--content');
     expect(source).not.toContain('portfolio-hero__stat-icon--views');
     expect(source).not.toContain('portfolio-hero__stat-icon--updated');
-    expect(source).toContain("import { Braces, FileText, Heart, Mail } from 'lucide-react';");
+    expect(source).toContain("import { FileText, Heart, Mail } from 'lucide-react';");
+    expect(source).not.toContain("import { Braces, FileText, Heart, Mail } from 'lucide-react';");
     expect(source).toContain("import { HomeAdminControl } from '@/components/HomeAdminControl';");
     expect(source).toContain("import { HomeContactButton } from '@/components/HomeContactButton';");
     expect(source).toContain('className="portfolio-hero__actions"');

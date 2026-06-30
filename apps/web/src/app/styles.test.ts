@@ -1029,8 +1029,12 @@ describe('global styles', () => {
     const homeActionsBlock = css.match(/^\.portfolio-hero__actions\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeLeetCodeBlock =
       css.match(/^\.portfolio-hero__leetcode-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
-    const homeLeetCodeDescriptionBlock =
-      css.match(/^\.portfolio-hero__leetcode-card p\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeLeetCodeIconBlock =
+      css.match(/^\.portfolio-hero__leetcode-icon\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeLeetCodeMarkBlock =
+      css.match(/^\.portfolio-hero__leetcode-mark\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
+    const homeLeetCodeStatusBlock =
+      css.match(/^\.portfolio-hero__leetcode-status\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeClockBlock = css.match(/^\.portfolio-hero__clock-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeCalendarBlock =
       [...css.matchAll(/^\.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/gm)]
@@ -1291,8 +1295,14 @@ describe('global styles', () => {
     expect(homeLeetCodeBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 - 162px);');
     expect(homeLeetCodeBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + var(--reference-calendar-height) + 62px);');
     expect(homeLeetCodeBlock).toContain('width: var(--reference-calendar-width);');
-    expect(homeLeetCodeDescriptionBlock).toContain('display: -webkit-box;');
-    expect(homeLeetCodeDescriptionBlock).toContain('-webkit-line-clamp: 2;');
+    expect(homeLeetCodeIconBlock).toContain('border-radius: 999px;');
+    expect(homeLeetCodeIconBlock).toContain('height: 26px;');
+    expect(homeLeetCodeIconBlock).toContain('width: 26px;');
+    expect(homeLeetCodeMarkBlock).toContain('transform: rotate(-12deg);');
+    expect(homeLeetCodeStatusBlock).toContain('display: block;');
+    expect(homeLeetCodeStatusBlock).toContain('overflow: hidden;');
+    expect(homeLeetCodeStatusBlock).toContain('text-overflow: ellipsis;');
+    expect(homeLeetCodeStatusBlock).toContain('white-space: nowrap;');
     expect(homeCalendarBlock).toContain('justify-self: start;');
     expect(css).not.toContain('grid-area: recommend;');
     expect(css).not.toContain('grid-area: pulse;');

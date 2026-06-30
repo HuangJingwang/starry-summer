@@ -1215,7 +1215,7 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__leetcode-card a {
   color: inherit;
   display: grid;
-  gap: 4px;
+  gap: 7px;
   min-width: 0;
   text-decoration: none;
 }
@@ -1244,27 +1244,40 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__leetcode-icon {
   align-items: center;
-  background: rgba(34, 211, 238, 0.12);
-  border: 1px solid rgba(34, 211, 238, 0.28);
-  border-radius: 12px;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-radius: 999px;
   color: var(--cyber-cyan);
   display: inline-flex;
-  height: 30px;
+  height: 26px;
   justify-content: center;
-  width: 30px;
+  width: 26px;
+}
+
+.portfolio-hero__leetcode-mark {
+  border-bottom: 3px solid currentColor;
+  border-left: 3px solid currentColor;
+  border-radius: 2px 0 0 4px;
+  display: block;
+  height: 12px;
+  position: relative;
+  transform: rotate(-12deg);
+  width: 11px;
+}
+
+.portfolio-hero__leetcode-mark::after {
+  background: currentColor;
+  border-radius: 999px;
+  content: "";
+  height: 3px;
+  position: absolute;
+  right: -6px;
+  top: 2px;
+  width: 10px;
 }
 
 .portfolio-hero__leetcode-meta {
   flex-wrap: wrap;
-}
-
-.portfolio-hero__leetcode-meta strong,
-.portfolio-hero__leetcode-description-label {
-  color: var(--cyber-cyan);
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: 0.66rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
 }
 
 .portfolio-hero__leetcode-meta small {
@@ -1282,21 +1295,15 @@ body:has(.cyber-home) .site-footer a {
   -webkit-line-clamp: 1;
 }
 
-.portfolio-hero__leetcode-description-label {
+.portfolio-hero__leetcode-status {
   color: rgba(148, 163, 184, 0.82);
-  display: none;
-  margin-top: 2px;
-}
-
-.portfolio-hero__leetcode-card p {
-  color: rgba(226, 232, 240, 0.72);
-  display: -webkit-box;
-  font-size: 0.75rem;
-  line-height: 1.32;
-  margin: 0;
+  display: block;
+  font-size: 0.74rem;
+  line-height: 1.2;
+  min-width: 0;
   overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .portfolio-hero__center-stack {
@@ -3843,10 +3850,9 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card span,
 :root[data-theme='summer-day'] .portfolio-hero__latest-card small,
 :root[data-theme='summer-day'] .portfolio-hero__leetcode-meta small,
-:root[data-theme='summer-day'] .portfolio-hero__leetcode-description-label,
+:root[data-theme='summer-day'] .portfolio-hero__leetcode-status,
 :root[data-theme='summer-day'] .portfolio-hero__latest-card time,
-:root[data-theme='summer-day'] .portfolio-hero__latest-card p,
-:root[data-theme='summer-day'] .portfolio-hero__leetcode-card p {
+:root[data-theme='summer-day'] .portfolio-hero__latest-card p {
   color: #7b888e;
 }
 
