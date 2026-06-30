@@ -1137,6 +1137,7 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--reference-clock-offset: 62px;');
     expect(homeHeroContentBlock).toContain('--reference-portrait-clock-gap: 24px;');
     expect(homeHeroContentBlock).toContain('--reference-calendar-width: 350px;');
+    expect(homeHeroContentBlock).toContain('--reference-leetcode-width: 280px;');
     expect(homeHeroContentBlock).toContain('--reference-calendar-height: 264px;');
     expect(homeHeroContentBlock).toContain('--reference-social-width: 315px;');
     expect(homeHeroContentBlock).toContain('--reference-article-width: 266px;');
@@ -1330,7 +1331,7 @@ describe('global styles', () => {
     expect(homeLeetCodeBlock).toContain('border-radius: 32px;');
     expect(homeLeetCodeBlock).toContain('left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 - 162px);');
     expect(homeLeetCodeBlock).toContain('top: calc(var(--reference-center-y) - var(--reference-clock-offset) + var(--reference-gap) + var(--reference-calendar-height) + 62px);');
-    expect(homeLeetCodeBlock).toContain('width: var(--reference-calendar-width);');
+    expect(homeLeetCodeBlock).toContain('width: var(--reference-leetcode-width);');
     expect(homeLeetCodeIconBlock).toContain('border-radius: 999px;');
     expect(homeLeetCodeIconBlock).toContain('height: 26px;');
     expect(homeLeetCodeIconBlock).toContain('width: 26px;');
@@ -1703,7 +1704,7 @@ describe('global styles', () => {
     expect(mobileLeetCodeCardBlock).toContain('justify-self: center;');
     expect(mobileLeetCodeCardBlock).toContain('padding: 14px;');
     expect(mobileLeetCodeCardBlock).toContain('translate: none;');
-    expect(mobileLeetCodeCardBlock).toContain('width: min(340px, 100%);');
+    expect(mobileLeetCodeCardBlock).toContain('width: min(300px, 100%);');
     expect(mobileLatestCardLinkBlock).toContain('grid-template-columns: 44px minmax(0, 1fr);');
     expect(mobileLatestCoverBlock).toContain('width: 44px;');
     expect(mobileSkyCardBlock).not.toContain('grid-area: sky;');
