@@ -2840,6 +2840,16 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] {
+  --reference-home-card-bg: #ffffff66;
+  --reference-home-card-border: #ffffff;
+  --reference-home-card-backdrop: blur(4px);
+  --reference-home-card-radius: 40px;
+  --reference-home-card-shadow:
+    0 40px 50px -32px rgba(0, 0, 0, 0.05),
+    inset 0 0 20px rgba(255, 255, 255, 0.25);
+  --reference-home-card-shadow-hover:
+    0 40px 50px -32px rgba(0, 0, 0, 0.08),
+    inset 0 0 20px rgba(255, 255, 255, 0.28);
   --summer-glow-warm: #fff0a3a8;
   --summer-glow-sea: #8fdbe9;
   --summer-glow-cloud: #fffef8;
@@ -2989,23 +2999,17 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-card {
-  background:
-    var(--summer-panel-sheen),
-    var(--summer-panel);
-  border-color: rgba(148, 163, 184, 0.34);
-  border-radius: 40px;
-  box-shadow:
-    0 40px 50px -32px rgba(0, 0, 0, 0.05),
-    inset 0 0 20px rgba(255, 255, 255, 0.25);
+  background: var(--reference-home-card-bg);
+  border-color: var(--reference-home-card-border);
+  border-radius: var(--reference-home-card-radius);
+  box-shadow: var(--reference-home-card-shadow);
   color: var(--summer-ink);
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-card:hover,
 :root[data-theme='summer-day'] .portfolio-hero__nav-card:focus-within {
-  border-color: rgba(148, 163, 184, 0.34);
-  box-shadow:
-    0 40px 50px -32px rgba(0, 0, 0, 0.08),
-    inset 0 0 20px rgba(255, 255, 255, 0.28);
+  border-color: var(--reference-home-card-border);
+  box-shadow: var(--reference-home-card-shadow-hover);
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-brand img {
@@ -3181,16 +3185,11 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card,
 :root[data-theme='summer-day'] .portfolio-home .content-card,
 :root[data-theme='summer-day'] .home-photo-album__viewport {
-  background:
-    var(--summer-panel-sheen),
-    var(--summer-panel);
-  backdrop-filter: blur(18px) saturate(1.08);
-  border-color: rgba(148, 163, 184, 0.34);
-  border-radius: 32px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    0 40px 50px -32px rgba(0, 0, 0, 0.05);
+  background: var(--reference-home-card-bg);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  border-color: var(--reference-home-card-border);
+  border-radius: var(--reference-home-card-radius);
+  box-shadow: var(--reference-home-card-shadow);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
@@ -3208,16 +3207,11 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__latest-card {
-  background:
-    var(--summer-panel-sheen),
-    var(--summer-panel);
-  backdrop-filter: blur(18px) saturate(1.08);
-  border-color: rgba(148, 163, 184, 0.34);
-  border-radius: 32px;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    0 40px 50px -32px rgba(0, 0, 0, 0.05);
+  background: var(--reference-home-card-bg);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  border-color: var(--reference-home-card-border);
+  border-radius: var(--reference-home-card-radius);
+  box-shadow: var(--reference-home-card-shadow);
   color: var(--summer-ink);
 }
 
@@ -3275,29 +3269,21 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__clock-card {
-  background:
-    var(--summer-panel-sheen),
-    rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(4px);
-  border-color: rgba(148, 163, 184, 0.34);
-  border-radius: 40px;
-  box-shadow:
-    inset 0 0 20px rgba(255, 255, 255, 0.25),
-    0 40px 50px -32px rgba(0, 0, 0, 0.05);
+  background: var(--reference-home-card-bg);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  border-color: var(--reference-home-card-border);
+  border-radius: var(--reference-home-card-radius);
+  box-shadow: var(--reference-home-card-shadow);
   gap: 5px;
   padding: 8px;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__calendar-card {
-  background:
-    var(--summer-panel-sheen),
-    rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(4px);
-  border-color: rgba(148, 163, 184, 0.34);
-  border-radius: 40px;
-  box-shadow:
-    0 40px 50px -32px rgba(0, 0, 0, 0.05),
-    inset 0 0 20px rgba(255, 255, 255, 0.25);
+  background: var(--reference-home-card-bg);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  border-color: var(--reference-home-card-border);
+  border-radius: var(--reference-home-card-radius);
+  box-shadow: var(--reference-home-card-shadow);
   gap: 0;
   justify-self: start;
   min-height: var(--reference-calendar-height);
@@ -3367,15 +3353,10 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__like-card {
-  background:
-    var(--summer-panel-sheen),
-    var(--summer-panel);
-  backdrop-filter: blur(18px) saturate(1.08);
-  border-color: rgba(148, 163, 184, 0.34);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    0 40px 50px -32px rgba(0, 0, 0, 0.05);
+  background: var(--reference-home-card-bg);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  border-color: var(--reference-home-card-border);
+  box-shadow: var(--reference-home-card-shadow);
   color: #fecdd3;
 }
 
@@ -3393,13 +3374,9 @@ body:has(.cyber-home) .site-footer a {
 :root[data-theme='summer-day'] .portfolio-hero__social,
 :root[data-theme='summer-day'] .portfolio-now a,
 :root[data-theme='summer-day'] .section-heading--row a {
-  background:
-    var(--summer-panel-sheen),
-    var(--summer-panel);
-  border-color: #ffffff;
-  box-shadow:
-    0 26px 46px -30px rgba(0, 0, 0, 0.08),
-    inset 0 0 20px rgba(255, 255, 255, 0.28);
+  background: var(--reference-home-card-bg);
+  border-color: var(--reference-home-card-border);
+  box-shadow: var(--reference-home-card-shadow);
   color: var(--summer-accent);
 }
 
@@ -3411,22 +3388,18 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__social--juejin {
-  backdrop-filter: blur(4px);
-  background: var(--summer-panel);
-  border-color: #fff;
-  box-shadow:
-    0 40px 50px -32px rgba(0, 0, 0, 0.05),
-    inset 0 0 20px rgba(255, 255, 255, 0.25);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  background: var(--reference-home-card-bg);
+  border-color: var(--reference-home-card-border);
+  box-shadow: var(--reference-home-card-shadow);
   color: var(--summer-ink);
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__social--guestbook {
-  backdrop-filter: blur(4px);
-  background: var(--summer-panel);
-  border-color: #fff;
-  box-shadow:
-    0 40px 50px -32px rgba(0, 0, 0, 0.05),
-    inset 0 0 20px rgba(255, 255, 255, 0.25);
+  backdrop-filter: var(--reference-home-card-backdrop);
+  background: var(--reference-home-card-bg);
+  border-color: var(--reference-home-card-border);
+  box-shadow: var(--reference-home-card-shadow);
   color: #55c7df;
 }
 

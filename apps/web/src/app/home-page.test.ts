@@ -607,8 +607,8 @@ describe('home page', () => {
     expect(readRule(css, '.portfolio-hero__actions')).toContain('margin-top: 0;');
     expect(readLastRule(css, '.portfolio-hero__calendar-card')).toContain('position: absolute;');
     expect(readLastRule(css, '.portfolio-hero__nav-card')).toContain('border-color: rgba(148, 163, 184, 0.26);');
-    expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: 32px;');
-    expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: 32px;');
+    expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__latest-card")).toContain('border-radius: var(--reference-home-card-radius);');
+    expect(readRuleContainingSelector(css, ":root[data-theme='summer-day'] .portfolio-hero__intro-card")).toContain('border-radius: var(--reference-home-card-radius);');
     expect(readRule(css, '.portfolio-hero__content')).toContain('padding: 0;');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('left: calc(var(--reference-center-x) - var(--reference-hi-width) / 2);');
     expect(readRule(css, '.portfolio-hero__intro-card')).toContain('top: calc(var(--reference-center-y) - var(--reference-hi-height) / 2);');
