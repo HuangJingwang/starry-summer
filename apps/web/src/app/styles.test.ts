@@ -413,6 +413,9 @@ describe('global styles', () => {
     const dayContentCardBlock =
       css.match(/:root\[data-theme='summer-day'\] \.study-archive-page \.content-card\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
+    const dayStudyNavBlock =
+      css.match(/:root\[data-theme='summer-day'\] body:has\(\.study-archive-page\) \.site-header\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
 
     expect(css).toContain(":root[data-theme='summer-night'] .study-archive-page");
     expect(css).toContain(":root[data-theme='summer-day'] body:has(.study-archive-page)");
@@ -430,6 +433,8 @@ describe('global styles', () => {
     expect(dayCardBlock).toContain('backdrop-filter: var(--study-glass-blur);');
     expect(dayContentCardBlock).toContain('background: var(--study-panel);');
     expect(dayContentCardBlock).toContain('color: var(--study-ink);');
+    expect(dayStudyNavBlock).toContain("var(--summer-panel-sheen)");
+    expect(dayStudyNavBlock).not.toContain('rgba(4, 6, 14, 0.58)');
   });
 
   test('keeps the LeetCode module visually aligned with public content pages', () => {
