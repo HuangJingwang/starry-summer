@@ -14,8 +14,8 @@ describe('HomeAdminControl', () => {
     expect(source).toContain('aria-label="打开首页管理面板"');
     expect(source).toContain('aria-haspopup="dialog"');
     expect(source).toContain('aria-expanded={open}');
-    expect(source).toContain('className="portfolio-hero__admin-grid-icon"');
-    expect(source).toContain('<span aria-hidden="true" />');
+    expect(source).toContain('Grip,');
+    expect(source).toContain('<Grip className="portfolio-hero__admin-grid-icon" size={24} strokeWidth={2} aria-hidden="true" />');
     expect(source).not.toContain('<Settings size={20} strokeWidth={1.8} aria-hidden="true" />');
     expect(source).not.toContain('<span>管理</span>');
     expect(source).not.toContain('href="/admin" aria-label="进入后台管理"');

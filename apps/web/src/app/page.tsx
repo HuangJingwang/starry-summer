@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { FileText, Heart, Mail } from 'lucide-react';
 
 import { BlurredBubblesCanvas } from '@/components/BlurredBubblesCanvas';
@@ -156,33 +155,6 @@ export default async function HomePage() {
                 ))}
               </ol>
             </aside>
-
-            <div className="portfolio-hero__visual">
-              <figure className="portfolio-hero__portrait">
-                <Image
-                  className="portfolio-hero__night-avatar"
-                  src="/images/aster-profile.png"
-                  alt="Aster.H 的夜晚头像"
-                  width={1254}
-                  height={1254}
-                  priority
-                />
-                <Image
-                  className="portfolio-hero__day-avatar"
-                  src="/images/aster-day-profile-v2.png"
-                  alt="Aster.H 的夏日头像"
-                  width={1254}
-                  height={1254}
-                  priority
-                />
-                <div className="portfolio-hero__signal" aria-hidden="true">
-                  <strong>Starry Summer</strong>
-                  <span />
-                  <span />
-                  <span />
-                </div>
-              </figure>
-            </div>
 
           </div>
         </section>

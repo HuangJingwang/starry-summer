@@ -1408,8 +1408,6 @@ describe('global styles', () => {
       css.match(/\.portfolio-hero__admin-widget\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const adminGridIconBlock =
       css.match(/\.portfolio-hero__admin-grid-icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
-    const adminGridIconDotBlock =
-      css.match(/\.portfolio-hero__admin-grid-icon span\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const responsiveAdminWidgetBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__admin-widget');
     const adminWidgetHoverBlock =
       css.match(/\.portfolio-hero__admin-widget:hover,[\s\S]*?\.portfolio-hero__admin-widget:focus-visible\s*{(?<body>[\s\S]*?)\n}/)
@@ -1490,6 +1488,9 @@ describe('global styles', () => {
     expect(guestbookBlock).toContain('width: 46px;');
     expect(guestbookBlock).toContain('padding: 0;');
     expect(adminWidgetBlock).toContain('height: 40px;');
+    expect(adminWidgetBlock).toContain('background: transparent;');
+    expect(adminWidgetBlock).toContain('border: 0;');
+    expect(adminWidgetBlock).toContain('box-shadow: none;');
     expect(adminWidgetBlock).toContain(
       'left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2 + var(--reference-clock-width) / 2 - 20px);',
     );
@@ -1498,24 +1499,22 @@ describe('global styles', () => {
       'top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height) - 56px);',
     );
     expect(adminWidgetBlock).toContain('width: 40px;');
-    expect(adminWidgetBlock).toContain('padding: 0;');
+    expect(adminWidgetBlock).toContain('padding: 8px;');
     expect(adminWidgetBlock).toContain('color: rgba(226, 232, 240, 0.58);');
     expect(adminWidgetBlock).toContain('text-decoration: none;');
-    expect(adminGridIconBlock).toContain('display: grid;');
-    expect(adminGridIconBlock).toContain('gap: 3px;');
-    expect(adminGridIconBlock).toContain('grid-template-columns: repeat(3, 4px);');
-    expect(adminGridIconDotBlock).toContain('background: currentColor;');
-    expect(adminGridIconDotBlock).toContain('border-radius: 999px;');
-    expect(adminGridIconDotBlock).toContain('height: 4px;');
-    expect(adminGridIconDotBlock).toContain('width: 4px;');
+    expect(adminGridIconBlock).toContain('display: block;');
+    expect(adminGridIconBlock).toContain('height: 24px;');
+    expect(adminGridIconBlock).toContain('width: 24px;');
     expect(responsiveAdminWidgetBlock).toContain('height: 40px;');
     expect(responsiveAdminWidgetBlock).toContain('left: auto;');
     expect(responsiveAdminWidgetBlock).toContain('position: static;');
     expect(responsiveAdminWidgetBlock).toContain('top: auto;');
     expect(responsiveAdminWidgetBlock).toContain('width: 40px;');
-    expect(adminWidgetHoverBlock).toContain('border-color: rgba(34, 211, 238, 0.38);');
+    expect(adminWidgetHoverBlock).toContain('opacity: 0.8;');
     expect(adminWidgetHoverBlock).toContain('outline: none;');
-    expect(dayAdminWidgetBlock).toContain('color: rgba(16, 52, 61, 0.54);');
+    expect(dayAdminWidgetBlock).toContain('background: transparent;');
+    expect(dayAdminWidgetBlock).toContain('box-shadow: none;');
+    expect(dayAdminWidgetBlock).toContain('color: rgba(91, 66, 63, 0.72);');
     expect(css).toContain(".portfolio-hero__admin-widget[aria-expanded='true']");
     expect(css).toContain('.home-admin-config');
     expect(css).toContain('.home-admin-config__panel');

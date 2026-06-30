@@ -6,6 +6,7 @@ import {
   Archive,
   FilePenLine,
   FolderKanban,
+  Grip,
   Image,
   LayoutDashboard,
   LayoutGrid,
@@ -159,17 +160,7 @@ export function HomeAdminControl() {
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        <span className="portfolio-hero__admin-grid-icon" aria-hidden="true">
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </span>
+        <Grip className="portfolio-hero__admin-grid-icon" size={24} strokeWidth={2} aria-hidden="true" />
       </button>
 
       {mounted && open ? createPortal(adminPanel, document.body) : null}
