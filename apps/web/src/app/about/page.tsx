@@ -30,6 +30,17 @@ export default async function AboutPage() {
             <li>片刻、推荐和生活记录</li>
             <li>项目过程与阶段复盘</li>
           </ul>
+          <div className="about-note__meta">
+            <h2>技术栈</h2>
+            <ul className="about-stack" aria-label="技术栈">
+              <li>Next.js</li>
+              <li>React</li>
+              <li>TypeScript</li>
+              <li>Markdown</li>
+              <li>GitHub</li>
+              <li>Vercel</li>
+            </ul>
+          </div>
         </section>
 
         {settings.profile.socialLinks.length > 0 ? (

@@ -208,8 +208,10 @@ describe('global styles', () => {
     expect(aboutPageSource).toContain('关于本站');
     expect(aboutPageSource).toContain('个人内容平台');
     expect(aboutPageSource).toContain('仓库');
+    expect(aboutPageSource).toContain('技术栈');
     expect(aboutPageSource).toContain('className="about-note"');
     expect(aboutPageSource).toContain('className="about-note__list"');
+    expect(aboutPageSource).toContain('className="about-stack"');
     expect(aboutPageSource).not.toContain('className="about-site-grid"');
     expect(aboutPageSource).not.toContain('className="about-site-card"');
     expect(aboutPageSource).not.toContain('className="about-flow"');
@@ -1716,6 +1718,8 @@ describe('global styles', () => {
     const css = readGlobalStyles();
     const aboutNoteBlock = css.match(/\.about-note\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const aboutNoteListBlock = css.match(/\.about-note__list\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutStackBlock = css.match(/\.about-stack\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutStackItemBlock = css.match(/\.about-stack li\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayAboutSocialBlock =
       css.match(/:root\[data-theme='summer-day'\] \.about-social a\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
@@ -1731,6 +1735,9 @@ describe('global styles', () => {
     expect(aboutNoteBlock).toContain('border: 1px solid rgba(148, 163, 184, 0.16);');
     expect(aboutNoteBlock).not.toContain('background: #fff;');
     expect(aboutNoteListBlock).toContain('list-style: none;');
+    expect(aboutStackBlock).toContain('display: flex;');
+    expect(aboutStackBlock).toContain('flex-wrap: wrap;');
+    expect(aboutStackItemBlock).toContain('border-radius: 999px;');
     expect(dayAboutSocialBlock).toContain('color: var(--summer-accent);');
     expect(dayAboutSocialBlock).toContain('border-color: rgba(45, 109, 116, 0.18);');
     expect(dayAboutNoteBlock).toContain('var(--summer-panel-sheen)');
