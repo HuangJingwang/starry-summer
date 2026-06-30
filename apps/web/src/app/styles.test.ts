@@ -753,10 +753,14 @@ describe('global styles', () => {
     expect(css).toContain('--summer-cloud');
     expect(css).toContain('--summer-sea');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];");
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const warmGlowColor = referenceDayColors[0];');
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const r = isWarmGlow ? rand(220, 330) : rand(minRadius, maxRadius);');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain("const dayGlowColors = ['#fff0a3a8', referenceDayColors[1], referenceDayColors[2]];");
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const warmGlowColor = dayGlowColors[0];');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const color = dayGlowColors[nextBubbles.length % dayGlowColors.length]');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const r = isWarmGlow ? rand(250, 360) : rand(minRadius, maxRadius);');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const x = isWarmGlow ? rand(-r * 0.3, width * 0.68) : rand(-r / 2, width + r / 2);');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const y = isWarmGlow ? rand(height * 0.68, height * 1.02) : rand(height * bottomBandStart, height * 1.2);');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('alpha: isWarmGlow ? 0.62 : 0.8,');
-    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('blur: isWarmGlow ? rand(180, 320) : rand(200, 400),');
+    expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('blur: isWarmGlow ? rand(220, 360) : rand(200, 400),');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('context.globalAlpha = bubble.alpha;');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const bottomBandStart = 0.8;');
     expect(readStylesheet('src/components/BlurredBubblesCanvas.tsx')).toContain('const targetFrameMs = 1000 / 6;');

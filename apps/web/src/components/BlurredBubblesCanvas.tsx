@@ -17,7 +17,8 @@ interface Bubble {
 }
 
 const referenceDayColors = ['#f7da3987', '#8fdbe9', '#fffef8'];
-const warmGlowColor = referenceDayColors[0];
+const dayGlowColors = ['#fff0a3a8', referenceDayColors[1], referenceDayColors[2]];
+const warmGlowColor = dayGlowColors[0];
 
 function getTheme(): BubbleTheme {
   return document.documentElement.dataset.theme === 'summer-day' ? 'summer-day' : 'summer-night';
@@ -175,11 +176,11 @@ export function BlurredBubblesCanvas({ className = '' }: { className?: string })
 
       while (nextBubbles.length < count && tries < 5000) {
         tries += 1;
-        const color = referenceDayColors[nextBubbles.length % referenceDayColors.length] ?? '#8fdbe9';
+        const color = dayGlowColors[nextBubbles.length % dayGlowColors.length] ?? '#8fdbe9';
         const isWarmGlow = color === warmGlowColor;
-        const r = isWarmGlow ? rand(220, 330) : rand(minRadius, maxRadius);
-        const x = rand(-r / 2, width + r / 2);
-        const y = rand(height * bottomBandStart, height * 1.2);
+        const r = isWarmGlow ? rand(250, 360) : rand(minRadius, maxRadius);
+        const x = isWarmGlow ? rand(-r * 0.3, width * 0.68) : rand(-r / 2, width + r / 2);
+        const y = isWarmGlow ? rand(height * 0.68, height * 1.02) : rand(height * bottomBandStart, height * 1.2);
         const ok = nextBubbles.every((bubble) => {
           const distance = Math.hypot(bubble.x - x, bubble.y - y);
 
@@ -189,7 +190,7 @@ export function BlurredBubblesCanvas({ className = '' }: { className?: string })
         if (ok) {
           nextBubbles.push({
             alpha: isWarmGlow ? 0.62 : 0.8,
-            blur: isWarmGlow ? rand(180, 320) : rand(200, 400),
+            blur: isWarmGlow ? rand(220, 360) : rand(200, 400),
             color,
             jitter: rand(0.6, 1.2),
             r,
