@@ -1027,9 +1027,9 @@ body:has(.cyber-home) .site-footer a {
   --reference-hi-height: 260px;
   --reference-art-width: 360px;
   --reference-art-height: 188px;
-  --reference-clock-width: 220px;
-  --reference-clock-height: 118px;
-  --reference-clock-offset: 62px;
+  --reference-clock-width: 232px;
+  --reference-clock-height: 132px;
+  --reference-clock-offset: 92px;
   --reference-portrait-clock-gap: 24px;
   --reference-calendar-width: 350px;
   --reference-leetcode-width: 280px;
@@ -2231,7 +2231,6 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__sky-card span,
-.portfolio-hero__clock-card span,
 .portfolio-hero__calendar-card span {
   color: var(--cyber-cyan);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -2247,17 +2246,17 @@ body:has(.cyber-home) .site-footer a {
 }
 
 .portfolio-hero__clock-card {
-  align-content: center;
+  align-items: center;
   animation: home-widget-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) 360ms both;
-  display: grid;
-  gap: 10px;
+  display: flex;
+  justify-content: center;
   justify-items: center;
   justify-self: start;
   left: calc(var(--reference-center-x) + var(--reference-gap) + var(--reference-hi-width) / 2);
   box-sizing: border-box;
   height: var(--reference-clock-height);
   min-height: var(--reference-clock-height);
-  padding: 12px;
+  padding: 8px;
   position: absolute;
   top: calc(var(--reference-center-y) - var(--reference-clock-offset) - var(--reference-clock-height));
   width: var(--reference-clock-width);
@@ -2265,85 +2264,31 @@ body:has(.cyber-home) .site-footer a {
 
 .portfolio-hero__clock-digits {
   align-items: center;
-  background: rgba(15, 23, 42, 0.24);
-  border: 1px solid rgba(125, 211, 252, 0.16);
-  border-radius: 22px;
+  background: rgba(123, 136, 142, 0.2);
+  border-radius: 40px;
   display: flex;
-  gap: 7px;
+  gap: 6px;
+  height: 100%;
   justify-content: center;
-  padding: 10px 9px;
+  padding: 8px;
   width: 100%;
 }
 
 .portfolio-hero__clock-digit {
   display: block;
+  flex: 0 0 auto;
   height: 52px;
-  position: relative;
   width: 29px;
 }
 
-.portfolio-hero__clock-digit i {
-  --clock-segment-off: rgba(148, 163, 184, 0.13);
-  --clock-segment-on: var(--cyber-cyan);
-  background: var(--clock-segment-off);
-  border-radius: 999px;
-  box-shadow: none;
-  display: block;
-  position: absolute;
-  transition: background 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+.portfolio-hero__clock-segment {
+  fill: rgba(148, 163, 184, 0.13);
+  transition: fill 160ms ease, filter 160ms ease;
 }
 
-.portfolio-hero__clock-digit i[data-active='true'] {
-  background: linear-gradient(135deg, var(--cyber-cyan), var(--cyber-teal));
-  box-shadow: 0 0 14px rgba(34, 211, 238, 0.34);
-}
-
-.portfolio-hero__clock-digit i[data-segment='0'],
-.portfolio-hero__clock-digit i[data-segment='3'],
-.portfolio-hero__clock-digit i[data-segment='6'] {
-  height: 5px;
-  left: 6px;
-  width: 17px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='0'] {
-  top: 1px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='3'] {
-  bottom: 1px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='6'] {
-  top: 23px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='1'],
-.portfolio-hero__clock-digit i[data-segment='2'],
-.portfolio-hero__clock-digit i[data-segment='4'],
-.portfolio-hero__clock-digit i[data-segment='5'] {
-  height: 18px;
-  width: 5px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='1'],
-.portfolio-hero__clock-digit i[data-segment='2'] {
-  right: 1px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='4'],
-.portfolio-hero__clock-digit i[data-segment='5'] {
-  left: 1px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='1'],
-.portfolio-hero__clock-digit i[data-segment='5'] {
-  top: 5px;
-}
-
-.portfolio-hero__clock-digit i[data-segment='2'],
-.portfolio-hero__clock-digit i[data-segment='4'] {
-  bottom: 5px;
+.portfolio-hero__clock-segment[data-active='true'] {
+  fill: var(--cyber-cyan);
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.3));
 }
 
 .portfolio-hero__clock-colon {
@@ -2362,13 +2307,6 @@ body:has(.cyber-home) .site-footer a {
   display: block;
   height: 6px;
   width: 6px;
-}
-
-.portfolio-hero__clock-card small {
-  color: rgba(226, 232, 240, 0.68);
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1;
 }
 
 .portfolio-hero__calendar-card {
@@ -3868,30 +3806,21 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__clock-digits {
-  background: rgba(127, 143, 151, 0.12);
-  border-color: rgba(148, 163, 184, 0.12);
+  background: rgba(123, 136, 142, 0.2);
   border-radius: 40px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(148, 163, 184, 0.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(91, 66, 63, 0.08);
   gap: 6px;
-  padding: 9px 10px;
 }
 
-:root[data-theme='summer-day'] .portfolio-hero__clock-digit i {
-  --clock-segment-off: rgba(0, 0, 0, 0.05);
-  --clock-segment-on: #2fcbe7;
-  background: var(--clock-segment-off);
-  clip-path: polygon(14% 0, 86% 0, 100% 34%, 86% 100%, 14% 100%, 0 66%, 0 34%);
+:root[data-theme='summer-day'] .portfolio-hero__clock-segment {
+  fill: rgba(91, 66, 63, 0.04);
 }
 
-:root[data-theme='summer-day'] .portfolio-hero__clock-digit i[data-active='true'] {
-  background: var(--clock-segment-on);
-  box-shadow: none;
-}
-
-:root[data-theme='summer-day'] .portfolio-hero__clock-card small {
-  color: #8b7667;
+:root[data-theme='summer-day'] .portfolio-hero__clock-segment[data-active='true'] {
+  fill: rgba(91, 66, 63, 0.9);
+  filter: none;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__clock-card {

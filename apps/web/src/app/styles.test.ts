@@ -1114,11 +1114,11 @@ describe('global styles', () => {
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-digits\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
     const dayHomeClockSegmentBlock =
-      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-digit i\s*{(?<body>[\s\S]*?)\n}/)
+      css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__clock-segment\s*{(?<body>[\s\S]*?)\n}/)
         ?.groups?.body ?? '';
     const dayHomeClockActiveSegmentBlock =
       css.match(
-        /:root\[data-theme='summer-day'\] \.portfolio-hero__clock-digit i\[data-active='true'\]\s*{(?<body>[\s\S]*?)\n}/,
+        /:root\[data-theme='summer-day'\] \.portfolio-hero__clock-segment\[data-active='true'\]\s*{(?<body>[\s\S]*?)\n}/,
       )?.groups?.body ?? '';
     const dayCalendarBlock =
       css.match(/:root\[data-theme='summer-day'\] \.portfolio-hero__calendar-card\s*{(?<body>[\s\S]*?)\n}/)?.groups
@@ -1137,9 +1137,9 @@ describe('global styles', () => {
     expect(homeHeroContentBlock).toContain('--reference-hi-height: 260px;');
     expect(homeHeroContentBlock).toContain('--reference-art-width: 360px;');
     expect(homeHeroContentBlock).toContain('--reference-art-height: 188px;');
-    expect(homeHeroContentBlock).toContain('--reference-clock-width: 220px;');
-    expect(homeHeroContentBlock).toContain('--reference-clock-height: 118px;');
-    expect(homeHeroContentBlock).toContain('--reference-clock-offset: 62px;');
+    expect(homeHeroContentBlock).toContain('--reference-clock-width: 232px;');
+    expect(homeHeroContentBlock).toContain('--reference-clock-height: 132px;');
+    expect(homeHeroContentBlock).toContain('--reference-clock-offset: 92px;');
     expect(homeHeroContentBlock).toContain('--reference-portrait-clock-gap: 24px;');
     expect(homeHeroContentBlock).toContain('--reference-calendar-width: 350px;');
     expect(homeHeroContentBlock).toContain('--reference-leetcode-width: 280px;');
@@ -1207,11 +1207,10 @@ describe('global styles', () => {
     expect(dayHomeClockBlock).toContain('padding: 8px;');
     expect(dayHomeClockBlock).toContain('0 40px 50px -32px rgba(0, 0, 0, 0.05)');
     expect(dayHomeClockDigitsBlock).toContain('border-radius: 40px;');
-    expect(dayHomeClockDigitsBlock).toContain('background: rgba(127, 143, 151, 0.12);');
+    expect(dayHomeClockDigitsBlock).toContain('background: rgba(123, 136, 142, 0.2);');
     expect(dayHomeClockDigitsBlock).toContain('gap: 6px;');
-    expect(dayHomeClockSegmentBlock).toContain('--clock-segment-off: rgba(0, 0, 0, 0.05);');
-    expect(dayHomeClockSegmentBlock).toContain('clip-path: polygon(');
-    expect(dayHomeClockActiveSegmentBlock).toContain('background: var(--clock-segment-on);');
+    expect(dayHomeClockSegmentBlock).toContain('fill: rgba(91, 66, 63, 0.04);');
+    expect(dayHomeClockActiveSegmentBlock).toContain('fill: rgba(91, 66, 63, 0.9);');
     expect(dayHomeClockActiveSegmentBlock).not.toContain('box-shadow: 0 0 14px');
     expect(dayHomeNavLinkBlock).toContain('color: rgba(91, 66, 63, 0.68);');
     expect(dayHomeNavActiveBlock).toContain('linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%)');

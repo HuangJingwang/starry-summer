@@ -17,9 +17,15 @@ describe('HomeClockCard', () => {
     expect(source).toContain("className=\"portfolio-hero__clock-digits\"");
     expect(source).toContain('<SevenSegmentDigit value={Number(hours[0])} />');
     expect(source).toContain('<ClockColon />');
+    expect(source).not.toContain('LOCAL TIME');
+    expect(source).not.toContain('formatClockDate');
+    expect(source).not.toContain('<small>');
     expect(source).toContain('function SevenSegmentDigit');
     expect(source).toContain('const segmentMap: Record<number, boolean[]>');
-    expect(source).toContain('data-active={active ?');
+    expect(source).toContain('width="29" height="52" viewBox="0 0 29 52"');
+    expect(source).toContain('className="portfolio-hero__clock-segment"');
+    expect(source).toContain("data-active={segments[index] ? 'true' : undefined}");
+    expect(source).not.toContain('<i key={index} data-segment={index}');
     expect(source).toContain('function ClockColon()');
   });
 });
