@@ -707,7 +707,7 @@ body:has(.cyber-home) .site-footer a {
 .portfolio-hero__nav-links {
   align-content: start;
   display: grid;
-  gap: 4px;
+  gap: 2px;
   grid-template-columns: 1fr;
   margin-top: 6px;
   max-width: none;
@@ -735,7 +735,7 @@ body:has(.cyber-home) .site-footer a {
   justify-content: flex-start;
   letter-spacing: 0;
   line-height: 1.5;
-  min-height: 52px;
+  min-height: 47px;
   padding: 0 20px;
   position: relative;
   text-decoration: none;
@@ -760,6 +760,7 @@ body:has(.cyber-home) .site-footer a {
   border-color: rgba(34, 211, 238, 0.24);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color: #f8fafc;
+  font-weight: 500;
 }
 
 .portfolio-hero__nav-icon {
@@ -822,18 +823,19 @@ body:has(.cyber-home) .site-footer a {
   background: rgba(15, 23, 42, 0.78);
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 999px;
+  box-sizing: border-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 28px rgba(0, 0, 0, 0.22);
   color: var(--cyber-cyan);
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 1.02rem;
-  height: 34px;
+  height: 38px;
   justify-content: center;
   line-height: 1;
-  padding: 0;
+  padding: 8px;
   transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 180ms ease;
-  width: 34px;
+  width: 38px;
 }
 
 .portfolio-hero__nav-theme:hover,
@@ -3028,7 +3030,7 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-brand strong {
-  color: var(--summer-ink);
+  color: #334f52;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-brand small {
@@ -3036,11 +3038,11 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-kicker {
-  color: rgba(91, 66, 63, 0.66);
+  color: #7b888e;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-links a {
-  color: rgba(91, 66, 63, 0.68);
+  color: #7b888e;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-links::before {
@@ -3054,7 +3056,8 @@ body:has(.cyber-home) .site-footer a {
     linear-gradient(to right bottom, #ffffff 60%, rgba(255, 255, 255, 0.4) 100%);
   border-color: #ffffff;
   box-shadow: none;
-  color: var(--summer-ink);
+  color: #334f52;
+  font-weight: 500;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-icon {
@@ -3072,7 +3075,8 @@ body:has(.cyber-home) .site-footer a {
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-footer span {
-  color: rgba(91, 66, 63, 0.54);
+  color: #7b888e;
+  font-weight: 700;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__nav-theme {
