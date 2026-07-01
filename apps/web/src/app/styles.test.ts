@@ -1000,17 +1000,6 @@ describe('global styles', () => {
     const homeNavBrandBlock = css.match(/\.portfolio-hero__nav-brand strong\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeNavFooterBlock = css.match(/\.portfolio-hero__nav-footer\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeNavThemeBlock = css.match(/\.portfolio-hero__nav-theme\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
-    const homeNavAvatarDayBlock =
-      css.match(/\.portfolio-hero__nav-brand \.portfolio-hero__nav-avatar--day\s*{(?<body>[\s\S]*?)\n}/)?.groups
-        ?.body ?? '';
-    const dayHomeNavAvatarNightBlock =
-      css.match(
-        /:root\[data-theme='summer-day'\] \.portfolio-hero__nav-brand \.portfolio-hero__nav-avatar--night\s*{(?<body>[\s\S]*?)\n}/,
-      )?.groups?.body ?? '';
-    const dayHomeNavAvatarDayBlock =
-      css.match(
-        /:root\[data-theme='summer-day'\] \.portfolio-hero__nav-brand \.portfolio-hero__nav-avatar--day\s*{(?<body>[\s\S]*?)\n}/,
-      )?.groups?.body ?? '';
     const homeNavKickerBlock = css.match(/^\.portfolio-hero__nav-kicker\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
     const homeHeroContentBlock = css.match(/\.portfolio-hero__content\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const homeIntroBlock = css.match(/^\.portfolio-hero__intro-card\s*{(?<body>[\s\S]*?)\n}/m)?.groups?.body ?? '';
@@ -1227,10 +1216,8 @@ describe('global styles', () => {
     expect(css).toContain('.portfolio-hero__nav-brand img');
     expect(css).toContain('height: 40px;');
     expect(css).toContain('width: 40px;');
-    expect(css).toContain('.portfolio-hero__nav-avatar--day');
-    expect(homeNavAvatarDayBlock).toContain('display: none;');
-    expect(dayHomeNavAvatarNightBlock).toContain('display: none;');
-    expect(dayHomeNavAvatarDayBlock).toContain('display: block;');
+    expect(css).not.toContain('.portfolio-hero__nav-avatar--night');
+    expect(css).not.toContain('.portfolio-hero__nav-avatar--day');
     expect(css).toContain('.portfolio-hero__nav-kicker');
     expect(css).toContain(".portfolio-hero__nav-links a[data-active='true']");
     expect(css).toContain('.portfolio-hero__nav-footer');

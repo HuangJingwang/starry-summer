@@ -1,23 +1,13 @@
 [
   {
-    "id": "asset-aster-night-profile",
-    "storageKey": "images/aster-profile.png",
-    "publicUrl": "/images/aster-profile.png",
-    "mimeType": "image/png",
-    "byteSize": 2125080,
-    "usage": "content",
-    "altText": "Aster.H night profile avatar",
-    "createdAt": "2026-06-13T15:02:07.000Z"
-  },
-  {
     "id": "asset-aster-day-profile",
-    "storageKey": "images/aster-day-profile-v2.png",
-    "publicUrl": "/images/aster-day-profile-v2.png",
+    "storageKey": "images/aster-day-profile.png",
+    "publicUrl": "/images/aster-day-profile.png",
     "mimeType": "image/png",
-    "byteSize": 2089989,
+    "byteSize": 2184136,
     "usage": "content",
     "altText": "Aster.H summer day profile avatar",
-    "createdAt": "2026-06-13T15:06:45.000Z"
+    "createdAt": "2026-07-01T00:00:00.000Z"
   },
   {
     "id": "asset-default-post-cover",

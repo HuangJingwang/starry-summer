@@ -109,8 +109,10 @@ describe('home page', () => {
     expect(greetingSource).toContain("return 'Good Night';");
     expect(introSource).toContain('window.setInterval(syncGreeting, 60 * 1000)');
     expect(introSource).toContain('className="portfolio-hero__hi-avatar"');
-    expect(introSource).toContain('className="portfolio-hero__hi-avatar-night"');
-    expect(introSource).toContain('className="portfolio-hero__hi-avatar-day"');
+    expect(introSource).toContain('className="portfolio-hero__hi-avatar-image"');
+    expect(introSource).toContain('src="/images/aster-day-profile.png"');
+    expect(introSource).not.toContain('src="/images/aster-profile.png"');
+    expect(introSource).not.toContain('src="/images/aster-day-profile-v2.png"');
     expect(introSource).toContain('className="portfolio-hero__hi-line" suppressHydrationWarning');
     expect(introSource).toContain('{greeting}');
     expect(introSource).toContain('I&apos;m <strong className="portfolio-hero__hi-name">{ownerName}</strong>,');
@@ -349,10 +351,10 @@ describe('home page', () => {
     expect(source).toContain('<HomeCardNav />');
     expect(navSource).toContain('aria-label="主页导航"');
     expect(navSource).toContain('<div ref={navCardRef} className="portfolio-hero__nav-card">');
-    expect(navSource).toContain('className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--night"');
-    expect(navSource).toContain('src="/images/aster-profile.png"');
-    expect(navSource).toContain('className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--day"');
-    expect(navSource).toContain('src="/images/aster-day-profile-v2.png"');
+    expect(navSource).toContain('className="portfolio-hero__nav-avatar"');
+    expect(navSource).toContain('src="/images/aster-day-profile.png"');
+    expect(navSource).not.toContain('src="/images/aster-profile.png"');
+    expect(navSource).not.toContain('src="/images/aster-day-profile-v2.png"');
     expect(navSource).toContain("href: '/posts'");
     expect(navSource).toContain("label: '近期文章'");
     expect(navSource).toContain("icon: '/images/reference-nav/scroll-outline.svg'");
@@ -477,10 +479,10 @@ describe('home page', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/PublicCardNav.tsx'), 'utf8');
     const orderedHrefs = ["href: '/posts'", "href: '/projects'", "href: '/about'", "href: '/moments'", "href: '/leetcode'"];
 
-    expect(source).toContain('className="brand-avatar brand-avatar--night"');
-    expect(source).toContain('className="brand-avatar brand-avatar--day"');
-    expect(source).toContain('src="/images/aster-profile.png"');
-    expect(source).toContain('src="/images/aster-day-profile-v2.png"');
+    expect(source).toContain('className="brand-avatar"');
+    expect(source).toContain('src="/images/aster-day-profile.png"');
+    expect(source).not.toContain('src="/images/aster-profile.png"');
+    expect(source).not.toContain('src="/images/aster-day-profile-v2.png"');
     expect(source).toContain('const referenceNavItems = [');
     expect(source).toContain("outline: '/images/reference-nav/scroll-outline.svg'");
     expect(source).toContain("filled: '/images/reference-nav/scroll-filled.svg'");

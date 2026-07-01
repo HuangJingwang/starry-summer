@@ -27,16 +27,8 @@ export function HomeIntroCard({ ownerName }: HomeIntroCardProps) {
     <div className="portfolio-hero__intro-card">
       <div className="portfolio-hero__hi-avatar" aria-hidden="true">
         <Image
-          className="portfolio-hero__hi-avatar-night"
-          src="/images/aster-profile.png"
-          alt=""
-          width={1254}
-          height={1254}
-          priority
-        />
-        <Image
-          className="portfolio-hero__hi-avatar-day"
-          src="/images/aster-day-profile-v2.png"
+          className="portfolio-hero__hi-avatar-image"
+          src="/images/aster-day-profile.png"
           alt=""
           width={1254}
           height={1254}

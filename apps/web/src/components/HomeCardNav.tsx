@@ -174,8 +174,7 @@ export function HomeCardNav() {
     >
       <div ref={navCardRef} className="portfolio-hero__nav-card">
         <Link className="portfolio-hero__nav-brand" href="/">
-          <img className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--night" src="/images/aster-profile.png" alt="" />
-          <img className="portfolio-hero__nav-avatar portfolio-hero__nav-avatar--day" src="/images/aster-day-profile-v2.png" alt="" />
+          <img className="portfolio-hero__nav-avatar" src="/images/aster-day-profile.png" alt="" />
           <span>
             <strong>Aster.H</strong>
             <small>(开发中)</small>
