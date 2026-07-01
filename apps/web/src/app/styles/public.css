@@ -144,6 +144,10 @@
   width: 40px;
 }
 
+.brand-avatar--day {
+  display: none;
+}
+
 .site-nav-card__body {
   display: flex;
   gap: 8px;
@@ -471,6 +475,14 @@ body:has(.page-main) .site-search {
   box-shadow: 0 12px 20px -5px rgba(226, 217, 206, 0.8);
 }
 
+:root[data-theme='summer-day'] body:has(.page-main) .brand-avatar--night {
+  display: none;
+}
+
+:root[data-theme='summer-day'] body:has(.page-main) .brand-avatar--day {
+  display: block;
+}
+
 :root[data-theme='summer-day'] body:has(.page-main) .site-nav a {
   background: transparent;
   border-color: transparent;
@@ -555,6 +567,14 @@ body:has(.page-main) .site-search {
 :root[data-theme='summer-day'] body:has(.study-archive-page) .brand-avatar {
   border-color: rgba(255, 255, 255, 0.72);
   box-shadow: 0 12px 20px -5px rgba(226, 217, 206, 0.8);
+}
+
+:root[data-theme='summer-day'] body:has(.study-archive-page) .brand-avatar--night {
+  display: none;
+}
+
+:root[data-theme='summer-day'] body:has(.study-archive-page) .brand-avatar--day {
+  display: block;
 }
 
 :root[data-theme='summer-day'] body:has(.study-archive-page) .site-nav a {

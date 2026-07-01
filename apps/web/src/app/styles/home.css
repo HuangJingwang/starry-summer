@@ -660,6 +660,10 @@ body:has(.cyber-home) .site-footer a {
   width: 40px;
 }
 
+.portfolio-hero__nav-brand .portfolio-hero__nav-avatar--day {
+  display: none;
+}
+
 .portfolio-hero__nav-brand span {
   align-items: center;
   display: flex;
@@ -1381,6 +1385,10 @@ body:has(.cyber-home) .site-footer a {
   height: 100%;
   object-fit: cover;
   width: 100%;
+}
+
+.portfolio-hero__hi-avatar .portfolio-hero__hi-avatar-day {
+  display: none;
 }
 
 .portfolio-hero__hi-greeting {
@@ -3013,6 +3021,14 @@ body:has(.cyber-home) .site-footer a {
   box-shadow: 0 10px 22px rgba(64, 132, 142, 0.12);
 }
 
+:root[data-theme='summer-day'] .portfolio-hero__nav-brand .portfolio-hero__nav-avatar--night {
+  display: none;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__nav-brand .portfolio-hero__nav-avatar--day {
+  display: block;
+}
+
 :root[data-theme='summer-day'] .portfolio-hero__nav-brand strong {
   color: #334f52;
 }
@@ -3128,6 +3144,14 @@ body:has(.cyber-home) .site-footer a {
     0 18px 34px -26px rgba(8, 116, 127, 0.34),
     0 0 0 7px rgba(255, 255, 255, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.74);
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__hi-avatar .portfolio-hero__hi-avatar-night {
+  display: none;
+}
+
+:root[data-theme='summer-day'] .portfolio-hero__hi-avatar .portfolio-hero__hi-avatar-day {
+  display: block;
 }
 
 :root[data-theme='summer-day'] .portfolio-hero__role,

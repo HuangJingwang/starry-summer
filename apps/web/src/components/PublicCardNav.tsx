@@ -192,7 +192,8 @@ export function PublicCardNav({ title, navItems }: { title: string; navItems: Na
       style={arrivalStyle}
     >
       <Link className="brand site-nav-card__brand" href="/" aria-label={`${title} 首页`} onClick={handleBrandClick}>
-        <img className="brand-avatar" src="/images/aster-day-profile.png" alt="" aria-hidden="true" />
+        <img className="brand-avatar brand-avatar--night" src="/images/aster-profile.png" alt="" aria-hidden="true" />
+        <img className="brand-avatar brand-avatar--day" src="/images/aster-day-profile.png" alt="" aria-hidden="true" />
       </Link>
       <div className="site-nav-card__body">
         <nav className="site-nav" aria-label="主导航">
