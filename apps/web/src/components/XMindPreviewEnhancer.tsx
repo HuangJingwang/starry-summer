@@ -69,6 +69,7 @@ export function XMindPreviewEnhancer() {
 }
 
 function createPreviewShell({ source, title }: { source: string; title: string }) {
+  const frameSrc = getPreviewFrameSrc({ source, title });
   const root = document.createElement('section');
   root.className = 'xmind-preview';
   root.dataset.xmindStatus = 'idle';
@@ -89,13 +90,24 @@ function createPreviewShell({ source, title }: { source: string; title: string }
 
   label.append(eyebrow, heading);
 
+  const actions = document.createElement('div');
+  actions.className = 'xmind-preview__actions';
+
+  const openPreview = document.createElement('a');
+  openPreview.className = 'xmind-preview__open';
+  openPreview.href = frameSrc;
+  openPreview.textContent = '新窗口查看';
+  openPreview.target = '_blank';
+  openPreview.rel = 'noreferrer';
+
   const download = document.createElement('a');
   download.className = 'xmind-preview__download';
   download.href = source;
   download.textContent = '下载原文件';
   download.setAttribute('download', '');
 
-  header.append(label, download);
+  actions.append(openPreview, download);
+  header.append(label, actions);
 
   const status = document.createElement('p');
   status.className = 'xmind-preview__status';
@@ -154,16 +166,20 @@ function renderXMindPreview({
 
 function createPreviewFrame({ source, title }: { source: string; title: string }) {
   const frame = document.createElement('iframe');
-  const params = new URLSearchParams({
-    file: source,
-    title,
-  });
-
-  frame.src = `/xmind-preview-frame.html?${params.toString()}`;
+  frame.src = getPreviewFrameSrc({ source, title });
   frame.title = `${title} XMind 预览`;
   frame.loading = 'lazy';
   frame.setAttribute('allowfullscreen', 'true');
   frame.setAttribute('allow', 'fullscreen');
 
   return frame;
+}
+
+function getPreviewFrameSrc({ source, title }: { source: string; title: string }) {
+  const params = new URLSearchParams({
+    file: source,
+    title,
+  });
+
+  return `/xmind-preview-frame.html?${params.toString()}`;
 }

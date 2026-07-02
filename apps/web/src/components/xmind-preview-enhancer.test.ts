@@ -18,7 +18,11 @@ describe('XMindPreviewEnhancer integration', () => {
     expect(enhancerSource).toContain('data-xmind-status');
     expect(enhancerSource).toContain('加载失败');
     expect(enhancerSource).toContain('下载原文件');
-    expect(readFileSync(join(process.cwd(), 'public/xmind-preview-frame.html'), 'utf8')).toContain('XMindEmbedViewer');
+    expect(enhancerSource).toContain('新窗口查看');
+    const frameSource = readFileSync(join(process.cwd(), 'public/xmind-preview-frame.html'), 'utf8');
+    expect(frameSource).toContain('XMindEmbedViewer');
+    expect(frameSource).toContain('minimumReadableZoom');
+    expect(frameSource).toContain('setZoomScale(minimumReadableZoom)');
     expect(detailSource).toContain("import { XMindPreviewEnhancer } from './XMindPreviewEnhancer';");
     expect(detailSource).toContain('<XMindPreviewEnhancer />');
   });

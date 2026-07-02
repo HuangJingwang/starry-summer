@@ -193,8 +193,12 @@ describe('global styles', () => {
     expect(previewBlock).toContain('background: rgba(3, 9, 20, 0.68);');
     expect(previewBlock).toContain('border: 1px solid rgba(34, 211, 238, 0.2);');
     expect(mountBlock).toContain('min-height: 360px;');
-    expect(mountBlock).toContain('height: 520px;');
+    expect(mountBlock).toContain('height: clamp(560px, 72vh, 760px);');
+    expect(mountBlock).toContain('overscroll-behavior: contain;');
+    expect(css).toContain('width: min(100%, 980px);');
+    expect(css).toContain('width: calc(100vw - 32px);');
     expect(css).toContain('.xmind-preview iframe');
+    expect(css).toContain('.xmind-preview__actions');
     expect(css).toContain(":root[data-theme='summer-day'] .xmind-preview");
     expect(css).not.toContain('.xmind-preview {\n  background: #fff;');
   });

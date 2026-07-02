@@ -12,7 +12,9 @@
         background: #ffffff;
         height: 100%;
         margin: 0;
+        overscroll-behavior: contain;
         overflow: hidden;
+        touch-action: none;
         width: 100%;
       }
 
@@ -43,6 +45,7 @@
     <script src="https://unpkg.com/xmind-embed-viewer@1.2.0/dist/umd/xmind-embed-viewer.js"></script>
     <script>
       const messagePrefix = 'starry-xmind-preview:';
+      const minimumReadableZoom = 50;
 
       function notify(type, payload) {
         window.parent.postMessage({ type: `${messagePrefix}${type}`, ...payload }, window.location.origin);
@@ -76,7 +79,6 @@
 
         const viewer = new XMindEmbedViewer({
           el: '#mount',
-          file: await response.arrayBuffer(),
           region: 'global',
           styles: {
             height: '100%',
@@ -84,7 +86,38 @@
           },
         });
 
-        viewer.addEventListener('map-ready', () => notify('ready'));
+        function getZoomScale() {
+          return Number(viewer.zoomScale ?? viewer.zoom);
+        }
+
+        function enforceReadableZoom() {
+          const zoomScale = getZoomScale();
+
+          if (!Number.isFinite(zoomScale) || zoomScale < minimumReadableZoom) {
+            viewer.setZoomScale(minimumReadableZoom);
+            return minimumReadableZoom;
+          }
+
+          return zoomScale;
+        }
+
+        viewer.addEventListener('map-ready', () => {
+          window.setTimeout(() => {
+            const zoomScale = enforceReadableZoom();
+            notify('ready', { zoomScale });
+          }, 0);
+          window.setTimeout(enforceReadableZoom, 400);
+        });
+
+        viewer.addEventListener('zoom-change', () => {
+          const zoomScale = getZoomScale();
+
+          if (Number.isFinite(zoomScale) && zoomScale < minimumReadableZoom) {
+            window.requestAnimationFrame(() => viewer.setZoomScale(minimumReadableZoom));
+          }
+        });
+
+        viewer.load(await response.arrayBuffer());
       }
 
       init().catch((error) => {
