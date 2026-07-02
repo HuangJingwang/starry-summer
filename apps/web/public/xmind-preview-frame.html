@@ -23,6 +23,77 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
+      .xmind-frame-controls {
+        align-items: center;
+        background: rgba(17, 24, 39, 0.86);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.24);
+        box-sizing: border-box;
+        color: #f8fafc;
+        display: flex;
+        gap: 8px;
+        left: 14px;
+        max-width: calc(100% - 28px);
+        padding: 8px;
+        position: fixed;
+        top: 14px;
+        z-index: 10;
+      }
+
+      .xmind-frame-controls button {
+        align-items: center;
+        appearance: none;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        color: inherit;
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 800;
+        height: 32px;
+        justify-content: center;
+        min-width: 32px;
+        padding: 0 10px;
+      }
+
+      .xmind-frame-controls button:hover,
+      .xmind-frame-controls button:focus-visible {
+        background: rgba(255, 255, 255, 0.18);
+        outline: 2px solid rgba(103, 232, 249, 0.38);
+        outline-offset: 2px;
+      }
+
+      .xmind-frame-controls input[type='range'] {
+        accent-color: #22d3ee;
+        inline-size: min(34vw, 180px);
+        min-inline-size: 96px;
+      }
+
+      .xmind-frame-zoom {
+        font-size: 0.82rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 900;
+        min-width: 42px;
+        text-align: center;
+      }
+
+      @media (max-width: 520px) {
+        .xmind-frame-controls {
+          flex-wrap: wrap;
+          left: 12px;
+          right: 12px;
+          top: 12px;
+        }
+
+        .xmind-frame-controls input[type='range'] {
+          flex: 1 1 128px;
+          inline-size: auto;
+        }
+      }
+
       .xmind-frame-error {
         align-items: center;
         box-sizing: border-box;
@@ -42,10 +113,25 @@
   </head>
   <body>
     <div id="mount"></div>
+    <div class="xmind-frame-controls" aria-label="XMind 缩放控制">
+      <button type="button" data-zoom-out aria-label="缩小">−</button>
+      <input data-zoom-range type="range" min="20" max="200" step="5" value="35" aria-label="缩放比例" />
+      <span class="xmind-frame-zoom" data-zoom-label>35%</span>
+      <button type="button" data-zoom-in aria-label="放大">+</button>
+      <button type="button" data-zoom-reset>重置</button>
+    </div>
     <script src="https://unpkg.com/xmind-embed-viewer@1.2.0/dist/umd/xmind-embed-viewer.js"></script>
     <script>
       const messagePrefix = 'starry-xmind-preview:';
-      const minimumReadableZoom = 50;
+      const defaultZoom = 35;
+      const minZoom = 20;
+      const maxZoom = 200;
+      const zoomStep = 10;
+      const zoomRange = document.querySelector('[data-zoom-range]');
+      const zoomLabel = document.querySelector('[data-zoom-label]');
+      const zoomOutButton = document.querySelector('[data-zoom-out]');
+      const zoomInButton = document.querySelector('[data-zoom-in]');
+      const resetButton = document.querySelector('[data-zoom-reset]');
 
       function notify(type, payload) {
         window.parent.postMessage({ type: `${messagePrefix}${type}`, ...payload }, window.location.origin);
@@ -90,31 +176,64 @@
           return Number(viewer.zoomScale ?? viewer.zoom);
         }
 
-        function enforceReadableZoom() {
-          const zoomScale = getZoomScale();
+        function clampZoom(value) {
+          return Math.min(maxZoom, Math.max(minZoom, Math.round(Number(value) || defaultZoom)));
+        }
 
-          if (!Number.isFinite(zoomScale) || zoomScale < minimumReadableZoom) {
-            viewer.setZoomScale(minimumReadableZoom);
-            return minimumReadableZoom;
-          }
+        function updateZoomControls(value) {
+          const zoomScale = clampZoom(value);
+
+          zoomRange.value = String(zoomScale);
+          zoomLabel.textContent = `${zoomScale}%`;
+          notify('zoom-change', { zoomScale });
 
           return zoomScale;
         }
 
+        function applyZoom(value) {
+          const currentZoom = updateZoomControls(value);
+
+          viewer.setZoomScale(currentZoom);
+        }
+
+        function readViewerZoom() {
+          const zoomScale = getZoomScale();
+
+          return Number.isFinite(zoomScale) ? updateZoomControls(zoomScale) : updateZoomControls(defaultZoom);
+        }
+
         viewer.addEventListener('map-ready', () => {
           window.setTimeout(() => {
-            const zoomScale = enforceReadableZoom();
+            const zoomScale = updateZoomControls(defaultZoom);
+            viewer.setZoomScale(defaultZoom);
             notify('ready', { zoomScale });
           }, 0);
-          window.setTimeout(enforceReadableZoom, 400);
+          window.setTimeout(readViewerZoom, 400);
         });
 
         viewer.addEventListener('zoom-change', () => {
-          const zoomScale = getZoomScale();
+          readViewerZoom();
+        });
 
-          if (Number.isFinite(zoomScale) && zoomScale < minimumReadableZoom) {
-            window.requestAnimationFrame(() => viewer.setZoomScale(minimumReadableZoom));
-          }
+        zoomOutButton.addEventListener('click', () => {
+          applyZoom(Number(zoomRange.value) - zoomStep);
+        });
+
+        zoomInButton.addEventListener('click', () => {
+          applyZoom(Number(zoomRange.value) + zoomStep);
+        });
+
+        zoomRange.addEventListener('input', () => {
+          applyZoom(zoomRange.value);
+        });
+
+        resetButton.addEventListener('click', () => {
+          applyZoom(defaultZoom);
+        });
+
+        document.querySelector('.xmind-frame-controls').addEventListener('wheel', (event) => {
+          event.preventDefault();
+          applyZoom(Number(zoomRange.value) + (event.deltaY > 0 ? -zoomStep : zoomStep));
         });
 
         viewer.load(await response.arrayBuffer());

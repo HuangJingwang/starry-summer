@@ -13,6 +13,7 @@ describe('XMindPreviewEnhancer integration', () => {
     expect(enhancerSource).toContain('/xmind-preview-frame.html');
     expect(enhancerSource).toContain('starry-xmind-preview:ready');
     expect(enhancerSource).toContain('starry-xmind-preview:error');
+    expect(enhancerSource).toContain('starry-xmind-preview:zoom-change');
     expect(enhancerSource).toContain('IntersectionObserver');
     expect(enhancerSource).toContain('data-xmind-rendered');
     expect(enhancerSource).toContain('data-xmind-status');
@@ -21,8 +22,11 @@ describe('XMindPreviewEnhancer integration', () => {
     expect(enhancerSource).toContain('新窗口查看');
     const frameSource = readFileSync(join(process.cwd(), 'public/xmind-preview-frame.html'), 'utf8');
     expect(frameSource).toContain('XMindEmbedViewer');
-    expect(frameSource).toContain('minimumReadableZoom');
-    expect(frameSource).toContain('setZoomScale(minimumReadableZoom)');
+    expect(frameSource).toContain('xmind-frame-controls');
+    expect(frameSource).toContain('zoomRange');
+    expect(frameSource).toContain('setZoomScale(currentZoom)');
+    expect(frameSource).toContain('data-zoom-reset');
+    expect(frameSource).toContain('applyZoom(defaultZoom)');
     expect(detailSource).toContain("import { XMindPreviewEnhancer } from './XMindPreviewEnhancer';");
     expect(detailSource).toContain('<XMindPreviewEnhancer />');
   });

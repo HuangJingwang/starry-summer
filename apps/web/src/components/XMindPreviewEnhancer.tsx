@@ -145,9 +145,8 @@ function renderXMindPreview({
 
     if (event.data?.type === 'starry-xmind-preview:ready') {
       window.clearTimeout(readyTimer);
-      window.removeEventListener('message', handleMessage);
       root?.setAttribute('data-xmind-status', 'ready');
-      status.textContent = `${title} 已加载`;
+      status.textContent = getReadyText(title, event.data.zoomScale);
     }
 
     if (event.data?.type === 'starry-xmind-preview:error') {
@@ -155,6 +154,10 @@ function renderXMindPreview({
       window.removeEventListener('message', handleMessage);
       root?.setAttribute('data-xmind-status', 'error');
       status.textContent = `加载失败：${event.data.message || 'XMind 预览不可用'}`;
+    }
+
+    if (event.data?.type === 'starry-xmind-preview:zoom-change') {
+      status.textContent = getReadyText(title, event.data.zoomScale);
     }
   };
 
@@ -182,4 +185,14 @@ function getPreviewFrameSrc({ source, title }: { source: string; title: string }
   });
 
   return `/xmind-preview-frame.html?${params.toString()}`;
+}
+
+function getReadyText(title: string, zoomScale: unknown) {
+  const zoom = Number(zoomScale);
+
+  if (!Number.isFinite(zoom)) {
+    return `${title} 已加载`;
+  }
+
+  return `${title} 已加载 · ${Math.round(zoom)}%`;
 }
