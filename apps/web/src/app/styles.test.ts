@@ -185,6 +185,20 @@ describe('global styles', () => {
     expect(css).toContain('.asset-item__actions');
   });
 
+  test('styles xmind previews as stable themed content embeds', () => {
+    const css = readGlobalStyles();
+    const previewBlock = readStyleBlock(css, '.xmind-preview');
+    const mountBlock = readStyleBlock(css, '.xmind-preview__mount');
+
+    expect(previewBlock).toContain('background: rgba(3, 9, 20, 0.68);');
+    expect(previewBlock).toContain('border: 1px solid rgba(34, 211, 238, 0.2);');
+    expect(mountBlock).toContain('min-height: 360px;');
+    expect(mountBlock).toContain('height: 520px;');
+    expect(css).toContain('.xmind-preview iframe');
+    expect(css).toContain(":root[data-theme='summer-day'] .xmind-preview");
+    expect(css).not.toContain('.xmind-preview {\n  background: #fff;');
+  });
+
   test('styles the admin cover picker as a compact form control', () => {
     const css = readGlobalStyles();
 

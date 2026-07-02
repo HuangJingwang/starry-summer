@@ -27,7 +27,7 @@ const allowedTags = sanitizeHtml.defaults.allowedTags.concat([
 
 const allowedAttributes: sanitizeHtml.IOptions['allowedAttributes'] = {
   ...sanitizeHtml.defaults.allowedAttributes,
-  a: ['href', 'name', 'target', 'rel'],
+  a: ['href', 'name', 'target', 'rel', 'class', 'data-xmind-src', 'data-xmind-title'],
   h1: ['id'],
   h2: ['id'],
   h3: ['id'],
@@ -47,6 +47,7 @@ export async function renderMarkdown(markdown: string): Promise<string> {
     .use(remarkRehype, { allowDangerousHtml: false })
     .use(rehypeHeadingIds)
     .use(rehypeCodeBlocks)
+    .use(rehypeXmindLinks)
     .use(rehypeStringify)
     .process(markdown);
 
@@ -62,6 +63,33 @@ export async function renderMarkdown(markdown: string): Promise<string> {
       }),
     },
   });
+}
+
+function rehypeXmindLinks() {
+  return (tree: MarkdownNode) => {
+    visitTree(tree, (node) => {
+      if (node.type !== 'element' || node.tagName !== 'a') {
+        return;
+      }
+
+      const href = node.properties?.href;
+
+      if (typeof href !== 'string' || !isXmindHref(href)) {
+        return;
+      }
+
+      const title = collectText(node).trim() || 'XMind 脑图';
+      const className = node.properties?.className;
+      const classes = Array.isArray(className) ? className : typeof className === 'string' ? className.split(/\s+/) : [];
+
+      node.properties = {
+        ...(node.properties ?? {}),
+        className: [...classes.filter((item): item is string => typeof item === 'string'), 'xmind-preview-link'],
+        dataXmindSrc: href,
+        dataXmindTitle: title,
+      };
+    });
+  };
 }
 
 export function extractMarkdownHeadings(markdown: string, minDepth = 2, maxDepth = 3): MarkdownHeading[] {
@@ -217,6 +245,10 @@ function getCodeLanguage(code: MarkdownNode): string {
   const languageClass = classes.find((item) => typeof item === 'string' && item.startsWith('language-'));
 
   return typeof languageClass === 'string' ? languageClass.replace(/^language-/, '') : '';
+}
+
+function isXmindHref(href: string): boolean {
+  return /\.xmind(?:$|[?#])/i.test(href);
 }
 
 function highlightCode(code: string, language: string): MarkdownNode[] {

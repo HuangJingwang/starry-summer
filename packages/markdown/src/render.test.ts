@@ -59,4 +59,14 @@ describe('Markdown rendering', () => {
     expect(html).toContain('class="token keyword">const</span>');
     expect(html).toContain('class="token string">"42"</span>');
   });
+
+  test('marks xmind links for progressive mind map previews', async () => {
+    const html = await renderMarkdown('[产品脑图](/files/product-plan.xmind)');
+
+    expect(html).toContain('href="/files/product-plan.xmind"');
+    expect(html).toContain('class="xmind-preview-link"');
+    expect(html).toContain('data-xmind-src="/files/product-plan.xmind"');
+    expect(html).toContain('data-xmind-title="产品脑图"');
+    expect(html).toContain('>产品脑图</a>');
+  });
 });

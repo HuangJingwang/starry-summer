@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>XMind 预览</title>
+    <style>
+      html,
+      body,
+      #mount {
+        background: #ffffff;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        width: 100%;
+      }
+
+      body {
+        color: #111827;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .xmind-frame-error {
+        align-items: center;
+        box-sizing: border-box;
+        display: grid;
+        height: 100%;
+        justify-items: center;
+        padding: 24px;
+        text-align: center;
+      }
+
+      .xmind-frame-error p {
+        color: #475569;
+        line-height: 1.7;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mount"></div>
+    <script src="https://unpkg.com/xmind-embed-viewer@1.2.0/dist/umd/xmind-embed-viewer.js"></script>
+    <script>
+      const messagePrefix = 'starry-xmind-preview:';
+
+      function notify(type, payload) {
+        window.parent.postMessage({ type: `${messagePrefix}${type}`, ...payload }, window.location.origin);
+      }
+
+      function showError(message) {
+        document.body.innerHTML = '<div class="xmind-frame-error"><p></p></div>';
+        document.querySelector('p').textContent = message;
+        notify('error', { message });
+      }
+
+      async function init() {
+        const params = new URLSearchParams(window.location.search);
+        const fileParam = params.get('file') || '';
+        const title = params.get('title') || 'XMind 脑图';
+        const fileUrl = new URL(fileParam, window.location.origin);
+
+        document.title = `${title} - XMind 预览`;
+
+        if (fileUrl.origin !== window.location.origin || !/\.xmind(?:$|[?#])/i.test(fileUrl.pathname + fileUrl.search + fileUrl.hash)) {
+          showError('只支持预览本站托管的 XMind 文件。');
+          return;
+        }
+
+        const response = await fetch(fileUrl.href);
+
+        if (!response.ok) {
+          showError(`XMind 文件请求失败：${response.status}`);
+          return;
+        }
+
+        const viewer = new XMindEmbedViewer({
+          el: '#mount',
+          file: await response.arrayBuffer(),
+          region: 'global',
+          styles: {
+            height: '100%',
+            width: '100%',
+          },
+        });
+
+        viewer.addEventListener('map-ready', () => notify('ready'));
+      }
+
+      init().catch((error) => {
+        showError(error instanceof Error ? error.message : 'XMind 预览不可用');
+      });
+    </script>
+  </body>
+</html>

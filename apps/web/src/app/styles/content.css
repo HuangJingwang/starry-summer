@@ -2504,6 +2504,15 @@ body:has(.search-page) .site-footer a {
   .detail .detail__body img {
     max-width: 100%;
   }
+
+  .xmind-preview__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .xmind-preview__download {
+    width: fit-content;
+  }
 }
 
 .inline-comment-shell {
@@ -2739,6 +2748,103 @@ body:has(.search-page) .site-footer a {
 
 .markdown-code-block .token.comment {
   color: #7f9099;
+}
+
+.xmind-preview {
+  background: rgba(3, 9, 20, 0.68);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24);
+  display: grid;
+  gap: 14px;
+  margin: 24px 0;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.xmind-preview__header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.xmind-preview__label {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.xmind-preview__eyebrow {
+  color: #67e8f9;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.xmind-preview__label strong {
+  color: rgba(226, 232, 240, 0.94);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.xmind-preview__download {
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  border-radius: 999px;
+  color: #a5f3fc;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 7px 11px;
+  text-decoration: none;
+}
+
+.xmind-preview__download:hover,
+.xmind-preview__download:focus-visible {
+  background: rgba(34, 211, 238, 0.16);
+  color: #e0faff;
+  outline: 2px solid rgba(103, 232, 249, 0.32);
+  outline-offset: 2px;
+}
+
+.xmind-preview__status {
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.xmind-preview__mount {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 12px;
+  height: 520px;
+  min-height: 360px;
+  overflow: hidden;
+}
+
+.xmind-preview iframe {
+  background: #ffffff;
+  border: 0;
+  border-radius: 12px;
+  color-scheme: light;
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  width: 100%;
+}
+
+.xmind-preview[data-xmind-status='ready'] .xmind-preview__status {
+  color: rgba(103, 232, 249, 0.78);
+}
+
+.xmind-preview[data-xmind-status='error'] {
+  border-color: rgba(248, 113, 113, 0.34);
+}
+
+.xmind-preview[data-xmind-status='error'] .xmind-preview__status {
+  color: #fecaca;
 }
 
 .detail-comments {
@@ -3074,6 +3180,7 @@ body:has(.search-page) .site-footer a {
 :root[data-theme='summer-day'] .detail-sidebar__card,
 :root[data-theme='summer-day'] .detail-toc,
 :root[data-theme='summer-day'] .project-meta,
+:root[data-theme='summer-day'] .xmind-preview,
 :root[data-theme='summer-day'] .inline-comment-rail,
 :root[data-theme='summer-day'] .inline-comment-card,
 :root[data-theme='summer-day'] .detail-comments__list li,
@@ -3239,6 +3346,7 @@ body:has(.search-page) .site-footer a {
 :root[data-theme='summer-day'] .detail-toc,
 :root[data-theme='summer-day'] .detail-sidebar__card,
 :root[data-theme='summer-day'] .project-meta,
+:root[data-theme='summer-day'] .xmind-preview,
 :root[data-theme='summer-day'] .adjacent-content a,
 :root[data-theme='summer-day'] .adjacent-content__empty {
   background:
@@ -3247,6 +3355,36 @@ body:has(.search-page) .site-footer a {
   backdrop-filter: none;
   border-color: rgba(8, 116, 127, 0.13);
   box-shadow: 0 14px 40px rgba(44, 106, 116, 0.08);
+}
+
+:root[data-theme='summer-day'] .xmind-preview__eyebrow,
+:root[data-theme='summer-day'] .xmind-preview__status,
+:root[data-theme='summer-day'] .xmind-preview[data-xmind-status='ready'] .xmind-preview__status {
+  color: var(--summer-accent);
+}
+
+:root[data-theme='summer-day'] .xmind-preview__label strong {
+  color: var(--summer-ink);
+}
+
+:root[data-theme='summer-day'] .xmind-preview__download {
+  background: rgba(8, 116, 127, 0.055);
+  border-color: rgba(45, 109, 116, 0.16);
+  color: var(--summer-accent);
+}
+
+:root[data-theme='summer-day'] .xmind-preview__download:hover,
+:root[data-theme='summer-day'] .xmind-preview__download:focus-visible {
+  background: rgba(255, 213, 105, 0.18);
+  border-color: rgba(8, 116, 127, 0.22);
+  color: var(--summer-ink);
+}
+
+:root[data-theme='summer-day'] .xmind-preview__mount {
+  background:
+    linear-gradient(135deg, rgba(8, 116, 127, 0.06), transparent 42%),
+    rgba(255, 255, 255, 0.48);
+  border-color: rgba(8, 116, 127, 0.12);
 }
 
 :root[data-theme='summer-day'] .inline-comment-rail,
