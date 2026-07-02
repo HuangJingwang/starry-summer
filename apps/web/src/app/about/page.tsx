@@ -31,6 +31,19 @@ const stackItems = [
   { label: 'Vercel', Icon: Rocket },
 ] as const;
 
+const socialIconSources = [
+  {
+    variant: 'github',
+    src: '/images/reference-social/github.svg',
+    matches: ['github'],
+  },
+  {
+    variant: 'juejin',
+    src: '/images/reference-social/juejin.svg',
+    matches: ['juejin', 'juejin.cn', '掘金'],
+  },
+] as const;
+
 export function generateMetadata() {
   return loadPublicPageMetadata({
     title: '关于',
@@ -82,14 +95,38 @@ export default async function AboutPage() {
 
         {settings.profile.socialLinks.length > 0 ? (
           <section className="about-social" aria-label="社交链接">
-            {settings.profile.socialLinks.map((link) => (
-              <a key={`${link.label}-${link.href}`} href={link.href} target="_blank" rel="noreferrer">
-                {link.label}
-              </a>
-            ))}
+            {settings.profile.socialLinks.map((link) => {
+              const socialIcon = getSocialIcon(link);
+
+              return (
+                <a
+                  className={`about-social__link${socialIcon ? ` about-social__link--${socialIcon.variant}` : ''}`}
+                  key={`${link.label}-${link.href}`}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {socialIcon ? (
+                    <img
+                      className={`about-social__icon about-social__icon--${socialIcon.variant}`}
+                      src={socialIcon.src}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  <span>{link.label}</span>
+                </a>
+              );
+            })}
           </section>
         ) : null}
       </main>
     </SiteShell>
   );
+}
+
+function getSocialIcon(link: { label: string; href: string }) {
+  const searchable = `${link.label} ${link.href}`.toLowerCase();
+
+  return socialIconSources.find((item) => item.matches.some((match) => searchable.includes(match)));
 }

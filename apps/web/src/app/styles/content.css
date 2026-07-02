@@ -2057,13 +2057,30 @@ body:has(.search-page) .site-footer a {
 }
 
 .about-social a {
+  align-items: center;
   background: rgba(34, 211, 238, 0.1);
   border: 1px solid rgba(34, 211, 238, 0.24);
   border-radius: 999px;
   color: #cffafe;
+  display: inline-flex;
   font-weight: 800;
+  gap: 8px;
   min-height: 40px;
   padding: 10px 14px;
+}
+
+.about-social__link--github {
+  background: #070707;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.about-social__icon {
+  display: block;
+  flex: 0 0 auto;
+  height: 16px;
+  object-fit: contain;
+  width: 16px;
 }
 
 .detail {
@@ -3142,6 +3159,12 @@ body:has(.search-page) .site-footer a {
   border-color: rgba(45, 109, 116, 0.18);
   box-shadow: inset 0 1px 0 var(--summer-glint), 0 12px 30px rgba(44, 106, 116, 0.08);
   color: var(--summer-accent);
+}
+
+:root[data-theme='summer-day'] .about-social__link--github {
+  background: #070707;
+  border-color: rgba(7, 7, 7, 0.82);
+  color: #ffffff;
 }
 
 :root[data-theme='summer-day'] .about-page {

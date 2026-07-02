@@ -249,6 +249,10 @@ describe('global styles', () => {
     expect(aboutPageSource).toContain('className="about-note__item-icon"');
     expect(aboutPageSource).toContain('className="about-stack"');
     expect(aboutPageSource).toContain('className="about-stack__icon"');
+    expect(aboutPageSource).toContain("src: '/images/reference-social/github.svg'");
+    expect(aboutPageSource).toContain("src: '/images/reference-social/juejin.svg'");
+    expect(aboutPageSource).toContain('className={`about-social__link${socialIcon ? ` about-social__link--${socialIcon.variant}` : \'\'}');
+    expect(aboutPageSource).toContain('className={`about-social__icon about-social__icon--${socialIcon.variant}`}');
     expect(aboutPageSource).toContain('aria-hidden="true"');
     expect(aboutPageSource).toContain("from 'lucide-react'");
     expect(aboutPageSource).not.toContain('className="about-site-grid"');
@@ -1871,9 +1875,16 @@ describe('global styles', () => {
     const aboutStackBlock = css.match(/\.about-stack\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const aboutStackItemBlock = css.match(/\.about-stack li\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const aboutStackIconBlock = css.match(/\.about-stack__icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutSocialLinkBlock = css.match(/\.about-social a\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutSocialGithubBlock =
+      css.match(/\.about-social__link--github\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
+    const aboutSocialIconBlock = css.match(/\.about-social__icon\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ?? '';
     const dayAboutSocialBlock =
       css.match(/:root\[data-theme='summer-day'\] \.about-social a\s*{(?<body>[\s\S]*?)\n}/)?.groups
         ?.body ?? '';
+    const dayAboutGithubBlock =
+      css.match(/:root\[data-theme='summer-day'\] \.about-social__link--github\s*{(?<body>[\s\S]*?)\n}/)
+        ?.groups?.body ?? '';
     const dayAboutNoteBlock =
       css.match(/:root\[data-theme='summer-day'\] \.about-note\s*{(?<body>[\s\S]*?)\n}/)?.groups?.body ??
       '';
@@ -1895,8 +1906,17 @@ describe('global styles', () => {
     expect(aboutStackItemBlock).toContain('display: inline-flex;');
     expect(aboutStackItemBlock).toContain('border-radius: 999px;');
     expect(aboutStackIconBlock).toContain('flex: 0 0 auto;');
+    expect(aboutSocialLinkBlock).toContain('align-items: center;');
+    expect(aboutSocialLinkBlock).toContain('display: inline-flex;');
+    expect(aboutSocialLinkBlock).toContain('gap: 8px;');
+    expect(aboutSocialGithubBlock).toContain('background: #070707;');
+    expect(aboutSocialGithubBlock).toContain('color: #ffffff;');
+    expect(aboutSocialIconBlock).toContain('height: 16px;');
+    expect(aboutSocialIconBlock).toContain('width: 16px;');
     expect(dayAboutSocialBlock).toContain('color: var(--summer-accent);');
     expect(dayAboutSocialBlock).toContain('border-color: rgba(45, 109, 116, 0.18);');
+    expect(dayAboutGithubBlock).toContain('background: #070707;');
+    expect(dayAboutGithubBlock).toContain('color: #ffffff;');
     expect(dayAboutNoteBlock).toContain('var(--summer-panel-sheen)');
     expect(dayAboutNoteBlock).toContain('var(--summer-panel)');
     expect(dayAboutNoteBlock).toContain('border-color: var(--summer-line);');
