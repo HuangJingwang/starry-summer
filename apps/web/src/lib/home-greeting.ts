@@ -1,5 +1,7 @@
+import { getBeijingHour } from '@/lib/beijing-time';
+
 export function getHomeGreeting(date = new Date()) {
-  const hour = date.getHours();
+  const hour = getBeijingHour(date);
 
   if (hour >= 6 && hour < 12) {
     return 'Good Morning';

@@ -9,6 +9,12 @@ import { HomeFleetBackground } from '@/components/HomeFleetBackground';
 import { HomeIntroCard } from '@/components/HomeIntroCard';
 import { SiteShell } from '@/components/SiteShell';
 import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
+import {
+  formatBeijingHomeDate,
+  formatBeijingHomeDateHeading,
+  formatBeijingHomeWeekday,
+  getBeijingDateParts,
+} from '@/lib/beijing-time';
 import { getContentHref } from '@/lib/content';
 import { getContentCover } from '@/lib/content-cover';
 import { buildHomeLeetCodeRecommendation, type HomeLeetCodeRecommendation } from '@/lib/home-leetcode-recommendation';
@@ -60,7 +66,7 @@ export default async function HomePage() {
                     )}
                     <strong>{latestArticle.title}</strong>
                     <small>{latestArticle.summary}</small>
-                    <time dateTime={latestArticle.publishedAt}>{formatHomeDate(latestArticle.publishedAt)}</time>
+                    <time dateTime={latestArticle.publishedAt}>{formatBeijingHomeDate(latestArticle.publishedAt)}</time>
                   </a>
                 ) : (
                   <p>正在整理新的文章。</p>
@@ -134,8 +140,8 @@ export default async function HomePage() {
 
             <aside className="portfolio-hero__calendar-card" aria-label="Calendar">
               <div>
-                <span>{formatHomeDateHeading(homeNow)}</span>
-                <strong>{formatHomeWeekday(homeNow)}</strong>
+                <span>{formatBeijingHomeDateHeading(homeNow)}</span>
+                <strong>{formatBeijingHomeWeekday(homeNow)}</strong>
               </div>
               <ol>
                 {homeCalendarWeekdays.map((weekday) => (
@@ -202,31 +208,10 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat('zh-CN', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
 }
 
-function formatHomeDate(value: string): string {
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(value));
-}
-
-function formatHomeDateHeading(value: Date): string {
-  const parts = getHomeDateParts(value);
-
-  return `${parts.year}/${parts.month}/${parts.day}`;
-}
-
-function formatHomeWeekday(value: Date): string {
-  return new Intl.DateTimeFormat('zh-CN', {
-    weekday: 'short',
-    timeZone: 'Asia/Shanghai',
-  }).format(value);
-}
-
 const homeCalendarWeekdays = ['一', '二', '三', '四', '五', '六', '日'];
 
 function buildHomeCalendarDays(value: Date): Array<{ label: string; current: boolean; empty?: boolean }> {
-  const parts = getHomeDateParts(value);
+  const parts = getBeijingDateParts(value);
   const daysInMonth = new Date(parts.year, parts.month, 0).getDate();
   const firstWeekday = new Date(parts.year, parts.month - 1, 1).getDay();
   const mondayOffset = (firstWeekday + 6) % 7;
@@ -246,19 +231,4 @@ function buildHomeCalendarDays(value: Date): Array<{ label: string; current: boo
   });
 
   return [...leadingDays, ...monthDays];
-}
-
-function getHomeDateParts(value: Date): { year: number; month: number; day: number } {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
-    timeZone: 'Asia/Shanghai',
-  }).formatToParts(value);
-
-  return {
-    day: Number(parts.find((part) => part.type === 'day')?.value ?? '1'),
-    month: Number(parts.find((part) => part.type === 'month')?.value ?? '1'),
-    year: Number(parts.find((part) => part.type === 'year')?.value ?? '1970'),
-  };
 }

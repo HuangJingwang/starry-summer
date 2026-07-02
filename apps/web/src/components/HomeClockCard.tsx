@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 
+import { getBeijingClockParts } from '@/lib/beijing-time';
+
 export function HomeClockCard() {
   const [time, setTime] = useState(() => new Date());
-  const hours = getClockPart(time.getHours());
-  const minutes = getClockPart(time.getMinutes());
+  const { hours, minutes } = getBeijingClockParts(time);
 
   useEffect(() => {
     const timer = window.setInterval(() => setTime(new Date()), 1000 * 5);
@@ -24,10 +25,6 @@ export function HomeClockCard() {
       </div>
     </aside>
   );
-}
-
-function getClockPart(value: number) {
-  return String(value).padStart(2, '0');
 }
 
 function SevenSegmentDigit({ value }: { value: number }) {

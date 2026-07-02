@@ -103,6 +103,8 @@ describe('home page', () => {
     expect(introSource).toContain("'use client';");
     expect(introSource).toContain("import { getHomeGreeting } from '@/lib/home-greeting';");
     expect(greetingSource).toContain('export function getHomeGreeting(date = new Date())');
+    expect(greetingSource).toContain("import { getBeijingHour } from '@/lib/beijing-time';");
+    expect(greetingSource).toContain('const hour = getBeijingHour(date);');
     expect(greetingSource).toContain("return 'Good Morning';");
     expect(greetingSource).toContain("return 'Good Afternoon';");
     expect(greetingSource).toContain("return 'Good Evening';");
@@ -166,10 +168,11 @@ describe('home page', () => {
     expect(source).toContain('homeCalendarWeekdays.map((weekday)');
     expect(source).toContain('className="portfolio-hero__calendar-weekday"');
     expect(source).toContain("data-empty={day.empty ? 'true' : undefined}");
-    expect(source).toContain('function getHomeDateParts');
+    expect(source).toContain("} from '@/lib/beijing-time';");
+    expect(source).toContain('getBeijingDateParts(value)');
     expect(source).toContain('getContentHref(latestArticle)');
     expect(source).toContain('getContentCover(latestArticle)');
-    expect(source).toContain('formatHomeDate(latestArticle.publishedAt)');
+    expect(source).toContain('formatBeijingHomeDate(latestArticle.publishedAt)');
     expect(source).not.toContain('<figcaption>');
     expect(source).not.toContain('className="portfolio-hero__signal"');
     expect(source).not.toContain('className="portfolio-hero__night-avatar"');
