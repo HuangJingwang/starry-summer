@@ -2,6 +2,8 @@ export interface RecommendedShare {
   name: string;
   url: string;
   logo: string;
+  avatarSrc?: string;
+  avatarAlt?: string;
   description: string;
   tags: string[];
   stars: number;
@@ -38,6 +40,8 @@ export const recommendedShares: RecommendedShare[] = [
     name: '小林面试笔记',
     url: 'https://xiaolinnote.com/',
     logo: 'XL',
+    avatarSrc: '/images/recommended-shares/xiaolinnote-logo.png',
+    avatarAlt: '小林面试笔记图标',
     description: '用图解方式整理 Agent、RAG、LLM 和大模型工程高频面试题，适合作为 AI 应用开发面试前的系统复习入口。',
     tags: ['AI 学习', 'AI Coding', '工程流程'],
     stars: 5,

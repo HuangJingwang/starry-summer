@@ -54,8 +54,12 @@ export function RecommendedShareGrid({ resources }: { resources: RecommendedShar
       <div className="share-page__grid">
         {filteredResources.map((resource) => (
           <a key={resource.url} className="share-page__card" href={resource.url} target="_blank" rel="noreferrer">
-            <span className="share-page__logo" aria-hidden="true">
-              {resource.logo}
+            <span className="share-page__logo">
+              {resource.avatarSrc ? (
+                <img src={resource.avatarSrc} alt={resource.avatarAlt ?? `${resource.name} 图标`} />
+              ) : (
+                <span aria-hidden="true">{resource.logo}</span>
+              )}
             </span>
             <span className="share-page__body">
               <strong>{resource.name}</strong>

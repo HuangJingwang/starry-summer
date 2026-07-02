@@ -58,6 +58,8 @@ describe('recommended share page', () => {
     expect(recommendedShares.find((resource) => resource.name === '小林面试笔记')).toMatchObject({
       url: 'https://xiaolinnote.com/',
       logo: 'XL',
+      avatarSrc: '/images/recommended-shares/xiaolinnote-logo.png',
+      avatarAlt: '小林面试笔记图标',
       tags: ['AI 学习', 'AI Coding', '工程流程'],
       stars: 5,
     });
@@ -72,6 +74,7 @@ describe('recommended share page', () => {
 
   test('styles the share page with separate light and dark themes from the YYsuni reference layout', () => {
     const css = readGlobalStyles();
+    const grid = readSource('src/components/RecommendedShareGrid.tsx');
     const responsiveCss = readSource('src/app/styles/responsive.css');
 
     expect(css).toContain('.share-page');
@@ -79,6 +82,8 @@ describe('recommended share page', () => {
     expect(css).toContain('.share-page__grid');
     expect(css).toContain('.share-page__card');
     expect(css).toContain('.share-page__logo');
+    expect(grid).toContain('resource.avatarSrc ?');
+    expect(grid).toContain('<img src={resource.avatarSrc} alt={resource.avatarAlt ?? `${resource.name} 图标`} />');
     expect(css).toContain(":root[data-theme='summer-day'] .share-page");
     expect(css).toContain(":root[data-theme='summer-night'] .share-page");
     expect(css).toContain(":root[data-theme='summer-day'] .share-page__card");
@@ -98,6 +103,8 @@ describe('recommended share page', () => {
     expect(readRule(css, '.share-page__tag-list button')).toContain('height: 32px;');
     expect(readRule(css, '.share-page__grid')).toContain('align-items: start;');
     expect(readRule(css, '.share-page__card')).toContain('align-content: start;');
+    expect(readRule(css, '.share-page__logo')).toContain('border-radius: 999px;');
+    expect(readRule(css, '.share-page__logo img')).toContain('object-fit: cover;');
     expect(readRule(css, '.share-page__body')).toContain('align-content: start;');
   });
 });
