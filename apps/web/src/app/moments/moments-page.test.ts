@@ -48,11 +48,23 @@ describe('recommended share page', () => {
     expect(grid).toContain('没有找到相关资源');
     expect(grid).toContain('share-page__stars');
 
-    expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程']);
-    expect(recommendedShares.map((resource) => resource.name)).toEqual(['Taste Skill', 'Trellis', 'Superpowers']);
+    expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习']);
+    expect(recommendedShares.map((resource) => resource.name)).toEqual([
+      'Taste Skill',
+      'Trellis',
+      'Superpowers',
+      '小林面试笔记',
+    ]);
+    expect(recommendedShares.find((resource) => resource.name === '小林面试笔记')).toMatchObject({
+      url: 'https://xiaolinnote.com/',
+      logo: 'XL',
+      tags: ['AI 学习', 'AI Coding', '工程流程'],
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
+    expect(data).toContain("name: '小林面试笔记'");
     expect(data).not.toContain("name: 'iLoveIMG'");
     expect(data).not.toContain("name: 'TinyPNG'");
     expect(data).not.toContain("name: 'Magic UI'");

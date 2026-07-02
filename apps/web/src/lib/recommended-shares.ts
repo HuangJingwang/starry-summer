@@ -7,7 +7,7 @@ export interface RecommendedShare {
   stars: number;
 }
 
-export const categoryOrder = ['全部', '开源项目', 'AI Coding', '前端审美', '工程流程'];
+export const categoryOrder = ['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习'];
 
 export const recommendedShares: RecommendedShare[] = [
   {
@@ -32,6 +32,14 @@ export const recommendedShares: RecommendedShare[] = [
     logo: 'SP',
     description: '一套给 coding agents 使用的软件开发方法论，用可组合 skills 串起澄清、计划、TDD、实现和验证。',
     tags: ['开源项目', 'AI Coding', '工程流程'],
+    stars: 5,
+  },
+  {
+    name: '小林面试笔记',
+    url: 'https://xiaolinnote.com/',
+    logo: 'XL',
+    description: '用图解方式整理 Agent、RAG、LLM 和大模型工程高频面试题，适合作为 AI 应用开发面试前的系统复习入口。',
+    tags: ['AI 学习', 'AI Coding', '工程流程'],
     stars: 5,
   },
 ];
