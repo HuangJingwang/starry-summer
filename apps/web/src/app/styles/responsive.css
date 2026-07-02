@@ -581,6 +581,7 @@
     grid-template-rows: auto;
     min-height: auto;
     padding-bottom: 24px;
+    padding-inline: clamp(16px, 5vw, 22px);
     padding-top: 16px;
     translate: none;
   }
@@ -608,7 +609,7 @@
     max-width: 100%;
     transform: none;
     translate: none;
-    width: min(340px, 100%);
+    width: min(360px, 100%);
   }
 
   .portfolio-hero__left-stack {
@@ -738,10 +739,10 @@
   }
 
   .portfolio-hero__intro-card {
-    border-radius: 24px;
+    border-radius: 28px;
     grid-area: intro;
     min-height: auto;
-    padding: 18px 14px;
+    padding: 22px 20px 24px;
     translate: none;
   }
 
@@ -755,9 +756,11 @@
   .portfolio-hero__actions {
     gap: 8px;
     grid-area: actions;
+    justify-self: center;
     margin-top: 0;
     max-width: 100%;
     padding-top: 0;
+    width: min(360px, 100%);
   }
 
   .portfolio-hero__action-row {
@@ -765,34 +768,34 @@
   }
 
   .portfolio-hero__latest-card {
-    border-radius: 18px;
+    border-radius: 24px;
     grid-area: latest;
     justify-self: center;
     margin-right: 0;
-    padding: 12px 14px;
+    padding: 16px 18px 18px;
     translate: none;
-    width: min(340px, 100%);
+    width: min(360px, 100%);
   }
 
   .portfolio-hero__leetcode-card {
-    border-radius: 18px;
+    border-radius: 24px;
     grid-area: recommendation;
     justify-self: center;
     min-height: auto;
-    padding: 14px;
+    padding: 18px;
     translate: none;
-    width: min(300px, 100%);
+    width: min(360px, 100%);
   }
 
   .portfolio-hero__latest-card a {
-    gap: 2px 10px;
-    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 6px 12px;
+    grid-template-columns: 52px minmax(0, 1fr);
   }
 
   .portfolio-hero__latest-card img,
   .portfolio-hero__latest-cover {
-    border-radius: 12px;
-    width: 44px;
+    border-radius: 14px;
+    width: 52px;
   }
 
   .portfolio-hero__sky-card,

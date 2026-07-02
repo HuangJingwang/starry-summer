@@ -693,4 +693,25 @@ describe('home page', () => {
     expect(clockBlock).toContain('width: 100%;');
     expect(calendarBlock).toContain('width: 100%;');
   });
+
+  test('keeps mobile home cards padded away from their edges', () => {
+    const css = readGlobalStyles();
+    const heroContentBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__content');
+    const navBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__card-nav');
+    const introBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__intro-card');
+    const actionsBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__actions');
+    const latestBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__latest-card');
+    const leetcodeBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__leetcode-card');
+    const latestLinkBlock = readMediaRule(css, '(max-width: 820px)', '.portfolio-hero__latest-card a');
+
+    expect(heroContentBlock).toContain('padding-inline: clamp(16px, 5vw, 22px);');
+    expect(navBlock).toContain('width: min(360px, 100%);');
+    expect(introBlock).toContain('padding: 22px 20px 24px;');
+    expect(actionsBlock).toContain('width: min(360px, 100%);');
+    expect(latestBlock).toContain('padding: 16px 18px 18px;');
+    expect(latestBlock).toContain('width: min(360px, 100%);');
+    expect(leetcodeBlock).toContain('padding: 18px;');
+    expect(leetcodeBlock).toContain('width: min(360px, 100%);');
+    expect(latestLinkBlock).toContain('gap: 6px 12px;');
+  });
 });
