@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
@@ -55,6 +55,16 @@ describe('recommended share page', () => {
       'Superpowers',
       '小林面试笔记',
     ]);
+    expect(recommendedShares.map((resource) => [resource.name, resource.avatarSrc, resource.avatarAlt])).toEqual([
+      ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
+      ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
+      ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
+    ]);
+    for (const resource of recommendedShares) {
+      expect(resource.avatarSrc).toBeTruthy();
+      expect(existsSync(join(process.cwd(), 'public', resource.avatarSrc!.replace(/^\//, '')))).toBe(true);
+    }
     expect(recommendedShares.find((resource) => resource.name === '小林面试笔记')).toMatchObject({
       url: 'https://xiaolinnote.com/',
       logo: 'XL',
