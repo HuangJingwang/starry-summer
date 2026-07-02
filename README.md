@@ -36,7 +36,7 @@ Starry Summer 的核心是一个单人内容平台：
 - GitHub 保存代码与内容，Vercel 负责部署，必要的互动数据可以接入 Worker/KV/D1。
 - 两套公开主题并存：白天主题干净、安静、易读；夜间主题保留 cyber archive 氛围。
 
-视觉和部分页面节奏参考了 [yysuni.com](https://www.yysuni.com/)，但 Starry Summer 保持自己的内容模型、公开身份和产品方向。
+视觉、首页布局节奏、卡片组合和部分动效参考了 [yysuni.com](https://www.yysuni.com/) 以及对应的参考项目 [YYsuni/2025-blog-public](https://github.com/YYsuni/2025-blog-public)。Starry Summer 只借鉴页面组织和交互气质，仍保持自己的内容模型、公开身份和产品方向。
 
 ## 当前能力
 
