@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
@@ -29,6 +30,10 @@ function readRule(source: string, selector: string) {
   const match = source.match(new RegExp(`${escapedSelector} \\{([\\s\\S]*?)\\n\\}`, 'm'));
 
   return match?.[1] ?? '';
+}
+
+function fileSha256(path: string) {
+  return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
 
 describe('recommended share page', () => {
@@ -65,6 +70,9 @@ describe('recommended share page', () => {
       expect(resource.avatarSrc).toBeTruthy();
       expect(existsSync(join(process.cwd(), 'public', resource.avatarSrc!.replace(/^\//, '')))).toBe(true);
     }
+    expect(fileSha256(join(process.cwd(), 'public/images/recommended-shares/xiaolinnote-logo.png'))).toBe(
+      '9d46bacbcd82a54266afc6e68d9ba6560c9bcdc5796bb75ebfa7c86a9a027476',
+    );
     expect(recommendedShares.find((resource) => resource.name === '小林面试笔记')).toMatchObject({
       url: 'https://xiaolinnote.com/',
       logo: 'XL',
