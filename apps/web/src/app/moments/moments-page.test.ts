@@ -58,6 +58,7 @@ describe('recommended share page', () => {
       'Taste Skill',
       'Trellis',
       'Superpowers',
+      'Conductor',
       '2025 Blog Public',
       'LINUX DO',
       '小林面试笔记',
@@ -66,6 +67,7 @@ describe('recommended share page', () => {
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       [
         '2025 Blog Public',
         '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
@@ -105,9 +107,18 @@ describe('recommended share page', () => {
       tags: ['技术社区', 'AI 学习', 'AI Coding'],
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Conductor')).toMatchObject({
+      url: 'https://github.com/zhengzizhe/conductor',
+      logo: 'CO',
+      avatarSrc: '/images/recommended-shares/conductor-avatar.jpg',
+      avatarAlt: 'Conductor GitHub 项目图标',
+      tags: ['开源项目', 'AI Coding', '工程流程'],
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
+    expect(data).toContain("name: 'Conductor'");
     expect(data).toContain("name: '2025 Blog Public'");
     expect(data).toContain("name: 'LINUX DO'");
     expect(data).toContain("name: '小林面试笔记'");

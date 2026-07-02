@@ -43,6 +43,16 @@ export const recommendedShares: RecommendedShare[] = [
     stars: 5,
   },
   {
+    name: 'Conductor',
+    url: 'https://github.com/zhengzizhe/conductor',
+    logo: 'CO',
+    avatarSrc: '/images/recommended-shares/conductor-avatar.jpg',
+    avatarAlt: 'Conductor GitHub 项目图标',
+    description: '原生 macOS 多终端管理器，适合把多个开发任务、Agent 会话和命令行工作流集中到一个更清晰的桌面环境里。',
+    tags: ['开源项目', 'AI Coding', '工程流程'],
+    stars: 5,
+  },
+  {
     name: '2025 Blog Public',
     url: 'https://github.com/YYsuni/2025-blog-public',
     logo: 'YY',
