@@ -344,7 +344,9 @@ describe('home page', () => {
 
   test('uses home cards instead of the shared top navigation on the home page', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
+    const rootLayoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
     const shellSource = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+    const persistentNavSource = readFileSync(join(process.cwd(), 'src/components/PublicPersistentNav.tsx'), 'utf8');
     const navSource = readFileSync(join(process.cwd(), 'src/components/HomeCardNav.tsx'), 'utf8');
 
     expect(source).toContain('<SiteShell hideHeader>');
@@ -438,10 +440,13 @@ describe('home page', () => {
     expect(navSource).toContain("const isActive = pendingHref === item.href || (!pendingHref && index === 0);");
     expect(navSource).toContain("data-active={isActive ? 'true' : undefined}");
     expect(navSource).not.toContain('setActiveKey(key)');
-    expect(shellSource).toContain('<PublicCardNav title={settings.profile.title} navItems={navItems} />');
-    expect(shellSource).toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
+    expect(rootLayoutSource).toContain('<PublicPersistentNav title={settings.profile.title} navItems={navItems} />');
+    expect(rootLayoutSource).toContain("import { PublicPersistentNav } from '@/components/PublicPersistentNav';");
+    expect(persistentNavSource).toContain("pathname === '/'");
+    expect(persistentNavSource).toContain('<PublicCardNav title={title} navItems={navItems} />');
+    expect(shellSource).not.toContain('<PublicCardNav');
+    expect(shellSource).not.toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
     expect(shellSource).toContain('hideHeader = false');
-    expect(shellSource).toContain('hideHeader ? null : <PublicCardNav');
   });
 
   test('animates the public navigation when arriving from the home card navigation', () => {

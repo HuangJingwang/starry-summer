@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
 import { PersistentPublicBackground } from '@/components/PersistentPublicBackground';
+import { PublicPersistentNav } from '@/components/PublicPersistentNav';
+import { buildPublicNavigation } from '@/lib/navigation';
 import { buildSiteMetadata, resolvePublicSiteUrl } from '@/lib/seo';
 import { loadSiteSettings } from '@/lib/settings-repository';
 import { getThemeInitScript } from '@/lib/site-theme';
@@ -26,6 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const settings = await loadSiteSettings();
+  const navItems = buildPublicNavigation(settings.navigation);
+
   return (
     <html lang="zh-CN" data-theme="summer-night" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
@@ -39,6 +44,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       </head>
       <body>
         <PersistentPublicBackground />
+        <PublicPersistentNav title={settings.profile.title} navItems={navItems} />
         {children}
       </body>
     </html>

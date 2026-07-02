@@ -44,11 +44,19 @@ describe('site shell helpers', () => {
     });
   });
 
-  test('renders the shared public card navigation in the shell', () => {
-    const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+  test('keeps the shared public card navigation in the persistent root layout', () => {
+    const rootLayoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
+    const persistentNavSource = readFileSync(join(process.cwd(), 'src/components/PublicPersistentNav.tsx'), 'utf8');
+    const shellSource = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
 
-    expect(source).toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
-    expect(source).toContain('<PublicCardNav title={settings.profile.title} navItems={navItems} />');
+    expect(rootLayoutSource).toContain("import { PublicPersistentNav } from '@/components/PublicPersistentNav';");
+    expect(rootLayoutSource).toContain('<PublicPersistentNav title={settings.profile.title} navItems={navItems} />');
+    expect(persistentNavSource).toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
+    expect(persistentNavSource).toContain('<PublicCardNav title={title} navItems={navItems} />');
+    expect(persistentNavSource).toContain("pathname === '/'");
+    expect(persistentNavSource).toContain("pathname.startsWith('/admin')");
+    expect(shellSource).not.toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
+    expect(shellSource).not.toContain('<PublicCardNav');
   });
 
   test('renders the mobile reference scroll-to-top control from the shared shell', () => {
@@ -75,8 +83,9 @@ describe('site shell helpers', () => {
 
   test('allows the home page to replace the shared top bar with card navigation', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
+    const persistentNavSource = readFileSync(join(process.cwd(), 'src/components/PublicPersistentNav.tsx'), 'utf8');
 
     expect(source).toContain('hideHeader = false');
-    expect(source).toContain('hideHeader ? null : <PublicCardNav');
+    expect(persistentNavSource).toContain("pathname === '/'");
   });
 });
