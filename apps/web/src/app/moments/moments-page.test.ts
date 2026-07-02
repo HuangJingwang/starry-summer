@@ -58,12 +58,18 @@ describe('recommended share page', () => {
       'Taste Skill',
       'Trellis',
       'Superpowers',
+      '2025 Blog Public',
       '小林面试笔记',
     ]);
     expect(recommendedShares.map((resource) => [resource.name, resource.avatarSrc, resource.avatarAlt])).toEqual([
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      [
+        '2025 Blog Public',
+        '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
+        '2025 Blog Public GitHub 项目图标',
+      ],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
     ]);
     for (const resource of recommendedShares) {
@@ -81,9 +87,18 @@ describe('recommended share page', () => {
       tags: ['AI 学习', 'AI Coding', '工程流程'],
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === '2025 Blog Public')).toMatchObject({
+      url: 'https://github.com/YYsuni/2025-blog-public',
+      logo: 'YY',
+      avatarSrc: '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
+      avatarAlt: '2025 Blog Public GitHub 项目图标',
+      tags: ['开源项目', '前端审美', '工程流程'],
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
+    expect(data).toContain("name: '2025 Blog Public'");
     expect(data).toContain("name: '小林面试笔记'");
     expect(data).not.toContain("name: 'iLoveIMG'");
     expect(data).not.toContain("name: 'TinyPNG'");

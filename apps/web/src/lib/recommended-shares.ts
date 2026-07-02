@@ -43,6 +43,16 @@ export const recommendedShares: RecommendedShare[] = [
     stars: 5,
   },
   {
+    name: '2025 Blog Public',
+    url: 'https://github.com/YYsuni/2025-blog-public',
+    logo: 'YY',
+    avatarSrc: '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
+    avatarAlt: '2025 Blog Public GitHub 项目图标',
+    description: 'YYsuni 的开源博客项目，主打无需服务器和额外费用即可开始写 blog、管理内容，适合作为个人内容站搭建参考。',
+    tags: ['开源项目', '前端审美', '工程流程'],
+    stars: 5,
+  },
+  {
     name: '小林面试笔记',
     url: 'https://xiaolinnote.com/',
     logo: 'XL',
