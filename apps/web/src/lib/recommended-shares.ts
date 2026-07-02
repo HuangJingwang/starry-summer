@@ -9,7 +9,7 @@ export interface RecommendedShare {
   stars: number;
 }
 
-export const categoryOrder = ['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习'];
+export const categoryOrder = ['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习', '技术社区'];
 
 export const recommendedShares: RecommendedShare[] = [
   {
@@ -50,6 +50,16 @@ export const recommendedShares: RecommendedShare[] = [
     avatarAlt: '2025 Blog Public GitHub 项目图标',
     description: 'YYsuni 的开源博客项目，主打无需服务器和额外费用即可开始写 blog、管理内容，适合作为个人内容站搭建参考。',
     tags: ['开源项目', '前端审美', '工程流程'],
+    stars: 5,
+  },
+  {
+    name: 'LINUX DO',
+    url: 'https://linux.do/',
+    logo: 'LD',
+    avatarSrc: '/images/recommended-shares/linux-do-logo.svg',
+    avatarAlt: 'LINUX DO 网站图标',
+    description: '活跃的中文技术社区，适合关注 AI 工具、开发经验、Linux 生态和日常工程实践的讨论与资源分享。',
+    tags: ['技术社区', 'AI 学习', 'AI Coding'],
     stars: 5,
   },
   {

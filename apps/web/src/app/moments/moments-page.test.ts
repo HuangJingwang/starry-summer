@@ -53,12 +53,13 @@ describe('recommended share page', () => {
     expect(grid).toContain('没有找到相关资源');
     expect(grid).toContain('share-page__stars');
 
-    expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习']);
+    expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习', '技术社区']);
     expect(recommendedShares.map((resource) => resource.name)).toEqual([
       'Taste Skill',
       'Trellis',
       'Superpowers',
       '2025 Blog Public',
+      'LINUX DO',
       '小林面试笔记',
     ]);
     expect(recommendedShares.map((resource) => [resource.name, resource.avatarSrc, resource.avatarAlt])).toEqual([
@@ -70,6 +71,7 @@ describe('recommended share page', () => {
         '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
         '2025 Blog Public GitHub 项目图标',
       ],
+      ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
     ]);
     for (const resource of recommendedShares) {
@@ -95,10 +97,19 @@ describe('recommended share page', () => {
       tags: ['开源项目', '前端审美', '工程流程'],
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'LINUX DO')).toMatchObject({
+      url: 'https://linux.do/',
+      logo: 'LD',
+      avatarSrc: '/images/recommended-shares/linux-do-logo.svg',
+      avatarAlt: 'LINUX DO 网站图标',
+      tags: ['技术社区', 'AI 学习', 'AI Coding'],
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
     expect(data).toContain("name: '2025 Blog Public'");
+    expect(data).toContain("name: 'LINUX DO'");
     expect(data).toContain("name: '小林面试笔记'");
     expect(data).not.toContain("name: 'iLoveIMG'");
     expect(data).not.toContain("name: 'TinyPNG'");
