@@ -43,6 +43,16 @@ export const recommendedShares: RecommendedShare[] = [
     stars: 5,
   },
   {
+    name: 'Deep Research Skills',
+    url: 'https://github.com/Weizhena/Deep-Research-skills',
+    logo: 'DR',
+    avatarSrc: '/images/recommended-shares/deep-research-skills-avatar.jpg',
+    avatarAlt: 'Deep Research Skills GitHub 项目图标',
+    description: '面向 Claude Code、OpenCode 和 Codex 的结构化深度研究 skill，用提纲生成、深入调研和人工确认串起更可控的研究流程。',
+    tags: ['开源项目', 'AI Coding', 'AI 学习'],
+    stars: 5,
+  },
+  {
     name: 'Conductor',
     url: 'https://github.com/zhengzizhe/conductor',
     logo: 'CO',

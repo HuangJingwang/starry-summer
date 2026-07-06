@@ -58,6 +58,7 @@ describe('recommended share page', () => {
       'Taste Skill',
       'Trellis',
       'Superpowers',
+      'Deep Research Skills',
       'Conductor',
       'Meetily',
       '2025 Blog Public',
@@ -68,6 +69,11 @@ describe('recommended share page', () => {
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      [
+        'Deep Research Skills',
+        '/images/recommended-shares/deep-research-skills-avatar.jpg',
+        'Deep Research Skills GitHub 项目图标',
+      ],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
       [
@@ -125,9 +131,18 @@ describe('recommended share page', () => {
       tags: ['开源项目', 'AI 学习', 'AI Coding'],
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Deep Research Skills')).toMatchObject({
+      url: 'https://github.com/Weizhena/Deep-Research-skills',
+      logo: 'DR',
+      avatarSrc: '/images/recommended-shares/deep-research-skills-avatar.jpg',
+      avatarAlt: 'Deep Research Skills GitHub 项目图标',
+      tags: ['开源项目', 'AI Coding', 'AI 学习'],
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
+    expect(data).toContain("name: 'Deep Research Skills'");
     expect(data).toContain("name: 'Conductor'");
     expect(data).toContain("name: 'Meetily'");
     expect(data).toContain("name: '2025 Blog Public'");
