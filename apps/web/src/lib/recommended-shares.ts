@@ -53,6 +53,16 @@ export const recommendedShares: RecommendedShare[] = [
     stars: 5,
   },
   {
+    name: 'Meetily',
+    url: 'https://github.com/Zackriya-Solutions/meetily',
+    logo: 'ME',
+    avatarSrc: '/images/recommended-shares/meetily-avatar.jpg',
+    avatarAlt: 'Meetily GitHub 项目图标',
+    description: '隐私优先的开源 AI 会议助手，支持本地实时转写、会议总结和 Ollama 等模型接入，适合关注本地化 AI 工作流。',
+    tags: ['开源项目', 'AI 学习', 'AI Coding'],
+    stars: 5,
+  },
+  {
     name: '2025 Blog Public',
     url: 'https://github.com/YYsuni/2025-blog-public',
     logo: 'YY',

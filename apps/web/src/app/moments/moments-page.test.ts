@@ -59,6 +59,7 @@ describe('recommended share page', () => {
       'Trellis',
       'Superpowers',
       'Conductor',
+      'Meetily',
       '2025 Blog Public',
       'LINUX DO',
       '小林面试笔记',
@@ -68,6 +69,7 @@ describe('recommended share page', () => {
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
+      ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
       [
         '2025 Blog Public',
         '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
@@ -115,10 +117,19 @@ describe('recommended share page', () => {
       tags: ['开源项目', 'AI Coding', '工程流程'],
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Meetily')).toMatchObject({
+      url: 'https://github.com/Zackriya-Solutions/meetily',
+      logo: 'ME',
+      avatarSrc: '/images/recommended-shares/meetily-avatar.jpg',
+      avatarAlt: 'Meetily GitHub 项目图标',
+      tags: ['开源项目', 'AI 学习', 'AI Coding'],
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
     expect(data).toContain("name: 'Conductor'");
+    expect(data).toContain("name: 'Meetily'");
     expect(data).toContain("name: '2025 Blog Public'");
     expect(data).toContain("name: 'LINUX DO'");
     expect(data).toContain("name: '小林面试笔记'");
