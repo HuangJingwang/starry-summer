@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-import { categoryOrder, recommendedShares } from '@/lib/recommended-shares';
+import { categoryOrder, getRecommendedShareStars, recommendedShares } from '@/lib/recommended-shares';
 
 function readSource(path: string) {
   return readFileSync(join(process.cwd(), path), 'utf8');
@@ -55,35 +55,52 @@ describe('recommended share page', () => {
 
     expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习', '技术社区']);
     expect(recommendedShares.map((resource) => resource.name)).toEqual([
-      'Taste Skill',
-      'Trellis',
       'Superpowers',
+      'Taste Skill',
+      'Meetily',
+      'Trellis',
+      '2025 Blog Public',
       'Deep Research Skills',
       'Conductor',
-      'Meetily',
-      '2025 Blog Public',
       'LINUX DO',
       '小林面试笔记',
     ]);
     expect(recommendedShares.map((resource) => [resource.name, resource.avatarSrc, resource.avatarAlt])).toEqual([
-      ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
-      ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
+      ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
+      ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
+      [
+        '2025 Blog Public',
+        '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
+        '2025 Blog Public GitHub 项目图标',
+      ],
       [
         'Deep Research Skills',
         '/images/recommended-shares/deep-research-skills-avatar.jpg',
         'Deep Research Skills GitHub 项目图标',
       ],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
-      ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
-      [
-        '2025 Blog Public',
-        '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
-        '2025 Blog Public GitHub 项目图标',
-      ],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
     ]);
+    expect(
+      recommendedShares
+        .filter((resource) => resource.githubStars !== undefined)
+        .map((resource) => [resource.name, resource.githubStars, resource.stars]),
+    ).toEqual([
+      ['Superpowers', 247376, 5],
+      ['Taste Skill', 58234, 5],
+      ['Meetily', 18223, 5],
+      ['Trellis', 11828, 5],
+      ['2025 Blog Public', 1576, 4],
+      ['Deep Research Skills', 1528, 4],
+      ['Conductor', 86, 3],
+    ]);
+    for (const resource of recommendedShares.filter((item) => item.githubStars !== undefined)) {
+      expect(resource.stars).toBe(getRecommendedShareStars(resource.githubStars!));
+      expect(resource.stars).toBeGreaterThanOrEqual(3);
+    }
     for (const resource of recommendedShares) {
       expect(resource.avatarSrc).toBeTruthy();
       expect(existsSync(join(process.cwd(), 'public', resource.avatarSrc!.replace(/^\//, '')))).toBe(true);
@@ -105,7 +122,8 @@ describe('recommended share page', () => {
       avatarSrc: '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
       avatarAlt: '2025 Blog Public GitHub 项目图标',
       tags: ['开源项目', '前端审美', '工程流程'],
-      stars: 5,
+      githubStars: 1576,
+      stars: 4,
     });
     expect(recommendedShares.find((resource) => resource.name === 'LINUX DO')).toMatchObject({
       url: 'https://linux.do/',
@@ -121,7 +139,8 @@ describe('recommended share page', () => {
       avatarSrc: '/images/recommended-shares/conductor-avatar.jpg',
       avatarAlt: 'Conductor GitHub 项目图标',
       tags: ['开源项目', 'AI Coding', '工程流程'],
-      stars: 5,
+      githubStars: 86,
+      stars: 3,
     });
     expect(recommendedShares.find((resource) => resource.name === 'Meetily')).toMatchObject({
       url: 'https://github.com/Zackriya-Solutions/meetily',
@@ -129,6 +148,7 @@ describe('recommended share page', () => {
       avatarSrc: '/images/recommended-shares/meetily-avatar.jpg',
       avatarAlt: 'Meetily GitHub 项目图标',
       tags: ['开源项目', 'AI 学习', 'AI Coding'],
+      githubStars: 18223,
       stars: 5,
     });
     expect(recommendedShares.find((resource) => resource.name === 'Deep Research Skills')).toMatchObject({
@@ -137,7 +157,8 @@ describe('recommended share page', () => {
       avatarSrc: '/images/recommended-shares/deep-research-skills-avatar.jpg',
       avatarAlt: 'Deep Research Skills GitHub 项目图标',
       tags: ['开源项目', 'AI Coding', 'AI 学习'],
-      stars: 5,
+      githubStars: 1528,
+      stars: 4,
     });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Trellis'");
@@ -151,6 +172,14 @@ describe('recommended share page', () => {
     expect(data).not.toContain("name: 'iLoveIMG'");
     expect(data).not.toContain("name: 'TinyPNG'");
     expect(data).not.toContain("name: 'Magic UI'");
+  });
+
+  test('converts GitHub repository stars into recommendation tiers with a three-star floor', () => {
+    expect(getRecommendedShareStars(10000)).toBe(5);
+    expect(getRecommendedShareStars(9999)).toBe(4);
+    expect(getRecommendedShareStars(1000)).toBe(4);
+    expect(getRecommendedShareStars(999)).toBe(3);
+    expect(getRecommendedShareStars(0)).toBe(3);
   });
 
   test('styles the share page with separate light and dark themes from the YYsuni reference layout', () => {
