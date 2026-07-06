@@ -37,6 +37,17 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(247376),
   },
   {
+    name: 'Learn Claude Code',
+    url: 'https://github.com/shareAI-lab/learn-claude-code',
+    logo: 'LC',
+    avatarSrc: '/images/recommended-shares/learn-claude-code-avatar.jpg',
+    avatarAlt: 'Learn Claude Code GitHub 项目图标',
+    description: '从 0 到 1 用 Bash 搭一个 nano 版 Claude Code agent harness，适合拆解 coding agent 的最小闭环和工具调用骨架。',
+    tags: ['开源项目', 'AI Coding', 'AI 学习'],
+    githubStars: 70037,
+    stars: getRecommendedShareStars(70037),
+  },
+  {
     name: 'Taste Skill',
     url: 'https://github.com/Leonxlnx/taste-skill',
     logo: 'TS',

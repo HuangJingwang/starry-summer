@@ -56,6 +56,7 @@ describe('recommended share page', () => {
     expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习', '技术社区']);
     expect(recommendedShares.map((resource) => resource.name)).toEqual([
       'Superpowers',
+      'Learn Claude Code',
       'Taste Skill',
       'Meetily',
       'Trellis',
@@ -67,6 +68,7 @@ describe('recommended share page', () => {
     ]);
     expect(recommendedShares.map((resource) => [resource.name, resource.avatarSrc, resource.avatarAlt])).toEqual([
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      ['Learn Claude Code', '/images/recommended-shares/learn-claude-code-avatar.jpg', 'Learn Claude Code GitHub 项目图标'],
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
@@ -90,6 +92,7 @@ describe('recommended share page', () => {
         .map((resource) => [resource.name, resource.githubStars, resource.stars]),
     ).toEqual([
       ['Superpowers', 247376, 5],
+      ['Learn Claude Code', 70037, 5],
       ['Taste Skill', 58234, 5],
       ['Meetily', 18223, 5],
       ['Trellis', 11828, 5],
@@ -160,7 +163,17 @@ describe('recommended share page', () => {
       githubStars: 1528,
       stars: 4,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Learn Claude Code')).toMatchObject({
+      url: 'https://github.com/shareAI-lab/learn-claude-code',
+      logo: 'LC',
+      avatarSrc: '/images/recommended-shares/learn-claude-code-avatar.jpg',
+      avatarAlt: 'Learn Claude Code GitHub 项目图标',
+      tags: ['开源项目', 'AI Coding', 'AI 学习'],
+      githubStars: 70037,
+      stars: 5,
+    });
     expect(data).toContain("name: 'Taste Skill'");
+    expect(data).toContain("name: 'Learn Claude Code'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
     expect(data).toContain("name: 'Deep Research Skills'");
