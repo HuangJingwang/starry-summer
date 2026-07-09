@@ -62,6 +62,7 @@ describe('recommended share page', () => {
       'Trellis',
       '2025 Blog Public',
       'Deep Research Skills',
+      'Grill Me Skill',
       'Conductor',
       'LINUX DO',
       '小林面试笔记',
@@ -82,6 +83,7 @@ describe('recommended share page', () => {
         '/images/recommended-shares/deep-research-skills-avatar.jpg',
         'Deep Research Skills GitHub 项目图标',
       ],
+      ['Grill Me Skill', '/images/recommended-shares/grill-me-skill-avatar.jpg', 'Grill Me Skill GitHub 项目图标'],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
@@ -98,6 +100,7 @@ describe('recommended share page', () => {
       ['Trellis', 11828, 5],
       ['2025 Blog Public', 1576, 4],
       ['Deep Research Skills', 1528, 4],
+      ['Grill Me Skill', 99, 3],
       ['Conductor', 86, 3],
     ]);
     for (const resource of recommendedShares.filter((item) => item.githubStars !== undefined)) {
@@ -172,11 +175,21 @@ describe('recommended share page', () => {
       githubStars: 70037,
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Grill Me Skill')).toMatchObject({
+      url: 'https://github.com/RobMitt/grill-me-skill',
+      logo: 'GM',
+      avatarSrc: '/images/recommended-shares/grill-me-skill-avatar.jpg',
+      avatarAlt: 'Grill Me Skill GitHub 项目图标',
+      tags: ['开源项目', 'AI Coding', '工程流程'],
+      githubStars: 99,
+      stars: 3,
+    });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Learn Claude Code'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
     expect(data).toContain("name: 'Deep Research Skills'");
+    expect(data).toContain("name: 'Grill Me Skill'");
     expect(data).toContain("name: 'Conductor'");
     expect(data).toContain("name: 'Meetily'");
     expect(data).toContain("name: '2025 Blog Public'");

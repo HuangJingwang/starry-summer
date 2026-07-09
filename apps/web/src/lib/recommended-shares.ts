@@ -103,6 +103,17 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(1528),
   },
   {
+    name: 'Grill Me Skill',
+    url: 'https://github.com/RobMitt/grill-me-skill',
+    logo: 'GM',
+    avatarSrc: '/images/recommended-shares/grill-me-skill-avatar.jpg',
+    avatarAlt: 'Grill Me Skill GitHub 项目图标',
+    description: 'Claude Code / Cowork 的追问型 skill，在动手前持续拷问目标、约束和边界，逼近共识后再进入实现。',
+    tags: ['开源项目', 'AI Coding', '工程流程'],
+    githubStars: 99,
+    stars: getRecommendedShareStars(99),
+  },
+  {
     name: 'Conductor',
     url: 'https://github.com/zhengzizhe/conductor',
     logo: 'CO',
