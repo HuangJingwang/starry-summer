@@ -56,19 +56,20 @@ describe('recommended share page', () => {
     expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习', '技术社区']);
     expect(recommendedShares.map((resource) => resource.name)).toEqual([
       'Superpowers',
+      'Matt Pocock Skills',
       'Learn Claude Code',
       'Taste Skill',
       'Meetily',
       'Trellis',
       '2025 Blog Public',
       'Deep Research Skills',
-      'Grill Me Skill',
       'Conductor',
       'LINUX DO',
       '小林面试笔记',
     ]);
     expect(recommendedShares.map((resource) => [resource.name, resource.avatarSrc, resource.avatarAlt])).toEqual([
       ['Superpowers', '/images/recommended-shares/superpowers-avatar.jpg', 'Superpowers GitHub 项目图标'],
+      ['Matt Pocock Skills', '/images/recommended-shares/mattpocock-skills-avatar.jpg', 'Matt Pocock Skills GitHub 项目图标'],
       ['Learn Claude Code', '/images/recommended-shares/learn-claude-code-avatar.jpg', 'Learn Claude Code GitHub 项目图标'],
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
@@ -83,7 +84,6 @@ describe('recommended share page', () => {
         '/images/recommended-shares/deep-research-skills-avatar.jpg',
         'Deep Research Skills GitHub 项目图标',
       ],
-      ['Grill Me Skill', '/images/recommended-shares/grill-me-skill-avatar.jpg', 'Grill Me Skill GitHub 项目图标'],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
@@ -94,13 +94,13 @@ describe('recommended share page', () => {
         .map((resource) => [resource.name, resource.githubStars, resource.stars]),
     ).toEqual([
       ['Superpowers', 247376, 5],
+      ['Matt Pocock Skills', 161732, 5],
       ['Learn Claude Code', 70037, 5],
       ['Taste Skill', 58234, 5],
       ['Meetily', 18223, 5],
       ['Trellis', 11828, 5],
       ['2025 Blog Public', 1576, 4],
       ['Deep Research Skills', 1528, 4],
-      ['Grill Me Skill', 99, 3],
       ['Conductor', 86, 3],
     ]);
     for (const resource of recommendedShares.filter((item) => item.githubStars !== undefined)) {
@@ -175,21 +175,21 @@ describe('recommended share page', () => {
       githubStars: 70037,
       stars: 5,
     });
-    expect(recommendedShares.find((resource) => resource.name === 'Grill Me Skill')).toMatchObject({
-      url: 'https://github.com/RobMitt/grill-me-skill',
-      logo: 'GM',
-      avatarSrc: '/images/recommended-shares/grill-me-skill-avatar.jpg',
-      avatarAlt: 'Grill Me Skill GitHub 项目图标',
+    expect(recommendedShares.find((resource) => resource.name === 'Matt Pocock Skills')).toMatchObject({
+      url: 'https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me',
+      logo: 'MP',
+      avatarSrc: '/images/recommended-shares/mattpocock-skills-avatar.jpg',
+      avatarAlt: 'Matt Pocock Skills GitHub 项目图标',
       tags: ['开源项目', 'AI Coding', '工程流程'],
-      githubStars: 99,
-      stars: 3,
+      githubStars: 161732,
+      stars: 5,
     });
     expect(data).toContain("name: 'Taste Skill'");
     expect(data).toContain("name: 'Learn Claude Code'");
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
     expect(data).toContain("name: 'Deep Research Skills'");
-    expect(data).toContain("name: 'Grill Me Skill'");
+    expect(data).toContain("name: 'Matt Pocock Skills'");
     expect(data).toContain("name: 'Conductor'");
     expect(data).toContain("name: 'Meetily'");
     expect(data).toContain("name: '2025 Blog Public'");
