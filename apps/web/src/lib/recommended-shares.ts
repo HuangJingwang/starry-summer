@@ -92,6 +92,15 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(11828),
   },
   {
+    name: 'Avoid AI Writing',
+    url: 'https://github.com/conorbronsdon/avoid-ai-writing',
+    logo: 'AW',
+    description: '面向 AI 文本的结构化审校与改写 skill，识别模板化措辞、空泛拔高和过度结构化，并用二次检查保留更自然的表达。',
+    tags: ['开源项目', 'AI Coding', '工程流程'],
+    githubStars: 2360,
+    stars: getRecommendedShareStars(2360),
+  },
+  {
     name: '2025 Blog Public',
     url: 'https://github.com/YYsuni/2025-blog-public',
     logo: 'YY',

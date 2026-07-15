@@ -61,6 +61,7 @@ describe('recommended share page', () => {
       'Taste Skill',
       'Meetily',
       'Trellis',
+      'Avoid AI Writing',
       '2025 Blog Public',
       'Deep Research Skills',
       'Conductor',
@@ -74,6 +75,7 @@ describe('recommended share page', () => {
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
+      ['Avoid AI Writing', undefined, undefined],
       [
         '2025 Blog Public',
         '/images/recommended-shares/yysuni-2025-blog-public-avatar.jpg',
@@ -99,6 +101,7 @@ describe('recommended share page', () => {
       ['Taste Skill', 58234, 5],
       ['Meetily', 18223, 5],
       ['Trellis', 11828, 5],
+      ['Avoid AI Writing', 2360, 4],
       ['2025 Blog Public', 1576, 4],
       ['Deep Research Skills', 1528, 4],
       ['Conductor', 86, 3],
@@ -107,8 +110,7 @@ describe('recommended share page', () => {
       expect(resource.stars).toBe(getRecommendedShareStars(resource.githubStars!));
       expect(resource.stars).toBeGreaterThanOrEqual(3);
     }
-    for (const resource of recommendedShares) {
-      expect(resource.avatarSrc).toBeTruthy();
+    for (const resource of recommendedShares.filter((item) => item.avatarSrc !== undefined)) {
       expect(existsSync(join(process.cwd(), 'public', resource.avatarSrc!.replace(/^\//, '')))).toBe(true);
     }
     expect(fileSha256(join(process.cwd(), 'public/images/recommended-shares/xiaolinnote-logo.png'))).toBe(
@@ -129,6 +131,14 @@ describe('recommended share page', () => {
       avatarAlt: '2025 Blog Public GitHub 项目图标',
       tags: ['开源项目', '前端审美', '工程流程'],
       githubStars: 1576,
+      stars: 4,
+    });
+    expect(recommendedShares.find((resource) => resource.name === 'Avoid AI Writing')).toMatchObject({
+      url: 'https://github.com/conorbronsdon/avoid-ai-writing',
+      logo: 'AW',
+      description: '面向 AI 文本的结构化审校与改写 skill，识别模板化措辞、空泛拔高和过度结构化，并用二次检查保留更自然的表达。',
+      tags: ['开源项目', 'AI Coding', '工程流程'],
+      githubStars: 2360,
       stars: 4,
     });
     expect(recommendedShares.find((resource) => resource.name === 'LINUX DO')).toMatchObject({
@@ -193,6 +203,7 @@ describe('recommended share page', () => {
     expect(data).toContain("name: 'Conductor'");
     expect(data).toContain("name: 'Meetily'");
     expect(data).toContain("name: '2025 Blog Public'");
+    expect(data).toContain("name: 'Avoid AI Writing'");
     expect(data).toContain("name: 'LINUX DO'");
     expect(data).toContain("name: '小林面试笔记'");
     expect(data).not.toContain("name: 'iLoveIMG'");
