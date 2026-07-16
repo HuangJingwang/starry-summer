@@ -64,6 +64,7 @@ describe('recommended share page', () => {
       'Avoid AI Writing',
       '2025 Blog Public',
       'Deep Research Skills',
+      'Minutes',
       'Conductor',
       'LINUX DO',
       '小林面试笔记',
@@ -86,6 +87,7 @@ describe('recommended share page', () => {
         '/images/recommended-shares/deep-research-skills-avatar.jpg',
         'Deep Research Skills GitHub 项目图标',
       ],
+      ['Minutes', undefined, undefined],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
@@ -104,6 +106,7 @@ describe('recommended share page', () => {
       ['Avoid AI Writing', 2360, 4],
       ['2025 Blog Public', 1576, 4],
       ['Deep Research Skills', 1528, 4],
+      ['Minutes', 1291, 4],
       ['Conductor', 86, 3],
     ]);
     for (const resource of recommendedShares.filter((item) => item.githubStars !== undefined)) {
@@ -176,6 +179,14 @@ describe('recommended share page', () => {
       githubStars: 1528,
       stars: 4,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Minutes')).toMatchObject({
+      url: 'https://github.com/silverstein/minutes',
+      logo: 'MI',
+      description: '本地优先的开源对话记忆工具，把会议、语音备忘和承诺整理成可搜索的 Markdown，并通过 MCP 接入 Codex 等 AI Agent。',
+      tags: ['开源项目', 'AI Coding', '工程流程'],
+      githubStars: 1291,
+      stars: 4,
+    });
     expect(recommendedShares.find((resource) => resource.name === 'Learn Claude Code')).toMatchObject({
       url: 'https://github.com/shareAI-lab/learn-claude-code',
       logo: 'LC',
@@ -199,6 +210,7 @@ describe('recommended share page', () => {
     expect(data).toContain("name: 'Trellis'");
     expect(data).toContain("name: 'Superpowers'");
     expect(data).toContain("name: 'Deep Research Skills'");
+    expect(data).toContain("name: 'Minutes'");
     expect(data).toContain("name: 'Matt Pocock Skills'");
     expect(data).toContain("name: 'Conductor'");
     expect(data).toContain("name: 'Meetily'");

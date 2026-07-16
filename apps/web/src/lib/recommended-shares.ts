@@ -123,6 +123,15 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(1528),
   },
   {
+    name: 'Minutes',
+    url: 'https://github.com/silverstein/minutes',
+    logo: 'MI',
+    description: '本地优先的开源对话记忆工具，把会议、语音备忘和承诺整理成可搜索的 Markdown，并通过 MCP 接入 Codex 等 AI Agent。',
+    tags: ['开源项目', 'AI Coding', '工程流程'],
+    githubStars: 1291,
+    stars: getRecommendedShareStars(1291),
+  },
+  {
     name: 'Conductor',
     url: 'https://github.com/zhengzizhe/conductor',
     logo: 'CO',
