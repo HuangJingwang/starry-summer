@@ -143,6 +143,22 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(86),
   },
   {
+    name: '21st.dev',
+    url: 'https://21st.dev/',
+    logo: '21',
+    description: '面向 React 开发者的社区组件与模板库，提供分类筛选、CLI、MCP 和 AI 创建入口，适合快速寻找可复用的前端实现。',
+    tags: ['前端审美', 'AI Coding', '工程流程'],
+    stars: 5,
+  },
+  {
+    name: 'Dribbble',
+    url: 'https://dribbble.com/',
+    logo: 'DB',
+    description: '汇集网页、产品、品牌、动效与插画作品的设计社区，适合追踪视觉趋势、收集界面灵感，并发现设计师与创意团队。',
+    tags: ['前端审美', '技术社区'],
+    stars: 5,
+  },
+  {
     name: 'LINUX DO',
     url: 'https://linux.do/',
     logo: 'LD',

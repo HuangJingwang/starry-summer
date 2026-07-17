@@ -66,6 +66,8 @@ describe('recommended share page', () => {
       'Deep Research Skills',
       'Minutes',
       'Conductor',
+      '21st.dev',
+      'Dribbble',
       'LINUX DO',
       '小林面试笔记',
     ]);
@@ -89,6 +91,8 @@ describe('recommended share page', () => {
       ],
       ['Minutes', undefined, undefined],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
+      ['21st.dev', undefined, undefined],
+      ['Dribbble', undefined, undefined],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
     ]);
@@ -187,6 +191,20 @@ describe('recommended share page', () => {
       githubStars: 1291,
       stars: 4,
     });
+    expect(recommendedShares.find((resource) => resource.name === '21st.dev')).toMatchObject({
+      url: 'https://21st.dev/',
+      logo: '21',
+      description: '面向 React 开发者的社区组件与模板库，提供分类筛选、CLI、MCP 和 AI 创建入口，适合快速寻找可复用的前端实现。',
+      tags: ['前端审美', 'AI Coding', '工程流程'],
+      stars: 5,
+    });
+    expect(recommendedShares.find((resource) => resource.name === 'Dribbble')).toMatchObject({
+      url: 'https://dribbble.com/',
+      logo: 'DB',
+      description: '汇集网页、产品、品牌、动效与插画作品的设计社区，适合追踪视觉趋势、收集界面灵感，并发现设计师与创意团队。',
+      tags: ['前端审美', '技术社区'],
+      stars: 5,
+    });
     expect(recommendedShares.find((resource) => resource.name === 'Learn Claude Code')).toMatchObject({
       url: 'https://github.com/shareAI-lab/learn-claude-code',
       logo: 'LC',
@@ -213,6 +231,8 @@ describe('recommended share page', () => {
     expect(data).toContain("name: 'Minutes'");
     expect(data).toContain("name: 'Matt Pocock Skills'");
     expect(data).toContain("name: 'Conductor'");
+    expect(data).toContain("name: '21st.dev'");
+    expect(data).toContain("name: 'Dribbble'");
     expect(data).toContain("name: 'Meetily'");
     expect(data).toContain("name: '2025 Blog Public'");
     expect(data).toContain("name: 'Avoid AI Writing'");
