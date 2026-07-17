@@ -16,6 +16,17 @@ describe('demo data', () => {
     expect(contentWithCovers.some((item) => item.coverImageUrl === '/hero-workspace.png')).toBe(false);
   });
 
+  test('describes the Starry Summer article with facts instead of lyrical copy', () => {
+    const introPost = createDemoContentRecords().find((item) => item.id === 'demo-post-summer-archive');
+
+    expect(introPost?.summary).toBe(
+      'Starry Summer 的名字来自童年夏夜；网站则源于一次大学时期的建站尝试，现在用于集中保存和发布个人内容。',
+    );
+    expect(introPost?.bodyMarkdown).toContain('## 第一版网站为什么停了');
+    expect(introPost?.bodyMarkdown).toContain('## 现在的用途');
+    expect(introPost?.bodyMarkdown).not.toContain('不用急着解释');
+  });
+
   test('keeps seeded public copy aligned with GitHub direct publishing', () => {
     const publicCopy = createDemoContentRecords()
       .map((item) => [item.title, item.summary, item.bodyMarkdown, ...item.tags].join('\n'))

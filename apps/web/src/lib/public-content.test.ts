@@ -316,9 +316,14 @@ describe('public content API helpers', () => {
       status: 'published',
       visibility: 'public',
       sourceType: 'original',
+      summary: 'Starry Summer 的名字来自童年夏夜；网站则源于一次大学时期的建站尝试，现在用于集中保存和发布个人内容。',
     });
-    expect(introPost?.bodyMarkdown).toContain('[Pigs-blog](https://github.com/Aster-H/Pigs-blog/tree/dev/server)');
+    expect(introPost?.bodyMarkdown).toContain('这版网站就是早期的 Pigs-blog');
+    expect(introPost?.bodyMarkdown).not.toContain('github.com/Aster-H/Pigs-blog');
+    expect(introPost?.bodyMarkdown).toContain('## 第一版网站为什么停了');
+    expect(introPost?.bodyMarkdown).toContain('## 现在的用途');
     expect(introPost?.bodyMarkdown).not.toContain('HuangJingwang');
+    expect(introPost?.bodyMarkdown).not.toContain('不用急着解释');
 
     const studyPost = content.find((item) => item.slug === 'juejin-7615915954711691304');
     expect(studyPost?.bodyMarkdown).toContain('[github.com/Aster-H/leetforge](https://github.com/Aster-H/leetforge)');
