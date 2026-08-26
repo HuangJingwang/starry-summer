@@ -81,6 +81,17 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(18223),
   },
   {
+    name: 'Pipecat',
+    url: 'https://github.com/pipecat-ai/pipecat',
+    logo: 'PC',
+    avatarSrc: '/images/recommended-shares/pipecat-avatar.png',
+    avatarAlt: 'Pipecat GitHub 项目图标',
+    description: '面向语音 Agent、多模态应用和实时 AI 的开源 Python 框架，统一编排语音、模型、传输与服务集成，适合构建低延迟对话应用。',
+    tags: ['开源项目', 'AI Coding', 'AI 学习'],
+    githubStars: 14743,
+    stars: getRecommendedShareStars(14743),
+  },
+  {
     name: 'Trellis',
     url: 'https://github.com/mindfold-ai/trellis',
     logo: 'TR',

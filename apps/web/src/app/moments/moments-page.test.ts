@@ -60,6 +60,7 @@ describe('recommended share page', () => {
       'Learn Claude Code',
       'Taste Skill',
       'Meetily',
+      'Pipecat',
       'Trellis',
       'Avoid AI Writing',
       '2025 Blog Public',
@@ -77,6 +78,7 @@ describe('recommended share page', () => {
       ['Learn Claude Code', '/images/recommended-shares/learn-claude-code-avatar.jpg', 'Learn Claude Code GitHub 项目图标'],
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
       ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
+      ['Pipecat', '/images/recommended-shares/pipecat-avatar.png', 'Pipecat GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
       ['Avoid AI Writing', undefined, undefined],
       [
@@ -106,6 +108,7 @@ describe('recommended share page', () => {
       ['Learn Claude Code', 70037, 5],
       ['Taste Skill', 58234, 5],
       ['Meetily', 18223, 5],
+      ['Pipecat', 14743, 5],
       ['Trellis', 11828, 5],
       ['Avoid AI Writing', 2360, 4],
       ['2025 Blog Public', 1576, 4],
@@ -174,6 +177,16 @@ describe('recommended share page', () => {
       githubStars: 18223,
       stars: 5,
     });
+    expect(recommendedShares.find((resource) => resource.name === 'Pipecat')).toMatchObject({
+      url: 'https://github.com/pipecat-ai/pipecat',
+      logo: 'PC',
+      avatarSrc: '/images/recommended-shares/pipecat-avatar.png',
+      avatarAlt: 'Pipecat GitHub 项目图标',
+      description: '面向语音 Agent、多模态应用和实时 AI 的开源 Python 框架，统一编排语音、模型、传输与服务集成，适合构建低延迟对话应用。',
+      tags: ['开源项目', 'AI Coding', 'AI 学习'],
+      githubStars: 14743,
+      stars: 5,
+    });
     expect(recommendedShares.find((resource) => resource.name === 'Deep Research Skills')).toMatchObject({
       url: 'https://github.com/Weizhena/Deep-Research-skills',
       logo: 'DR',
@@ -234,6 +247,7 @@ describe('recommended share page', () => {
     expect(data).toContain("name: '21st.dev'");
     expect(data).toContain("name: 'Dribbble'");
     expect(data).toContain("name: 'Meetily'");
+    expect(data).toContain("name: 'Pipecat'");
     expect(data).toContain("name: '2025 Blog Public'");
     expect(data).toContain("name: 'Avoid AI Writing'");
     expect(data).toContain("name: 'LINUX DO'");
