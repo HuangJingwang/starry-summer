@@ -59,6 +59,7 @@ describe('recommended share page', () => {
       'Matt Pocock Skills',
       'Learn Claude Code',
       'Taste Skill',
+      'WeKnora',
       'Meetily',
       'Pipecat',
       'Trellis',
@@ -77,6 +78,7 @@ describe('recommended share page', () => {
       ['Matt Pocock Skills', '/images/recommended-shares/mattpocock-skills-avatar.jpg', 'Matt Pocock Skills GitHub 项目图标'],
       ['Learn Claude Code', '/images/recommended-shares/learn-claude-code-avatar.jpg', 'Learn Claude Code GitHub 项目图标'],
       ['Taste Skill', '/images/recommended-shares/taste-skill-avatar.jpg', 'Taste Skill GitHub 项目图标'],
+      ['WeKnora', '/images/recommended-shares/weknora-avatar.png', 'Tencent GitHub 头像'],
       ['Meetily', '/images/recommended-shares/meetily-avatar.jpg', 'Meetily GitHub 项目图标'],
       ['Pipecat', '/images/recommended-shares/pipecat-avatar.png', 'Pipecat GitHub 项目图标'],
       ['Trellis', '/images/recommended-shares/trellis-avatar.jpg', 'Trellis GitHub 项目图标'],
@@ -107,6 +109,7 @@ describe('recommended share page', () => {
       ['Matt Pocock Skills', 161732, 5],
       ['Learn Claude Code', 70037, 5],
       ['Taste Skill', 58234, 5],
+      ['WeKnora', 21151, 5],
       ['Meetily', 18223, 5],
       ['Pipecat', 14743, 5],
       ['Trellis', 11828, 5],
@@ -255,6 +258,22 @@ describe('recommended share page', () => {
     expect(data).not.toContain("name: 'iLoveIMG'");
     expect(data).not.toContain("name: 'TinyPNG'");
     expect(data).not.toContain("name: 'Magic UI'");
+  });
+
+  test('recommends Tencent WeKnora with its repository details and local avatar', () => {
+    expect(recommendedShares.filter((resource) => resource.name === 'WeKnora')).toEqual([
+      {
+        name: 'WeKnora',
+        url: 'https://github.com/Tencent/WeKnora',
+        logo: 'WK',
+        avatarSrc: '/images/recommended-shares/weknora-avatar.png',
+        avatarAlt: 'Tencent GitHub 头像',
+        description: '腾讯开源的知识库框架，支持文档解析、RAG 检索问答、Agent 推理和 Wiki 整理，可本地部署，适合搭建私有知识库与知识问答应用。',
+        tags: ['开源项目', 'AI Coding', 'AI 学习'],
+        githubStars: 21151,
+        stars: 5,
+      },
+    ]);
   });
 
   test('converts GitHub repository stars into recommendation tiers with a three-star floor', () => {

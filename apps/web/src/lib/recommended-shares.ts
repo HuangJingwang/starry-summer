@@ -70,6 +70,17 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(58234),
   },
   {
+    name: 'WeKnora',
+    url: 'https://github.com/Tencent/WeKnora',
+    logo: 'WK',
+    avatarSrc: '/images/recommended-shares/weknora-avatar.png',
+    avatarAlt: 'Tencent GitHub 头像',
+    description: '腾讯开源的知识库框架，支持文档解析、RAG 检索问答、Agent 推理和 Wiki 整理，可本地部署，适合搭建私有知识库与知识问答应用。',
+    tags: ['开源项目', 'AI Coding', 'AI 学习'],
+    githubStars: 21151,
+    stars: getRecommendedShareStars(21151),
+  },
+  {
     name: 'Meetily',
     url: 'https://github.com/Zackriya-Solutions/meetily',
     logo: 'ME',
