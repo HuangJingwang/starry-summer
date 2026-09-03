@@ -154,6 +154,17 @@ export const recommendedShares: RecommendedShare[] = [
     stars: getRecommendedShareStars(1291),
   },
   {
+    name: 'Visual IP Illustrations',
+    url: 'https://github.com/yangchuansheng/visual-ip-illustrations',
+    logo: 'VI',
+    avatarSrc: '/images/recommended-shares/visual-ip-illustrations-avatar.jpg',
+    avatarAlt: 'yangchuansheng GitHub 头像',
+    description: '面向文章配图的开源 Codex skill，将概念、流程和隐喻转成 16:9 手绘插图，支持小黑、纸盒、Gopher 等角色，适合保持整篇文章的视觉风格一致。',
+    tags: ['开源项目', 'AI Coding', '工程流程'],
+    githubStars: 265,
+    stars: getRecommendedShareStars(265),
+  },
+  {
     name: 'Conductor',
     url: 'https://github.com/zhengzizhe/conductor',
     logo: 'CO',

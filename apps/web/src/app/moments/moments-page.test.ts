@@ -67,6 +67,7 @@ describe('recommended share page', () => {
       '2025 Blog Public',
       'Deep Research Skills',
       'Minutes',
+      'Visual IP Illustrations',
       'Conductor',
       '21st.dev',
       'Dribbble',
@@ -94,6 +95,7 @@ describe('recommended share page', () => {
         'Deep Research Skills GitHub 项目图标',
       ],
       ['Minutes', undefined, undefined],
+      ['Visual IP Illustrations', '/images/recommended-shares/visual-ip-illustrations-avatar.jpg', 'yangchuansheng GitHub 头像'],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['21st.dev', undefined, undefined],
       ['Dribbble', undefined, undefined],
@@ -117,6 +119,7 @@ describe('recommended share page', () => {
       ['2025 Blog Public', 1576, 4],
       ['Deep Research Skills', 1528, 4],
       ['Minutes', 1291, 4],
+      ['Visual IP Illustrations', 265, 3],
       ['Conductor', 86, 3],
     ]);
     for (const resource of recommendedShares.filter((item) => item.githubStars !== undefined)) {
@@ -272,6 +275,22 @@ describe('recommended share page', () => {
         tags: ['开源项目', 'AI Coding', 'AI 学习'],
         githubStars: 21151,
         stars: 5,
+      },
+    ]);
+  });
+
+  test('recommends Visual IP Illustrations with its repository details and local avatar', () => {
+    expect(recommendedShares.filter((resource) => resource.name === 'Visual IP Illustrations')).toEqual([
+      {
+        name: 'Visual IP Illustrations',
+        url: 'https://github.com/yangchuansheng/visual-ip-illustrations',
+        logo: 'VI',
+        avatarSrc: '/images/recommended-shares/visual-ip-illustrations-avatar.jpg',
+        avatarAlt: 'yangchuansheng GitHub 头像',
+        description: '面向文章配图的开源 Codex skill，将概念、流程和隐喻转成 16:9 手绘插图，支持小黑、纸盒、Gopher 等角色，适合保持整篇文章的视觉风格一致。',
+        tags: ['开源项目', 'AI Coding', '工程流程'],
+        githubStars: 265,
+        stars: 3,
       },
     ]);
   });
