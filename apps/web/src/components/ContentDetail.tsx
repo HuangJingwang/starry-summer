@@ -15,6 +15,7 @@ import { InlineCommentLayer } from './InlineCommentLayer';
 import { LikeButton } from './LikeButton';
 import { ViewTracker } from './ViewTracker';
 import { XMindPreviewEnhancer } from './XMindPreviewEnhancer';
+import { ArticleImageLightbox } from './ArticleImageLightbox';
 
 function isCommentTargetType(type: SiteContentItem['type']): type is CommentTargetType {
   return type === 'post' || type === 'note' || type === 'project';
@@ -119,6 +120,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
           <div className="detail-reader__main">
             <CodeCopyEnhancer />
             <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+            <ArticleImageLightbox />
             <XMindPreviewEnhancer />
             {isCommentTargetType(item.type) && canShowComments(item) ? (
               <InlineCommentLayer

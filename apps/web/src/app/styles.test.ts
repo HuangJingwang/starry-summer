@@ -2013,10 +2013,11 @@ describe('global styles', () => {
     expect(detailTocBlock).toContain('border-radius: 16px;');
     expect(detailTocBlock).toContain('border: 1px solid rgba(34, 211, 238, 0.2);');
     expect(detailTocLinkBlock).toContain('color: rgba(226, 232, 240, 0.78);');
-    expect(detailBodyImageBlock).toContain('max-width: 40%;');
-    expect(detailBodyImageBlock).toContain('width: auto;');
+    expect(detailBodyImageBlock).toContain('max-width: 100%;');
+    expect(detailBodyImageBlock).toContain('width: 100%;');
     expect(detailBodyImageBlock).toContain('height: auto;');
     expect(detailBodyImageBlock).toContain('margin: 1.5em auto;');
+    expect(detailBodyImageBlock).toContain('cursor: zoom-in;');
     expect(commentEmptyBlock).toContain('background: rgba(4, 6, 14, 0.52);');
     expect(adjacentBlock).toContain('background: rgba(4, 6, 14, 0.52);');
     expect(detailLikeButtonBlock).toContain('flex: 0 0 auto;');
