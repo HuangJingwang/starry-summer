@@ -1,0 +1,672 @@
+.preview {
+  --preview-bg: #0c0c0c;
+  --preview-ink: #d7e2ea;
+  background: var(--preview-bg);
+  color: var(--preview-ink);
+  font-family: "Kanit", "Arial Narrow", Arial, sans-serif;
+  min-height: 100svh;
+  overflow: clip;
+}
+
+.preview,
+.preview * {
+  box-sizing: border-box;
+}
+
+.hero {
+  background: #0c0c0c;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  overflow: clip;
+  position: relative;
+}
+
+.nav {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 0;
+  position: relative;
+  z-index: 4;
+}
+
+.nav a {
+  color: #d7e2ea;
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  transition: opacity 200ms ease;
+}
+
+.nav a:hover,
+.nav a:focus-visible {
+  opacity: 0.7;
+}
+
+.heroTitleWrap {
+  margin-top: 1.5rem;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  z-index: 3;
+}
+
+.heroTitle,
+.sectionTitle {
+  background: linear-gradient(180deg, #646973 0%, #bbccd7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(3.9rem, 14vw, 17.5rem);
+  font-weight: 900;
+  letter-spacing: -0.075em;
+  line-height: 0.78;
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.portraitWrap {
+  left: 50%;
+  position: absolute;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: min(73vw, 280px);
+  z-index: 2;
+}
+
+.magnet {
+  transform: translate3d(var(--magnet-x, 0), var(--magnet-y, 0), 0);
+  transition: transform 0.6s ease-in-out;
+  will-change: transform;
+}
+
+.magnet[data-active] {
+  transition: transform 0.3s ease-out;
+}
+
+.portrait {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  width: 100%;
+}
+
+.heroBottom {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: 0 1.5rem 1.75rem;
+  position: relative;
+  z-index: 3;
+}
+
+.heroSummary {
+  color: #d7e2ea;
+  font-size: clamp(0.72rem, 1.4vw, 1.5rem);
+  font-weight: 300;
+  letter-spacing: 0.075em;
+  line-height: 1.35;
+  margin: 0;
+  max-width: 10rem;
+  text-transform: uppercase;
+}
+
+.contactButton,
+.liveProject {
+  align-items: center;
+  color: #fff;
+  display: inline-flex;
+  font-weight: 500;
+  gap: 0.46rem;
+  justify-content: center;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.contactButton {
+  background: linear-gradient(123deg, #18011f 7%, #b600a8 37%, #7621b0 72%, #be4c00 100%);
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 4px 4px rgba(181, 1, 167, 0.25), 4px 4px 12px #7721b1 inset;
+  box-shadow: 0 0 0 3px #0c0c0c, 0 0 0 5px #fff, 0 4px 4px rgba(181, 1, 167, 0.25), 4px 4px 12px #7721b1 inset;
+  font-size: 0.68rem;
+  min-width: max-content;
+  padding: 0.7rem 1rem;
+}
+
+.contactButton:hover,
+.contactButton:focus-visible {
+  box-shadow: 0 0 0 3px #0c0c0c, 0 0 0 5px #fff, 0 7px 18px rgba(181, 1, 167, 0.42), 4px 4px 12px #7721b1 inset;
+  transform: translateY(-2px);
+}
+
+.marquee {
+  background: #0c0c0c;
+  display: grid;
+  gap: 0.75rem;
+  overflow: clip;
+  padding: 6rem 0 2.5rem;
+}
+
+.marqueeViewport {
+  overflow: visible;
+  width: max-content;
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: 0.75rem;
+  will-change: transform;
+}
+
+.marqueeTile {
+  border-radius: 1rem;
+  display: block;
+  flex: 0 0 auto;
+  height: 10.6rem;
+  object-fit: cover;
+  width: 16.5rem;
+}
+
+.about {
+  align-items: center;
+  background: #0c0c0c;
+  display: flex;
+  justify-content: center;
+  min-height: 100svh;
+  overflow: hidden;
+  padding: 5rem 1.25rem;
+  position: relative;
+}
+
+.aboutContent {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  max-width: 45rem;
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+.about .sectionTitle,
+.projects .sectionTitle {
+  font-size: clamp(3.2rem, 12vw, 10rem);
+}
+
+.aboutMoon,
+.aboutObject,
+.aboutLego,
+.aboutGroup {
+  position: absolute;
+}
+
+.aboutMoon {
+  left: 1%;
+  top: 4%;
+  width: 7.5rem;
+}
+
+.aboutObject {
+  bottom: 8%;
+  left: 3%;
+  width: 6.25rem;
+}
+
+.aboutLego {
+  right: 1%;
+  top: 4%;
+  width: 7.5rem;
+}
+
+.aboutGroup {
+  bottom: 8%;
+  right: 3%;
+  width: 8.125rem;
+}
+
+.aboutMoon img,
+.aboutObject img,
+.aboutLego img,
+.aboutGroup img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.animatedText {
+  color: #d7e2ea;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 35rem;
+}
+
+.animatedCharacter {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.formats {
+  background: #fff;
+  border-radius: 2.5rem 2.5rem 0 0;
+  color: #0c0c0c;
+  padding: 5rem 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+
+.formatsTitle {
+  color: #0c0c0c;
+  font-size: clamp(3.2rem, 12vw, 10rem);
+  font-weight: 900;
+  letter-spacing: -0.075em;
+  line-height: 0.8;
+  margin: 0 0 4rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.formatsList {
+  margin: 0 auto;
+  max-width: 64rem;
+}
+
+.formatItem {
+  align-items: start;
+  border-top: 1px solid rgba(12, 12, 12, 0.15);
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(3.4rem, 0.42fr) 1fr;
+  padding: 2rem 0;
+}
+
+.formatItem:last-child {
+  border-bottom: 1px solid rgba(12, 12, 12, 0.15);
+}
+
+.formatNumber,
+.projectNumber {
+  font-size: clamp(2.5rem, 10vw, 8.75rem);
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 0.78;
+}
+
+.formatItem h3 {
+  font-size: clamp(1rem, 2.2vw, 2.1rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.formatItem p {
+  font-size: clamp(0.85rem, 1.6vw, 1.25rem);
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0.65rem 0 0;
+  max-width: 40rem;
+  opacity: 0.65;
+}
+
+.projects {
+  background: #0c0c0c;
+  border-radius: 2.5rem 2.5rem 0 0;
+  margin-top: -2.5rem;
+  padding: 6.5rem 1.25rem 4rem;
+  position: relative;
+  z-index: 3;
+}
+
+.projectStack {
+  margin: 4rem auto 0;
+  max-width: 76rem;
+}
+
+.projectSlot {
+  height: 85svh;
+  position: relative;
+}
+
+.projectCard {
+  background: #0c0c0c;
+  border: 2px solid #d7e2ea;
+  border-radius: 2.5rem;
+  padding: 1rem;
+  position: sticky;
+  top: calc(4.75rem + var(--stack-offset, 0px));
+  transform-origin: top center;
+}
+
+.projectSlot:nth-child(2) .projectCard {
+  --stack-offset: 28px;
+}
+
+.projectSlot:nth-child(3) .projectCard {
+  --stack-offset: 56px;
+}
+
+.projectTopline {
+  align-items: start;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: 4.2rem 1fr;
+  margin-bottom: 1.15rem;
+}
+
+.projectNumber {
+  color: #d7e2ea;
+  font-size: clamp(2.8rem, 6vw, 6.6rem);
+}
+
+.projectHeading {
+  align-self: center;
+}
+
+.projectHeading span {
+  color: rgba(215, 226, 234, 0.66);
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  margin-bottom: 0.28rem;
+  text-transform: uppercase;
+}
+
+.projectHeading h3 {
+  color: #d7e2ea;
+  font-size: clamp(1rem, 2.2vw, 2.1rem);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.liveProject {
+  border: 2px solid #d7e2ea;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  grid-column: 2;
+  justify-self: start;
+  padding: 0.55rem 0.75rem;
+}
+
+.liveProject:hover,
+.liveProject:focus-visible {
+  background: rgba(215, 226, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.projectImages {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+}
+
+.projectImageColumn {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-rows: 8.1rem 10rem;
+}
+
+.projectImageColumn img,
+.projectImageTall {
+  border-radius: 2.5rem;
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.projectImageTall {
+  min-height: 18.75rem;
+}
+
+.projectsOutro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 3rem auto 0;
+  max-width: 30rem;
+  text-align: center;
+}
+
+.projectsOutro p {
+  color: rgba(215, 226, 234, 0.78);
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  line-height: 1.45;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .nav {
+    padding: 2rem 2.5rem 0;
+  }
+
+  .nav a {
+    font-size: 1rem;
+  }
+
+  .heroTitleWrap {
+    margin-top: 1rem;
+  }
+
+  .portraitWrap {
+    bottom: 0;
+    top: auto;
+    transform: translateX(-50%);
+    width: min(56vw, 360px);
+  }
+
+  .heroBottom {
+    padding: 0 2.5rem 2rem;
+  }
+
+  .heroSummary {
+    max-width: 13.75rem;
+  }
+
+  .contactButton {
+    font-size: 0.78rem;
+    padding: 0.8rem 1.25rem;
+  }
+
+  .marquee {
+    padding-top: 8rem;
+  }
+
+  .marqueeTile {
+    height: 12.5rem;
+    width: 19.5rem;
+  }
+
+  .about {
+    padding: 6rem 2.5rem;
+  }
+
+  .aboutContent {
+    gap: 3.5rem;
+  }
+
+  .aboutMoon,
+  .aboutLego {
+    width: 10rem;
+  }
+
+  .aboutMoon {
+    left: 2%;
+  }
+
+  .aboutLego {
+    right: 2%;
+  }
+
+  .aboutObject {
+    left: 6%;
+    width: 8.75rem;
+  }
+
+  .aboutGroup {
+    right: 6%;
+    width: 10.625rem;
+  }
+
+  .formats {
+    border-radius: 3.125rem 3.125rem 0 0;
+    padding: 6rem 2.5rem;
+  }
+
+  .formatsTitle {
+    margin-bottom: 5rem;
+  }
+
+  .formatItem {
+    gap: 1.75rem;
+    padding: 2.5rem 0;
+  }
+
+  .projects {
+    border-radius: 3.125rem 3.125rem 0 0;
+    margin-top: -3rem;
+    padding: 7.5rem 2.5rem 5rem;
+  }
+
+  .projectCard {
+    border-radius: 3.125rem;
+    padding: 1.5rem;
+  }
+
+  .projectTopline {
+    align-items: center;
+    grid-template-columns: minmax(6rem, 0.4fr) 1fr auto;
+  }
+
+  .liveProject {
+    grid-column: auto;
+    justify-self: end;
+    padding: 0.75rem 1.15rem;
+  }
+
+  .projectImageColumn {
+    grid-template-rows: clamp(8.1rem, 16vw, 14.4rem) clamp(10rem, 22vw, 21.25rem);
+  }
+
+  .projectImageTall {
+    min-height: clamp(18.75rem, 39vw, 36.3rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .nav {
+    padding: 2rem 2.5rem 0;
+  }
+
+  .nav a {
+    font-size: 1.15rem;
+  }
+
+  .heroTitleWrap {
+    margin-top: -1.25rem;
+  }
+
+  .portraitWrap {
+    width: min(52vw, 440px);
+  }
+
+  .heroBottom {
+    padding: 0 2.5rem 2.5rem;
+  }
+
+  .marquee {
+    padding-top: 10rem;
+  }
+
+  .marqueeTile {
+    height: 16.875rem;
+    width: 26.25rem;
+  }
+
+  .aboutMoon,
+  .aboutLego {
+    width: 13.125rem;
+  }
+
+  .aboutMoon {
+    left: 4%;
+  }
+
+  .aboutLego {
+    right: 4%;
+  }
+
+  .aboutObject {
+    left: 10%;
+    width: 11.25rem;
+  }
+
+  .aboutGroup {
+    right: 10%;
+    width: 13.75rem;
+  }
+
+  .formats {
+    border-radius: 3.75rem 3.75rem 0 0;
+    padding: 8rem 2.5rem;
+  }
+
+  .formatsTitle {
+    margin-bottom: 7rem;
+  }
+
+  .formatItem {
+    padding: 3rem 0;
+  }
+
+  .projects {
+    border-radius: 3.75rem 3.75rem 0 0;
+    margin-top: -3.5rem;
+    padding: 8.5rem 2.5rem 6rem;
+  }
+
+  .projectCard {
+    border-radius: 3.75rem;
+    padding: 2rem;
+    top: calc(8rem + var(--stack-offset, 0px));
+  }
+
+  .projectImageColumn img,
+  .projectImageTall {
+    border-radius: 3.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav a {
+    font-size: 1.4rem;
+  }
+
+  .portraitWrap {
+    width: min(46vw, 520px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview *,
+  .preview *::before,
+  .preview *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

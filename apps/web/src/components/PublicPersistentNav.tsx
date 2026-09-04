@@ -16,5 +16,11 @@ export function PublicPersistentNav({ title, navItems }: { title: string; navIte
 }
 
 function shouldHidePublicNav(pathname: string) {
-  return pathname === '/' || pathname === '/home' || pathname.startsWith('/admin') || pathname === '/fleet-flagship';
+  return (
+    pathname === '/' ||
+    pathname === '/home' ||
+    pathname.startsWith('/admin') ||
+    pathname === '/fleet-flagship' ||
+    pathname === '/creative-preview'
+  );
 }
