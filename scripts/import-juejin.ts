@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { promisify } from 'node:util';
 
 import { seedContent } from '../apps/web/src/lib/content-seed';
 import type { SiteContentItem } from '../apps/web/src/lib/content-types';
@@ -10,6 +12,7 @@ const JUEJIN_LIST_URL = 'https://api.juejin.cn/content_api/v1/article/query_list
 const JUEJIN_POST_URL = 'https://juejin.cn/post/';
 const STATIC_CONTENT_PATH = join(process.cwd(), 'apps', 'web', 'content', 'public-content.json');
 const PUBLIC_IMAGE_ROOT = join(process.cwd(), 'apps', 'web', 'public', 'images', 'juejin');
+const execFileAsync = promisify(execFile);
 
 interface JuejinListResponse {
   err_no: number;
@@ -26,6 +29,8 @@ interface JuejinArticleItem {
     title: string;
     brief_content: string;
     cover_image: string;
+    mark_content?: string;
+    web_html_content?: string;
     ctime: string;
     mtime: string;
     rtime: string;
@@ -61,11 +66,13 @@ const dryRun = args.has('--dry-run');
 const downloadImages = args.has('--download-images');
 
 async function main() {
-  let articles = await fetchArticles();
-  console.log(`Fetched ${articles.length} article(s) from Juejin.`);
+  let existingContent = await readStaticContent();
+  let articles = await fetchArticles(getExistingJuejinArticleIds(existingContent));
+  console.log(`Fetched ${articles.length} new article(s) from Juejin.`);
 
   if (downloadImages) {
     articles = await localizeArticleImages(articles);
+    existingContent = await localizeStaticJuejinImages(existingContent);
   }
 
   if (dryRun) {
@@ -75,11 +82,11 @@ async function main() {
     return;
   }
 
-  await writeStaticContent(articles);
+  await writeStaticContent(articles, existingContent);
   console.log(`Wrote ${articles.length} Juejin article(s) to ${STATIC_CONTENT_PATH}.`);
 }
 
-async function fetchArticles(): Promise<ImportedArticle[]> {
+async function fetchArticles(existingArticleIds: ReadonlySet<string>): Promise<ImportedArticle[]> {
   const items: JuejinArticleItem[] = [];
   let cursor = '0';
 
@@ -100,6 +107,12 @@ async function fetchArticles(): Promise<ImportedArticle[]> {
 
   const articles: ImportedArticle[] = [];
   for (const item of items) {
+    const articleId = item.article_info.article_id || item.article_id;
+
+    if (existingArticleIds.has(articleId)) {
+      continue;
+    }
+
     const article = await fetchArticleDetail(item);
     articles.push(article);
   }
@@ -107,24 +120,36 @@ async function fetchArticles(): Promise<ImportedArticle[]> {
   return articles;
 }
 
+export function getExistingJuejinArticleIds(
+  content: ReadonlyArray<Pick<SiteContentItem, 'id' | 'slug' | 'sourceUrl'>>,
+): Set<string> {
+  return new Set(
+    content
+      .map(getJuejinArticleId)
+      .filter((articleId): articleId is string => Boolean(articleId)),
+  );
+}
+
+function getJuejinArticleId(item: Pick<SiteContentItem, 'id' | 'slug' | 'sourceUrl'>): string | undefined {
+  if (item.id.startsWith('juejin-')) {
+    return item.id.slice('juejin-'.length);
+  }
+
+  if (item.slug?.startsWith('juejin-')) {
+    return item.slug.slice('juejin-'.length);
+  }
+
+  return item.sourceUrl?.match(/^https:\/\/juejin\.cn\/post\/(\d+)\/?$/)?.[1];
+}
+
 async function fetchArticleDetail(item: JuejinArticleItem): Promise<ImportedArticle> {
   const articleId = item.article_info.article_id || item.article_id;
   const sourceUrl = `${JUEJIN_POST_URL}${articleId}`;
-  const response = await fetch(sourceUrl, {
-    headers: {
-      'user-agent': 'Mozilla/5.0 StarrySummerImporter/1.0',
-    },
-  });
+  let bodyMarkdown = getArticleBodyMarkdown(item.article_info);
 
-  if (!response.ok) {
-    throw new Error(`Juejin article request failed for ${articleId}: ${response.status}`);
+  if (!bodyMarkdown) {
+    bodyMarkdown = await fetchArticleBodyFromPage(articleId);
   }
-
-  const html = await response.text();
-  const bodyMarkdown = (
-    extractNuxtStringField(html, 'mark_content')
-    || htmlToMarkdown(extractNuxtStringField(html, 'web_html_content'))
-  ).trim();
 
   if (!bodyMarkdown) {
     throw new Error(`Juejin article ${articleId} did not include markdown content`);
@@ -147,6 +172,40 @@ async function fetchArticleDetail(item: JuejinArticleItem): Promise<ImportedArti
   };
 }
 
+export function getArticleBodyMarkdown(articleInfo: Pick<JuejinArticleItem['article_info'], 'mark_content' | 'web_html_content'>): string {
+  const markdown = articleInfo.mark_content?.trim();
+
+  return markdown || htmlToMarkdown(articleInfo.web_html_content ?? '').trim();
+}
+
+async function fetchArticleBodyFromPage(articleId: string): Promise<string> {
+  try {
+    // Juejin currently serves a bot-verification page to Node's built-in fetch,
+    // while the rendered public page remains available to curl.
+    const { stdout } = await execFileAsync(
+      'curl',
+      [
+        '--fail',
+        '--silent',
+        '--show-error',
+        '--location',
+        '--user-agent',
+        'Mozilla/5.0 StarrySummerImporter/1.0',
+        `${JUEJIN_POST_URL}${articleId}`,
+      ],
+      { maxBuffer: 10 * 1024 * 1024 },
+    );
+
+    return getArticleBodyMarkdown({
+      mark_content: extractNuxtStringField(stdout, 'mark_content'),
+      web_html_content: extractNuxtStringField(stdout, 'web_html_content'),
+    });
+  } catch (error) {
+    console.warn(`Could not fetch Juejin article ${articleId}: ${String(error)}`);
+    return '';
+  }
+}
+
 async function fetchJson<T>(url: string, body: unknown): Promise<T> {
   const response = await fetch(url, {
     method: 'POST',
@@ -164,16 +223,15 @@ async function fetchJson<T>(url: string, body: unknown): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function writeStaticContent(articles: ImportedArticle[]): Promise<void> {
+async function writeStaticContent(articles: ImportedArticle[], existing?: SiteContentItem[]): Promise<void> {
   await mkdir(join(process.cwd(), 'apps', 'web', 'content'), { recursive: true });
-  const existing = await readStaticContent();
+  const currentContent = existing ?? await readStaticContent();
   const imported = articles.map(toSiteContentItem);
   const importedKeys = new Set(imported.flatMap((item) => [item.id, item.slug, item.sourceUrl]).filter(Boolean));
-  const preserved = existing.filter((item) => {
+  const preserved = currentContent.filter((item) => {
     const itemKeys = [item.id, item.slug, item.sourceUrl].filter(Boolean);
-    const isJuejinImport = item.id.startsWith('juejin-') || item.slug?.startsWith('juejin-') || item.sourceUrl?.startsWith(JUEJIN_POST_URL);
 
-    return !isJuejinImport && !itemKeys.some((key) => importedKeys.has(key));
+    return !itemKeys.some((key) => importedKeys.has(key));
   });
   const content = [...preserved, ...imported].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
@@ -222,27 +280,7 @@ async function localizeArticleImages(articles: ImportedArticle[]): Promise<Impor
 
   return Promise.all(
     articles.map(async (article) => {
-      const localize = (url: string, kind: string) => {
-        const normalizedUrl = decodeHtml(url);
-
-        if (!isRemoteImageUrl(normalizedUrl)) {
-          return Promise.resolve(normalizedUrl);
-        }
-
-        const cacheKey = `${article.articleId}:${normalizedUrl}`;
-        const cached = cache.get(cacheKey);
-
-        if (cached) {
-          return cached;
-        }
-
-        const promise = downloadImage(normalizedUrl, article.articleId, kind).catch((error) => {
-          console.warn(`Failed to download image for ${article.articleId}: ${normalizedUrl} (${String(error)})`);
-          return normalizedUrl;
-        });
-        cache.set(cacheKey, promise);
-        return promise;
-      };
+      const localize = createImageLocalizer(article.articleId, cache);
 
       const coverImageUrl = article.coverImageUrl
         ? await localize(article.coverImageUrl, 'cover')
@@ -256,6 +294,54 @@ async function localizeArticleImages(articles: ImportedArticle[]): Promise<Impor
       };
     }),
   );
+}
+
+async function localizeStaticJuejinImages(content: SiteContentItem[]): Promise<SiteContentItem[]> {
+  const cache = new Map<string, Promise<string>>();
+
+  return Promise.all(
+    content.map(async (item) => {
+      const articleId = getJuejinArticleId(item);
+
+      if (!articleId) {
+        return item;
+      }
+
+      const localize = createImageLocalizer(articleId, cache);
+      const coverImageUrl = item.coverImageUrl ? await localize(item.coverImageUrl, 'cover') : item.coverImageUrl;
+      const bodyMarkdown = await localizeMarkdownImages(item.bodyMarkdown, localize);
+
+      return {
+        ...item,
+        bodyMarkdown,
+        coverImageUrl,
+      };
+    }),
+  );
+}
+
+function createImageLocalizer(articleId: string, cache: Map<string, Promise<string>>) {
+  return (url: string, kind: string): Promise<string> => {
+    const normalizedUrl = decodeHtml(url);
+
+    if (!isRemoteImageUrl(normalizedUrl)) {
+      return Promise.resolve(normalizedUrl);
+    }
+
+    const cacheKey = `${articleId}:${normalizedUrl}`;
+    const cached = cache.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    const promise = downloadImage(normalizedUrl, articleId, kind).catch((error) => {
+      console.warn(`Failed to download image for ${articleId}: ${normalizedUrl} (${String(error)})`);
+      return normalizedUrl;
+    });
+    cache.set(cacheKey, promise);
+    return promise;
+  };
 }
 
 async function localizeMarkdownImages(
@@ -295,21 +381,24 @@ function extractHtmlAttribute(html: string, attribute: string): string {
 }
 
 async function downloadImage(url: string, articleId: string, kind: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      'user-agent': 'Mozilla/5.0 StarrySummerImporter/1.0',
-      referer: 'https://juejin.cn/',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  const bytes = Buffer.from(await response.arrayBuffer());
-  const contentType = response.headers.get('content-type') ?? '';
+  const { stdout } = await execFileAsync(
+    'curl',
+    [
+      '--fail',
+      '--silent',
+      '--show-error',
+      '--location',
+      '--referer',
+      'https://juejin.cn/',
+      '--user-agent',
+      'Mozilla/5.0 StarrySummerImporter/1.0',
+      url,
+    ],
+    { encoding: 'buffer', maxBuffer: 25 * 1024 * 1024 },
+  );
+  const bytes = Buffer.from(stdout);
   const hash = createHash('sha256').update(bytes).digest('hex').slice(0, 16);
-  const extension = getImageExtension(url, contentType);
+  const extension = getImageExtension(url, '');
   const directory = join(PUBLIC_IMAGE_ROOT, articleId);
   const fileName = `${kind}-${hash}${extension}`;
 
@@ -465,7 +554,9 @@ function uniqueCompact(values: Array<string | undefined>): string[] {
   return [...new Set(values.map((value) => value?.trim()).filter(Boolean) as string[])];
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (process.argv[1]?.endsWith('import-juejin.ts')) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

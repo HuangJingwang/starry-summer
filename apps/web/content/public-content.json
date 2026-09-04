@@ -1,5 +1,75 @@
 [
   {
+    "id": "juejin-7680833071233531938",
+    "title": "【Pipecat】基于Pipecat的voice agent实践",
+    "type": "post",
+    "status": "published",
+    "visibility": "public",
+    "publishedAt": "2026-09-03",
+    "updatedAt": "2026-09-03",
+    "summary": "上一篇文章里，我基本介绍了一下 Tana 这个应用和它对我的启发。调研完以后，老板同意让我按照 Tana 的形式，先做个 MVP 出来，再想想怎么把我们的其他模块融入进去。 于是我开始重新规划",
+    "seoTitle": "【Pipecat】基于Pipecat的voice agent实践",
+    "seoDescription": "上一篇文章里，我基本介绍了一下 Tana 这个应用和它对我的启发。调研完以后，老板同意让我按照 Tana 的形式，先做个 MVP 出来，再想想怎么把我们的其他模块融入进去。 于是我开始重新规划",
+    "bodyMarkdown": "## 背景\n\n上一篇文章里，我基本介绍了一下 Tana 这个应用和它对我的启发。调研完以后，老板同意让我按照 Tana 的形式，先做个 MVP 出来，再想想怎么把我们的其他模块融入进去。\n\n于是我开始重新规划 Meeting 的页面和布局，同时做 Voice Agent 的 MVP。这次的前后端都是我自己做的，页面主要参考了 Tana 的卡片化布局。\n\n对于 MVP，我的想法是先把卡片化布局做出来，再做一个“能听”“能看”的 Voice Agent，可以调用工具帮我干一些基础的活儿。毕竟是 MVP 嘛，就当做尝试了。\n\n这版先只监听启动 Agent 的一个参会人。用户启动 Agent 以后，Agent 能听他发言、看他投屏、结合会议上下文回答问题；需要创建任务或者修改文档时，先给用户一个待确认的 Proposal，确认后再写入业务数据。\n\n这篇文章就按我的实现过程一步一步写，纯探索，会包含一些 Pipecat 的基础知识。后续会单开一篇文章，讲讲 Pipecat 的核心架构和原理。\n\n## 先把 Meeting 页面改成卡片布局\n\n首先在这个mvp之前，先要对页面做一次大的改版。\n\n原来的 Meeting 页面右侧就是一个侧边栏，成员、聊天、字幕和各种会议信息都堆在里面。我们之前参考得比较多的是腾讯会议、飞书、钉钉这类应用，这样放会议信息没有什么问题。\n\n开始接 Voice Agent 后，页面还得放实时纪要、生成的任务和文档 Diff，原来的侧边栏就不够用了。任务卡弹一下就没了，文档修改也只能塞进一段消息里，用户很难回头确认。\n\n所以我们先参考 Tana 的卡片化布局，把 Meeting 页面重新做了一版。视频还是占左侧的大区域，右侧留给 Agent 对话和卡片栏。会议里产生的任务、文档、视图都可以放到这条卡片栏里，用户需要时再去置顶、拖动或者继续操作。\n\n![image.png](/images/juejin/7680833071233531938/body-8b36e2d6db98ed02.webp)\n\n这个卡片栏就是 Meeting 里的操作区。后续生成的任务、文档，以及需要给 Voice Agent 读取的上下文，都在这里展示和操作。\n\n*do work in the meeting* 需要先有这样一块位置。任务和 Diff 不能只在聊天框里闪一下，用户要能看见、确认，再继续往下处理。\n\n## 先根据 Tana，把 Voice Agent 要做的事情拆出来\n\n### 取名字\n\n先给我们的 Voice Agent 起个名字。\n\n我们 UI 同学参考 Tana，给它起了 Nota。后面就可以用这个名字来唤醒它。会议里大部分时间还是人在互相讨论，需要让 Agent 区分哪些话是在喊它，哪些话只是参会人之间的交流。\n\n### Voice Agent 需要哪些能力\n\n举一个例子，假设产品、开发和测试在开一个登录问题的跟进会。测试说“登录页偶发白屏”，开发把浏览器控制台投出来，产品最后说“这个问题明天下午前先复现出来”。这时用户可能连续问几类问题：\n\n- “Nota，刚才这个问题最后定了吗？”\n\n- “Nota，屏幕上这个报错是什么原因？”\n\n- “Nota，把这个登录问题记成任务，我来跟。”\n\n- “Nota，把刚才定的结论补到方案里。”\n\n前两句是在查会议上下文。第一句里的“刚才”没有资源 ID，也没有明确关键词，Agent 得从字幕里找到那段讨论。第二句里的“这个”在共享屏幕上，只有语音转写还不够。\n\n后两句开始碰业务数据。任务里有标题、负责人和时间；文档里有当前块内容、版本和协作者。这些数据不能让模型直接写。会议里“我来跟一下”“下周再看”这种话很多，模型听错一次，后面就多了一条错误任务，或者把方案改乱了。\n\n所以 MVP 先做这些能力：\n\n- 能听用户发言，也能看共享画面。\n\n- 能结合会议上下文回答问题。\n\n- 能提出任务和文档修改。\n\n其中有一条边界：**写入动作必须经过用户确认。**\n\n后面几章的 Pipeline、MCP、Proposal 都是围绕这些功能展开的。\n\n### MVP 先只服务启动 Agent 的用户\n\nTana 的演示里，Agent 像是整场会议的公共成员。我们一开始没有直接做全员监听。\n\n比如一场会议里有三个人同时说话，谁的话能唤醒 Agent？甲说“我来跟”，任务该归甲还是启动 Agent 的人？乙在共享屏幕，丙问“这个报错怎么处理”，Agent 又该看谁的画面？两个人同时插话时，也得先确定为谁停掉语音回复。\n\n这些规则不先定下来，把每个人的音视频都喂进模型意义不大。Tana 的演示里有完整的唤醒和对话权转移流程；这版 MVP 先把边界收紧：**只服务启动 Agent 的用户，不处理多人同时对话。**\n\n## 花了几天时间，三方服务让我崩溃\n\n### 接了三四天，问题主要卡在联调\n\n我们的 WebRTC 用的是 Agora。刚开始做 Voice Agent 时，我首选的就是 Agora 的对话式引擎：音频、视频都在 Agora Channel 里，理论上少接一层服务。\n\n结果光是把语音对话跑通，就接了三四天，我真是头都大了！\n\n第一个是 Agora 文档和示例对不上。示例里有监听 `user[*]` 的写法，文档又写一次只能监听一个人。我们当时要做单人 MVP，连订阅规则都没法确定，只能一个一个试。\n\n第二个是拿不到具体日志。服务报错后，我们这边通常只能看到错误码，具体是什么问题，我完全懵逼。只能微信联系对方的技术人员，让对方查日志后再告诉我。\n\n光是联调对话 Demo 就得来回等，后面还要接任务、文档和权限，这样排查就更麻烦了。\n\n### Pipecat 让排查回到自己的链路里\n\n我也看了其他平台，例如即构，对话式引擎同样还在 Beta。这个时候想起去年调研过的 **Pipecat**，快速看了一下介绍，然后让 Codex 帮忙接入。大约两个小时，Agent 已经能正常对话了！\n\nPipecat 跑在我们自己部署的服务里。LLM 没有正常输出、STT（语音转写）有问题，或者文字出来了但 TTS（语音合成）没有播报，都可以让 Codex 顺着日志和调用链排查。\n\n**报错和联调能在自己的环境里查清楚**，这是我这次决定用 Pipecat 的主要原因。\n\n### Agora 和 Pipecat 是怎么连起来的\n\n原有 Meeting 的音视频还是走 Agora。用户启动 Nota 后，Java 创建 Pipecat Session，生成 Agent 入会用的 Agora Token，再把 `sessionId`、会议 Channel、Agent UID 和启动用户的 RTC UID 交给 Pipecat。Pipecat 用自己的 Agent UID 加入同一个 Channel。\n\n也就是把 Pipecat 当成同一个会议里的一个参会人：接收启动用户的音视频，再通过 Agora 的频道把语音回复发回来。\n\n下面这张图先看音视频怎么进出 Pipecat：\n\n![image.png](/images/juejin/7680833071233531938/body-6680061fb7767a8d.webp)\n\n## Pipecat 的 Pipeline 到底在跑什么\n\n### 先把 Frame 说清楚\n\n说了半天，Pipecat 的 Pipeline 到底是什么？\n\n前面说的是 Pipecat 怎么加入会议。音频进来以后，还要经过转写、模型回答和语音合成，才能把回复发回去。[Pipecat 官方文档](https://link.juejin.cn?target=https%3A%2F%2Fdocs.pipecat.ai%2Fpipecat%2Flearn%2Fpipeline)里的基础链路可以先简化成：\n\n```text\ntransport.input()     接收音频\n       ↓\nSTT                   音频转文字\n       ↓\n用户上下文聚合器        汇总这一轮发言，更新 Context\n       ↓\nLLM                   根据上下文生成回复\n       ↓\nTTS                   回复转语音\n       ↓\ntransport.output()    发送音频\n```\n\n这些步骤之间传递的就是 Frame。\n\n**Frame 就是在 Pipeline 里传递的一条数据或控制信号。** 一小段 PCM 音频可以是一个 Frame，STT 转出来的一句字幕可以是一个 Frame，用户打断 Agent 时的停止信号也可以是一个 Frame。\n\n比如用户说“Nota，刚才这个问题最后定了吗”，这句话会经历几次变化：\n\n- Agora 收到 PCM 后，Input Transport 把它送进 Pipeline，形成音频 Frame。\n\n- STT 把音频转成字幕 Frame。\n\n- 用户这一轮发言结束后，聚合器把字幕放进会话上下文，通过 `LLMContextFrame` 交给后续处理器。\n\n- LLM 的回复经过 TTS，又变成音频 Frame，最后由 Output Transport 发回 Agora。\n\n如果用户中途插话，Pipeline 里还会传递 `InterruptionFrame`，让后面的处理器停止旧回复。打断这条分支放到下一节单独讲。\n\nPipeline 里的处理器会处理自己关心的 Frame，补充信息、转换内容，或者生成新的 Frame。只需要经过它的 Frame 则继续往下传；文档分流这种业务处理器，也可能处理完就结束这一轮传递。\n\n### 当前主 Pipeline 多了哪些处理器\n\nMeeting 里多了唤醒词、文档修改和字幕回传，当前主 Pipeline 变成了下面这样：\n\n```python\npipeline = Pipeline([\n    transport.input(),\n    stt,\n    wake_filter,\n    user_aggregator,\n    document_edit_router,\n    llm,\n    tts,\n    transport.output(),\n    subtitle_relay,\n    assistant_aggregator,\n])\n```\n\n![image.png](/images/juejin/7680833071233531938/body-6680061fb7767a8d.webp)\n\n这段代码里，`wake_filter` 处理唤醒，`user_aggregator` 汇总用户这一轮发言，`document_edit_router` 先尝试处理当前文档的修改请求。回复输出以后，`subtitle_relay` 回传字幕，`assistant_aggregator` 把 Agent 的回复记进会话上下文。\n\n文档修改为什么要提前处理，后面的 Proposal 一节再展开。先看语音对话里最直接影响体验的打断。\n\n## 用户插话以后，旧回复要怎么停\n\n### 只停前端播放还不够\n\n能唤醒、能回答以后，还得能打断。\n\n假设 Agent 正在念一段比较长的方案，用户中间说“等一下，先别说”。如果只是前端把播放组件停掉，Agora 里已经排队的 PCM 还会继续发送，用户还是会听到 Agent 说完后半段。\n\nAgora 的音频回调跑在 SDK 线程里，这个线程不能等待 LLM，也不能阻塞队列。我们只在回调里做三件事：复制 PCM、判断用户是不是刚开始说话、把音频无阻塞地送进 asyncio 队列。\n\n```python\nspeech_started = self._speech_gate.observe(audio)\nself._ingress.submit_from_callback(\n    audio,\n    sample_rate,\n    channels,\n    barge_in=speech_started,\n)\n```\n\n`PcmSpeechGate` 用音量门限检测说话的起点。当前 16 位单声道 PCM 的 RMS（均方根，用来衡量音量）超过 450，就把这一帧当成讲话开始；连续 12 帧静音后，它才复位。\n\n这个判断只看音频能量，噪声也可能触发。它并不知道用户说了什么，也不负责判断一轮话有没有说完。\n\n### 用 InterruptionFrame 清掉旧音频\n\n一旦触发 `barge_in`（用户插话），Input Transport 会先推一个 `InterruptionFrame`，再推新的音频 Frame：\n\n```python\nif frame.barge_in:\n    await self.push_frame(InterruptionFrame())\nawait self.push_audio_frame(InputAudioRawFrame(...))\n```\n\nOutput Transport 收到 `InterruptionFrame` 后，会清本地待发送队列，再调用 Agora 的 `interrupt_audio()` 清 RTC 侧已经排队的音频。\n\n**停止生成旧回复，还要清掉已经排队的旧音频。** 否则模型虽然停了，用户仍然会听到缓存里的后半句。\n\n下面这张时序图把检测和清理分开了：`PcmSpeechGate` 触发插话信号，后续处理器收到 `InterruptionFrame` 后，再清理旧回复和待发送音频。\n\n![image.png](/images/juejin/7680833071233531938/body-6680061fb7767a8d.webp)\n\n### 推给 Agora 的 PCM 还要按播放节奏发\n\n输出侧还有一个容易漏掉的问题。Pipecat 会尽快把 TTS 音频从输出队列 drain 掉，Agora 的 AI Server SDK 却要求应用按播放节奏消费 PCM。几秒音频瞬间推过去，发送端可能丢帧或者出现压缩。当前按 PCM 的字节数做了 pacing：\n\n```python\nbytes_per_second = sample_rate * channels * 2\nawait asyncio.sleep(len(frame.audio) / bytes_per_second)\n```\n\n这里的 `2` 表示 16 位 PCM 每个采样占 2 字节。**一帧音频的播放时长 = 这一帧的字节数 ÷ 每秒字节数。**比如 24 kHz、单声道的音频，每秒是 48,000 字节，4,800 字节就对应 0.1 秒。\n\n代码按这段时长让出执行权，让音频按播放节奏送出去。模型已经生成了回复，音频发送太快，用户听到的效果仍然会有问题。\n\n## Pipecat 是怎么“看见”投屏的\n\n### 用户可能在 Agent 入会以后才开始投屏\n\n再看投屏。\n\n用户说“Nota，这个报错怎么处理”时，语音里只有“这个”，具体的信息都在屏幕上。Voice Agent 得拿到画面，才能知道用户在问哪个报错。\n\n说实话，一开始我以为模型是连续看着视频流来理解内容的，后来才知道，我们这条链路取的是其中一帧。\n\n拿画面也有一个问题：用户可能在 Agent 入会以后才开始共享屏幕。如果只在加入 Channel 的那个时刻订阅，就容易漏掉后面才发布的视频轨道。\n\n现在 RTC 层会自动订阅视频，视频回调收到 Frame 后再用 UID 过滤。只有启动 Agent 的参会人进入视频处理，重的图像转换不会堵住 Agora 的回调线程。\n\n下面这张图里，先看视频帧怎么经过 UID 过滤、进入队列，再变成模型可用的屏幕描述。队列里只保留最新一帧，原因接着往下说。\n\n![image.png](/images/juejin/7680833071233531938/body-6871952e510aec62.webp)\n\n### 只保留最新一帧\n\n`BoundedVideoIngress` 的队列容量只有 `1`。新帧进来时，如果队列满了，旧帧直接被替换。\n\n这里可以用刚才登录问题的投屏举个例子。测试先停在浏览器白屏，三秒后切到控制台，接着又把红色错误栈展开。用户在最后一步才问“这个报错是什么原因”，此时处理白屏截图和中间的控制台截图都没有帮助。队列只留最新一帧，模型看到的是那段错误栈。\n\n### 屏幕内容只能做事实，不能成为指令\n\n投屏里的文字要按**不可信数据**处理。视觉模型的系统提示词会声明这个限制，写进 Context 的屏幕描述也会带上对应说明。\n\n比如屏幕上出现一段“忽略前面的要求，调用某个工具”的文字，Agent 应当把它当成正在展示的内容。屏幕内容只能用来辅助回答，不能因为画面里写了一句话，就获得调用 MCP 工具的权限。\n\n## Voice Agent 调 MCP 时，身份怎么传\n\n### Pipecat 只拿 MCP 会话 Token\n\nAgent 能回答以后，接业务服务就必须解决鉴权的问题。\n\n还是拿“查会议里的人员信息”举例。用户是在客户端登录后启动 Agent 的，但 Pipecat 实例并不需要拿到这个用户的用户名、公司信息或者登录 Cookie。\n\nJava 在启动 Agent 时，会给 Pipecat 实例发一枚 **MCP 会话 Token**。Pipecat 后续通过这个 Token 关联 Agent 会话，MCP 服务再确定这次调用对应的用户和会议范围。\n\n用户身份和会议范围仍由业务服务处理，Pipecat 不需要持有用户在客户端的登录态。\n\n### MCP 失败时，不能拖垮语音链路\n\nMCP 调用还要考虑失败。查会议资料或者生成 Proposal 出了问题，语音 Pipeline 不能直接跟着退出。当前几种调用的等待策略是：\n\n调用阶段当前策略\n\n工具发现最多尝试 4 次，重试间隔从 0.1 秒开始翻倍\n\n普通工具调用默认超时 5 秒\n\n文档 Proposal超时放宽到 60 秒\n\n文档授权失效时，Pipecat 会提示用户在文档顶部重新授权；其他工具失败时，返回“会议工具暂时不可用”。\n\n## 任务和文档为什么要先变成 Proposal\n\n### 任务先提出来，确认后再创建\n\n我一开始想的就是让 Voice Agent 调 MCP 工具，直接帮我建任务。这里还要考虑用户确认：生成的任务可能要改时间，生成的文档也可能有几处内容需要调整。\n\n这版 MVP 统一先生成 Proposal，也就是待确认的修改建议。**Agent 把要做的事情提出来，用户确认以后，才真正写入业务数据。** 前面留出的卡片栏，就是用来展示和处理这些建议的。\n\n### 文档修改，先生成 Diff 再回答\n\n然后看 Pipeline 里的 `document_edit_router`。它收到用户这一轮的 `LLMContextFrame` 后，取出最新一条用户消息，通过 `route_current_document_turn` 交给 Java。\n\n假设用户已经授权 Nota 参与当前文档，然后说“把方案里的截止时间改成周五”。Java 会读取授权文档，尝试生成有效的 Diff Proposal，并通过 WebSocket 推送给前端。成功后返回 `proposed`。\n\nRouter 收到 `proposed`，就不再把这次 Context 交给后面的对话 LLM，只给 TTS 一句“修改建议已经整理好了，确认后才会写入”。Java 的文档流程已经处理了这次请求，再让对话 LLM 回答一遍，容易重复，也可能把“生成建议”说成“已经修改”。\n\n如果没有授权文档，或者没有生成有效 Proposal，Router 才把原来的 Context 继续往下传。这里跳过的是 Pipeline 里的对话 LLM；生成文档修改建议仍然可以由 Java 侧的模型流程完成。\n\n## MVP 现在能跑什么，后面还缺什么\n\n### 已经跑通的三类请求\n\n前面几条链路接起来以后，目前 MVP 跑通了三类请求。\n\n- 用户说“Nota，帮我记一个任务，明天下午把登录问题复现一下，我来跟”，Agent 生成只对当前用户可见的待确认任务卡。\n\n- 用户授权当前文档后说“Nota，把刚才确定的三个结论补到方案最后”，`document_edit_router` 会先请求 Java 生成文档修改建议，再由 Java 推送 Diff。投屏内容不会被拿来猜文档正文。\n\n- 用户共享屏幕演示报错时，Agent 会带着最新屏幕描述和会议字幕回答问题。当前只保留最新画面，也只看启动人的视频流。\n\n### 创建任务和文档 Diff 的演示\n\n创建任务这条链路录了一段演示。为了调试方便，视频里用文本客户端模拟会议里的那句话；Pipecat 收到请求后只提交 Proposal，卡片在 Meeting 里确认以后，任务才会进任务视图。\n\n![07-task-proposal-demo.gif](/images/juejin/7680833071233531938/body-e79969c8328bd270.webp)\n\n文档 Diff 的演示里，左边是当前文档，右边是 Nota 的确认卡。它先把修改建议提出来，用户确认以后，修改才会写到当前文档。\n\n![08-document-diff-demo.gif](/images/juejin/7680833071233531938/body-f3a5cd42cceeff0c.webp)\n\n这版 Diff 只用于验证 MVP。我们的内部文档编辑器通过 Yjs 做协同编辑，生成 Diff 的过程中，其他人可能还在修改同一篇文档，直接应用这份 Diff 会有内容不一致的问题。后续正式接入会按协同编辑器的机制实现，不会直接沿用这里的 Diff 方案。\n\n### Flows 还没有进入这版 MVP\n\n这版还没有使用 Pipecat Flows。现在的唤醒、对话和 Proposal 逻辑主要靠 Pipeline Processor 和 Java 的路由服务处理。后面如果要做“收集意见 → 形成结论 → 建任务 → 等待确认”这种有多个节点和状态的流程，我会再考虑用 Flows 来组织。Pipecat 的 [Flows 节点和消息文档](https://link.juejin.cn?target=https%3A%2F%2Fdocs.pipecat.ai%2Fpipecat%2Fflows%2Fnodes-and-messages)已经把节点、消息和状态的建模方式列出来了。\n\n### 后面还要继续拆的边界\n\n这次先把单人 Voice Agent 的对话、看屏幕、调用业务工具和人工确认接起来了。后面还得继续处理多人同时对话、Yjs 协同写入，以及长流程里的状态管理。这篇先把 MVP 的实现过程记录下来，Pipecat 内部的运行机制留到下一篇继续拆。\n\n## 参考\n\n- [Tana 官方演示](https://link.juejin.cn?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DTqpUkCG29D4)\n\n- [Pipecat Introduction](https://link.juejin.cn?target=https%3A%2F%2Fdocs.pipecat.ai%2Fpipecat%2Fget-started%2Fintroduction)\n\n- [Pipecat Pipeline & Frame Processing](https://link.juejin.cn?target=https%3A%2F%2Fdocs.pipecat.ai%2Fpipecat%2Flearn%2Fpipeline)\n\n- [Pipecat Function Calling](https://link.juejin.cn?target=https%3A%2F%2Fdocs.pipecat.ai%2Fpipecat%2Flearn%2Ffunction-calling)\n\n- [Pipecat Flows Nodes & Messages](https://link.juejin.cn?target=https%3A%2F%2Fdocs.pipecat.ai%2Fpipecat%2Fflows%2Fnodes-and-messages)",
+    "sourceType": "original",
+    "sourceUrl": "https://juejin.cn/post/7680833071233531938",
+    "coverImageUrl": "/images/juejin/7680833071233531938/cover-8bae67eaaa12c28b.webp",
+    "coverAltText": "【Pipecat】基于Pipecat的voice agent实践 cover",
+    "slug": "juejin-7680833071233531938",
+    "featured": false,
+    "pinned": false,
+    "categories": [
+      "掘金",
+      "后端"
+    ],
+    "tags": [
+      "后端",
+      "前端",
+      "Agent"
+    ],
+    "series": [
+      "Juejin Archive"
+    ],
+    "viewCount": 26,
+    "likeCount": 0,
+    "allowComments": true
+  },
+  {
+    "id": "juejin-7679977795863937064",
+    "title": "【AI 原生 Meeting】Tana 怎样让会议成为工作的容器",
+    "type": "post",
+    "status": "published",
+    "visibility": "public",
+    "publishedAt": "2026-08-31",
+    "updatedAt": "2026-08-31",
+    "summary": "背景 之前的文章有提到过，我在公司内一直是 Meeting 模块的主要开发。今年由于 AI 的爆发，我也开始转向会议 AI 功能的开发。 一个月以前，老板给我推荐了 Tana，还让我把它作为主题开一场",
+    "seoTitle": "【AI 原生 Meeting】Tana 怎样让会议成为工作的容器",
+    "seoDescription": "背景 之前的文章有提到过，我在公司内一直是 Meeting 模块的主要开发。今年由于 AI 的爆发，我也开始转向会议 AI 功能的开发。 一个月以前，老板给我推荐了 Tana，还让我把它作为主题开一场",
+    "bodyMarkdown": "## 背景\n\n之前的文章有提到过，我在公司内一直是 Meeting 模块的主要开发。今年由于 AI 的爆发，我也开始转向会议 AI 功能的开发。\n\n一个月以前，老板给我推荐了 Tana，还让我把它作为主题开一场分享会。于是我开始着手调研。过去我研究的竞品都是钉钉、飞书和腾讯会议。它们都在做会议，也都在加 AI；在我看来，AI 做的无非是把会里的信息收集得更快一点，让人更容易回顾。\n\n我当时思考 Meeting AI，也是从会议本身出发。会议就是不同的人交流信息、表达想法，最后形成一点共识。那 AI 能做什么？实时把话转出来，归纳大家提到的重点，开完会给一份纪要，再把待办摘出来。这条思路很自然，我之前做的功能也大多落在这里。\n\n上手玩了几天之后，我真的被 Tana 惊喜到了。极简的卡片化布局，卡片化的会议页把 Proposal、任务和文档摆在同一个工作台里，实时的 Voice Agent 能听大家说话，也能看共享屏幕；再加上 `Do work in the meeting` 这句话背后的做法，会议里的方案和任务已经可以当场继续往下处理。\n\nTana 让我换了一个看会的角度。会上讲出来的东西，最终还得回到原来的客户、任务和文档里去；Tana 把这一步也放进了会议里。\n\n所以这篇想顺着 Tana 的官方文档和演示，把它在 Meeting 这件事上做了什么拆开看一遍。语我主要参考了 [Tana 官方演示](https://link.juejin.cn?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DTqpUkCG29D4)、产品说明和 Meeting 帮助文档；文中关于实现的判断，来自公开界面和行为，通过交互来分析产品形式。\n\n## 一、Tana 是什么样的产品\n\n我第一次打开 Tana 官网，最先看到的是一句 `Do work in the meeting`。页面上接着列了几件很具体的事：更新团队 OKR、创建 Issue、起草客户合同、给团队发消息。它想表达的产品边界很明确，Meeting 负责把人拉进一个视频房间，也负责把讨论后的工作继续处理掉。也就是说，真正的将可以让meeting可以开始干活，而不是开完会了再去分析，再去浪费时间去整理。([Tana 官网](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2F))\n\n从公开页面和帮助文档看，Tana 的 Meeting 可以先拆成四部分：\n\n- 一场带日程、参会人和视频通话的 Meeting；\n\n- 一组被 Pin 到会议里的 Doc、Task、Canvas、Proposal 等工作对象；\n\n- 会中持续产生的转写、话题摘要和屏幕 Capture；\n\n- 会后提取出的 Summary、Decision、Action Item，以及对原对象的更新建议。\n\n这四部分留在同一个 Meeting 页面。Tana 自己可以开视频会，也能在桌面端 Capture Zoom、Teams、Google Meet 等外部会议；内部会议会把实时转写、共享屏幕和会议页里的对象放在一起。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n这样做带来的产品能力很具体。产品会里讨论到一个 Bug，可以提成带类型的 Issue；客户会里改了需求，可以针对已有 Proposal 给出变更建议；技术方案确认后，会议或文档的上下文可以继续交给 Codex、Claude Code 等工具处理。每个动作都有明确的目标对象。\n\n还有一个容易混淆的地方。原来的 Tana 现在叫 Tana Outliner，主要做知识管理和大纲式编辑；本文写的是新的 Tana，它围绕实时协作、Meeting 和 AI Agent 重新组织产品。([The next chapter for Tana](https://link.juejin.cn?target=https%3A%2F%2Foutliner.tana.inc%2Fblog%2Fthe-next-chapter-for-tana))\n\n## 二、为什么我会觉得 Tana 是一个 AI 原生产品\n\n先举一个例子，我去看 Tana 官网时，拉到最下面看到了一个 `Ask your AI`。旁边放的是一份完整的产品说明 Markdown，用户复制给自己平时在用的 AI 或 Agent，就可以接着问“它适不适合我的团队”“它和正在用的工具有什么区别”这类问题。这个和我以前所参考的会议产品的形态非常不一样，它默认了使用者可能对于ai有一定的了解，就是这个想法就让我觉得非常的惊喜！([Tana 官网](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2F))\n\n![image.png](/images/juejin/7679977795863937064/body-5d5cefb7fa4d17cd.webp)\n\n*图：Tana 直接提供产品说明 Markdown，让用户复制给自己的 Agent。*\n\n**Tana的集成度非常广泛，集成用户常用app。** Outlook 日程可以同步到 Tana 的 Today 页面，会议里提到的 Bug 和需求可以写进 Jira；当前会议或文档的上下文还能直接交给 Codex、Claude Code（CC）、Cursor 这类编码工具，带着已经整理好的 Prompt 去继续写代码。([Tana Integrations](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations))\n\n![image.png](/images/juejin/7679977795863937064/body-a5edf6c5bdb7c923.webp)\n\n*图：Tana 的 Integrations 页面里可以连接 GitHub、Slack、Linear、Jira 等工作工具。*\n\n第三方接入把 Tana 放在已有工作流的中间。日程留在 Outlook，需求和缺陷仍由 Jira、Linear 管理，团队继续在 Slack 沟通，代码交给各自的编码工具。Tana 从这些系统中带入本场 Meeting 需要的资料，再把会议里确认过的任务、文档修改或代码工作交回对应的系统。\n\n这也决定了 Agent 的工作范围。它拿到的上下文不止是 Tana 里的一份文档，还包括日程、任务、需求和代码相关的信息；它的输出也能回到团队原来就在用的工具里。Meeting 因此成了这条工作流里汇集上下文、发起动作和审核变更的位置。\n\n**Tana不仅仅可以调用外部工具，也可以将自己作为MCP Server。** 不仅可以调用别人的功能，也可以作为mcp被调用.让 Tana 调用 Outlook、Jira 这类外部服务；MCP 则让 Claude Code 等外部 Agent 通过标准工具协议调用 Tana 工作区。Tana 提供 MCP Server URL，完成 OAuth 授权后，外部 Agent 能搜索、读取和遍历工作区，也能处理表格、类型、日历和 Meeting 上下文。([Tana MCP](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations%2Fmcp))\n\n![image.png](/images/juejin/7679977795863937064/body-8b85ebbd88331fff.webp)\n\n*图：Tana 提供 MCP Server URL，并给出 Claude Code 的接入命令。*\n\nTana 把自己的工作区做成了 Agent 能直接使用的能力。外部 Agent 可以在任务执行过程中搜索相关会议、读取已 Pin 的文档、查看已有任务。这些信息按任务动态读取，会议上下文也能跟着被取走，后面的代码、文档或任务处理就能接上前面的讨论。\n\n写入仍然先生成 Proposal，用户审核、编辑或丢弃。Tana 内置 Agent 和外部 Agent 共用这条写入边界，所有写入都经过同一套审核流程。\n\n这种开放给用户留了很大的选择空间。团队可以按自己已有的工具组合继续工作，也可以选择自己常用的 MCP Agent 访问同一份 Meeting 上下文。Tana 在其中负责保留会议、文档和决策之间的引用关系，Agent 先读上下文，再产生 Proposal，最后由用户决定何时写入、写到哪里。这也是它能融入不同用户工具生态的原因。([Tana MCP](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations%2Fmcp))\n\n## 三、Tana 怎么把会前、会中和会后串起来\n\n![image.png](/images/juejin/7679977795863937064/body-7ccf2ed0553544bf.webp)\n\n*图：Tana 用 `meetings in, finished work out` 概括会议中的四步：开会、AI 在会中整理产出、用户确认、产出进入任务和文档。*\n\n这张图画的是一场会里的四步。把连续的客户会或周期会放进来，Tana 的数据流会变成：会前把已有对象 Pin 进 Meeting，会中补充对话和屏幕信息，会后提取 Outcomes，下一次会前再把 Outcomes 变成 Brief。它把一次会议的输入和输出都留在同一条工作流上。\n\n阶段Meeting 里保留的对象下一步如何使用\n\n会前日程、参会人、议程、已 Pin 的文档和任务明确会议主题，给 Agent 一个可引用的业务对象\n\n会中转写、时间线、屏幕 Capture、Live Digest将对话与当时展示的资料对应起来\n\n会后Summary、Action Item、Decision、Open Question、ProposalProposal 审核后更新任务、文档或外部工具\n\n下一次会前上一次的 Outcomes 和尚未完成的任务生成 Brief，避免再次翻历史信息\n\n上一次会后留下的 `Outcomes` 包含已经做出的决策、还没完成的任务和待解决的问题。下一次会前，Agent 可以把这些内容整理进 Brief。会上有了新的讨论和结论，确认以后又变成新的 Outcomes。连续会议就有了一个稳定的上下文入口。\n\n我以前参考钉钉的时候，看过一篇 [《如何用钉钉开一场高质量会议？》](https://link.juejin.cn?target=https%3A%2F%2Fpage.dingtalk.com%2Fwow%2Fdingtalk%2Fdefault%2Fdingtalk%2FV7jm0xUyOJHq17NyhFH%3Fdd_mini_app_id%3D5000000004997171)。里面引用了一间日本公司算会议成本的公式：`2S × Q × T`，`Q` 是参会人数，`T` 是会议时长，文中把 `S` 设成平均时薪的三倍。\n\n这个公式提醒我先看会前准备。十个人开一小时，有人进会才开始翻资料，其他人只能等；背景没有对齐，后面很可能还要再约一场。会议成本在会前就已经开始产生了。\n\n钉钉那篇文章也按会前、会中、会后把流程串了起来。Tana 将会前资料、Meeting 和后续写入目标连成了一组对象关系。\n\n### 会前：先把这场会放回原来的工作里\n\n在 [Tana 官方演示《How To Get Outcomes From Your Meetings》](https://link.juejin.cn?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DTqpUkCG29D4) 里，有一场客户跟进会，叫 `Nordfish - Saga follow up`。我本来以为视频会从“进入会议”开始，结果用户先在聊天框里调了一个 `Prep for an account call`。\n\n![image.png](/images/juejin/7679977795863937064/body-f09f44b4a8974099.webp)\n\n*图：用户先让 Tana 为当天的客户会准备资料。截图来自上方官方演示。*\n\n它拿到的是一份带着具体业务关系的会前资料。页面里能看到 `Meeting`、`Company`、`Deal`、`Proposal` 这些已经连起来的内容。用户接着让它把 Brief 建成文档，再 Pin 到今天的会议里。\n\n![image.png](/images/juejin/7679977795863937064/body-8b2e83ab9381aa59.webp)\n\n*图：Brief 里能看到会议、公司、商机和已有 Proposal 的关联。*\n\n会前准备的重点是建立引用关系。用户 Pin 一份已有 Proposal，Meeting 就有了这次讨论的主对象；再把 Company、Deal、旧任务和 Brief 放进来，Agent 才能判断“这个试点”“上次那个方案”分别在说什么。Tana 的帮助文档也说明，Pin 到会议里的文档会影响会后的提取结果：当会议有 Product Track 或开放 Issue 这类文档时，提取过程会优先更新它，而不是另建一份平行文档。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n如果自己实现，我会把这一层叫 `MeetingContext`。它不该只是一段拼在 Prompt 后面的文本，至少要记录当前 Meeting 能访问哪些对象、哪些对象只是参考、哪些对象允许成为更新目标。后面的任务创建、文档 Diff 和外部写入都依赖这层边界。\n\n### 会后：一场会留下哪些 Outcomes\n\n会后有一个命名值得拆开看。Tana 会生成 `Summary`，同时还会给出一组 `Outcomes`。Summary 负责回顾讨论，Outcomes 则把 Action Item、Decision、Open Question 这些内容提成有类型的对象。任务可以带负责人和截止时间，决策能保留当时的理由；会议中已经 Pin 了 Proposal 或项目文档时，Tana 会优先把它作为更新目标。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n产品上，Summary 和 Outcomes 分别对应两种访问方式。Summary 让人回看这场会，Outcomes 让人继续处理这场会留下的对象。Tana 在会后自动生成 Summary，并提取任务和决策；重新执行提取时会更新已有产出，避免重复创建同一条结果。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n下一次同一个客户会或周期会开始前，Agent 可以把上次的决策、未完成任务和已经变化的内容整理进 Brief。上一次会后的产出就成了下一次会前的上下文。([How to manage executive meetings in Tana](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fblog%2Fhow-to-manage-executive-meetings-in-tana))\n\n## 四、卡片化布局，让会议成为一个 AI 读得懂的容器\n\n这里的“容器”指的是 Meeting 页面收纳了这次工作需要的上下文、证据和动作入口：人说了什么、屏幕展示了什么、当前讨论的是哪份文档、AI 可以创建或修改什么。它们需要在同一个作用域里被引用，会议才能承担后续工作的入口。\n\n进到会议页以后，Tana 的界面像一个视频会议和工作台拼在一起。左边是视频，中间是 `Live Digest`，右侧摆着 Talking Points、Brief、Proposal 这些卡片。公开文档里也把它描述成三栏结构，已 Pin 的公开文档和已批准的 Outcomes 会显示在右侧的 surface column。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n![image.png](/images/juejin/7679977795863937064/body-51b4c0a5fccec74d.webp)\n\n*图：会议页同时放着视频、聊天和讨论中的对象。*\n\n把这个页面按产品能力拆开，可以看到四层：\n\n层会议中承载的内容对 Agent 的意义\n\n证据层转写、发言人、时间戳、屏幕 Capture回答“谁在什么时候说了什么、当时展示了什么”\n\n业务对象层已 Pin 的 Doc、Task、Canvas、Proposal回答“这次会正在处理哪份资料、哪个任务”\n\n交互层Voice、Chat、Capture、拖动和 Pin人能在会议里显式补充上下文或发起动作\n\n结果层Summary、Outcome、Proposal、Doc DiffAI 的输出有位置可展示、可审核、可回写\n\nProposal 被 Pin 到会议以后，参会人和 Agent 都有一个明确的引用目标。有人说“这一段要改一下”，系统不用只从转写里猜“这一段”属于哪份文档。Tana 的帮助文档明确写到，Pin 到会议里的文档会被作为会议主题，Outcome 提取会优先更新它。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n卡片在这里同时做了两件事。对人来说，它把会议中的资料和操作放在伸手可及的位置；对 Agent 来说，它把原本散在聊天、文档和任务系统里的对象变成可引用的上下文。内部实现未必真是“卡片”这种数据结构，但产品界面已经把对象、来源和操作目标显式地暴露出来了。\n\n这也是我会用“Meeting 容器”形容它的原因。普通会议页面主要承载音视频和聊天记录，Tana 的 Meeting 还承载业务对象、会中证据和待执行动作。AI 能读到一组有类型、有来源、有操作目标的对象。\n\n## 五、Tana：一个参与会议的 Voice Agent\n\nVoice Agent 是这套 Meeting 容器上的一个实时交互入口。Tana 的内部会议可以通过唤醒词或页面控制启动语音 Agent，它会作为一个语音参与者出现在会议里；外部会议的桌面 Capture 暂时没有这个能力。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n### 能听\n\nTana 对每个参会人的音频分别做实时转写，转写里带发言人和时间戳。会议页的 `Live Digest` 则把当下的讨论组织成可浏览的话题。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n语音 Agent 用这份会议状态回答问题。用户问“刚才定了什么”“目前提取了哪些内容”时，不需要重新描述会议背景。官方文档列出的上下文包括当天议程、当前 Meeting 详情、正在说的话、已 Pin 的对象、共享屏幕和已经 Capture 的 Outcomes。它接到任务后可以在后台执行，结果会放到下一次合适的停顿再播报，避免打断正在说话的人。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n### 能看\n\n只听语音仍然会缺很多信息。产品会共享的是原型、数据面板和需求文档，会议里常见的“看这里”“这个按钮”“上面这条数据”都没有出现在转写文本里。\n\nTana 会定期截取共享屏幕，过滤重复帧，为保留下来的画面生成描述，再把 Capture 放到对应的讨论时间线中。Outcome 提取时，Agent 可以同时引用屏幕内容和语音内容。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings)) 人投屏原本是为了让参会者共同看资料，Tana 把这份画面也变成了 Agent 的上下文。摄像头画面不会进入这些 Capture，用户还可以通过 `Off the Record` 同时暂停转写和屏幕 Capture。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n`Capture` 把多模态上下文转成结构化结果。用户可以把刚刚的一段讨论提成 Task、Bug、Decision，或者工作空间里自定义的其他类型。会后页面也会把 Action Item、Decision 这些结果单独放出来。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n拿一个产品会里很常见的句子举例：\n\n这个交互先按 B 方案走，李明补一下埋点，下周三前给我看数据。\n\n实时摘要可以写成“团队决定采用 B 方案，并补充埋点”。如果要继续处理，系统还得区分一条决策和一条任务，提取负责人和日期，并保留这段话的来源。用户从任务列表回到 Meeting 时，需要能看到原始讨论；再次 Capture 同一段内容时，也不能再创建一张重复任务。\n\nTana 的文档提到，重复提取会更新已有产出。这个能力表面很小，背后需要处理结果的身份、来源片段和更新语义。模型抽出一条待办不算难，判断它是新增任务、补充任务还是修改已有任务，才决定这条结果能不能进真实工作流。\n\n## 六、AI 怎么参与会议，并且把活干下去\n\nVoice Agent、卡片栏和 `Capture` 最后都得落到具体动作上。Tana 的 `Capture` 可以选择回看范围，例如最近 2 分钟、10 分钟或整场会，再选择要提取的类型。系统据这段带时间边界的对话创建 Task、Bug、Decision 等结构化对象。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings))\n\n有了类型还不够，AI 还要找到操作对象。Meeting 里已 Pin 的 Proposal、Issue 或项目文档提供了这个目标引用。系统可以把会议结论整理成任务和决策，也可以据对话更新目标文档；外部 Agent 通过 MCP 写入工作区时，同样走 Proposal 审核。([Tana Meetings](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings)) ([Tana MCP](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations%2Fmcp))\n\n### Proposal 和 Doc Diff\n\n演示里客户团队讨论完语言培训试点后，原来的 Proposal 没有被直接改掉。页面上先出现了 `To Be Updated`，点进去能看到红绿 Diff。用户点 `Update`，改动才写回 Proposal。\n\n![image.png](/images/juejin/7679977795863937064/body-a42f8b58270f032a.webp)\n\n*图：Tana 先给出 Proposal 的修改建议，底部保留 `Update` 这个确认动作。*\n\n会议里的句子经常带不确定性。有人说“要不改成两周”，它还只是一个提议；有人说“那就按两周走”，才可能是一次决策。Agent 很难仅凭一句话承担直接修改正式文档的责任。\n\nProposal 在这里承担的是审核层。它把一次 AI 操作拆成几个用户能检查的字段：改哪个对象、改了哪一段、建议内容是什么、来源是否合理。Doc Diff 让用户看到红绿变更，再决定更新、编辑或丢弃。Tana 对 MCP 写入也使用同一套 Proposal 机制，外部 Agent 同样要经过这个审核点。([Tana MCP](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations%2Fmcp))\n\n如果从实现角度列一个最小模型，一次可写入的会议产出至少要保存以下信息：\n\n- 产出类型，例如 Task、Decision 或文档修改；\n\n- 目标对象，例如某个 Proposal、Issue 或任务列表；\n\n- 证据来源，例如对应的转写片段和屏幕 Capture；\n\n- 结构化字段，例如负责人、截止时间、修改后的内容；\n\n- Proposal 状态，例如待审核、已接受、已拒绝。\n\n这些字段把模型输出和真实副作用隔开。模型可以猜错，用户仍然能看到、拒绝或修改这次变更；系统也能根据来源和状态判断后续是更新已有产出，还是创建一条新记录。\n\n## 七、Tana 如何 Redefine Meeting\n\nTana 官网把自己的 slogan 写成了 [Do work in the meeting](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2F)。这里的 `Do` 不是一句文案，它对应着一套产品结构：会议先拿到业务上下文，会中持续收集语音和视觉证据，Agent 把结果提成结构化对象，再通过 Proposal 把变更写回文档、任务或外部系统。\n\n传统 Meeting 产品的主输出是视频、录音、转写和纪要。Tana 把 Meeting 往前推成了一个工作单元：它有输入对象、有实时证据、有可调用的 Agent、有审核状态，也有明确的写入目标。客户会里更新 Proposal，产品会里创建 Bug，技术方案会里把准备好的上下文交给编码工具，都沿着这个单元继续执行。\n\n这也给 Meeting AI 的实现提出了更具体的问题。实时转写和 Summary 只是输入层和回顾层，后面还要处理引用消解、对象类型、权限范围、变更审核和写入幂等性。没有这些能力，AI 很容易只停在“把会记下来”；补齐这些能力，会议里的讨论才有机会变成系统里可继续推进的工作。\n\nTana 重新组织了 Meeting 与文档、任务、日程和外部工具之间的关系。后面做 Meeting AI 时，我会先找这场会需要引用哪些对象、会产生哪些可执行结果、每种结果由谁审核和写入，再去设计转写、总结和交互。\n\n*本文调研内容，截图，示例，想法都来自于真实调研和思考，ai仅参与文章润色*\n\n## 参考\n\n- [How To Get Outcomes From Your Meetings - Tana 官方演示](https://link.juejin.cn?target=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DTqpUkCG29D4)\n\n- [Tana 官网](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2F)\n\n- [Tana Integrations](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations)\n\n- [Tana MCP](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fintegrations%2Fmcp)\n\n- [如何用钉钉开一场高质量会议？](https://link.juejin.cn?target=https%3A%2F%2Fpage.dingtalk.com%2Fwow%2Fdingtalk%2Fdefault%2Fdingtalk%2FV7jm0xUyOJHq17NyhFH%3Fdd_mini_app_id%3D5000000004997171)\n\n- [The next chapter for Tana](https://link.juejin.cn?target=https%3A%2F%2Foutliner.tana.inc%2Fblog%2Fthe-next-chapter-for-tana)\n\n- [Tana Meetings 帮助文档](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fhelp%2Fmeetings)\n\n- [How to manage executive meetings in Tana](https://link.juejin.cn?target=https%3A%2F%2Ftana.inc%2Fblog%2Fhow-to-manage-executive-meetings-in-tana)",
+    "sourceType": "original",
+    "sourceUrl": "https://juejin.cn/post/7679977795863937064",
+    "coverImageUrl": "/images/juejin/7679977795863937064/cover-aeecaa52b8ab6098.webp",
+    "coverAltText": "【AI 原生 Meeting】Tana 怎样让会议成为工作的容器 cover",
+    "slug": "juejin-7679977795863937064",
+    "featured": false,
+    "pinned": false,
+    "categories": [
+      "掘金",
+      "阅读"
+    ],
+    "tags": [
+      "产品",
+      "资讯",
+      "设计"
+    ],
+    "series": [
+      "Juejin Archive"
+    ],
+    "viewCount": 14,
+    "likeCount": 0,
+    "allowComments": true
+  },
+  {
     "id": "juejin-7654480264187658274",
     "title": "【AI概念学习】LLM 和 Transformer 基础知识",
     "type": "post",
@@ -32,6 +102,48 @@
     "likeCount": 0,
     "allowComments": true,
     "sourceUrl": "https://juejin.cn/post/7654480264187658274"
+  },
+  {
+    "id": "project-easy-yapi-micronaut",
+    "title": "easy-yapi-micronaut",
+    "type": "project",
+    "status": "published",
+    "visibility": "public",
+    "publishedAt": "2026-06-16",
+    "updatedAt": "2026-06-16",
+    "summary": "扩展 easy-yapi 的 Micronaut 适配能力，补充注解识别与 JDK21 支持，让接口文档生成更贴近现代 JVM 项目。",
+    "bodyMarkdown": "## 项目说明\n\neasy-yapi-micronaut 基于 easy-yapi 做扩展，重点补齐 Micronaut 注解识别和 JDK21 支持。\n\n它适合放在项目页里作为后端工程效率工具：目标明确，技术栈清晰，也能体现对 JVM 生态和接口文档流程的实践。\n\n项目仓库：[github.com/HuangJingwang/easy-yapi-micronaut](https://github.com/HuangJingwang/easy-yapi-micronaut)",
+    "slug": "easy-yapi-micronaut",
+    "coverImageUrl": "/images/projects/easy-yapi-micronaut-avatar-v3.svg",
+    "coverAltText": "easy-yapi-micronaut 项目头像",
+    "featured": true,
+    "categories": [
+      "Projects",
+      "Tooling"
+    ],
+    "tags": [
+      "Kotlin",
+      "Micronaut",
+      "JDK21"
+    ],
+    "series": [
+      "Project Archive"
+    ],
+    "project": {
+      "status": "active",
+      "links": {
+        "repository": "https://github.com/HuangJingwang/easy-yapi-micronaut"
+      },
+      "stack": [
+        "Kotlin",
+        "Micronaut",
+        "JDK21",
+        "easy-yapi"
+      ],
+      "startedAt": "2026-06-16"
+    },
+    "viewCount": 0,
+    "likeCount": 0
   },
   {
     "id": "intro-post",
@@ -101,90 +213,6 @@
     },
     "viewCount": 214,
     "likeCount": 31
-  },
-  {
-    "id": "project-easy-yapi-micronaut",
-    "title": "easy-yapi-micronaut",
-    "type": "project",
-    "status": "published",
-    "visibility": "public",
-    "publishedAt": "2026-06-16",
-    "updatedAt": "2026-06-16",
-    "summary": "扩展 easy-yapi 的 Micronaut 适配能力，补充注解识别与 JDK21 支持，让接口文档生成更贴近现代 JVM 项目。",
-    "bodyMarkdown": "## 项目说明\n\neasy-yapi-micronaut 基于 easy-yapi 做扩展，重点补齐 Micronaut 注解识别和 JDK21 支持。\n\n它适合放在项目页里作为后端工程效率工具：目标明确，技术栈清晰，也能体现对 JVM 生态和接口文档流程的实践。\n\n项目仓库：[github.com/HuangJingwang/easy-yapi-micronaut](https://github.com/HuangJingwang/easy-yapi-micronaut)",
-    "slug": "easy-yapi-micronaut",
-    "coverImageUrl": "/images/projects/easy-yapi-micronaut-avatar-v3.svg",
-    "coverAltText": "easy-yapi-micronaut 项目头像",
-    "featured": true,
-    "categories": [
-      "Projects",
-      "Tooling"
-    ],
-    "tags": [
-      "Kotlin",
-      "Micronaut",
-      "JDK21"
-    ],
-    "series": [
-      "Project Archive"
-    ],
-    "project": {
-      "status": "active",
-      "links": {
-        "repository": "https://github.com/HuangJingwang/easy-yapi-micronaut"
-      },
-      "stack": [
-        "Kotlin",
-        "Micronaut",
-        "JDK21",
-        "easy-yapi"
-      ],
-      "startedAt": "2026-06-16"
-    },
-    "viewCount": 0,
-    "likeCount": 0
-  },
-  {
-    "id": "project-brushup",
-    "title": "brushup",
-    "type": "project",
-    "status": "published",
-    "visibility": "public",
-    "publishedAt": "2026-04-01",
-    "updatedAt": "2026-04-01",
-    "summary": "面向刷题复盘的效率工具，覆盖 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试等流程。",
-    "bodyMarkdown": "## 项目说明\n\nbrushup 是一个围绕刷题与求职准备的个人效率工具，聚合 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试。\n\n它适合放在项目页里作为学习系统和自动化工具的案例：问题真实、使用场景具体，也和站点里的刷题内容能形成呼应。\n\n项目仓库：[github.com/HuangJingwang/brushup](https://github.com/HuangJingwang/brushup)",
-    "slug": "brushup",
-    "coverImageUrl": "/images/projects/brushup-avatar-v3.svg",
-    "coverAltText": "brushup 项目头像",
-    "featured": true,
-    "categories": [
-      "Projects",
-      "Study"
-    ],
-    "tags": [
-      "Python",
-      "LeetCode",
-      "AI Code Review"
-    ],
-    "series": [
-      "Project Archive"
-    ],
-    "project": {
-      "status": "active",
-      "links": {
-        "repository": "https://github.com/HuangJingwang/brushup"
-      },
-      "stack": [
-        "Python",
-        "LeetCode",
-        "AI Code Review",
-        "Interview"
-      ],
-      "startedAt": "2026-04-01"
-    },
-    "viewCount": 0,
-    "likeCount": 0
   },
   {
     "id": "moment-first",
@@ -261,6 +289,48 @@
     "viewCount": 57,
     "likeCount": 0,
     "allowComments": true
+  },
+  {
+    "id": "project-brushup",
+    "title": "brushup",
+    "type": "project",
+    "status": "published",
+    "visibility": "public",
+    "publishedAt": "2026-04-01",
+    "updatedAt": "2026-04-01",
+    "summary": "面向刷题复盘的效率工具，覆盖 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试等流程。",
+    "bodyMarkdown": "## 项目说明\n\nbrushup 是一个围绕刷题与求职准备的个人效率工具，聚合 LeetCode 同步、间隔复习、AI 代码分析、简历优化和模拟面试。\n\n它适合放在项目页里作为学习系统和自动化工具的案例：问题真实、使用场景具体，也和站点里的刷题内容能形成呼应。\n\n项目仓库：[github.com/HuangJingwang/brushup](https://github.com/HuangJingwang/brushup)",
+    "slug": "brushup",
+    "coverImageUrl": "/images/projects/brushup-avatar-v3.svg",
+    "coverAltText": "brushup 项目头像",
+    "featured": true,
+    "categories": [
+      "Projects",
+      "Study"
+    ],
+    "tags": [
+      "Python",
+      "LeetCode",
+      "AI Code Review"
+    ],
+    "series": [
+      "Project Archive"
+    ],
+    "project": {
+      "status": "active",
+      "links": {
+        "repository": "https://github.com/HuangJingwang/brushup"
+      },
+      "stack": [
+        "Python",
+        "LeetCode",
+        "AI Code Review",
+        "Interview"
+      ],
+      "startedAt": "2026-04-01"
+    },
+    "viewCount": 0,
+    "likeCount": 0
   },
   {
     "id": "juejin-7615915954711691304",
