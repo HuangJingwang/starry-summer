@@ -2005,8 +2005,8 @@ describe('global styles', () => {
     expect(detailShellTocDesktopBlock).toContain('order: 2;');
     expect(detailShellTocDesktopBlock).toContain('position: sticky;');
     expect(detailShellTocDesktopBlock).toContain('top: 24px;');
-    expect(detailShellTocDesktopBlock).toContain('flex: 0 0 200px;');
-    expect(detailShellTocDesktopBlock).toContain('width: 200px;');
+    expect(detailShellTocDesktopBlock).toContain('flex: 0 0 280px;');
+    expect(detailShellTocDesktopBlock).toContain('width: 280px;');
     expect(css.match(/\.detail-shell--with-toc \.detail\s*{(?<body>[\s\S]*?)\n  }/)?.groups?.body ?? '').toContain(
       'margin-inline: 0;',
     );
