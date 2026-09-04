@@ -18,6 +18,8 @@ describe('ArticleImageLightbox integration', () => {
     expect(componentSource).toContain("event.key === 'Enter'");
     expect(componentSource).toContain("event.key === ' '");
     expect(componentSource).toContain("event.key === 'Escape'");
+    expect(componentSource).toContain('closeButtonRef.current?.focus({ preventScroll: true })');
+    expect(componentSource).toContain('triggerRef.current?.focus({ preventScroll: true })');
     expect(componentSource).toContain('role="dialog"');
     expect(componentSource).toContain('aria-modal="true"');
     expect(componentSource).toContain('article-image-lightbox');

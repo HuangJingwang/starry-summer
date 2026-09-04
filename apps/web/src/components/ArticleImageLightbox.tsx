@@ -65,13 +65,13 @@ export function ArticleImageLightbox() {
 
     document.body.classList.add('article-image-lightbox-open');
     document.addEventListener('keydown', onKeyDown);
-    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus({ preventScroll: true }));
 
     return () => {
       document.body.classList.remove('article-image-lightbox-open');
       document.removeEventListener('keydown', onKeyDown);
       window.cancelAnimationFrame(focusFrame);
-      triggerRef.current?.focus();
+      triggerRef.current?.focus({ preventScroll: true });
     };
   }, [activeImage]);
 
