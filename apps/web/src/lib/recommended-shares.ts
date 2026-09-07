@@ -194,6 +194,16 @@ export const recommendedShares: RecommendedShare[] = [
     stars: 5,
   },
   {
+    name: 'MotionSites AI',
+    url: 'https://motionsites.ai/',
+    logo: 'MS',
+    avatarSrc: '/images/recommended-shares/motionsites-logo.png',
+    avatarAlt: 'MotionSites AI 网站图标',
+    description: '收集适用于 Lovable、Bolt、Cursor 和 Claude 的 AI 建站提示词与动态页面案例，包含完整页面、功能区块和动画背景，适合快速寻找视觉方向。',
+    tags: ['前端审美', 'AI Coding', '工程流程'],
+    stars: 5,
+  },
+  {
     name: 'Dribbble',
     url: 'https://dribbble.com/',
     logo: 'DB',

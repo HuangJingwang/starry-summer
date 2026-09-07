@@ -71,6 +71,7 @@ describe('recommended share page', () => {
       'Conductor',
       '21st.dev',
       'React Bits',
+      'MotionSites AI',
       'Dribbble',
       'LINUX DO',
       '小林面试笔记',
@@ -100,6 +101,7 @@ describe('recommended share page', () => {
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['21st.dev', undefined, undefined],
       ['React Bits', '/images/recommended-shares/react-bits-logo.png', 'React Bits 网站图标'],
+      ['MotionSites AI', '/images/recommended-shares/motionsites-logo.png', 'MotionSites AI 网站图标'],
       ['Dribbble', undefined, undefined],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
@@ -225,6 +227,15 @@ describe('recommended share page', () => {
       avatarSrc: '/images/recommended-shares/react-bits-logo.png',
       avatarAlt: 'React Bits 网站图标',
       description: '开源 React 动效组件库，提供可复制、可定制的动画与交互组件，涵盖文字、背景、卡片等分类，适合快速为页面补充有辨识度的动态效果。',
+      tags: ['前端审美', 'AI Coding', '工程流程'],
+      stars: 5,
+    });
+    expect(recommendedShares.find((resource) => resource.name === 'MotionSites AI')).toMatchObject({
+      url: 'https://motionsites.ai/',
+      logo: 'MS',
+      avatarSrc: '/images/recommended-shares/motionsites-logo.png',
+      avatarAlt: 'MotionSites AI 网站图标',
+      description: '收集适用于 Lovable、Bolt、Cursor 和 Claude 的 AI 建站提示词与动态页面案例，包含完整页面、功能区块和动画背景，适合快速寻找视觉方向。',
       tags: ['前端审美', 'AI Coding', '工程流程'],
       stars: 5,
     });
