@@ -70,6 +70,7 @@ describe('recommended share page', () => {
       'Visual IP Illustrations',
       'Conductor',
       '21st.dev',
+      'React Bits',
       'Dribbble',
       'LINUX DO',
       '小林面试笔记',
@@ -98,6 +99,7 @@ describe('recommended share page', () => {
       ['Visual IP Illustrations', '/images/recommended-shares/visual-ip-illustrations-avatar.jpg', 'yangchuansheng GitHub 头像'],
       ['Conductor', '/images/recommended-shares/conductor-avatar.jpg', 'Conductor GitHub 项目图标'],
       ['21st.dev', undefined, undefined],
+      ['React Bits', '/images/recommended-shares/react-bits-logo.png', 'React Bits 网站图标'],
       ['Dribbble', undefined, undefined],
       ['LINUX DO', '/images/recommended-shares/linux-do-logo.svg', 'LINUX DO 网站图标'],
       ['小林面试笔记', '/images/recommended-shares/xiaolinnote-logo.png', '小林面试笔记图标'],
@@ -214,6 +216,15 @@ describe('recommended share page', () => {
       url: 'https://21st.dev/',
       logo: '21',
       description: '面向 React 开发者的社区组件与模板库，提供分类筛选、CLI、MCP 和 AI 创建入口，适合快速寻找可复用的前端实现。',
+      tags: ['前端审美', 'AI Coding', '工程流程'],
+      stars: 5,
+    });
+    expect(recommendedShares.find((resource) => resource.name === 'React Bits')).toMatchObject({
+      url: 'https://reactbits.dev/',
+      logo: 'RB',
+      avatarSrc: '/images/recommended-shares/react-bits-logo.png',
+      avatarAlt: 'React Bits 网站图标',
+      description: '开源 React 动效组件库，提供可复制、可定制的动画与交互组件，涵盖文字、背景、卡片等分类，适合快速为页面补充有辨识度的动态效果。',
       tags: ['前端审美', 'AI Coding', '工程流程'],
       stars: 5,
     });

@@ -184,6 +184,16 @@ export const recommendedShares: RecommendedShare[] = [
     stars: 5,
   },
   {
+    name: 'React Bits',
+    url: 'https://reactbits.dev/',
+    logo: 'RB',
+    avatarSrc: '/images/recommended-shares/react-bits-logo.png',
+    avatarAlt: 'React Bits 网站图标',
+    description: '开源 React 动效组件库，提供可复制、可定制的动画与交互组件，涵盖文字、背景、卡片等分类，适合快速为页面补充有辨识度的动态效果。',
+    tags: ['前端审美', 'AI Coding', '工程流程'],
+    stars: 5,
+  },
+  {
     name: 'Dribbble',
     url: 'https://dribbble.com/',
     logo: 'DB',
