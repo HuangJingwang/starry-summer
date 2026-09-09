@@ -8,7 +8,7 @@ function readSource(path: string) {
 }
 
 describe('creative preview page', () => {
-  test('keeps the 3D-inspired landing composition isolated from the public home', () => {
+  test('uses repository content as a personal blog home preview instead of a design portfolio', () => {
     const pagePath = 'src/app/creative-preview/page.tsx';
     const previewPath = 'src/app/creative-preview/CreativePortfolioPreview.tsx';
     const stylePath = 'src/app/creative-preview/creative-preview.module.css';
@@ -21,16 +21,21 @@ describe('creative preview page', () => {
     const previewSource = readSource(previewPath);
     const styleSource = readSource(stylePath);
 
-    expect(pageSource).toContain('<CreativePortfolioPreview />');
+    expect(pageSource).toContain("import { loadSiteContent } from '@/lib/public-content';");
+    expect(pageSource).toContain('<BlogHomePreview');
     expect(previewSource).toContain("from 'framer-motion'");
-    expect(previewSource).toContain('function Magnet');
-    expect(previewSource).toContain('function ScrollMarquee');
-    expect(previewSource).toContain('function AnimatedText');
+    expect(previewSource).toContain("import { ThemeToggle } from '@/components/ThemeToggle';");
+    expect(previewSource).toContain('function FeaturedReading');
+    expect(previewSource).toContain('function RecentUpdates');
+    expect(previewSource).toContain('function ContentRoutes');
     expect(previewSource).toContain('Aster.H');
-    expect(previewSource).toContain('>\n          Projects\n        </h2>');
-    expect(previewSource).toContain('Nextlevel Studio');
+    expect(previewSource).toContain('最新更新');
+    expect(previewSource).toContain('文章、笔记、片刻与项目');
+    expect(previewSource).not.toContain('Nextlevel Studio');
+    expect(previewSource).not.toContain('Live Project');
     expect(styleSource).toContain('.preview');
-    expect(styleSource).toContain('position: sticky;');
+    expect(styleSource).toContain(':global(:root[data-theme=\'summer-day\'])');
+    expect(styleSource).toContain('.featureCard');
     expect(styleSource).toContain('@media (prefers-reduced-motion: reduce)');
   });
 });
