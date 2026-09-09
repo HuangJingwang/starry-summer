@@ -21,10 +21,11 @@ export default async function TagsPage() {
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">标签</p>
+          <p className="eyebrow">THE INDEX / KEYWORDS</p>
           <h1>标签</h1>
           <p>用更细的关键词串起文章、日常和项目，快速回到相同技术、主题或状态的内容。</p>
         </div>
+        <nav className="journal-taxonomy-index" aria-label="标签索引">{groups.map((group) => <a key={group.key} href={`#tag-${group.key}`}>{group.label}<span>{group.items.length}</span></a>)}</nav>
         <div className="category-stack">
           {groups.map((group) => (
             <section key={group.key} className="category-section" aria-labelledby={`tag-${group.key}`}>

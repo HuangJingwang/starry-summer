@@ -20,7 +20,7 @@ export default async function ProjectsPage() {
   return (
     <SiteShell>
       <main className="page-main projects-page">
-        <h1 className="projects-page__sr-title">项目</h1>
+        <div className="page-title-row"><div className="page-title"><p className="eyebrow">04 / IN THE MAKING</p><h1>项目</h1><p>把想法做出来，再把过程留下来。</p></div><div className="journal-heading-note"><b>{projects.length}</b>个项目 / 边做边记</div></div>
         <div className="projects-page__grid">
           {projects.map((item) => (
             <ProjectShowcaseCard key={item.id} item={item} />
@@ -47,7 +47,7 @@ function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
           href={href}
         >
           {cover ? (
-            <img src={cover.imageUrl} alt={cover.altText} />
+            <img src={cover.imageUrl} alt={cover.altText} loading="lazy" decoding="async" />
           ) : (
             <span>PROJECT</span>
           )}

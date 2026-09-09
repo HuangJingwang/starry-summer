@@ -711,7 +711,7 @@ describe('global styles', () => {
     expect(css).not.toContain('@keyframes shore-surge-wash');
     expect(css).not.toContain('@keyframes shore-surge-foam');
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
-    expect(readStylesheet('src/app/page.tsx')).toContain('BlurredBubblesCanvas');
+    expect(readStylesheet('src/app/page.tsx')).toContain('BlogHomePreview');
     expect(css).toContain('.portfolio-hero__bubbles');
     expect(css).toContain('filter: blur(50px) saturate(1.12);');
     expect(css).toContain('opacity: 0;');

@@ -1,28 +1,28 @@
 .preview {
-  --preview-bg: var(--cyber-bg);
-  --preview-surface: #0b141c;
-  --preview-ink: var(--cyber-ink);
-  --preview-muted: var(--cyber-muted);
-  --preview-accent: #91f2d3;
-  --preview-line: rgba(179, 215, 214, .18);
-  --preview-wash: rgba(82, 208, 190, .07);
+  --preview-bg: #0a0d0f;
+  --preview-surface: #111719;
+  --preview-ink: #e9eee8;
+  --preview-muted: #95a39d;
+  --preview-accent: #b2dfc6;
+  --preview-line: rgba(216, 234, 222, .14);
+  --preview-wash: rgba(143, 198, 166, .055);
   --preview-button-ink: #07251d;
-  --preview-display: Arial, Helvetica, sans-serif;
+  --preview-display: 'Manrope', Arial, Helvetica, sans-serif;
   --preview-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   background: var(--preview-bg);
   color: var(--preview-ink);
-  font-family: var(--font-nav);
+  font-family: 'Manrope', var(--font-nav);
   overflow-x: clip;
 }
 
 :global(:root[data-theme='summer-day']) .preview {
-  --preview-bg: #eef0ec;
-  --preview-surface: #e3e8e2;
-  --preview-ink: #1b3430;
-  --preview-muted: #5e716a;
-  --preview-accent: #176b55;
-  --preview-line: rgba(44, 79, 62, .2);
-  --preview-wash: rgba(53, 121, 88, .065);
+  --preview-bg: #eef0eb;
+  --preview-surface: #e5e9e1;
+  --preview-ink: #203b31;
+  --preview-muted: #586c60;
+  --preview-accent: #206248;
+  --preview-line: rgba(31, 64, 45, .18);
+  --preview-wash: rgba(58, 111, 75, .045);
   --preview-button-ink: #f2fff9;
 }
 
@@ -215,6 +215,7 @@
 .dockControl svg { transform: translateY(calc(var(--dock-icon-y, 0) * 1px)) scale(var(--dock-icon-scale, 1)); pointer-events: none; }
 .dockControl :global(.theme-toggle) { border: 0; border-radius: 12px; background: transparent; width: 100%; height: 100%; padding: 0; }
 .dockControl :global(.theme-toggle button:hover) { box-shadow: none; background: transparent; color: var(--preview-accent); }
+:global(:root[data-theme]) .dockControl :global(.theme-toggle button:hover), :global(:root[data-theme]) .dockControl :global(.theme-toggle button:focus-visible) { box-shadow: none; background: transparent; color: var(--preview-accent); }
 .dockTooltip { position: absolute; bottom: calc(100% + 19px); left: 50%; transform: translate(-50%, 5px); opacity: 0; white-space: nowrap; background: var(--preview-surface); border: 1px solid var(--preview-line); border-radius: 7px; padding: 7px 10px; font-size: 11px; color: var(--preview-ink); pointer-events: none; transition: opacity .15s, transform .15s; }
 .dockSlot:hover .dockTooltip, .dockTooltip[data-focused='true'] { opacity: 1; transform: translate(-50%, 0); }
 .dockDivider { width: 1px; height: 25px; background: var(--preview-line); margin: 0 2px; }

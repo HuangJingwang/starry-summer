@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { formatArchiveDate } from '@/lib/archive-date';
 
 import { ContentArchiveActions, ContentArchiveMarkup } from '@/components/ContentArchiveMarkup';
 import { SiteShell } from '@/components/SiteShell';
@@ -29,8 +30,11 @@ export default async function PostsPage() {
       <main className="page-main">
         <div className="page-title-row">
           <div className="page-title">
+            <p className="eyebrow">01 / THE JOURNAL</p>
             <h1>文章</h1>
+            <p>技术实践、原理探索，以及那些值得认真聊聊的事。</p>
           </div>
+          <div className="journal-heading-note"><b>{latestPosts.length}</b>公开文章 / 持续更新</div>
         </div>
         <Suspense
           fallback={
@@ -83,22 +87,13 @@ function toArchiveItem(item: SiteContentItem): SortableArchiveGroup['items'][num
   return {
     id: item.id,
     href: getContentHref(item),
-    dateLabel: formatPostArchiveDate(item.publishedAt),
+    dateLabel: formatArchiveDate(item.publishedAt),
     dateTime: item.publishedAt,
     title: item.title,
+    excerpt: item.summary,
     pinned: Boolean(item.pinned),
     taxonomyItems,
     statsLabel: `${item.viewCount ?? 0} 浏览 · ${item.likeCount ?? 0} 喜欢`,
     ...(cover ? { cover: { imageUrl: cover.imageUrl } } : {}),
   };
-}
-
-function formatPostArchiveDate(value: string): string {
-  const [, month = '', day = ''] = value.match(/^(\d{4})-(\d{2})-(\d{2})/) ?? [];
-
-  if (!month || !day) {
-    return value;
-  }
-
-  return `${month}-${day}`;
 }

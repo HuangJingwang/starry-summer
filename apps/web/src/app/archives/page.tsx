@@ -22,7 +22,7 @@ export default async function ArchivesPage() {
     <SiteShell>
       <main className="page-main narrow">
         <div className="page-title">
-          <p className="eyebrow">归档</p>
+          <p className="eyebrow">THE ARCHIVE / 按时间回看</p>
           <h1>归档</h1>
           <p>按发布时间整理所有公开内容，方便从时间线回看文章、日常和项目。</p>
         </div>

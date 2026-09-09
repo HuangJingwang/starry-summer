@@ -16,6 +16,7 @@ import { LikeButton } from './LikeButton';
 import { ViewTracker } from './ViewTracker';
 import { XMindPreviewEnhancer } from './XMindPreviewEnhancer';
 import { ArticleImageLightbox } from './ArticleImageLightbox';
+import { ArticleReadingGuide } from './ArticleReadingGuide';
 
 function isCommentTargetType(type: SiteContentItem['type']): type is CommentTargetType {
   return type === 'post' || type === 'note' || type === 'project';
@@ -35,21 +36,9 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
     ? await loadApprovedComments(item.type, item.id)
     : [];
   const { anchored: anchoredComments, regular: regularComments } = splitAnchoredComments(approvedComments);
-  const tableOfContentsNav = tableOfContents.length > 0 ? (
-    <nav className="detail-toc" aria-label="文章目录">
-      <p className="eyebrow">目录</p>
-      <ol>
-        {tableOfContents.map((heading) => (
-          <li key={heading.slug} className={`detail-toc__item detail-toc__item--depth-${heading.depth}`}>
-            <a href={`#${heading.slug}`}>{heading.text}</a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  ) : null;
-  const detailSidebar = cover || item.summary || tableOfContentsNav;
+  const collection = item.type === 'project' ? { href: '/projects', label: '项目记录' } : item.type === 'note' ? { href: '/notes', label: '笔记' } : item.type === 'moment' ? { href: '/moments', label: '片刻' } : { href: '/posts', label: '文章' };
   const commentSection = isCommentTargetType(item.type) && canShowComments(item) ? (
-    <section className="detail-comments" aria-label="评论">
+    <section className="detail-comments" aria-label="评论" id="comments">
       <h2>评论</h2>
       <CommentList comments={regularComments} />
       <CommentForm
@@ -62,26 +51,14 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
   ) : null;
 
   return (
-    <div className={`detail-shell ${tableOfContentsNav ? 'detail-shell--with-toc' : 'detail-shell--no-toc'}`}>
+    <div className={`detail-shell ${tableOfContents.length ? 'detail-shell--with-toc' : 'detail-shell--no-toc'}`}>
       <ViewTracker targetType={item.type} targetId={item.id} />
-      {detailSidebar ? (
-        <aside className="detail-sidebar" aria-label="文章侧栏">
-          {cover ? (
-            <section className="detail-sidebar__card detail-sidebar__cover" aria-label="文章封面">
-              <img src={cover.imageUrl} alt={cover.altText} />
-            </section>
-          ) : null}
-          {item.summary ? (
-            <section className="detail-sidebar__card detail-sidebar__summary" aria-label="文章摘要">
-              <p className="eyebrow">摘要</p>
-              <p>{item.summary}</p>
-            </section>
-          ) : null}
-          {tableOfContentsNav}
-        </aside>
-      ) : null}
       <article className="detail">
+        <header className={`journal-article-hero${cover ? '' : ' journal-article-hero--text'}`}>
+        <div>
+        <nav className="journal-breadcrumb" aria-label="阅读路径"><Link href="/">首页</Link><span>/</span><Link href={collection.href}>{collection.label}</Link><span>/</span><span>THE JOURNAL</span></nav>
         <h1>{item.title}</h1>
+        {item.summary && <p className="journal-article-standfirst">{item.summary}</p>}
         <div className="detail__meta">
           <time dateTime={item.publishedAt}>{item.publishedAt}</time>
           {updatedAt ? <time dateTime={updatedAt}>更新于 {updatedAt}</time> : null}
@@ -115,8 +92,14 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
             ))}
           </div>
         ))}
+        </div>
+        {cover && <figure className="journal-article-cover"><img src={cover.imageUrl} alt={cover.altText} /><figcaption>ASTER.H / {collection.label}</figcaption></figure>}
+        </header>
+        <div className="journal-article-grid">
+        <ArticleReadingGuide headings={tableOfContents} />
+        <div className="journal-article-main">
         {item.type === 'project' && item.project ? <ProjectMeta item={item} /> : null}
-        <div className={`detail-reader ${tableOfContentsNav ? 'detail-reader--with-external-toc' : 'detail-reader--no-toc'}`}>
+        <div className={`detail-reader ${tableOfContents.length ? 'detail-reader--with-external-toc' : 'detail-reader--no-toc'}`}>
           <div className="detail-reader__main">
             <CodeCopyEnhancer />
             <div className="detail__body" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
@@ -154,6 +137,8 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
           </nav>
         ) : null}
         {commentSection}
+        </div>
+        </div>
       </article>
     </div>
   );

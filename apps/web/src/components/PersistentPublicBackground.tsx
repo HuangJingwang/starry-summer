@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { StarrySkyCanvas } from '@/components/StarrySkyCanvas';
 
 type SiteTheme = 'summer-day' | 'summer-night';
 
@@ -61,7 +60,7 @@ export function PersistentPublicBackground() {
       data-public-module={isPublicModule ? 'true' : undefined}
       aria-hidden="true"
     >
-      {isPublicModule ? <StarrySkyCanvas className="site-shell__canvas" showFleet={false} active={isActive} /> : null}
+      {/* Reader pages use the journal's CSS atmosphere; no hidden animation loop. */}
     </div>
   );
 }

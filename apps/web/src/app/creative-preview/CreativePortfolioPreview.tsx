@@ -53,7 +53,7 @@ function Hero({ publicCount, lastPublishedAt, featuredEntries, galleryEntries, q
 
   return (
     <section aria-labelledby="blog-preview-title" className={styles.hero} ref={hero}>
-      <nav aria-label="博客预览导航" className={styles.nav}>
+      <nav aria-label="首页导航" className={styles.nav}>
         <a className={styles.brand} href="#top"><span aria-hidden="true">✳</span> Aster.H</a>
         <div className={styles.navLinks}>
           <a href="#latest">阅读<span>01</span></a><a href="#routes">探索<span>02</span></a><a href="/about">关于<span>03</span></a>
@@ -176,7 +176,7 @@ function ContentRoutes() {
 
 function ArchiveCallout({ quiet }: { quiet: boolean }) {
   return <footer className={styles.archive} id="archive">
-    <div className={styles.archiveTop}><div><p className={styles.eyebrow}>UNTIL OUR NEXT ORBIT</p><h2>很高兴，在这里遇见你。</h2><p>有想法，有问题，或者只是想打个招呼。</p></div><MagneticLink className={styles.footerAction} href="/guestbook" quiet={quiet}>留个脚印 <ArrowUpRight size={23} /></MagneticLink></div>
+    <div className={styles.archiveTop}><div><p className={styles.eyebrow}>UNTIL OUR NEXT ORBIT</p><h2>很高兴，在这里遇见你。</h2><p>更多关于我，以及能找到我的地方。</p></div><MagneticLink className={styles.footerAction} href="/about" quiet={quiet}>关于与联系 <ArrowUpRight size={23} /></MagneticLink></div>
     <a className={styles.footerWordmark} href="#top" aria-label="回到顶部">STAY CURIOUS<span aria-hidden="true">↗</span></a>
     <div className={styles.footerMeta}><span>© STARRY SUMMER · ASTER.H</span><div><a href="/archives">归档</a><a href="/tags">标签</a><a href="/rss.xml">RSS <ArrowUpRight size={12} /></a></div><span>记录仍在继续 <i /></span></div>
   </footer>;

@@ -36,7 +36,7 @@ export default async function SearchPage({
     <SiteShell>
       <main className="page-main search-page">
         <div className="page-title">
-          <p className="eyebrow">搜索</p>
+          <p className="eyebrow">SEARCH THE JOURNAL</p>
           <h1>搜索</h1>
           <p>搜索已发布的文章、日常和项目。</p>
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpenText, Compass, Images, Orbit, Pause, Play, Search } from 'lucide-react';
+import { BookOpenText, Code2, Compass, Images, Orbit, Pause, Play, Search } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform, type MotionStyle, type MotionValue } from 'framer-motion';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -15,11 +15,12 @@ const destinations = [
   { id: 'routes', label: '探索', icon: Compass },
 ];
 
-export function PreviewDock({ hasGallery, paused, quiet, onPause }: { hasGallery: boolean; paused: boolean; quiet: boolean; onPause: () => void }) {
+export function PreviewDock({ hasGallery, paused, quiet, onPause, sitePath }: { hasGallery: boolean; paused: boolean; quiet: boolean; onPause: () => void; sitePath?: string }) {
   const mouseX = useMotionValue(Infinity);
   const [active, setActive] = useState('top');
 
   useEffect(() => {
+    if (sitePath) return;
     // DOM order, rather than Dock order, determines the current reading section.
     const ids = ['top', ...(hasGallery ? ['fragments'] : []), 'latest', 'routes'];
     let frame = 0;
@@ -37,7 +38,14 @@ export function PreviewDock({ hasGallery, paused, quiet, onPause }: { hasGallery
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
     return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); };
-  }, [hasGallery]);
+  }, [hasGallery, sitePath]);
+
+  const links = sitePath ? [
+    { href: '/', label: '首页', icon: Orbit, current: sitePath === '/' },
+    { href: '/posts', label: '阅读', icon: BookOpenText, current: /^\/(posts|notes)(\/|$)/.test(sitePath) },
+    { href: '/projects', label: '项目', icon: Code2, current: sitePath.startsWith('/projects') },
+    { href: '/categories', label: '探索', icon: Compass, current: /^\/(categories|series|tags|archives)(\/|$)/.test(sitePath) },
+  ] : destinations.filter((item) => hasGallery || item.id !== 'fragments').map((item) => ({ ...item, href: `#${item.id}`, current: active === item.id }));
 
   return <div className={styles.dockPosition}>
     <nav aria-label="快捷导航" className={styles.dock}
@@ -51,9 +59,9 @@ export function PreviewDock({ hasGallery, paused, quiet, onPause }: { hasGallery
         controls[next]?.focus();
       }}
       onPointerLeave={() => mouseX.set(Infinity)}>
-      {destinations.filter((item) => hasGallery || item.id !== 'fragments').map(({ id, label, icon: Icon }) =>
-        <DockItem label={label} mouseX={mouseX} quiet={quiet} key={id}>
-          <a aria-label={label} aria-current={active === id ? 'location' : undefined} href={`#${id}`}><Icon aria-hidden="true" size={21} /><span className={styles.dockMobileLabel}>{label}</span></a>
+      {links.map(({ href, label, icon: Icon, current }) =>
+        <DockItem label={label} mouseX={mouseX} quiet={quiet} key={href}>
+          <a aria-label={label} aria-current={current ? sitePath ? 'page' : 'location' : undefined} href={href}><Icon aria-hidden="true" size={21} /><span className={styles.dockMobileLabel}>{label}</span></a>
         </DockItem>)}
       <DockItem label="搜索文章" mouseX={mouseX} quiet={quiet}><a aria-label="搜索文章" href="/search"><Search aria-hidden="true" size={20} /></a></DockItem>
       <span aria-hidden="true" className={styles.dockDivider} />

@@ -44,15 +44,15 @@ describe('site shell helpers', () => {
     });
   });
 
-  test('keeps the shared public card navigation in the persistent root layout', () => {
+  test('keeps shared journal navigation in the persistent root layout', () => {
     const rootLayoutSource = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
     const persistentNavSource = readFileSync(join(process.cwd(), 'src/components/PublicPersistentNav.tsx'), 'utf8');
     const shellSource = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
 
     expect(rootLayoutSource).toContain("import { PublicPersistentNav } from '@/components/PublicPersistentNav';");
     expect(rootLayoutSource).toContain('<PublicPersistentNav title={settings.profile.title} navItems={navItems} />');
-    expect(persistentNavSource).toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
-    expect(persistentNavSource).toContain('<PublicCardNav title={title} navItems={navItems} />');
+    expect(persistentNavSource).toContain('PreviewDock');
+    expect(persistentNavSource).toContain('sitePath={pathname');
     expect(persistentNavSource).toContain("pathname === '/'");
     expect(persistentNavSource).toContain("pathname.startsWith('/admin')");
     expect(shellSource).not.toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
@@ -69,7 +69,7 @@ describe('site shell helpers', () => {
   test('uses home as the public top anchor name', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
 
-    expect(source).toContain('<div id="home" className="site-shell">');
+    expect(source).toContain('<div id="home" className="site-shell journal-shell">');
     expect(source).not.toContain('id="top"');
   });
 

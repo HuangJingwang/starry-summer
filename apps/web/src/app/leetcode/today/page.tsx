@@ -11,6 +11,7 @@ export default async function LeetCodeTodayPage() {
   return (
     <SiteShell>
       <main className="study-archive-page">
+        <header className="page-title"><p className="eyebrow">TODAY / PRACTICE LOG</p><h1>今日练习</h1><p>从一道题开始，继续昨天的思路。</p></header>
         <StudyTodaySection dashboard={dashboard} />
 
         <p className="study-return-home">

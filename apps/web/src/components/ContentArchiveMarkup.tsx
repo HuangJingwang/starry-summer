@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 
 export interface SortableArchiveItem {
   id: string;
@@ -6,6 +7,7 @@ export interface SortableArchiveItem {
   dateLabel: string;
   dateTime: string;
   title: string;
+  excerpt?: string;
   pinned: boolean;
   taxonomyItems: Array<{ href: string; label: string }>;
   statsLabel: string;
@@ -74,6 +76,7 @@ export function ContentArchiveMarkup({ groups, contentLabel }: { groups: Sortabl
                   {item.title}
                   {item.pinned ? <span className="posts-archive-item__pin">置顶</span> : null}
                 </span>
+                {item.excerpt && <span className="posts-archive-item__excerpt">{item.excerpt}</span>}
                 <span className="posts-archive-item__tags" aria-label={`${contentLabel}标签`}>
                   {item.taxonomyItems.slice(0, 3).map((taxonomyItem) => (
                     <span key={taxonomyItem.href}>{taxonomyItem.label}</span>
@@ -84,9 +87,10 @@ export function ContentArchiveMarkup({ groups, contentLabel }: { groups: Sortabl
                 </span>
                 {item.cover ? (
                   <span className="posts-archive-item__cover-preview" aria-hidden="true">
-                    <img src={item.cover.imageUrl} alt="" />
+                    <img src={item.cover.imageUrl} alt="" loading="lazy" decoding="async" />
                   </span>
                 ) : null}
+                <ArrowUpRight aria-hidden="true" className="posts-archive-item__arrow" size={21} />
               </Link>
             ))}
           </div>

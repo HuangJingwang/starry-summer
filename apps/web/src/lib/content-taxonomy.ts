@@ -54,7 +54,7 @@ export function groupContentByCategory(items: SiteContentItem[]): ContentCategor
 }
 
 export function getContentByCategorySlug(items: SiteContentItem[], slug: string): ContentCategoryGroup | null {
-  return groupContentByCategory(items).find((group) => group.key === slug) ?? null;
+  return groupContentByCategory(items).find((group) => group.key === decodeTaxonomySlug(slug)) ?? null;
 }
 
 export function getCategoryHref(category: string): string {
@@ -79,7 +79,7 @@ export function groupContentBySeries(items: SiteContentItem[]): ContentSeriesGro
 }
 
 export function getContentBySeriesSlug(items: SiteContentItem[], slug: string): ContentSeriesGroup | null {
-  return groupContentBySeries(items).find((group) => group.key === slug) ?? null;
+  return groupContentBySeries(items).find((group) => group.key === decodeTaxonomySlug(slug)) ?? null;
 }
 
 export function getSeriesHref(series: string): string {
@@ -104,7 +104,7 @@ export function groupContentByTag(items: SiteContentItem[]): ContentTagGroup[] {
 }
 
 export function getContentByTagSlug(items: SiteContentItem[], slug: string): ContentTagGroup | null {
-  return groupContentByTag(items).find((group) => group.key === slug) ?? null;
+  return groupContentByTag(items).find((group) => group.key === decodeTaxonomySlug(slug)) ?? null;
 }
 
 export function getTagHref(tag: string): string {
@@ -117,6 +117,10 @@ function slugifyTaxonomyLabel(value: string): string {
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function decodeTaxonomySlug(slug: string): string {
+  try { return decodeURIComponent(slug); } catch { return slug; }
 }
 
 function normalizeTaxonomyItems(items: string[] | undefined): string[] {

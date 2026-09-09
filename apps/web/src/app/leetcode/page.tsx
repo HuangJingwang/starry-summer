@@ -13,6 +13,7 @@ export default async function LeetCodeArchivePage() {
   return (
     <SiteShell>
       <main className="study-archive-page">
+        <header className="page-title"><p className="eyebrow">PRACTICE / ONE DAY AT A TIME</p><h1>刷题日记</h1><p>每天练一点，记录解题过程与复习轨迹。</p></header>
         <StudySnapshotHero viewModel={viewModel} />
 
         <p className="study-return-home">

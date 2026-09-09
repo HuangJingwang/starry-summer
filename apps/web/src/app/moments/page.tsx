@@ -16,7 +16,7 @@ export default function MomentsPage() {
     <SiteShell>
       <main className="page-main share-page">
         <div className="share-page__heading">
-          <p className="eyebrow">Recommended Shares</p>
+          <p className="eyebrow">03 / FOUND ALONG THE WAY</p>
           <h1>推荐分享</h1>
           <p>收藏一些真的会反复打开的工具、灵感网站、组件库和学习资料。</p>
         </div>

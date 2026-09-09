@@ -22,7 +22,7 @@ describe('projects page', () => {
     expect(pageSource).toContain('className="page-main projects-page"');
     expect(pageSource).not.toContain("import { ContentCard }");
     expect(pageSource).toContain('function ProjectShowcaseCard');
-    expect(pageSource).toContain('className="projects-page__sr-title"');
+    expect(pageSource).toContain('className="page-title-row"');
     expect(pageSource).toContain('className="projects-page__grid"');
     expect(pageSource).toContain('className="project-showcase-card__header"');
     expect(pageSource).toContain('project-showcase-card__thumbnail');

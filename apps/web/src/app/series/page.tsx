@@ -21,10 +21,11 @@ export default async function SeriesPage() {
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">系列</p>
+          <p className="eyebrow">COLLECTIONS / 连续写作</p>
           <h1>系列</h1>
           <p>把连续写作、项目日志和长期主题串起来，方便按一条线索回看完整上下文。</p>
         </div>
+        <nav className="journal-taxonomy-index" aria-label="系列索引">{groups.map((group) => <a key={group.key} href={`#series-${group.key}`}>{group.label}<span>{group.items.length}</span></a>)}</nav>
         <div className="category-stack">
           {groups.map((group) => (
             <section key={group.key} className="category-section" aria-labelledby={`series-${group.key}`}>

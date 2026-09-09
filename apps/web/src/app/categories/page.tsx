@@ -21,10 +21,11 @@ export default async function CategoriesPage() {
     <SiteShell>
       <main className="page-main">
         <div className="page-title">
-          <p className="eyebrow">分类</p>
+          <p className="eyebrow">FIND YOUR ORBIT / TOPICS</p>
           <h1>分类</h1>
           <p>按主题整理公开内容，把文章、日常和项目放回它们所属的长期线索里。</p>
         </div>
+        <nav className="journal-taxonomy-index" aria-label="分类索引">{groups.map((group) => <a key={group.key} href={`#category-${group.key}`}>{group.label}<span>{group.items.length}</span></a>)}</nav>
         <div className="category-stack">
           {groups.map((group) => (
             <section key={group.key} className="category-section" aria-labelledby={`category-${group.key}`}>

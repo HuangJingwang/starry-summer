@@ -14,6 +14,7 @@ import './styles/leetcode.css';
 import './styles/share.css';
 import './styles/admin.css';
 import './styles/responsive.css';
+import './styles/journal.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await loadSiteSettings();

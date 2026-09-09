@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { formatArchiveDate } from '@/lib/archive-date';
 
 import { ContentArchiveActions, ContentArchiveMarkup } from '@/components/ContentArchiveMarkup';
 import { SiteShell } from '@/components/SiteShell';
@@ -29,8 +30,11 @@ export default async function NotesPage() {
       <main className="page-main">
         <div className="page-title-row">
           <div className="page-title">
+            <p className="eyebrow">02 / FIELD NOTES</p>
             <h1>笔记</h1>
+            <p>还没写成长文的发现，和留给以后自己的线索。</p>
           </div>
+          <div className="journal-heading-note"><b>{latestNotes.length}</b>则笔记 / 随时记录</div>
         </div>
         <Suspense
           fallback={
@@ -58,6 +62,7 @@ export default async function NotesPage() {
             baseHref="/notes"
           />
         </Suspense>
+        {latestNotes.length === 0 && <div className="journal-empty"><p>笔记还在慢慢积累。先看看已经整理好的文章吧。</p><a href="/posts">去读文章 ↗</a></div>}
       </main>
     </SiteShell>
   );
@@ -83,22 +88,13 @@ function toArchiveItem(item: SiteContentItem): SortableArchiveGroup['items'][num
   return {
     id: item.id,
     href: getContentHref(item),
-    dateLabel: formatNoteArchiveDate(item.publishedAt),
+    dateLabel: formatArchiveDate(item.publishedAt),
     dateTime: item.publishedAt,
     title: item.title,
+    excerpt: item.summary,
     pinned: Boolean(item.pinned),
     taxonomyItems,
     statsLabel: `${item.viewCount ?? 0} 浏览 · ${item.likeCount ?? 0} 喜欢`,
     ...(cover ? { cover: { imageUrl: cover.imageUrl } } : {}),
   };
-}
-
-function formatNoteArchiveDate(value: string): string {
-  const [, month = '', day = ''] = value.match(/^(\d{4})-(\d{2})-(\d{2})/) ?? [];
-
-  if (!month || !day) {
-    return value;
-  }
-
-  return `${month}-${day}`;
 }
