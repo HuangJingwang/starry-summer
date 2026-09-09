@@ -1,12 +1,13 @@
 'use client';
 
-import { ArrowDown, ArrowUpRight, BookOpenText, Code2, MoonStar, Pause, Play, Search, Sparkles } from 'lucide-react';
-import { MotionConfig, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from 'framer-motion';
-import { useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
-
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ArrowDown, ArrowUpRight, BookOpenText, Code2, MoonStar, Sparkles } from 'lucide-react';
+import { MotionConfig, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, type MotionStyle, type MotionValue } from 'framer-motion';
+import { useRef, type PointerEvent, type ReactNode } from 'react';
 
 import { OrbitalScene } from './OrbitalScene';
+import { CoverMarquee } from './CoverMarquee';
+import { PreviewDock } from './PreviewDock';
+import { usePausableValue, usePreviewPause } from './use-preview-motion';
 import type { BlogPreviewEntry, selectPreviewContent } from './preview-content';
 import styles from './creative-preview.module.css';
 
@@ -21,32 +22,33 @@ const contentRoutes = [
 
 export function BlogHomePreview(props: BlogHomePreviewProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [paused, setPaused] = useState(false);
+  const [paused, togglePause] = usePreviewPause();
   const quiet = Boolean(prefersReducedMotion) || paused;
   const { scrollYProgress } = useScroll();
 
   return (
-    <MotionConfig reducedMotion={quiet ? 'always' : 'never'}>
-      <main className={styles.preview} data-motion={quiet ? 'reduced' : 'full'} id="top">
+    <MotionConfig reducedMotion={prefersReducedMotion ? 'always' : 'never'}>
+      <main className={styles.preview} data-motion={prefersReducedMotion ? 'reduced' : 'full'} data-paused={paused} id="top" tabIndex={-1}>
         <motion.div aria-hidden="true" className={styles.readingProgress} style={{ scaleX: scrollYProgress }} />
         <a className={styles.skipLink} href="#latest">跳到精选文章</a>
-        <Hero {...props} paused={paused} quiet={quiet} onPause={() => setPaused(!paused)} />
+        <Hero {...props} quiet={quiet} />
         {props.galleryEntries.length > 0 && <CoverMarquee entries={props.galleryEntries} quiet={quiet} />}
         <JournalIntro description={props.description} quiet={quiet} />
         <FeaturedReading entries={props.featuredEntries} quiet={quiet} />
         <RecentUpdates entries={props.recentEntries} />
         <ContentRoutes />
         <ArchiveCallout quiet={quiet} />
+        <PreviewDock hasGallery={props.galleryEntries.length > 0} paused={paused} quiet={quiet} onPause={togglePause} />
       </main>
     </MotionConfig>
   );
 }
 
-function Hero({ publicCount, lastPublishedAt, featuredEntries, paused, quiet, onPause }: BlogHomePreviewProps & { paused: boolean; quiet: boolean; onPause: () => void }) {
+function Hero({ publicCount, lastPublishedAt, featuredEntries, galleryEntries, quiet }: BlogHomePreviewProps & { quiet: boolean }) {
   const hero = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: hero, offset: ['start start', 'end start'] });
-  const titleY = useTransform(scrollYProgress, [0, 1], [0, 110]);
-  const orbitY = useTransform(scrollYProgress, [0, 1], [0, -85]);
+  const titleY = usePausableValue(useTransform(scrollYProgress, [0, 1], [0, 110]), quiet);
+  const orbitY = usePausableValue(useTransform(scrollYProgress, [0, 1], [0, -85]), quiet);
   const latest = featuredEntries[0];
 
   return (
@@ -56,17 +58,12 @@ function Hero({ publicCount, lastPublishedAt, featuredEntries, paused, quiet, on
         <div className={styles.navLinks}>
           <a href="#latest">阅读<span>01</span></a><a href="#routes">探索<span>02</span></a><a href="/about">关于<span>03</span></a>
         </div>
-        <div className={styles.navTools}>
-          <a aria-label="搜索文章" className={styles.iconButton} href="/search"><Search size={17} /></a>
-          <button aria-label={paused ? '继续动态效果' : '暂停动态效果'} aria-pressed={paused} className={styles.iconButton} onClick={onPause} type="button">{paused ? <Play size={15} /> : <Pause size={15} />}</button>
-          <div className={styles.themeControl}><ThemeToggle /></div>
-        </div>
       </nav>
       <div className={styles.heroTopline}><span>AN OPEN-ENDED PERSONAL JOURNAL</span><span className={styles.liveLabel}><i /> 持续记录中</span></div>
-      <motion.div className={styles.heroType} style={quiet ? undefined : { y: titleY }}>
+      <motion.div className={styles.heroType} style={{ y: titleY }}>
         <h1 id="blog-preview-title"><span>STARRY</span><span>SUMMER<span className={styles.titlePeriod}>.</span></span></h1>
       </motion.div>
-      <motion.div className={styles.orbitalStage} style={quiet ? undefined : { y: orbitY }}>
+      <motion.div className={styles.orbitalStage} style={{ y: orbitY }}>
         <div aria-hidden="true" className={styles.orbitGlow} />
         <OrbitalScene paused={quiet} />
         <span aria-hidden="true" className={styles.orbitCoordinate}>SS—01 / EXPLORING</span>
@@ -85,7 +82,7 @@ function Hero({ publicCount, lastPublishedAt, featuredEntries, paused, quiet, on
       </a>}
       <div className={styles.heroFooter}>
         <p><strong>{String(publicCount).padStart(2, '0')}</strong> 篇公开记录 <span className={styles.footerDivider}>/</span> <span>更新于 {formatDate(lastPublishedAt)}</span></p>
-        <a className={styles.scrollCue} href="#fragments"><span>SCROLL TO EXPLORE</span><ArrowDown size={16} /></a>
+        <a className={styles.scrollCue} href={galleryEntries.length ? '#fragments' : '#latest'}><span>SCROLL TO EXPLORE</span><ArrowDown size={16} /></a>
       </div>
     </section>
   );
@@ -102,31 +99,7 @@ function MagneticLink({ children, className, href, quiet }: { children: ReactNod
     x.set((event.clientX - rect.left - rect.width / 2) * 0.16);
     y.set((event.clientY - rect.top - rect.height / 2) * 0.2);
   }
-  return <motion.a className={className} href={href} onPointerMove={follow} onPointerLeave={() => { x.set(0); y.set(0); }} style={quiet ? undefined : { x: springX, y: springY }}>{children}</motion.a>;
-}
-
-function CoverMarquee({ entries, quiet }: { entries: BlogPreviewEntry[]; quiet: boolean }) {
-  const section = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: section, offset: ['start end', 'end start'] });
-  const firstX = useTransform(scrollYProgress, [0, 1], ['-8%', '-29%']);
-  const secondX = useTransform(scrollYProgress, [0, 1], ['-30%', '-7%']);
-  const midpoint = Math.ceil(entries.length / 2);
-  const rows: [BlogPreviewEntry[], BlogPreviewEntry[]] = [entries.slice(0, midpoint), entries.slice(midpoint)];
-  if (!rows[1].length) rows[1] = rows[0];
-
-  return <section aria-label="内容切片，滚动浏览文章封面" className={styles.filmSection} id="fragments" ref={section}>
-    <div className={styles.filmHeading}><span className={styles.eyebrow}>FRAGMENTS OF MY WORLD</span><span>最近的切片 <span aria-hidden="true">↙</span></span></div>
-    <div className={styles.filmRows}>
-      {rows.map((row, rowIndex) => <div className={styles.filmViewport} key={rowIndex}>
-        <motion.div className={styles.filmTrack} style={quiet ? undefined : { x: rowIndex ? secondX : firstX }}>
-          {[0, 1, 2].flatMap((copy) => row.map((entry) => <a aria-hidden={copy > 0 ? true : undefined} tabIndex={copy > 0 ? -1 : undefined} className={styles.filmTile} href={entry.href} key={`${copy}-${entry.id}`}>
-            {entry.cover && <img alt="" loading="lazy" src={entry.cover.src} />}
-            <span className={styles.filmCaption}><span>{entry.title}</span><ArrowUpRight size={16} /></span>
-          </a>))}
-        </motion.div>
-      </div>)}
-    </div>
-  </section>;
+  return <a className={className} href={href} onPointerMove={follow} onPointerLeave={() => { x.set(0); y.set(0); }}><motion.span className={styles.magneticContents} style={quiet ? undefined : { x: springX, y: springY }}>{children}</motion.span></a>;
 }
 
 function JournalIntro({ description, quiet }: { description: string; quiet: boolean }) {
@@ -148,7 +121,7 @@ function RevealPhrase({ children, index, progress, quiet }: { children: ReactNod
 }
 
 function FeaturedReading({ entries, quiet }: { entries: BlogPreviewEntry[]; quiet: boolean }) {
-  return <section className={styles.feature} id="latest" aria-labelledby="featured-title">
+  return <section className={styles.feature} id="latest" aria-labelledby="featured-title" tabIndex={-1}>
     <SectionHeading english="SELECTED STORIES" id="featured-title" index="01" title="值得展开读读。" />
     <div className={styles.stackDeck}>
       {entries.map((entry, index) => <StackedStory entry={entry} index={index} key={entry.id} quiet={quiet} total={entries.length} />)}
@@ -160,8 +133,8 @@ function FeaturedReading({ entries, quiet }: { entries: BlogPreviewEntry[]; quie
 function StackedStory({ entry, index, quiet, total }: { entry: BlogPreviewEntry; index: number; quiet: boolean; total: number }) {
   const card = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: card, offset: ['start 12%', 'end 12%'] });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1 - (total - 1 - index) * 0.035]);
-  return <motion.article className={styles.featureCard} ref={card} style={{ '--card-offset': `${index * 22}px`, '--card-index': index, ...(quiet ? {} : { scale }) } as CSSProperties}>
+  const scale = usePausableValue(useTransform(scrollYProgress, [0, 1], [1, 1 - (total - 1 - index) * 0.035]), quiet);
+  return <motion.article className={styles.featureCard} ref={card} style={{ '--card-offset': `${index * 22}px`, '--card-index': index, scale } as MotionStyle}>
     <div className={styles.featureBody}>
       <div className={styles.featureTop}><span className={styles.storyNumber}>{String(index + 1).padStart(2, '0')}</span><span className={styles.eyebrow}>{formatType(entry.type)} / {formatDate(entry.publishedAt)}</span><ArrowUpRight size={22} /></div>
       <h3><a href={entry.href}>{entry.title}</a></h3>
@@ -188,7 +161,7 @@ function RecentUpdates({ entries }: { entries: BlogPreviewEntry[] }) {
 }
 
 function ContentRoutes() {
-  return <section aria-labelledby="routes-title" className={styles.routes} id="routes">
+  return <section aria-labelledby="routes-title" className={styles.routes} id="routes" tabIndex={-1}>
     <SectionHeading english="FIND YOUR ORBIT" id="routes-title" index="03" title="从这里，随意逛逛。" />
     <div className={styles.routeGrid}>{contentRoutes.map((route) => {
       const Icon = route.icon;

@@ -24,7 +24,6 @@ describe('creative preview page', () => {
     expect(pageSource).toContain("import { loadSiteContent } from '@/lib/public-content';");
     expect(pageSource).toContain('<BlogHomePreview');
     expect(previewSource).toContain("from 'framer-motion'");
-    expect(previewSource).toContain("import { ThemeToggle } from '@/components/ThemeToggle';");
     expect(previewSource).toContain('function FeaturedReading');
     expect(previewSource).toContain('function RecentUpdates');
     expect(previewSource).toContain('function ContentRoutes');

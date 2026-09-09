@@ -82,6 +82,8 @@ export function createOrbitalScene(host: HTMLDivElement) {
   let paused = false;
   let inView = true;
   let destroyed = false;
+  let contextUnavailable = false;
+  let positioned = false;
   let frame = 0;
   let lastTime = 0;
   let elapsed = 0;
@@ -90,25 +92,28 @@ export function createOrbitalScene(host: HTMLDivElement) {
 
   function render(time: number) {
     frame = 0;
-    if (destroyed) return;
+    if (destroyed || contextUnavailable) return;
     const delta = Math.min((time - lastTime) / 1000, 0.05);
     lastTime = time;
     if (!paused) elapsed += delta;
-    group.rotation.y = THREE.MathUtils.lerp(group.rotation.y, paused ? 0 : pointer.x * 0.25, 0.045);
-    group.rotation.x = THREE.MathUtils.lerp(group.rotation.x, paused ? 0 : -pointer.y * 0.16, 0.045);
-    group.position.y = paused ? 0 : Math.sin(elapsed * 0.65) * 0.09;
-    star.rotation.y = -0.35 + (paused ? 0 : Math.sin(elapsed * 0.32) * 0.28);
-    star.rotation.z = -0.18 + (paused ? 0 : elapsed * 0.07);
-    satellite.position.set(Math.cos(elapsed * 0.4 + 0.8) * 2.05, Math.sin(elapsed * 0.4 + 0.8) * 2.05, 0);
-    moon.position.set(Math.cos(-elapsed * 0.24 + 2.4) * 2.28, Math.sin(-elapsed * 0.24 + 2.4) * 2.28, 0);
-    shard.rotation.y = elapsed * 0.3;
-    dust.rotation.z = elapsed * 0.018;
+    if (!paused || !positioned) {
+      group.rotation.y = THREE.MathUtils.lerp(group.rotation.y, pointer.x * 0.25, 0.045);
+      group.rotation.x = THREE.MathUtils.lerp(group.rotation.x, -pointer.y * 0.16, 0.045);
+      group.position.y = Math.sin(elapsed * 0.65) * 0.09;
+      star.rotation.y = -0.35 + Math.sin(elapsed * 0.32) * 0.28;
+      star.rotation.z = -0.18 + elapsed * 0.07;
+      satellite.position.set(Math.cos(elapsed * 0.4 + 0.8) * 2.05, Math.sin(elapsed * 0.4 + 0.8) * 2.05, 0);
+      moon.position.set(Math.cos(-elapsed * 0.24 + 2.4) * 2.28, Math.sin(-elapsed * 0.24 + 2.4) * 2.28, 0);
+      shard.rotation.y = elapsed * 0.3;
+      dust.rotation.z = elapsed * 0.018;
+      positioned = true;
+    }
     renderer.render(scene, camera);
     host.dataset.ready = 'true';
     if (!paused && inView && !document.hidden) frame = requestAnimationFrame(render);
   }
   function wake() {
-    if (!frame && !destroyed) { lastTime = performance.now(); frame = requestAnimationFrame(render); }
+    if (!frame && !destroyed && !contextUnavailable) { lastTime = performance.now(); frame = requestAnimationFrame(render); }
   }
   function resize() {
     const { width, height } = host.getBoundingClientRect();
@@ -145,12 +150,14 @@ export function createOrbitalScene(host: HTMLDivElement) {
   }
   function contextLost(event: Event) {
     event.preventDefault();
+    contextUnavailable = true;
     cancelAnimationFrame(frame);
     frame = 0;
     host.dataset.ready = 'false';
   }
+  function contextRestored() { contextUnavailable = false; wake(); }
   renderer.domElement.addEventListener('webglcontextlost', contextLost);
-  renderer.domElement.addEventListener('webglcontextrestored', wake);
+  renderer.domElement.addEventListener('webglcontextrestored', contextRestored);
   host.appendChild(renderer.domElement);
   section.addEventListener('pointermove', move as EventListener, { passive: true });
   section.addEventListener('pointerleave', leave);
@@ -164,6 +171,7 @@ export function createOrbitalScene(host: HTMLDivElement) {
   return {
     setPaused(value: boolean) { paused = value; cancelAnimationFrame(frame); frame = 0; wake(); },
     destroy() {
+      if (destroyed) return;
       destroyed = true;
       cancelAnimationFrame(frame);
       resizeObserver.disconnect(); intersection.disconnect(); themeObserver.disconnect();
@@ -171,7 +179,7 @@ export function createOrbitalScene(host: HTMLDivElement) {
       section.removeEventListener('pointerleave', leave);
       document.removeEventListener('visibilitychange', visibility);
       renderer.domElement.removeEventListener('webglcontextlost', contextLost);
-      renderer.domElement.removeEventListener('webglcontextrestored', wake);
+      renderer.domElement.removeEventListener('webglcontextrestored', contextRestored);
       const materials = new Set<THREE.Material>();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh || object instanceof THREE.Points) {
