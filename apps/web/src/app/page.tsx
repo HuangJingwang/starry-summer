@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 import { loadSiteContent } from '@/lib/public-content';
-import { loadSiteSettings } from '@/lib/settings-repository';
-import { BlogHomePreview } from './creative-preview/CreativePortfolioPreview';
-import { selectPreviewContent } from './creative-preview/preview-content';
+import { EditorialHome } from '@/components/EditorialHome';
+import { SiteShell } from '@/components/SiteShell';
+import { selectEditorialHome } from '@/lib/editorial-home';
 
 export const metadata: Metadata = {
   title: 'Starry Summer · Aster.H 的个人博客',
@@ -13,6 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [content, settings] = await Promise.all([loadSiteContent(), loadSiteSettings()]);
-  return <BlogHomePreview {...selectPreviewContent(content)} description={settings.profile.description} />;
+  const content = await loadSiteContent();
+  return <SiteShell><EditorialHome {...selectEditorialHome(content)} /></SiteShell>;
 }

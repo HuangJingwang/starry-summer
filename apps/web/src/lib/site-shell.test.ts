@@ -51,9 +51,9 @@ describe('site shell helpers', () => {
 
     expect(rootLayoutSource).toContain("import { PublicPersistentNav } from '@/components/PublicPersistentNav';");
     expect(rootLayoutSource).toContain('<PublicPersistentNav title={settings.profile.title} navItems={navItems} />');
-    expect(persistentNavSource).toContain('PreviewDock');
-    expect(persistentNavSource).toContain('sitePath={pathname');
-    expect(persistentNavSource).toContain("pathname === '/'");
+    expect(persistentNavSource).toContain('EditorialDock');
+    expect(persistentNavSource).toContain('pathname={pathname}');
+    expect(persistentNavSource).not.toContain("pathname === '/'");
     expect(persistentNavSource).toContain("pathname.startsWith('/admin')");
     expect(shellSource).not.toContain("import { PublicCardNav } from '@/components/PublicCardNav';");
     expect(shellSource).not.toContain('<PublicCardNav');
@@ -81,11 +81,11 @@ describe('site shell helpers', () => {
     expect(source).not.toContain('className="site-footer"');
   });
 
-  test('allows the home page to replace the shared top bar with card navigation', () => {
+  test('the homepage shares the same public navigation as the reader pages', () => {
     const source = readFileSync(join(process.cwd(), 'src/components/SiteShell.tsx'), 'utf8');
     const persistentNavSource = readFileSync(join(process.cwd(), 'src/components/PublicPersistentNav.tsx'), 'utf8');
 
     expect(source).toContain('hideHeader = false');
-    expect(persistentNavSource).toContain("pathname === '/'");
+    expect(persistentNavSource).not.toContain("pathname === '/'");
   });
 });

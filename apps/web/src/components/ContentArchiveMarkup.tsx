@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
+import { buildArchiveSortHref } from '@/lib/archive-filter';
 
 export interface SortableArchiveItem {
   id: string;
@@ -20,6 +21,8 @@ export interface SortableArchiveGroup {
 }
 
 interface ContentArchiveActionsProps {
+  query?: string;
+  tag?: string;
   sort: 'latest' | 'popular';
   sortAriaLabel: string;
   browseAriaLabel: string;
@@ -29,6 +32,8 @@ interface ContentArchiveActionsProps {
 }
 
 export function ContentArchiveActions({
+  query,
+  tag,
   sort,
   sortAriaLabel,
   browseAriaLabel,
@@ -39,10 +44,10 @@ export function ContentArchiveActions({
   return (
     <div className="posts-page-actions">
       <nav className="sort-tabs" aria-label={sortAriaLabel}>
-        <Link href={baseHref} aria-current={sort === 'latest' ? 'page' : undefined}>
+        <Link href={buildArchiveSortHref(baseHref, 'latest', query, tag)} aria-current={sort === 'latest' ? 'page' : undefined}>
           最新
         </Link>
-        <Link href={`${baseHref}?sort=popular`} aria-current={sort === 'popular' ? 'page' : undefined}>
+        <Link href={buildArchiveSortHref(baseHref, 'popular', query, tag)} aria-current={sort === 'popular' ? 'page' : undefined}>
           热门
         </Link>
       </nav>

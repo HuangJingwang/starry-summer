@@ -2,14 +2,14 @@ import Link from 'next/link';
 
 import { SiteShell } from '@/components/SiteShell';
 import { getContentHref, type SiteContentItem } from '@/lib/content';
-import { getContentCover } from '@/lib/content-cover';
+import { getProjectVisual } from '@/lib/project-visual';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteContent } from '@/lib/public-content';
 
 export function generateMetadata() {
   return loadPublicPageMetadata({
     title: '项目',
-    description: '开源项目、产品实验和作品集记录。',
+    description: '个人项目、技术实践与开发过程记录。',
     path: '/projects',
   });
 }
@@ -20,7 +20,7 @@ export default async function ProjectsPage() {
   return (
     <SiteShell>
       <main className="page-main projects-page">
-        <div className="page-title-row"><div className="page-title"><p className="eyebrow">04 / IN THE MAKING</p><h1>项目</h1><p>把想法做出来，再把过程留下来。</p></div><div className="journal-heading-note"><b>{projects.length}</b>个项目 / 边做边记</div></div>
+        <div className="page-title-row"><div className="page-title"><h1>个人项目</h1><p>把想法做出来，再把过程留下来。</p></div></div>
         <div className="projects-page__grid">
           {projects.map((item) => (
             <ProjectShowcaseCard key={item.id} item={item} />
@@ -33,7 +33,7 @@ export default async function ProjectsPage() {
 
 function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
   const href = getContentHref(item);
-  const cover = getContentCover(item);
+  const cover = getProjectVisual(item);
   const projectTags = getProjectTags(item);
   const projectLinks = getProjectLinks(item);
   const year = new Date(item.publishedAt).getFullYear();
@@ -74,6 +74,7 @@ function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
       {item.summary && <p className="project-showcase-card__description">{item.summary}</p>}
 
       <div className="project-showcase-card__links">
+        <Link href={href}>项目详情</Link>
         {projectLinks.map((link) => (
           <Link
             key={`${link.label}-${link.href}`}

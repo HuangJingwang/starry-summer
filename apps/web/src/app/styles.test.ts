@@ -115,11 +115,12 @@ describe('global styles', () => {
     expect(responsiveCss).toContain('.admin-layout,');
   });
 
-  test('loads Averia only for public display typography', () => {
+  test('loads public display typography locally without a remote font dependency', () => {
     const rootLayout = readFileSync(join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
     const css = readGlobalStyles();
 
-    expect(rootLayout).toContain('family=Averia+Gruesa+Libre&display=swap');
+    expect(rootLayout).not.toContain('fonts.googleapis.cn');
+    expect(readStylesheet('src/app/styles/journal.css')).toContain("url('/fonts/manrope-variable.ttf')");
     expect(rootLayout).not.toContain('family=Noto+Serif+SC');
     expect(css).toContain('--font-display: "Averia Gruesa Libre", Arial, Helvetica, sans-serif;');
     expect(css).toContain('--font-nav: "PingFang SC", -apple-system, system-ui');
@@ -711,7 +712,7 @@ describe('global styles', () => {
     expect(css).not.toContain('@keyframes shore-surge-wash');
     expect(css).not.toContain('@keyframes shore-surge-foam');
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
-    expect(readStylesheet('src/app/page.tsx')).toContain('BlogHomePreview');
+    expect(readStylesheet('src/app/page.tsx')).toContain('EditorialHome');
     expect(css).toContain('.portfolio-hero__bubbles');
     expect(css).toContain('filter: blur(50px) saturate(1.12);');
     expect(css).toContain('opacity: 0;');

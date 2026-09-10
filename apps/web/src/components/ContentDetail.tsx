@@ -93,7 +93,7 @@ export async function ContentDetail({ item, adjacent }: { item: SiteContentItem;
           </div>
         ))}
         </div>
-        {cover && <figure className="journal-article-cover"><img src={cover.imageUrl} alt={cover.altText} /><figcaption>ASTER.H / {collection.label}</figcaption></figure>}
+        {cover && <figure className="journal-article-cover"><img src={cover.imageUrl} alt={cover.altText} /></figure>}
         </header>
         <div className="journal-article-grid">
         <ArticleReadingGuide headings={tableOfContents} />

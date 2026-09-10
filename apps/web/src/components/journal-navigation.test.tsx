@@ -26,20 +26,20 @@ test('reader navigation keeps a real homepage return and a shared, current-locat
   expect(dock).not.toBeNull();
   expect(dock!.querySelector('a[aria-label="首页"]')?.getAttribute('href')).toBe('/');
   expect(dock!.querySelector('a[aria-current="page"]')?.getAttribute('href')).toBe('/posts');
-  expect(host.querySelector('a[aria-label="Aster.H · 返回首页"]')?.getAttribute('href')).toBe('/');
+  expect(host.querySelector('a[aria-label="Starry Summer · Aster.H · 返回首页"]')?.getAttribute('href')).toBe('/');
 });
 
-test('the mobile directory opens, closes with Escape and preserves destinations', async () => {
+test('home and reader routes share five link destinations and keyboard navigation', async () => {
+  location.pathname = '/';
   await render();
-  const toggle = host.querySelector<HTMLButtonElement>('button[aria-label="打开站点目录"]');
-  expect(toggle).not.toBeNull();
-  await act(async () => toggle!.click());
-  expect(toggle!.getAttribute('aria-expanded')).toBe('true');
-  const menu = host.querySelector('[aria-label="站点目录"]');
-  expect([...menu!.querySelectorAll('a')].map((a) => a.getAttribute('href'))).toEqual(expect.arrayContaining(['/notes', '/moments', '/series', '/categories', '/tags', '/archives', '/about', '/leetcode']));
-  await act(async () => { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); });
-  expect(toggle!.getAttribute('aria-expanded')).toBe('false');
-  expect(document.activeElement).toBe(toggle);
+  const dock = host.querySelector('nav[aria-label="快捷导航"]')!;
+  const links = [...dock.querySelectorAll<HTMLAnchorElement>('a')];
+  expect(links.map(link => link.getAttribute('href'))).toEqual(['/', '/posts', '/projects', '/moments', '/search']);
+  expect(links[0]!.getAttribute('aria-current')).toBe('page');
+  links[0]!.focus();
+  await act(async () => links[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+  expect(document.activeElement).toBe(links[1]);
+  expect(host.querySelector('.editorial-header .theme-toggle')).not.toBeNull();
 });
 
 test('admin routes never receive the public redesign controls', async () => {

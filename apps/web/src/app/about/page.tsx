@@ -3,6 +3,7 @@ import { Atom, BookOpen, Braces, Code2, FileText, FolderGit2, GitBranch, Rocket,
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteSettings } from '@/lib/settings-repository';
+import { HeroCharacter } from '@/components/EditorialMotion';
 
 const contentSections = [
   {
@@ -58,11 +59,10 @@ export default async function AboutPage() {
   return (
     <SiteShell>
       <main className="page-main narrow about-page">
-        <div className="page-title">
-          <p className="eyebrow">A SMALL CORNER OF THE INTERNET</p>
+        <div className="editorial-about-hero"><div className="page-title">
           <h1>关于本站</h1>
           <p>Starry Summer 是 Aster.H 的个人内容平台。</p>
-        </div>
+        </div><HeroCharacter /></div>
 
         <section className="about-note" aria-label="关于 Starry Summer">
           <p>

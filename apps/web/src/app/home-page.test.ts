@@ -10,7 +10,7 @@ vi.mock('@/lib/public-content', () => ({ loadSiteContent: async () => [
 ] }));
 vi.mock('@/lib/settings-repository', () => ({ loadSiteSettings: async () => ({ profile: { description: 'Aster.H 的个人内容平台。' } }) }));
 const redirect = vi.hoisted(() => vi.fn());
-vi.mock('next/navigation', () => ({ redirect }));
+vi.mock('next/navigation', () => ({ redirect, usePathname: () => '/' }));
 
 describe('unified journal homepage', () => {
   test('publishes the same editorial homepage reached by the reader return links', async () => {
@@ -19,7 +19,9 @@ describe('unified journal homepage', () => {
     expect(html).toContain('Aster.H');
     expect(html).toContain('最新公开文章');
     expect(html).toContain('href="/posts/latest-story"');
-    expect(html).toContain('aria-label="快捷导航"');
+    expect(html).toContain('aria-label="Starry Summer，Aster.H 的个人博客"');
+    expect(html).toContain('id="recommendations"');
+    expect(html).toContain('React Bits');
     expect(html).not.toContain('不可公开的草稿');
     for (const destination of ['/posts', '/notes', '/moments', '/projects', '/about', '/archives', '/search']) expect(html).toContain('href="' + destination + '"');
   });

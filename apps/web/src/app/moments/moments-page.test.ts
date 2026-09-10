@@ -48,10 +48,10 @@ describe('recommended share page', () => {
     expect(page).not.toContain('loadSiteContent');
     expect(page).not.toContain('<ContentCard');
 
-    expect(grid).toContain('placeholder="搜索资源..."');
+    expect(grid).toContain('placeholder="搜索名称、标签或简介"');
     expect(grid).toContain('全部');
     expect(grid).toContain('没有找到相关资源');
-    expect(grid).toContain('share-page__stars');
+    expect(grid).toContain('RecommendationCard');
 
     expect(categoryOrder).toEqual(['全部', '开源项目', 'AI Coding', '前端审美', '工程流程', 'AI 学习', '技术社区']);
     expect(recommendedShares.map((resource) => resource.name)).toEqual([
@@ -335,8 +335,10 @@ describe('recommended share page', () => {
     expect(css).toContain('.share-page__grid');
     expect(css).toContain('.share-page__card');
     expect(css).toContain('.share-page__logo');
-    expect(grid).toContain('resource.avatarSrc ?');
-    expect(grid).toContain('<img src={resource.avatarSrc} alt={resource.avatarAlt ?? `${resource.name} 图标`} />');
+    const card = readSource('src/components/RecommendationCard.tsx');
+    expect(card).toContain('resource.avatarSrc ?');
+    expect(card).toContain('src={resource.avatarSrc}');
+    expect(card).toContain('alt=""');
     expect(css).toContain(":root[data-theme='summer-day'] .share-page");
     expect(css).toContain(":root[data-theme='summer-night'] .share-page");
     expect(css).toContain(":root[data-theme='summer-day'] .share-page__card");

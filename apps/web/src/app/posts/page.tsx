@@ -30,7 +30,6 @@ export default async function PostsPage() {
       <main className="page-main">
         <div className="page-title-row">
           <div className="page-title">
-            <p className="eyebrow">01 / THE JOURNAL</p>
             <h1>文章</h1>
             <p>技术实践、原理探索，以及那些值得认真聊聊的事。</p>
           </div>

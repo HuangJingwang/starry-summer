@@ -15,6 +15,7 @@ import './styles/share.css';
 import './styles/admin.css';
 import './styles/responsive.css';
 import './styles/journal.css';
+import './styles/editorial.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await loadSiteSettings();
@@ -36,12 +37,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="zh-CN" data-theme="summer-night" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <script id="theme-init" dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />
-        <link rel="preconnect" href="https://fonts.googleapis.cn" />
-        <link rel="preconnect" href="https://fonts.gstatic.cn" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.cn/css2?family=Averia+Gruesa+Libre&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body>
         <PersistentPublicBackground />

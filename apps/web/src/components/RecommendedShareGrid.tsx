@@ -1,88 +1,49 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-
+import { useEffect, useMemo, useState } from 'react';
 import type { RecommendedShare } from '@/lib/recommended-shares';
 import { categoryOrder } from '@/lib/recommended-shares';
+import { filterRecommendations, type RecommendationKind } from '@/lib/recommendation-filter';
+import { RecommendationCard } from './RecommendationCard';
+
+type Filters = { query: string; tag: string; kind: RecommendationKind };
+const defaults: Filters = { query: '', tag: '全部', kind: 'all' };
 
 export function RecommendedShareGrid({ resources }: { resources: RecommendedShare[] }) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('全部');
+  const [filters, setFilters] = useState<Filters>(defaults);
   const availableTags = useMemo(() => {
-    const resourceTags = new Set(resources.flatMap((resource) => resource.tags));
-
-    return categoryOrder.filter((tag) => tag === '全部' || resourceTags.has(tag));
+    const tags = new Set(resources.flatMap(resource => resource.tags));
+    return categoryOrder.filter(tag => tag === '全部' || tags.has(tag));
   }, [resources]);
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-  const filteredResources = resources.filter((resource) => {
-    const matchesSearch =
-      !normalizedSearch ||
-      [resource.name, resource.url, resource.description, ...resource.tags].some((value) =>
-        value.toLowerCase().includes(normalizedSearch),
-      );
-    const matchesTag = selectedTag === '全部' || resource.tags.includes(selectedTag);
-
-    return matchesSearch && matchesTag;
-  });
-
-  return (
-    <section className="share-page__panel" aria-label="推荐资源">
-      <div className="share-page__filters">
-        <label className="share-page__search">
-          <span>搜索资源</span>
-          <input
-            type="search"
-            value={searchTerm}
-            placeholder="搜索资源..."
-            onChange={(event) => setSearchTerm(event.currentTarget.value)}
-          />
-        </label>
-        <div className="share-page__tag-list" aria-label="资源分类">
-          {availableTags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              aria-pressed={selectedTag === tag}
-              onClick={() => setSelectedTag(tag)}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="share-page__grid">
-        {filteredResources.map((resource) => (
-          <a key={resource.url} className="share-page__card" href={resource.url} target="_blank" rel="noreferrer">
-            <span className="share-page__logo">
-              {resource.avatarSrc ? (
-                <img src={resource.avatarSrc} alt={resource.avatarAlt ?? `${resource.name} 图标`} />
-              ) : (
-                <span aria-hidden="true">{resource.logo}</span>
-              )}
-            </span>
-            <span className="share-page__body">
-              <strong>{resource.name}</strong>
-              <small>{resource.url}</small>
-              <span className="share-page__stars" aria-label={`${resource.stars} 星推荐`}>
-                {Array.from({ length: 5 }, (_, index) => (
-                  <span key={index} data-filled={index < resource.stars ? 'true' : undefined}>
-                    ★
-                  </span>
-                ))}
-              </span>
-              <span className="share-page__tags">
-                {resource.tags.map((tag) => (
-                  <em key={tag}>{tag}</em>
-                ))}
-              </span>
-              <span className="share-page__description">{resource.description}</span>
-            </span>
-          </a>
-        ))}
-      </div>
-
-      {filteredResources.length === 0 ? <p className="share-page__empty">没有找到相关资源</p> : null}
-    </section>
-  );
+  useEffect(() => {
+    function restore() {
+      const params = new URLSearchParams(window.location.search);
+      const kind = params.get('kind');
+      const tag = params.get('tag') ?? '全部';
+      setFilters({ query: params.get('q') ?? '', tag: availableTags.includes(tag) ? tag : '全部', kind: kind === 'website' || kind === 'opensource' ? kind : 'all' });
+    }
+    restore();
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, [availableTags]);
+  function update(patch: Partial<Filters>) {
+    const next = { ...filters, ...patch };
+    setFilters(next);
+    const url = new URL(window.location.href);
+    for (const [key, value] of Object.entries({ q: next.query, tag: next.tag === '全部' ? '' : next.tag, kind: next.kind === 'all' ? '' : next.kind })) {
+      if (value) url.searchParams.set(key, value); else url.searchParams.delete(key);
+    }
+    window.history.replaceState(window.history.state, '', url);
+  }
+  const results = filterRecommendations(resources, filters.query, filters.tag, filters.kind);
+  return <section className="share-page__panel" aria-label="推荐资源">
+    <div className="share-page__filters">
+      <label className="share-page__search"><span>搜索资源</span><input type="search" value={filters.query} placeholder="搜索名称、标签或简介" onChange={event => update({ query: event.currentTarget.value })} /></label>
+      <div className="resource-kind-filter" aria-label="资源类型">{([{ value: 'all', label: '全部资源' }, { value: 'website', label: '网站' }, { value: 'opensource', label: '开源项目' }] as const).map(item => <button key={item.value} type="button" aria-pressed={filters.kind === item.value} onClick={() => update({ kind: item.value })}>{item.label}</button>)}</div>
+      <div className="share-page__tag-list" aria-label="资源分类">{availableTags.map(tag => <button key={tag} type="button" aria-pressed={filters.tag === tag} onClick={() => update({ tag })}>{tag}</button>)}</div>
+    </div>
+    <p className="resource-results" role="status">{results.length} 项资源</p>
+    <div className="resource-grid">{results.map(resource => <RecommendationCard key={resource.url} resource={resource} />)}</div>
+    {!results.length && <div className="editorial-empty"><p>没有找到相关资源，试试其他关键词。</p><button type="button" onClick={() => update(defaults)}>清除筛选</button></div>}
+  </section>;
 }
