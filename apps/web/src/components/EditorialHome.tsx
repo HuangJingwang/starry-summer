@@ -17,7 +17,7 @@ export function EditorialHome({ articles, projects, socialLinks = [] }: { articl
     <section className="editorial-hero" aria-labelledby="home-title">
       <h1 id="home-title" aria-label="Aster，Aster.H 的个人博客"><span aria-hidden="true">ASTER<span className="editorial-period">.</span></span></h1>
       <HeroCharacter />
-      <div className="editorial-hero__intro"><p>你好，我是 Aster.H。</p><p>写代码，也写下思考。<br />这里收藏实践、项目和沿途的发现。</p><div className="editorial-hero__actions"><Link className="editorial-action" href="/posts">开始阅读 <ArrowUpRight size={19} /></Link>{socialLinks.length > 0 && <nav className="editorial-social" aria-label="社交主页">{socialLinks.map(link => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`${link.label}（在新标签页打开）`}>{link.label}<ArrowUpRight size={14} aria-hidden="true" /></a>)}</nav>}</div></div>
+      <div className="editorial-hero__intro"><p>你好，我是 Aster.H。</p><p>写代码，也写下思考。<br />这里收藏实践、项目和沿途的发现。</p><div className="editorial-hero__actions"><Link className="editorial-action" href="/posts">开始阅读 <ArrowUpRight size={19} /></Link>{socialLinks.length > 0 && <nav className="editorial-social" aria-label="社交主页">{socialLinks.map(link => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`${link.label}（在新标签页打开）`}><SocialIcon href={link.href} /><span>{link.label}</span><ArrowUpRight size={14} aria-hidden="true" /></a>)}</nav>}</div></div>
     </section>
     <section className="editorial-section" id="latest" aria-labelledby="latest-title">
       <div className="editorial-section__heading"><h2 id="latest-title">最近文章</h2><Link href="/posts">全部文章 <ArrowRight size={18} /></Link></div>
@@ -38,6 +38,17 @@ export function EditorialHome({ articles, projects, socialLinks = [] }: { articl
       <div className="resource-grid">{homeRecommendations.flatMap(name => recommendedShares.filter(resource => resource.name === name)).map(resource => <RecommendationCard key={resource.url} resource={resource} />)}</div>
     </section>
   </main>;
+}
+
+function SocialIcon({ href }: { href: string }) {
+  let host: string;
+  try {
+    host = new URL(href).hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+  const brand = host === 'github.com' ? 'github' : host === 'juejin.cn' ? 'juejin' : null;
+  return brand ? <img className={`editorial-social__icon editorial-social__icon--${brand}`} src={`/images/reference-social/${brand}.svg`} width="22" height="22" alt="" aria-hidden="true" /> : null;
 }
 
 function ArticleCover({ item, priority = false }: { item: SiteContentItem; priority?: boolean }) {

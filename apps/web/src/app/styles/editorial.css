@@ -53,7 +53,9 @@
 .editorial-hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 24px; }
 .editorial-hero__actions .editorial-action { margin-top: 0; }
 .editorial-social { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
-.editorial-social a { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; color: var(--journal-muted); font-size: 13px; white-space: nowrap; }
+.editorial-social a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--journal-muted); font-size: 13px; white-space: nowrap; }
+.editorial-social__icon { display: block; flex: 0 0 22px; width: 22px; height: 22px; object-fit: contain; }
+:root[data-theme='summer-day'] .editorial-social__icon--github { filter: brightness(0); }
 .editorial-social a:hover { color: var(--journal-accent); }
 .editorial-social a:focus-visible { outline: 2px solid var(--journal-accent); outline-offset: 4px; border-radius: 4px; }
 .editorial-section { padding: 55px 0; }
