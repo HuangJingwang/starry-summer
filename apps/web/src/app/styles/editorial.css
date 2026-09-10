@@ -1,7 +1,9 @@
 /* MotionSites-inspired composition. React Bits-inspired feedback, native page scrolling.
    Layers: imagery 1, foreground copy 2, public chrome 100, reading progress 120.
    Shapes: media 20px, resources 16px, controls 999px; admin tokens are untouched. */
+@font-face { font-family: 'Aster Display'; src: url('/fonts/aster-display.woff2') format('woff2'); font-style: oblique; font-weight: 400; font-display: swap; }
 .journal-shell, .journal-chrome {
+  --journal-art: 'Aster Display', var(--journal-display);
   --journal-bg: #0c0e10;
   --journal-surface: #15191d;
   --journal-raised: #20272b;
@@ -60,7 +62,10 @@
 .editorial-social a:focus-visible { outline: 2px solid var(--journal-accent); outline-offset: 4px; border-radius: 4px; }
 .editorial-section { padding: 55px 0; }
 .editorial-section__heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 35px; }
-.editorial-section__heading h2 { margin: 0; font-size: clamp(27px, 3vw, 40px); letter-spacing: -.05em; font-weight: 600; }
+.editorial-section__heading h2 { margin: 0; font: oblique 400 clamp(30px, 3.4vw, 46px)/1.3 var(--journal-art); letter-spacing: .015em; font-synthesis: none; padding-right: .12em; }
+/* Art lettering is reserved for fixed section titles, never article titles or controls. */
+:root[data-theme] .journal-shell .projects-page .page-title h1,
+:root[data-theme] .journal-shell .share-page__heading h1 { font-family: var(--journal-art); font-style: oblique; font-weight: 400; font-synthesis: none; letter-spacing: .015em; line-height: 1.25; padding-right: .12em; }
 .editorial-section__heading > a { display: inline-flex; align-items: center; gap: 15px; color: var(--journal-muted); font-size: 12px; min-height: 44px; white-space: nowrap; }
 .editorial-section__heading > a:hover { color: var(--journal-accent); }
 .editorial-section__description { color: var(--journal-muted); font-size: 14px; margin: -14px 0 30px; }
