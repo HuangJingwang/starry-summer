@@ -47,7 +47,7 @@ export interface SettingsRequest {
 
 export const defaultSettings: SiteSettings = {
   profile: {
-    title: 'Starry Summer',
+    title: 'Aster',
     ownerName: 'Aster.H',
     description:
       '我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。',

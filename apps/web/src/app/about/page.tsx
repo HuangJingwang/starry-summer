@@ -48,7 +48,7 @@ const socialIconSources = [
 export function generateMetadata() {
   return loadPublicPageMetadata({
     title: '关于',
-    description: '关于 Aster.H 和 Starry Summer 个人内容平台。',
+    description: '关于 Aster.H 和 Aster 个人内容平台。',
     path: '/about',
   });
 }
@@ -61,10 +61,10 @@ export default async function AboutPage() {
       <main className="page-main narrow about-page">
         <div className="editorial-about-hero"><div className="page-title">
           <h1>关于本站</h1>
-          <p>Starry Summer 是 Aster.H 的个人内容平台。</p>
+          <p>Aster 是 Aster.H 的个人内容平台。</p>
         </div><HeroCharacter /></div>
 
-        <section className="about-note" aria-label="关于 Starry Summer">
+        <section className="about-note" aria-label="关于 Aster">
           <p>
             这里长期保存公开写作、笔记、日常和项目。内容尽量跟着仓库走，方便以后迁移、回看和继续整理。
           </p>

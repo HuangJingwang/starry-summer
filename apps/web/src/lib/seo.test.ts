@@ -204,7 +204,7 @@ describe('SEO helpers', () => {
     const xml = buildRssXml(defaultSettings, 'https://example.com', [{ ...content, updatedAt: '2026-06-11' }]);
 
     expect(xml).toContain('<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">');
-    expect(xml).toContain('<title><![CDATA[Starry Summer]]></title>');
+    expect(xml).toContain('<title><![CDATA[Aster]]></title>');
     expect(xml).toContain(
       '<description><![CDATA[我是 Aster.H，这里是我的个人内容平台。文章、笔记、日常和项目都会长期沉淀在这里，方便公开分享，也方便我回看自己的思考和成长轨迹。]]></description>',
     );

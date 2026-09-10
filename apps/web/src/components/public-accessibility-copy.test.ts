@@ -11,7 +11,7 @@ describe('public accessibility copy', () => {
   test('keeps the public about note concise and labelled', () => {
     const source = readFileSync(join(process.cwd(), 'src/app/about/page.tsx'), 'utf8');
 
-    expect(source).toContain('aria-label="关于 Starry Summer"');
+    expect(source).toContain('aria-label="关于 Aster"');
     expect(source).toContain('aria-label="站点内容"');
     expect(source).toContain('className="about-note"');
     expect(source).not.toContain('className="about-list__item"');

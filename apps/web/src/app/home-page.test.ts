@@ -15,17 +15,20 @@ vi.mock('next/navigation', () => ({ redirect, usePathname: () => '/' }));
 describe('unified journal homepage', () => {
   test('publishes the same editorial homepage reached by the reader return links', async () => {
     const html = renderToStaticMarkup(await HomePage());
-    expect(html).toContain('STARRY');
+    expect(html).toContain('ASTER');
+    expect(html).not.toContain('STARRY');
+    expect(html).not.toContain('Starry Summer');
     expect(html).toContain('Aster.H');
     expect(html).toContain('最新公开文章');
     expect(html).toContain('href="/posts/latest-story"');
-    expect(html).toContain('aria-label="Starry Summer，Aster.H 的个人博客"');
+    expect(html).toContain('aria-label="Aster，Aster.H 的个人博客"');
     expect(html).toContain('id="recommendations"');
     expect(html).toContain('React Bits');
     expect(html).not.toContain('不可公开的草稿');
     for (const destination of ['/posts', '/notes', '/moments', '/projects', '/about', '/archives', '/search']) expect(html).toContain('href="' + destination + '"');
   });
   test('the real homepage stays indexable and /home resolves to that same route', () => {
+    expect(metadata.title).toBe('Aster · Aster.H 的个人博客');
     expect(metadata.robots).toEqual({ index: true, follow: true });
     expect(metadata.alternates?.canonical).toBe('/');
     HomeAliasPage();

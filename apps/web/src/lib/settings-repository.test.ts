@@ -59,7 +59,7 @@ describe('repository settings source', () => {
   test('falls back to default settings when the repository file is unavailable', async () => {
     await expect(loadSiteSettings({ settingsFilePath: 'missing-site-settings.json' })).resolves.toMatchObject({
       profile: {
-        title: 'Starry Summer',
+        title: 'Aster',
         ownerName: 'Aster.H',
       },
     });

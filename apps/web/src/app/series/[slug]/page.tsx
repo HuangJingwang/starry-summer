@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${group.label} | Starry Summer`,
+    title: `${group.label} | Aster`,
     description: `${group.label} 系列归档。`,
   };
 }

@@ -8,7 +8,7 @@ export interface ContentCover {
 
 export const DEFAULT_POST_COVER: ContentCover = {
   imageUrl: '/images/default-post-cover.png',
-  altText: 'Starry Summer 默认文章封面',
+  altText: 'Aster 默认文章封面',
   isDefault: true,
 };
 

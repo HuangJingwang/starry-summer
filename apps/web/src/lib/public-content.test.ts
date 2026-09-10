@@ -364,9 +364,9 @@ describe('public content API helpers', () => {
       expect.arrayContaining([
         expect.objectContaining({
           id: 'project-starry',
-          title: 'Starry Summer',
+          title: 'Aster',
           coverImageUrl: '/images/projects/starry-summer-avatar-v3.svg',
-          coverAltText: 'Starry Summer 项目头像',
+          coverAltText: 'Aster 项目头像',
         }),
         expect.objectContaining({
           id: 'project-easy-yapi-micronaut',

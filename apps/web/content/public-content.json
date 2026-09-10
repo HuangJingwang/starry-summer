@@ -178,17 +178,17 @@
   },
   {
     "id": "project-starry",
-    "title": "Starry Summer",
+    "title": "Aster",
     "type": "project",
     "status": "published",
     "visibility": "public",
     "publishedAt": "2026-06-08",
     "updatedAt": "2026-06-08",
     "summary": "个人内容平台：文章、笔记、日常、项目、评论、后台管理，以及逐步转向文件内容源的部署方案。",
-    "bodyMarkdown": "## 平台目标\n\nStarry Summer 面向单人长期使用：公网展示内容，后台维护文章、笔记、项目和互动。\n\n当前的迁移方向是让公开内容先从数据库里撤出来，放到仓库文件中；互动和管理能力后续再拆到更轻的 Worker 或 GitHub API 流程里。",
+    "bodyMarkdown": "## 平台目标\n\nAster（原名 Starry Summer）面向单人长期使用：公网展示内容，后台维护文章、笔记、项目和互动。\n\n当前的迁移方向是让公开内容先从数据库里撤出来，放到仓库文件中；互动和管理能力后续再拆到更轻的 Worker 或 GitHub API 流程里。",
     "slug": "starry-summer",
     "coverImageUrl": "/images/projects/starry-summer-avatar-v3.svg",
-    "coverAltText": "Starry Summer 项目头像",
+    "coverAltText": "Aster 项目头像",
     "featured": true,
     "categories": [
       "Projects",
@@ -237,14 +237,14 @@
   },
   {
     "id": "about-page",
-    "title": "About Starry Summer",
+    "title": "About Aster",
     "type": "page",
     "status": "published",
     "visibility": "public",
     "publishedAt": "2026-06-06",
     "updatedAt": "2026-06-06",
     "summary": "一个用于沉淀写作、项目和日常记录的个人内容平台。",
-    "bodyMarkdown": "Starry Summer 是一个个人内容系统，用来记录文章、笔记、日常和项目。它会优先保证内容能被长期保存和迁移，然后再慢慢补齐评论、点赞、留言和后台工作流。",
+    "bodyMarkdown": "Aster 是一个个人内容系统，用来记录文章、笔记、日常和项目。它会优先保证内容能被长期保存和迁移，然后再慢慢补齐评论、点赞、留言和后台工作流。",
     "slug": "about",
     "categories": [
       "Site"

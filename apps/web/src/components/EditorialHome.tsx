@@ -15,7 +15,7 @@ export function EditorialHome({ articles, projects, socialLinks = [] }: { articl
   const lead = articles[0];
   return <main id="main-content" tabIndex={-1} className="editorial-home">
     <section className="editorial-hero" aria-labelledby="home-title">
-      <h1 id="home-title" aria-label="Starry Summer，Aster.H 的个人博客"><span aria-hidden="true">STARRY</span><span aria-hidden="true">SUMMER<span className="editorial-period">.</span></span></h1>
+      <h1 id="home-title" aria-label="Aster，Aster.H 的个人博客"><span aria-hidden="true">ASTER<span className="editorial-period">.</span></span></h1>
       <HeroCharacter />
       <div className="editorial-hero__intro"><p>你好，我是 Aster.H。</p><p>写代码，也写下思考。<br />这里收藏实践、项目和沿途的发现。</p><div className="editorial-hero__actions"><Link className="editorial-action" href="/posts">开始阅读 <ArrowUpRight size={19} /></Link>{socialLinks.length > 0 && <nav className="editorial-social" aria-label="社交主页">{socialLinks.map(link => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`${link.label}（在新标签页打开）`}>{link.label}<ArrowUpRight size={14} aria-hidden="true" /></a>)}</nav>}</div></div>
     </section>

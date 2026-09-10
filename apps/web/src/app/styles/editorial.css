@@ -39,9 +39,8 @@
 .editorial-dock__icon { display: grid; place-items: center; width: 30px; height: 28px; }
 .editorial-home { position: relative; width: min(1320px, calc(100% - 96px)); margin: auto; padding-bottom: 100px; }
 .editorial-hero { position: relative; isolation: isolate; min-height: 630px; height: min(680px, 78dvh); margin-bottom: 36px; }
-.editorial-hero h1 { position: absolute; top: 38px; left: 0; margin: 0; font: 800 clamp(110px, 14.4vw, 204px)/.91 var(--journal-display); letter-spacing: -.08em; color: var(--journal-ink); }
+.editorial-hero h1 { position: absolute; top: 96px; left: 0; margin: 0; font: 800 clamp(110px, 17vw, 244px)/1 var(--journal-display); letter-spacing: -.08em; color: var(--journal-ink); }
 .editorial-hero h1 > span { display: block; }
-.editorial-hero h1 > span:last-child { padding-left: .31em; }
 .editorial-period { color: var(--journal-accent); }
 .editorial-character { position: absolute; right: 2%; bottom: 0; width: min(57%, 700px); z-index: 1; }
 .editorial-character img { display: block; width: 100%; height: auto; object-fit: contain; }
@@ -150,7 +149,6 @@
 :root[data-theme] .journal-shell .project-showcase-card__description { max-width: 75ch; }
 @media (prefers-reduced-motion: no-preference) {
   .editorial-hero h1 > span { animation: editorial-arrive .8s cubic-bezier(.2,.75,.2,1) both; }
-  .editorial-hero h1 > span:last-child { animation-delay: .12s; }
   .editorial-hero .editorial-character { animation: editorial-arrive 1s .15s cubic-bezier(.2,.75,.2,1) both; }
   .editorial-hero__intro { animation: editorial-arrive .8s .25s cubic-bezier(.2,.75,.2,1) both; }
 }
@@ -176,8 +174,7 @@
   .editorial-dock__icon { transform: none !important; }
   .journal-shell { padding-top: 64px; }
   .editorial-hero { min-height: 630px; height: auto; margin-bottom: 0; }
-  .editorial-hero h1 { top: 28px; font-size: clamp(57px, 17vw, 125px); }
-  .editorial-hero h1 > span:last-child { padding-left: 0; }
+  .editorial-hero h1 { top: 28px; font-size: clamp(76px, 25vw, 180px); }
   .editorial-hero .editorial-character { top: 126px; bottom: auto; right: -3%; width: 92%; max-width: 370px; }
   .editorial-hero__intro { bottom: 0; max-width: 100%; }
   .editorial-hero__intro p:first-child { font-size: 18px; }

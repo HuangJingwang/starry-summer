@@ -52,7 +52,7 @@ export const seedContent: SiteContentItem[] = [
   },
   {
     id: 'project-starry',
-    title: 'Starry Summer',
+    title: 'Aster',
     type: 'project',
     status: 'published',
     visibility: 'public',
@@ -61,11 +61,11 @@ export const seedContent: SiteContentItem[] = [
     bodyMarkdown: [
       '## Platform direction',
       '',
-      'Starry Summer favors a static-friendly architecture: Next.js for the public and admin surfaces, repository JSON for durable content, Markdown for writing, and hosted workers for dynamic edges.',
+      'Aster favors a static-friendly architecture: Next.js for the public and admin surfaces, repository JSON for durable content, Markdown for writing, and hosted workers for dynamic edges.',
     ].join('\n'),
     slug: 'starry-summer',
     coverImageUrl: '/images/default-post-cover.png',
-    coverAltText: 'Starry Summer project cover',
+    coverAltText: 'Aster project cover',
     featured: true,
     categories: ['Projects', 'Platform'],
     tags: ['Next.js', 'Markdown', 'Repository'],
