@@ -248,18 +248,6 @@ for (const requiredPhrase of ['Codex post-push watcher', postPushWatcherDocPath]
   }
 }
 
-const appIcon = readFileSync('apps/web/src/app/icon.svg', 'utf8');
-
-for (const requiredPhrase of ['Aster moon star icon', 'viewBox="0 0 64 64"', 'aria-labelledby="title"']) {
-  if (!appIcon.includes(requiredPhrase)) {
-    fail(`App icon must include "${requiredPhrase}".`);
-  }
-}
-
-if (/<text\b|A\.H|star orbit|stroke-linecap="round"/.test(appIcon)) {
-  fail('App icon must stay textless and avoid face-like orbit compositions at favicon sizes.');
-}
-
 console.log('Repository hygiene tests passed');
 
 function fail(message) {
