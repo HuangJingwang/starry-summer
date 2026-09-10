@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { SiteContentItem } from '@/lib/content-types';
+import type { SiteSocialLink } from '@/lib/settings';
 import { getContentCover } from '@/lib/content-cover';
 import { getProjectVisual } from '@/lib/project-visual';
 import { getContentHref } from '@/lib/content-routing';
@@ -10,13 +11,13 @@ import { RecommendationCard } from './RecommendationCard';
 
 const homeRecommendations = ['React Bits', 'MotionSites AI', '21st.dev', 'Pipecat', 'WeKnora', 'Taste Skill'];
 
-export function EditorialHome({ articles, projects }: { articles: SiteContentItem[]; projects: SiteContentItem[] }) {
+export function EditorialHome({ articles, projects, socialLinks = [] }: { articles: SiteContentItem[]; projects: SiteContentItem[]; socialLinks?: SiteSocialLink[] }) {
   const lead = articles[0];
   return <main id="main-content" tabIndex={-1} className="editorial-home">
     <section className="editorial-hero" aria-labelledby="home-title">
       <h1 id="home-title" aria-label="Starry Summer，Aster.H 的个人博客"><span aria-hidden="true">STARRY</span><span aria-hidden="true">SUMMER<span className="editorial-period">.</span></span></h1>
       <HeroCharacter />
-      <div className="editorial-hero__intro"><p>你好，我是 Aster.H。</p><p>写代码，也写下思考。<br />这里收藏实践、项目和沿途的发现。</p><Link className="editorial-action" href="/posts">开始阅读 <ArrowUpRight size={19} /></Link></div>
+      <div className="editorial-hero__intro"><p>你好，我是 Aster.H。</p><p>写代码，也写下思考。<br />这里收藏实践、项目和沿途的发现。</p><div className="editorial-hero__actions"><Link className="editorial-action" href="/posts">开始阅读 <ArrowUpRight size={19} /></Link>{socialLinks.length > 0 && <nav className="editorial-social" aria-label="社交主页">{socialLinks.map(link => <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`${link.label}（在新标签页打开）`}>{link.label}<ArrowUpRight size={14} aria-hidden="true" /></a>)}</nav>}</div></div>
     </section>
     <section className="editorial-section" id="latest" aria-labelledby="latest-title">
       <div className="editorial-section__heading"><h2 id="latest-title">最近文章</h2><Link href="/posts">全部文章 <ArrowRight size={18} /></Link></div>

@@ -4,6 +4,7 @@ import { loadSiteContent } from '@/lib/public-content';
 import { EditorialHome } from '@/components/EditorialHome';
 import { SiteShell } from '@/components/SiteShell';
 import { selectEditorialHome } from '@/lib/editorial-home';
+import { loadSiteSettings } from '@/lib/settings-repository';
 
 export const metadata: Metadata = {
   title: 'Starry Summer · Aster.H 的个人博客',
@@ -13,6 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const content = await loadSiteContent();
-  return <SiteShell><EditorialHome {...selectEditorialHome(content)} /></SiteShell>;
+  const [content, settings] = await Promise.all([loadSiteContent(), loadSiteSettings()]);
+  return <SiteShell><EditorialHome {...selectEditorialHome(content)} socialLinks={settings.profile.socialLinks} /></SiteShell>;
 }
