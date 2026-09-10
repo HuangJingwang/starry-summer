@@ -1,5 +1,6 @@
 import { RecommendedShareGrid } from '@/components/RecommendedShareGrid';
 import { SiteShell } from '@/components/SiteShell';
+import { ReaderReveal } from '@/components/ReaderMotion';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { recommendedShares } from '@/lib/recommended-shares';
 
@@ -15,10 +16,10 @@ export default function MomentsPage() {
   return (
     <SiteShell>
       <main className="page-main share-page">
-        <div className="share-page__heading">
+        <ReaderReveal className="share-page__heading">
           <h1>推荐分享</h1>
           <p>收藏一些真的会反复打开的工具、灵感网站、组件库和学习资料。</p>
-        </div>
+        </ReaderReveal>
         <RecommendedShareGrid resources={recommendedShares} />
       </main>
     </SiteShell>

@@ -1,23 +1,28 @@
-import { Atom, BookOpen, Braces, Code2, FileText, FolderGit2, GitBranch, Rocket, StickyNote } from 'lucide-react';
+import { ArrowUpRight, Atom, BookOpen, Braces, Code2, FileText, FolderGit2, GitBranch, Rocket, StickyNote } from 'lucide-react';
+import Link from 'next/link';
 
 import { SiteShell } from '@/components/SiteShell';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteSettings } from '@/lib/settings-repository';
 import { HeroCharacter } from '@/components/EditorialMotion';
+import { AboutPortraitMotion, ReaderReveal } from '@/components/ReaderMotion';
 
 const contentSections = [
   {
     title: '文章和技术笔记',
+    href: '/posts',
     description: '把长一点的想法、教程和阶段复盘留成可以回看的文本。',
     Icon: BookOpen,
   },
   {
     title: '片刻、推荐和生活记录',
+    href: '/moments',
     description: '保存更轻的日常、链接和当下发现，不必每次都写成长文。',
     Icon: StickyNote,
   },
   {
     title: '项目过程与阶段复盘',
+    href: '/projects',
     description: '记录项目从想法到落地的过程，留下取舍、结果和后续线索。',
     Icon: FolderGit2,
   },
@@ -59,18 +64,19 @@ export default async function AboutPage() {
   return (
     <SiteShell>
       <main className="page-main narrow about-page">
-        <div className="editorial-about-hero"><div className="page-title">
+        <div className="editorial-about-hero"><ReaderReveal className="page-title">
           <h1>关于本站</h1>
           <p>Aster 是 Aster.H 的个人内容平台。</p>
-        </div><HeroCharacter /></div>
+        </ReaderReveal><AboutPortraitMotion><HeroCharacter /></AboutPortraitMotion></div>
 
         <section className="about-note" aria-label="关于 Aster">
           <p>
             这里长期保存公开写作、笔记、日常和项目。内容尽量跟着仓库走，方便以后迁移、回看和继续整理。
           </p>
           <ul className="about-note__list" aria-label="站点内容">
-            {contentSections.map(({ title, description, Icon }) => (
-              <li className="about-note__item" key={title}>
+            {contentSections.map(({ title, description, Icon, href }, index) => (
+              <ReaderReveal as="li" className="about-note__item" key={title} index={index}>
+                <Link className="about-content-link" href={href}>
                 <span className="about-note__item-icon" aria-hidden="true">
                   <Icon size={16} strokeWidth={1.8} />
                 </span>
@@ -78,10 +84,12 @@ export default async function AboutPage() {
                   <strong>{title}</strong>
                   <p>{description}</p>
                 </div>
-              </li>
+                <ArrowUpRight className="about-content-link__arrow" size={22} aria-hidden="true" />
+                </Link>
+              </ReaderReveal>
             ))}
           </ul>
-          <div className="about-note__meta">
+          <ReaderReveal className="about-note__meta">
             <h2>技术栈</h2>
             <ul className="about-stack" aria-label="技术栈">
               {stackItems.map(({ label, Icon }) => (
@@ -91,7 +99,7 @@ export default async function AboutPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </ReaderReveal>
         </section>
 
         {settings.profile.socialLinks.length > 0 ? (

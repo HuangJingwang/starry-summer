@@ -115,6 +115,39 @@
 .resource-kind-filter { display: flex; gap: 8px; }
 .resource-kind-filter button { padding: 10px 20px; min-height: 44px; border: 1px solid var(--journal-line); border-radius: 999px; color: var(--journal-ink); background: transparent; font: inherit; font-size: 13px; cursor: pointer; }
 .resource-kind-filter button[aria-pressed='true'] { background: var(--journal-ink); color: var(--journal-bg); }
+.reader-filter-motion .resource-kind-filter button { position: relative; isolation: isolate; }
+.reader-filter-motion .resource-kind-filter button[aria-pressed='true'] { background: transparent; color: var(--journal-accent); border-color: transparent; }
+.reader-kind-indicator { position: absolute; inset: -1px; z-index: -1; border: 1px solid var(--journal-accent); border-radius: inherit; background: var(--journal-raised); pointer-events: none; }
+.reader-resource-card .resource-card__logo, .reader-resource-card .resource-card__top > svg { transition: transform .35s cubic-bezier(.2,.75,.2,1); }
+.reader-resource-card:focus-visible .resource-card__top > svg { transform: translate(3px, -3px); }
+.reader-project-media { width: 100%; height: 100%; }
+.reader-project-media > div { width: 100%; height: 100%; display: grid; place-items: center; }
+.reader-project-media img { transition: transform .55s cubic-bezier(.2,.75,.2,1); }
+.projects-page .project-showcase-card { transition: border-color .3s, box-shadow .3s; }
+.projects-page .project-showcase-card:focus-within { border-color: var(--journal-accent); }
+.editorial-about-hero .about-portrait-motion { position: absolute; right: 0; bottom: 0; width: 330px; height: 330px; }
+:root[data-theme] .journal-shell .about-note__list { grid-template-columns: 1fr; gap: 0; margin: 34px 0 44px; }
+.about-content-link { display: grid; grid-template-columns: 52px minmax(0, 1fr) 24px; align-items: center; gap: 24px; padding: 24px 12px; border-radius: 14px; border-bottom: 1px solid var(--journal-line); }
+:root[data-theme] .journal-shell .about-content-link .about-note__item-icon { margin-bottom: 0; transition: transform .35s cubic-bezier(.2,.75,.2,1); }
+:root[data-theme] .journal-shell .about-content-link p { margin: 7px 0 0; }
+.about-content-link__arrow { color: var(--journal-muted); transition: transform .3s; }
+.about-content-link:focus-visible { outline: 2px solid var(--journal-accent); outline-offset: 3px; }
+.about-content-link:focus-visible .about-content-link__arrow { color: var(--journal-accent); transform: translate(3px, -3px); }
+.about-stack li svg, .about-social__icon { transition: transform .35s cubic-bezier(.2,.75,.2,1); }
+@media (hover: hover) and (pointer: fine) {
+  .reader-resource-card:hover .resource-card__logo { transform: translateY(-4px) rotate(-5deg); }
+  .reader-resource-card:hover .resource-card__top > svg { transform: translate(4px, -4px); color: var(--journal-accent); }
+  .projects-page .project-showcase-card:hover { border-color: var(--journal-accent); box-shadow: 0 16px 38px rgb(0 10 16 / .12); }
+  .project-showcase-card__thumbnail:hover .reader-project-media img { transform: scale(1.035); }
+  .about-content-link:hover { background: var(--journal-wash); }
+  .about-content-link:hover .about-note__item-icon { transform: translateY(-3px) rotate(-6deg); }
+  .about-content-link:hover .about-content-link__arrow { color: var(--journal-accent); transform: translate(4px, -4px); }
+  .about-stack li:hover svg { transform: rotate(-12deg) scale(1.15); }
+  .about-social__link:hover .about-social__icon { transform: translateY(-3px) rotate(-6deg); }
+}
+@media (hover: none), (pointer: coarse) {
+  .about-portrait-motion { transform: none !important; }
+}
 .resource-results { color: var(--journal-muted); font-size: 12px; }
 .editorial-empty { padding: 35px 0; color: var(--journal-muted); }
 .editorial-archive-filter { display: flex; align-items: end; flex-wrap: wrap; gap: 14px; margin: 25px 0; }
@@ -202,6 +235,8 @@
   .editorial-home { padding-bottom: 65px; }
   .editorial-about-hero { min-height: auto; flex-direction: column; align-items: stretch; }
   .editorial-about-hero .editorial-character { position: static; width: 240px; align-self: center; }
+  .editorial-about-hero .about-portrait-motion { position: static; width: 240px; height: 240px; align-self: center; transform: none !important; }
+  .about-content-link { grid-template-columns: 44px minmax(0, 1fr) 20px; gap: 14px; padding: 22px 2px; }
   .editorial-about-hero .page-title { max-width: none; }
   :root[data-theme] .journal-shell .page-main { width: calc(100% - 36px); padding-top: 38px; }
   :root[data-theme] .journal-shell .project-showcase-card__header { grid-template-columns: 1fr; gap: 24px; }
@@ -211,6 +246,9 @@
   .journal-footer__bottom { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .reader-reveal, .reader-resource-card, .about-portrait-motion { transform: none !important; }
+  .reader-resource-card *, .reader-kind-indicator, .reader-project-media *, .about-content-link *, .about-stack *, .about-social__icon { transition: none !important; transform: none !important; }
+  .projects-page .project-showcase-card { transition: none !important; }
   .editorial-project-slot { position: static; }
   .editorial-project-stage, .editorial-tilt > div, .editorial-dock__icon { transform: none !important; }
   .editorial-home *, .resource-card::before, .editorial-dock * { animation: none !important; transition: none !important; }

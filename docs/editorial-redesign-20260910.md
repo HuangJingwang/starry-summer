@@ -39,6 +39,14 @@
 
 ## 验证范围
 
+### 内页动效
+
+推荐分享增加选中底色弹簧过渡、卡片视口入场和筛选位置重排；外链立即随筛选更新，不保留可点击的退场旧卡片。图标与箭头响应鼠标悬停，首页的推荐区不启用这组新增卡片动效。
+
+项目页按阅读顺序展示，截图支持轻微倾斜和缩放。关于页的形象增加有限范围的滚动视差，内容介绍成为文章、推荐和项目的真实入口；图标与社交链接有轻量反馈。保持现有明暗主题和内容，未新增动画依赖或修改正文阅读页。
+
+新增动效仅使用现有 Motion 和原生 CSS。内容不会在服务端因入场效果而隐藏；触屏禁用人物视差，系统“减少动态”禁用新增位移、缩放和重排。参考 [YYsuni](https://www.yysuni.com/) 的卡片反馈思路及 [React Bits Animated Content](https://reactbits.dev/animations/animated-content)、[Spotlight Card](https://reactbits.dev/components/spotlight-card)，没有复制其完整页面或引入其动画栈。
+
 自动测试覆盖内容可见性、全部推荐保留、筛选与空状态、分页边界、排序保留查询、URL 恢复、Dock 键盘操作和样式契约。
 
 浏览器检查覆盖桌面 1440px、手机 390px，明暗两种主题：`/`、`/posts`、`/notes`、`/moments`、`/projects`、`/series`、`/categories`、`/tags`、`/archives`、`/search`、`/guestbook`、`/about`、文章详情、项目详情与 404。

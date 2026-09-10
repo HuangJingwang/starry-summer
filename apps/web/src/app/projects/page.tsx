@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 import { SiteShell } from '@/components/SiteShell';
+import { ReaderReveal } from '@/components/ReaderMotion';
+import { TiltMedia } from '@/components/EditorialMotion';
 import { getContentHref, type SiteContentItem } from '@/lib/content';
 import { getProjectVisual } from '@/lib/project-visual';
 import { loadPublicPageMetadata } from '@/lib/page-metadata';
@@ -20,10 +22,10 @@ export default async function ProjectsPage() {
   return (
     <SiteShell>
       <main className="page-main projects-page">
-        <div className="page-title-row"><div className="page-title"><h1>个人项目</h1><p>把想法做出来，再把过程留下来。</p></div></div>
+        <ReaderReveal className="page-title-row"><div className="page-title"><h1>个人项目</h1><p>把想法做出来，再把过程留下来。</p></div></ReaderReveal>
         <div className="projects-page__grid">
-          {projects.map((item) => (
-            <ProjectShowcaseCard key={item.id} item={item} />
+          {projects.map((item, index) => (
+            <ReaderReveal key={item.id} index={index}><ProjectShowcaseCard item={item} /></ReaderReveal>
           ))}
         </div>
       </main>
@@ -47,7 +49,7 @@ function ProjectShowcaseCard({ item }: { item: SiteContentItem }) {
           href={href}
         >
           {cover ? (
-            <img src={cover.imageUrl} alt={cover.altText} loading="lazy" decoding="async" />
+            <TiltMedia className="reader-project-media"><img src={cover.imageUrl} alt={cover.altText} loading="lazy" decoding="async" /></TiltMedia>
           ) : (
             <span>PROJECT</span>
           )}
