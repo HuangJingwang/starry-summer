@@ -5,11 +5,21 @@ import { findPublicIdentityViolations } from './public-identity-guard.mjs';
 const cleanFiles = [
   {
     file: 'apps/web/content/site-settings.json',
-    source: JSON.stringify({ ownerName: 'Aster.H', description: '个人内容平台' }),
+    source: JSON.stringify({
+      ownerName: 'Aster.H',
+      description: '个人内容平台',
+      socialLinks: [{ label: 'GitHub', href: 'https://github.com/HuangJingwang' }],
+    }),
   },
   {
     file: 'apps/web/src/app/page.tsx',
     source: '<h1>Aster.H</h1>',
+  },
+  {
+    file: 'apps/web/content/public-content.json',
+    source: JSON.stringify({
+      bodyMarkdown: '[项目源码](https://github.com/HuangJingwang/brushup)',
+    }),
   },
 ];
 

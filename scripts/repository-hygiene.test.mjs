@@ -207,23 +207,6 @@ if (!('sync:leetcode' in (packageJson.scripts ?? {}))) {
   fail('package.json must expose sync:leetcode.');
 }
 
-const publicThemeSkill = readFileSync('.codex/skills/starry-summer-public-theme-review/SKILL.md', 'utf8');
-
-for (const requiredPhrase of [
-  'light and dark public themes',
-  'cyber archive',
-  'old light card system',
-  '/posts',
-  '/series',
-  '/archives',
-  'horizontal overflow',
-  'taxonomy chips',
-]) {
-  if (!publicThemeSkill.includes(requiredPhrase)) {
-    fail(`Public theme review skill must mention "${requiredPhrase}".`);
-  }
-}
-
 const postPushWatcherSkillPath = '.codex/skills/codex-post-push-watcher/SKILL.md';
 const postPushWatcherDocPath = 'docs/ops/codex-post-push-watcher.md';
 

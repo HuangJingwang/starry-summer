@@ -1,60 +1,48 @@
-# Starry Summer Agent Constraints
+# Starry Summer Project Guidance
 
 These instructions apply to the entire repository.
 
-## Constraint Authority
+## Authority and Scope
 
-- This `AGENTS.md` is the canonical instruction source for Starry Summer.
-- DO NOT send optional commentary.
-- Use Asia/Shanghai time for all date and time behavior, examples, assumptions, and scheduling unless the user explicitly requests another timezone.
-- Do not create or maintain separate product-positioning instructions in subdirectories. If a tool requires a local `CLAUDE.md`, `GEMINI.md`, or similar file, keep it as a short pointer back to this file.
-- Older generated, imported, or experimental directories remain subordinate to this file. Their local notes must not redefine Starry Summer as a portfolio, AI product, recruiting site, or design showcase.
+- This file is the canonical project guidance. Keep tool-specific instruction files as short pointers here; historical plans, imported references, and skills must not independently redefine the product.
+- Distinguish functional requirements and security safeguards from design defaults. The user's latest explicit choice takes precedence over older project preferences, subject to higher-priority instructions and safety requirements.
+- Work within the requested scope. Do not rewrite working features, content, links, account identifiers, or deployment configuration merely to conform to old wording in a rule or test.
+- If a rule conflicts with the requested feature, identify the concrete conflict and update the obsolete project rule when authorized. Do not silently disable the feature or invent replacement data.
+- Keep communication concise: report meaningful decisions, blockers, and verification results without routine narration.
+- Default to Asia/Shanghai for user-facing dates and scheduling. Preserve timestamps and timezone semantics required by APIs, storage, and CI; convert explicitly for display rather than relabeling UTC values.
 
-## Product Direction
+## Product and Identity
 
-- Starry Summer is a single-owner personal content platform for long-term public writing, notes, moments, projects, comments, guestbook entries, assets, and deployment.
-- The public site supports two public themes. The light theme should stay clean, quiet, readable, and content-first; the dark theme should feel like a cyber archive: quiet, personal, atmospheric, readable, and content-first.
-- Admin surfaces should be fully Chinese, practical, dense, and work-focused.
-- The public owner display name is `Aster.H`. Do not expose, seed, test for, or render the owner's real name on public webpages, RSS metadata, default settings, or database migrations.
-- The display-name rule does not anonymize approved external URLs. The owner has approved `https://github.com/HuangJingwang` and its repository links for public use. Keep the visible owner name `Aster.H`; never derive GitHub account names or rewrite working URLs from that display alias.
-- Public profile copy should describe Starry Summer as a personal content platform, not as an AI product, design portfolio, recruiting portfolio, or personal showcase for AI/design abilities.
+- This is a single-owner personal content platform for writing, notes, moments, projects, recommendations, and reader interaction. The current public brand is `Aster`; `Starry Summer` remains the repository name and may appear in historical content. Branding changes do not imply renaming packages, routes, identifiers, or old articles.
+- The owner display name is `Aster.H`. Use it for author/profile display and public author metadata. Do not introduce private real-name information into public defaults, examples, fixtures, or migrations.
+- Display names and external account identifiers are separate. The owner has approved `https://github.com/HuangJingwang` and its repository links for public use. Preserve their real destinations; never construct or anonymize an account URL from `Aster` or `Aster.H`.
+- Apply the same separation to other approved social profiles, project URLs, import sources, and integration identifiers. Verify destination changes against configured or user-confirmed values; do not guess a new account name.
+- Privacy checks must distinguish private identity disclosure from approved public links and source attribution. Do not blanket-ban an approved username wherever it appears. If a new privacy concern arises, explain it and obtain direction instead of replacing a working link with a fake one.
+- Keep existing content, recommended websites/projects, social entry points, and integrations unless the user asks to change them. Do not rewrite historical articles solely to enforce current branding or positioning.
+- Public copy should reflect a personal blog/content platform. Rich motion, a cartoon avatar, and expressive project cards are compatible with that purpose; they do not by themselves turn the site into a portfolio or AI product.
+- Admin surfaces default to Chinese, practical, and work-focused. Do not translate technical identifiers or break third-party integration values to satisfy the language preference.
 
-## Reference Site Context
+## Design Defaults and References
 
-- When the user mentions the reference site, reference website, or upstream reference project, treat it as `https://www.yysuni.com/`.
-- The reference site's source repository is `YYsuni/2025-blog-public` at `https://github.com/YYsuni/2025-blog-public`.
-- For public homepage layout, card composition, motion, and image treatment requests, compare against the live reference site and, when implementation details matter, inspect the source repository before editing.
-- Preserve Starry Summer's product direction, public owner display name, content model, and theme guardrails even when borrowing layout or interaction ideas from the reference site.
+- Preserve both public themes unless the user explicitly changes this requirement. Light should be readable and calm; dark should be atmospheric and readable. The earlier “cyber archive” direction is context, not a requirement to freeze fonts, colors, card radii, or layouts.
+- Use the tokens and components of the affected surface. Current journal/editorial pages use `--journal-*`; use `--cyber-*` where the existing surface actually depends on them. Do not force one legacy token family across the entire site.
+- For visual design, redesign, or styling work, use `design-taste-frontend` first, then `.codex/skills/starry-summer-public-theme-review/SKILL.md` before editing and again before completion. Pure URL, data, configuration, or nonvisual behavior fixes do not require an unrelated redesign or visual-reference audit.
+- The user's explicitly supplied reference takes precedence. When “the reference site” is otherwise ambiguous, `https://www.yysuni.com/` and its source `https://github.com/YYsuni/2025-blog-public` are the fallback context, not the only permitted references.
+- Inspect a live reference for tasks that actually borrow its visual design; inspect its source when implementation details are relevant. Do not make unrelated link, content, backend, or documentation fixes depend on browsing that reference.
+- Preserve reading usability, keyboard access, visible focus, adequate contrast, compact taxonomy controls, theme-consistent forms, and reduced-motion support. Fonts, radii, accent colors, and animation styles may evolve with the approved design.
 
-## Visual Design Guardrails
+## Verification
 
-- For any frontend coding, redesign, or public UI styling task in this repository, use the global Codex skill `design-taste-frontend` first to read the brief, infer the creative direction, and avoid generic visual defaults. Do not treat it as a rigid checklist that overrides Starry Summer's product direction.
-- When changing or reviewing public page visuals, global public CSS, shared reader components, public forms, or taxonomy/search/archive/guestbook layouts, use the repository skill at `.codex/skills/starry-summer-public-theme-review/SKILL.md` after the initial design read and before editing, then use it again before reporting completion. This repository-specific theme review is the higher-priority guardrail for preserving Starry Summer's two public themes, owner-name constraints, and content-platform positioning.
-- Public reader pages such as home, posts, notes, moments, projects, series, categories, tags, archives, search, guestbook, and about must preserve both public themes unless the user explicitly asks for a different theme: light should stay clean, quiet, readable, and content-first; dark should keep the cyber/glass archive atmosphere.
-- Do not mix the old light card system into public pages. Avoid harsh white panels, mismatched form blocks, low-contrast headings, and pale taxonomy chips. In dark theme, use the existing `--cyber-*` tokens, translucent dark panels, subtle borders, and cyan/teal accents.
-- When changing a shared component or shared selector such as `ContentCard`, `.content-card`, `.page-main`, `.category-section`, `.archive-list`, `.search-form`, or `.guestbook-form`, check every page family that reuses it. A fix for one page must not leave series/categories/tags/archives with a mismatched style.
-- Tags, series chips, and taxonomy pills must remain compact inline controls. They must not stretch into tall vertical ovals or resize cards unexpectedly.
-- Forms on public pages must match the active theme, with readable inputs, visible focus states, and theme-consistent buttons. Never leave a bright white public form on a dark page or a heavy dark form on a light page.
-- Public page headings must have readable contrast. Eyebrows should use the established mono/cyan treatment; titles should not disappear into the background.
-- Keep cards at 8px radius or less only where the existing system calls for utility/admin cards. Public cyber/glass cards may use the established larger radii already present in the design.
+- Match verification to the change. Documentation-only work needs consistency and referenced-path checks; skill changes also need skill validation. Link fixes need destination and regression checks, not a site-wide visual rewrite.
+- For visual changes, inspect the actual affected routes at mobile and desktop widths in both applicable themes. Check overflow, text contrast, clipped controls, chips, forms, and unintended theme mismatches.
+- For shared visual changes, identify actual consumers and inspect a representative route from each affected family: content (`/posts`, `/notes`, `/moments`, `/projects`), taxonomy (`/series`, `/categories`, `/tags`), interaction/archive (`/archives`, `/search`, `/guestbook`), and home/about when affected. Unrelated families need not be redesigned.
+- Use TDD for behavior changes and regression fixes. Assert functional contracts, such as correct destinations and separate display identity. Do not use blanket username bans or exact instruction prose as substitutes for behavior checks.
+- When an approved redesign changes a style contract, update its regression tests along with the design. Do not retain obsolete visual assertions merely to freeze an old design, or remove meaningful safety checks just to pass tests.
+- Run focused checks for narrow changes. For broad application changes, run `npm test`, `npm run typecheck`, and `npm run build`. State any checks that could not be completed; do not claim deployment success from build success alone.
 
-## Frontend Verification
+## Security and Delivery
 
-- For frontend visual changes, verify the actual affected local route, not only the component that was edited.
-- If a style is shared, verify at least one representative page from each affected family:
-  - content lists: `/posts`, `/notes`, `/moments`, `/projects`
-  - taxonomy lists: `/series`, `/categories`, `/tags`
-  - archive/search/interaction pages: `/archives`, `/search`, `/guestbook`
-- Before reporting a visual fix, check for horizontal overflow, unreadable low-contrast text, oversized chips, and accidental white panels.
-- Add or update tests for durable style contracts when a repeated visual regression is fixed.
-
-## Development Workflow
-
-- Use TDD for behavior changes and regression fixes.
-- Keep commits focused. Do not mix unrelated worktree changes into a commit.
-- After modifying Git-tracked code or repository files, run the appropriate verification, create a focused commit, and push the current branch directly unless the user explicitly says not to push. Ignored files, local scratch files, and untracked throwaway artifacts do not trigger the commit and push requirement unless they are intentionally added to version control.
-- Run the appropriate verification before claiming completion. For broad app changes, use:
-  - `npm test`
-  - `npm run typecheck`
-  - `npm run build`
-- The repository may have unrelated dirty files. Never revert or stage changes you did not intentionally make for the current task.
+- Never commit secrets, private personal data, production exports, or credentials. Approved public profile/repository URLs are not secrets. Preserve authorization, moderation, and other security behavior unless an explicitly requested change has been assessed.
+- Preserve the current static-deployment workflow and integration contracts unless deployment changes are requested. Do not reintroduce removed infrastructure based on historical setup documentation.
+- After modifying tracked repository files, verify, create a focused commit, and push the current branch unless the user says not to push. This preference does not authorize force pushes, unrelated changes, or additional external mutations. Ignored scratch files do not trigger this requirement.
+- Never revert or stage unrelated user changes. Keep commits focused and report blockers when safe delivery requires additional authorization.

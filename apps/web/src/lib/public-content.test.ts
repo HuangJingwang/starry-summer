@@ -322,7 +322,6 @@ describe('public content API helpers', () => {
     expect(introPost?.bodyMarkdown).not.toContain('github.com/Aster-H/Pigs-blog');
     expect(introPost?.bodyMarkdown).toContain('## 第一版网站为什么停了');
     expect(introPost?.bodyMarkdown).toContain('## 现在的用途');
-    expect(introPost?.bodyMarkdown).not.toContain('HuangJingwang');
     expect(introPost?.bodyMarkdown).not.toContain('不用急着解释');
 
     const studyPost = content.find((item) => item.slug === 'juejin-7615915954711691304');
