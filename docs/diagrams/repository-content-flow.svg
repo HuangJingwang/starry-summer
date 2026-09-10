@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
-  <title id="title">Starry Summer repository content flow</title>
-  <desc id="desc">A diagram showing how authoring, repository content, Next.js, Vercel, and public readers connect in Starry Summer.</desc>
+  <title id="title">Aster repository content flow</title>
+  <desc id="desc">A diagram showing how authoring, repository content, Next.js, Vercel, and public readers connect in Aster.</desc>
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0" stop-color="#07111f"/>

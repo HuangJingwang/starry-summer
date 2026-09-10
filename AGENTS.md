@@ -1,4 +1,4 @@
-# Starry Summer Project Guidance
+# Aster Project Guidance
 
 These instructions apply to the entire repository.
 
@@ -13,7 +13,7 @@ These instructions apply to the entire repository.
 
 ## Product and Identity
 
-- This is a single-owner personal content platform for writing, notes, moments, projects, recommendations, and reader interaction. The current public brand is `Aster`; `Starry Summer` remains the repository name and may appear in historical content. Branding changes do not imply renaming packages, routes, identifiers, or old articles.
+- This is a single-owner personal content platform for writing, notes, moments, projects, recommendations, and reader interaction. The public brand is `Aster` and the GitHub repository is `HuangJingwang/aster`. `Starry Summer` is the former name and may remain in internal package names, local paths, backup prefixes, skill identifiers, and historical content. Do not rename those identifiers or old articles just to match the repository name.
 - The owner display name is `Aster.H`. Use it for author/profile display and public author metadata. Do not introduce private real-name information into public defaults, examples, fixtures, or migrations.
 - Display names and external account identifiers are separate. The owner has approved `https://github.com/HuangJingwang` and its repository links for public use. Preserve their real destinations; never construct or anonymize an account URL from `Aster` or `Aster.H`.
 - Apply the same separation to other approved social profiles, project URLs, import sources, and integration identifiers. Verify destination changes against configured or user-confirmed values; do not guess a new account name.

@@ -1,12 +1,16 @@
-# Starry Summer
+# Aster
 
-Starry Summer 是 Aster.H 自用的长期个人内容平台，用来保存公开写作、笔记、片刻、项目记录、推荐分享、刷题日记、留言、素材和部署运维信息。
+Aster 是 Aster.H 的个人博客，记录技术、项目与日常，也收集值得再打开的网站、开源项目和学习资料。
 
-它不是通用 CMS，也不是作品集或 AI 产品展示页。这个仓库更关注一件事：把一个人的长期公开内容放在可迁移、可备份、可部署、可持续维护的位置上。
+[访问网站](https://www.asterh.me/) · [GitHub 仓库](https://github.com/HuangJingwang/aster)
 
-这个项目的视觉方向、首页布局节奏、卡片组合和部分动效参考了 [yysuni.com](https://www.yysuni.com/) 以及对应的参考项目 [YYsuni/2025-blog-public](https://github.com/YYsuni/2025-blog-public)。Starry Summer 不是对参考项目的直接复刻：现在它已经补上了更适合自己长期使用的功能，比如刷题日记、LeetCode 学习追踪、推荐分享、中文后台、素材维护和部署反馈。
+代码、文章、配置和素材保存在同一个仓库，通过 Git 管理版本并由 Vercel 部署。网站支持明暗主题，首页保留卡通形象与交互动效，文章页以阅读为主。
+
+首页构图与交互参考了 [MotionSites](https://motionsites.ai/?prompt=3d-jack-portfolio-hero) 和 [React Bits Dock](https://reactbits.dev/components/dock)。早期布局参考了 [yysuni.com](https://www.yysuni.com/) 及其开源项目 [YYsuni/2025-blog-public](https://github.com/YYsuni/2025-blog-public)。
 
 ## 预览
+
+当前效果见 [在线站点](https://www.asterh.me/)。以下保留的是 Starry Summer 时期的历史截图，不代表当前界面。
 
 首页夜间主题：
 
@@ -30,31 +34,31 @@ Starry Summer 是 Aster.H 自用的长期个人内容平台，用来保存公开
 
 ## 项目定位
 
-Starry Summer 的核心是一个单人内容平台：
+Aster 按单人维护的方式组织内容：
 
 - 公开站点负责阅读体验、搜索、归档、RSS、推荐分享、刷题日记、留言和轻互动。
-- 中文后台负责写作、内容整理、素材维护、站点设置和 LeetCode 学习追踪。
+- 仓库保留中文后台界面；默认静态模式通过仓库文件维护和发布内容，不开放后台写入。
 - 内容、配置和小型素材优先落在仓库中，方便审阅、备份、迁移和回滚。
 - GitHub 保存代码与内容，Vercel 负责部署，必要的互动数据可以接入 Worker/KV/D1。
-- 两套公开主题并存：白天主题干净、安静、易读；夜间主题保留 cyber archive 氛围。
+- 两套公开主题并存：白天采用浅灰底色，夜间采用深灰底色与青色点缀，兼顾动效和阅读。
 
-参考项目提供的是视觉和交互方向，Starry Summer 保留的是自己的内容模型、公开身份和长期维护工作流。
+项目原名 Starry Summer，现用名称为 Aster，GitHub 仓库为 `HuangJingwang/aster`。内部 npm 包名、备份目录前缀和历史文章中的旧名保留，避免改名影响已有命令和内容链接。
 
 ## 当前能力
 
 - 写作与发布：文章、笔记、片刻、项目记录和推荐分享。
 - 内容组织：分类、标签、系列、归档、搜索和 RSS。
 - 公开互动：留言板、评论入口、点赞和浏览量模型。
-- 后台工作台：中文管理界面、Markdown 编辑、预览、发布设置、素材引用。
+- 后台界面：内容浏览、Markdown 编辑器与素材管理组件；默认静态模式禁用写入。
 - 刷题日记：LeetCode 仪表盘、每日推荐、今日任务、复习轮次和题目笔记。
 - 静态友好：内容文件、站点设置和素材索引可随 Git 一起提交。
 - 运维工具：备份、恢复、健康检查、生产 smoke、部署反馈跟踪。
 
 ## 架构
 
-Starry Summer 现在采用仓库驱动的轻量路线：
+Aster 采用仓库驱动的内容管理方式：
 
-![Starry Summer 仓库驱动内容流](docs/diagrams/repository-content-flow.svg)
+![Aster 仓库驱动内容流](docs/diagrams/repository-content-flow.svg)
 
 ```text
 apps/
@@ -83,12 +87,12 @@ apps/web/public/images/**
 
 ## 技术栈
 
-- Web: Next.js, React, TypeScript
-- 内容: JSON, Markdown, repository-backed files
-- UI: public light/dark themes, Chinese admin workspace
-- Workspace: npm workspaces
-- Packages: `@starry-summer/shared`, `@starry-summer/markdown`
-- Ops: Vercel, GitHub, shell checks, optional Cloudflare Worker
+- Web：Next.js、React、TypeScript
+- 内容：JSON、Markdown、仓库文件
+- UI：明暗主题、中文后台界面
+- 工作区：npm workspaces
+- 内部包：`@starry-summer/shared`、`@starry-summer/markdown`
+- 部署与运维：Vercel、GitHub、Shell 检查脚本，可选 Cloudflare Worker
 
 ## 本地运行
 
@@ -97,10 +101,18 @@ apps/web/public/images/**
 - Node.js 22+
 - npm 10+
 
-安装依赖：
+克隆仓库并安装依赖：
 
 ```bash
+git clone https://github.com/HuangJingwang/aster.git
+cd aster
 npm install
+```
+
+已有本地仓库只需更新远程地址，不必重命名本地目录：
+
+```bash
+git remote set-url origin git@github.com:HuangJingwang/aster.git
 ```
 
 启动 Web：
@@ -146,7 +158,7 @@ INTERACTION_HASH_SECRET=generated-interaction-secret # 可选，仅互动 Worker
 
 默认生产路线是 GitHub + Vercel + 自定义域名：
 
-![Starry Summer 部署与反馈流](docs/diagrams/deployment-feedback-flow.svg)
+![Aster 部署与反馈流](docs/diagrams/deployment-feedback-flow.svg)
 
 Vercel 项目建议：
 

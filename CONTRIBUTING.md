@@ -1,6 +1,6 @@
 # Contributing
 
-Starry Summer is a single-owner personal content platform. Contributions are
+Aster is a single-owner personal content platform. Contributions are
 welcome when they keep the project content-first, statically deployable, and
 safe for long-term public writing.
 

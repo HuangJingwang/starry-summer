@@ -1,6 +1,6 @@
 # Security Policy
 
-Starry Summer is a personal publishing system, so security reports should focus
+Aster is a personal publishing system, so security reports should focus
 on issues that could expose private content, admin sessions, reader identity,
 deployment secrets, uploaded assets, or production data.
 
@@ -18,7 +18,7 @@ through a private channel first and include:
 
 ## Supported Versions
 
-The main branch is the supported development line until Starry Summer publishes
+The main branch is the supported development line until Aster publishes
 tagged releases.
 
 ## Notes
