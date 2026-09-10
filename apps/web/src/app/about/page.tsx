@@ -6,24 +6,25 @@ import { loadPublicPageMetadata } from '@/lib/page-metadata';
 import { loadSiteSettings } from '@/lib/settings-repository';
 import { HeroCharacter } from '@/components/EditorialMotion';
 import { AboutPortraitMotion, ReaderReveal } from '@/components/ReaderMotion';
+import styles from './about.module.css';
 
 const contentSections = [
   {
-    title: '文章和技术笔记',
+    title: '文章与笔记',
     href: '/posts',
-    description: '把长一点的想法、教程和阶段复盘留成可以回看的文本。',
+    description: '技术问题、学习笔记，还有做完一件事之后的复盘。',
     Icon: BookOpen,
   },
   {
-    title: '片刻、推荐和生活记录',
+    title: '推荐分享',
     href: '/moments',
-    description: '保存更轻的日常、链接和当下发现，不必每次都写成长文。',
+    description: '收集值得再打开的网站、开源项目和学习资料。',
     Icon: StickyNote,
   },
   {
-    title: '项目过程与阶段复盘',
+    title: '个人项目',
     href: '/projects',
-    description: '记录项目从想法到落地的过程，留下取舍、结果和后续线索。',
+    description: '记录做过的项目，也留下实现过程中的选择和问题。',
     Icon: FolderGit2,
   },
 ] as const;
@@ -63,72 +64,82 @@ export default async function AboutPage() {
 
   return (
     <SiteShell>
-      <main className="page-main narrow about-page">
-        <div className="editorial-about-hero"><ReaderReveal className="page-title">
-          <h1>关于本站</h1>
-          <p>Aster 是 Aster.H 的个人内容平台。</p>
-        </ReaderReveal><AboutPortraitMotion><HeroCharacter /></AboutPortraitMotion></div>
+      <main className={`page-main narrow about-page ${styles.page}`}>
+        <section className={styles.hero} aria-label="关于 Aster">
+          <ReaderReveal className={styles.intro}>
+            <p className={styles.eyebrow}>关于本站</p>
+            <h1><span>你好，我是</span>Aster.H<span className={styles.period}>.</span></h1>
+            <p className={styles.lead}>这里是 Aster，记录技术、项目，也留一点日常。</p>
+            {settings.profile.socialLinks.length > 0 ? (
+              <nav className="about-social" aria-label="社交链接">
+                {settings.profile.socialLinks.map((link) => {
+                  const socialIcon = getSocialIcon(link);
+                  return (
+                    <a
+                      className={`about-social__link${socialIcon ? ` about-social__link--${socialIcon.variant}` : ''}`}
+                      key={`${link.label}-${link.href}`}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${link.label}（在新标签页打开）`}
+                    >
+                      {socialIcon ? (
+                        <img className={`about-social__icon about-social__icon--${socialIcon.variant}`} src={socialIcon.src} alt="" width="20" height="20" aria-hidden="true" />
+                      ) : null}
+                      <span>{link.label}</span>
+                      <ArrowUpRight size={16} aria-hidden="true" />
+                    </a>
+                  );
+                })}
+              </nav>
+            ) : null}
+          </ReaderReveal>
+          <div className={styles.portrait}>
+            <AboutPortraitMotion><HeroCharacter /></AboutPortraitMotion>
+          </div>
+        </section>
 
-        <section className="about-note" aria-label="关于 Aster">
-          <p>
-            这里长期保存公开写作、笔记、日常和项目。内容尽量跟着仓库走，方便以后迁移、回看和继续整理。
-          </p>
+        <section className="about-note" aria-labelledby="about-writing">
+          <ReaderReveal className={styles.sectionIntro}>
+            <h2 id="about-writing">写在这里</h2>
+            <p>Aster 是 Aster.H 的个人内容平台。文章、笔记和日常记录放在一起，方便慢慢整理，也方便以后回看。</p>
+          </ReaderReveal>
           <ul className="about-note__list" aria-label="站点内容">
             {contentSections.map(({ title, description, Icon, href }, index) => (
               <ReaderReveal as="li" className="about-note__item" key={title} index={index}>
                 <Link className="about-content-link" href={href}>
-                <span className="about-note__item-icon" aria-hidden="true">
-                  <Icon size={16} strokeWidth={1.8} />
-                </span>
-                <div>
-                  <strong>{title}</strong>
-                  <p>{description}</p>
-                </div>
-                <ArrowUpRight className="about-content-link__arrow" size={22} aria-hidden="true" />
+                  <span className="about-note__item-icon" aria-hidden="true">
+                    <Icon size={20} strokeWidth={1.5} />
+                  </span>
+                  <div>
+                    <strong>{title}</strong>
+                    <p>{description}</p>
+                  </div>
+                  <ArrowUpRight className="about-content-link__arrow" size={22} aria-hidden="true" />
                 </Link>
               </ReaderReveal>
             ))}
           </ul>
-          <ReaderReveal className="about-note__meta">
-            <h2>技术栈</h2>
+        </section>
+
+        <ReaderReveal className={styles.build}>
+          <section className={styles.buildCopy} aria-labelledby="about-building">
+            <h2 id="about-building">这个网站怎么搭的</h2>
+            <p>页面用 Next.js 和 React 搭建，文章用 Markdown 保存，代码和内容一起放在 GitHub 仓库里，部署在 Vercel。以后要修改、备份或迁移，都有文件可查。</p>
+            <Link href="/guestbook" className={styles.guestbook}>有想法，留个言<ArrowUpRight size={18} aria-hidden="true" /></Link>
+          </section>
+          <div className="about-note__meta">
+            <h3>技术栈</h3>
             <ul className="about-stack" aria-label="技术栈">
               {stackItems.map(({ label, Icon }) => (
                 <li key={label}>
-                  <Icon className="about-stack__icon" size={13} strokeWidth={1.9} aria-hidden="true" />
+                  <Icon className="about-stack__icon" size={20} strokeWidth={1.5} aria-hidden="true" />
                   {label}
                 </li>
               ))}
             </ul>
-          </ReaderReveal>
-        </section>
-
-        {settings.profile.socialLinks.length > 0 ? (
-          <section className="about-social" aria-label="社交链接">
-            {settings.profile.socialLinks.map((link) => {
-              const socialIcon = getSocialIcon(link);
-
-              return (
-                <a
-                  className={`about-social__link${socialIcon ? ` about-social__link--${socialIcon.variant}` : ''}`}
-                  key={`${link.label}-${link.href}`}
-                  href={link.href}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {socialIcon ? (
-                    <img
-                      className={`about-social__icon about-social__icon--${socialIcon.variant}`}
-                      src={socialIcon.src}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                  ) : null}
-                  <span>{link.label}</span>
-                </a>
-              );
-            })}
-          </section>
-        ) : null}
+          </div>
+        </ReaderReveal>
       </main>
     </SiteShell>
   );
