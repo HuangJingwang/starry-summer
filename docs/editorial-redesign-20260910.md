@@ -19,6 +19,12 @@
 
 ## 资产与来源
 
+### 已确认的 Aster 形象
+
+首页和关于页现使用 `apps/web/public/images/aster-avatar.webp` 及 640/960 响应式版本。站主确认了黑色短发、深色卫衣、坐在方块上手持笔记本的卡通版本；不是后续年龄调整版本，也不是真人脸贴图。
+
+此版本从站主选定的原图进行本地前景分割，修复坐凳遮罩并清理灰边。透明 PNG 仅改变 alpha，RGB 像素与选定原图逐像素一致；网页 WebP 是保留透明通道的压缩派生图。原始人物照片不进入仓库。本站项目卡片中的截图也随形象更新。下方银发形象说明作为初版素材记录保留，不再用于正式首页或关于页。
+
 - `apps/web/public/images/editorial-writer.webp` 及 640/960 响应式版本：通过内置图像生成工具生成的原创角色渲染图，透明背景。网页通过分层和倾斜实现 2.5D 效果，**不是可旋转的 3D 模型**，也不是站主真人肖像。
 - `apps/web/public/images/editorial-pipecat-cover.webp`：现有 Pipecat 封面的轻量首页派生版本，原文章封面和正文图片未修改。
 - `apps/web/public/images/projects/brushup-dashboard.webp`：来自 [BrushUp 原仓库截图](https://raw.githubusercontent.com/HuangJingwang/brushup/master/screenshots/dashboard.png)，压缩为 WebP；图中为仓库提供的历史演示数据。
