@@ -286,7 +286,7 @@ export function createDemoContentRecords(): ContentRecord[] {
         stack: ['Next.js', 'Markdown', 'Repository JSON', 'GitHub API', 'Vercel'],
         startedAt: '2026-06-10',
         links: {
-          repository: 'https://github.com/Aster-H/starry-summer',
+          repository: 'https://github.com/HuangJingwang/starry-summer',
         },
       },
     },

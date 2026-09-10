@@ -326,8 +326,9 @@ describe('public content API helpers', () => {
     expect(introPost?.bodyMarkdown).not.toContain('不用急着解释');
 
     const studyPost = content.find((item) => item.slug === 'juejin-7615915954711691304');
-    expect(studyPost?.bodyMarkdown).toContain('[github.com/Aster-H/leetforge](https://github.com/Aster-H/leetforge)');
-    expect(studyPost?.bodyMarkdown).not.toContain('HuangJingwang');
+    expect(studyPost?.bodyMarkdown).toContain('[github.com/HuangJingwang/brushup](https://github.com/HuangJingwang/brushup)');
+    expect(studyPost?.bodyMarkdown).toContain('git clone https://github.com/HuangJingwang/brushup.git leetforge');
+    expect(studyPost?.bodyMarkdown).not.toContain('github.com/Aster-H/');
   });
 
   test('reuses unchanged repository content instead of reparsing it on every route render', async () => {

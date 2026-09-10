@@ -6,12 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Aster-H/starry-summer.git"
+    "url": "https://github.com/HuangJingwang/starry-summer.git"
   },
   "bugs": {
-    "url": "https://github.com/Aster-H/starry-summer/issues"
+    "url": "https://github.com/HuangJingwang/starry-summer/issues"
   },
-  "homepage": "https://github.com/Aster-H/starry-summer#readme",
+  "homepage": "https://github.com/HuangJingwang/starry-summer#readme",
   "workspaces": [
     "apps/web",
     "packages/markdown",

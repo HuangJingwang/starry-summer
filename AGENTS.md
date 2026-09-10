@@ -16,6 +16,7 @@ These instructions apply to the entire repository.
 - The public site supports two public themes. The light theme should stay clean, quiet, readable, and content-first; the dark theme should feel like a cyber archive: quiet, personal, atmospheric, readable, and content-first.
 - Admin surfaces should be fully Chinese, practical, dense, and work-focused.
 - The public owner display name is `Aster.H`. Do not expose, seed, test for, or render the owner's real name on public webpages, RSS metadata, default settings, or database migrations.
+- The display-name rule does not anonymize approved external URLs. The owner has approved `https://github.com/HuangJingwang` and its repository links for public use. Keep the visible owner name `Aster.H`; never derive GitHub account names or rewrite working URLs from that display alias.
 - Public profile copy should describe Starry Summer as a personal content platform, not as an AI product, design portfolio, recruiting portfolio, or personal showcase for AI/design abilities.
 
 ## Reference Site Context

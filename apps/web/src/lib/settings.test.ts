@@ -75,7 +75,7 @@ describe('settings client helpers', () => {
     expect(normalizeSiteSettings({}).navigation).not.toContain('about');
   });
 
-  test('ships the canonical public GitHub profile without exposing the private owner name', async () => {
+  test('keeps the owner display alias separate from the approved GitHub account URL', async () => {
     const { readFile } = await import('node:fs/promises');
 
     const source = await readFile(new URL('../../content/site-settings.json', import.meta.url), 'utf8');
@@ -85,7 +85,7 @@ describe('settings client helpers', () => {
     expect(source).not.toContain(privateOwnerName);
     expect(settings.profile.socialLinks).toContainEqual({
       label: 'GitHub',
-      href: 'https://github.com/Aster-H',
+      href: 'https://github.com/HuangJingwang',
     });
   });
 
