@@ -39,6 +39,17 @@
 .editorial-dock a[aria-current='page'] { background: var(--journal-raised); color: var(--journal-accent); }
 .editorial-dock a:hover { color: var(--journal-ink); }
 .editorial-dock__icon { display: grid; place-items: center; width: 30px; height: 28px; }
+/* Reading navigation stays at the page top, never over the article text. */
+.journal-chrome--reading { height: 72px; }
+.journal-chrome--reading + .journal-shell { padding-top: 0; }
+.journal-chrome--reading .editorial-dock { position: absolute; top: 14px; bottom: auto; padding: 0 4px; gap: 2px; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+.journal-chrome--reading .editorial-dock a { width: auto; min-height: 44px; padding: 0 12px; border-radius: 6px; font-size: 12px; }
+.journal-chrome--reading .editorial-dock__icon { display: none; }
+@media (max-width: 900px) {
+  .journal-chrome--reading { height: 130px; }
+  .journal-chrome--reading .editorial-dock { top: 78px; width: min(360px, calc(100% - 32px)); justify-content: center; }
+  .journal-chrome--reading .editorial-dock a { flex: 1; padding: 0 6px; white-space: nowrap; }
+}
 .editorial-home { position: relative; width: min(1320px, calc(100% - 96px)); margin: auto; padding-bottom: 100px; }
 .editorial-hero { position: relative; isolation: isolate; min-height: 630px; height: min(680px, 78dvh); margin-bottom: 36px; }
 .editorial-hero h1 { position: absolute; top: 96px; left: 0; margin: 0; font: 800 clamp(110px, 17vw, 244px)/1 var(--journal-display); letter-spacing: -.08em; color: var(--journal-ink); }

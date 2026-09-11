@@ -12,3 +12,11 @@ test('journal palettes stay scoped away from administration and preserve a light
   expect(css).toContain('@media (prefers-reduced-motion: reduce)');
   expect(css).not.toMatch(/(?:^|\n)\s*(?:body|input|button)\s*\{/);
 });
+
+test('reading rhythm overrides legacy directory spacing without compressing mobile touch targets', () => {
+  expect(css).toMatch(/\.detail \.detail__body \{[^}]*line-height: 1\.8;/);
+  expect(css).toMatch(/\.detail \.detail__body p \{[^}]*margin: 1em 0;/);
+  expect(css).toMatch(/\.detail-toc ol \{[^}]*gap: 2px;/);
+  expect(css).toMatch(/\.detail-toc__item--depth-3 \{[^}]*margin-left: 0;[^}]*padding-left: 12px;/);
+  expect(css).toMatch(/\.journal-mobile-toc \.detail-toc a \{[^}]*min-height: 44px;/);
+});
